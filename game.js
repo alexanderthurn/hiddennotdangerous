@@ -2,7 +2,18 @@ console.log('no need to hide')
 var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
 var mice = [{x: 0, y: 0, isAnyButtonPressed: false}];
-var keyboards = [{left: false, right : false, up : false, down : false}];
+var keyboards = [{bindings: {
+    'a': {player: 0, value: 'left'},
+    'd': {player: 0, value: 'right'},
+    'w': {player: 0, value: 'up'},
+    's': {player: 0, value: 'down'},
+    'ArrowLeft': {player: 1, value: 'left'},
+    'ArrowRight': {player: 1, value: 'right'},
+    'ArrowUp': {player: 1, value: 'up'},
+    'ArrowDown': {player: 1, value: 'down'}},
+    players: [{left: false, right : false, up : false, down : false},
+        {left: false, right : false, up : false, down : false}
+    ]}];
 var virtualGamepads = []
 var stop = false;
 var frameCount = 0;
@@ -38,43 +49,21 @@ document.addEventListener("DOMContentLoaded", function(event){
 })
 
 window.addEventListener('keydown', event => {
-    switch (event.key) {
-        case 'a':
-            keyboards[0].left = true;
-            break;
-        case 'd':
-            keyboards[0].right = true;
-            break;
-        case 'w':
-            keyboards[0].up = true;
-            break;
-        case 's':
-            keyboards[0].down = true;
-            break;
-        default:
-            break;
-    }
-    console.log('KEYDOWN', event.key, keyboards[0]);
+    keyboards.forEach(k => {
+        let binding = k.bindings[event.key];
+        if (binding) {
+            k.players[binding.player][binding.value] = true;
+        }
+    });
 });
 
 window.addEventListener('keyup', event => {
-    switch (event.key) {
-        case 'a':
-            keyboards[0].left = false;
-            break;
-        case 'd':
-            keyboards[0].right = false;
-            break;
-        case 'w':
-            keyboards[0].up = false;
-            break;
-        case 's':
-            keyboards[0].down = false;
-            break;
-        default:
-            break;
-    }
-    console.log('KEYDOWN', event.key, keyboards[0]);
+    keyboards.forEach(k => {
+        let binding = k.bindings[event.key];
+        if (binding) {
+            k.players[binding.player][binding.value] = false;
+        }
+    });
 });
 
 canvas.addEventListener('pointermove', event => {
@@ -107,25 +96,26 @@ function gameLoop() {
         return g
     });
 
-    keyboards.forEach(k => {
-        k.xAxis = 0;
-        k.yAxis = 0;
-        if (k.left) {
-            k.xAxis--;
+    let keyboardPlayers = keyboards.flatMap(k => k.players);
+    keyboardPlayers.forEach(p => {
+        p.xAxis = 0;
+        p.yAxis = 0;
+        if (p.left) {
+            p.xAxis--;
         }
-        if (k.right) {
-            k.xAxis++;
+        if (p.right) {
+            p.xAxis++;
         }
-        if (k.up) {
-            k.yAxis--;
+        if (p.up) {
+            p.yAxis--;
         }
-        if (k.down) {
-            k.yAxis++;
+        if (p.down) {
+            p.yAxis++;
         }
-        k.isMoving = k.xAxis !== 0 || k.yAxis !== 0;
+        p.isMoving = p.xAxis !== 0 || p.yAxis !== 0;
     });
 
-    let players = [...virtualGamepads, ...keyboards];
+    let players = [...virtualGamepads, ...keyboardPlayers];
 
    /* mice.forEach(m => {
         g = {}
