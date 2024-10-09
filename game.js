@@ -8,13 +8,16 @@ document.addEventListener("DOMContentLoaded", function(event){
     console.log('hahahahahahaha')
     window.requestAnimationFrame(gameLoop);
     resizeCanvasToDisplaySize(canvas)
-
-    canvas.addEventListener('mousemove', event => {
-        mousePosition.x = event.clientX;
-        mousePosition.y = event.clientY;
+    canvas.addEventListener('pointermove', event => {
+        mousePosition.x = event.clientX - canvas.offsetLeft;
+        mousePosition.y = event.clientY -  canvas.offsetTop;
     }, false);
 
 })
+
+window.addEventListener("resize", function(event){
+    resizeCanvasToDisplaySize(canvas)
+});
 
 function resizeCanvasToDisplaySize(canvas) {
     // look up the size the canvas is being displayed
@@ -38,8 +41,10 @@ function gameLoop() {
 }
 
 function draw() {
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.beginPath();
-    ctx.arc(mousePosition.x-20, mousePosition.y-20, 40, 0, 2 * Math.PI);
+    ctx.arc(mousePosition.x, mousePosition.y, 40, 0, 2 * Math.PI);
     ctx.fillStyle = "red";
     ctx.fill();
     ctx.lineWidth = 4;
