@@ -104,6 +104,7 @@ function handleAi(figures) {
 
 function draw(gamepads, mice, figures, dt) {
 
+    /*HALLO*/
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.beginPath();
     ctx.arc(mice[0].x, mice[0].y, 40, 0, 2 * Math.PI);
