@@ -2,6 +2,7 @@ console.log('no need to hide')
 var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
 var mice = [{x: 0, y: 0, isAnyButtonPressed: false}];
+var keyboards = [{left: false, right : false, up : false, down : false}];
 var virtualGamepads = []
 var stop = false;
 var frameCount = 0;
@@ -27,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function(event){
             maxSpeed: 0.08,
             speed: 0,
             isAlive: true, 
-            isAI: i > 4,
+            isAI: i > 5,
             index: i,
             angle: 0
         })
@@ -36,12 +37,50 @@ document.addEventListener("DOMContentLoaded", function(event){
     window.requestAnimationFrame(gameLoop);
 })
 
+window.addEventListener('keydown', event => {
+    switch (event.key) {
+        case 'a':
+            keyboards[0].left = true;
+            break;
+        case 'd':
+            keyboards[0].right = true;
+            break;
+        case 'w':
+            keyboards[0].up = true;
+            break;
+        case 's':
+            keyboards[0].down = true;
+            break;
+        default:
+            break;
+    }
+    console.log('KEYDOWN', event.key, keyboards[0]);
+});
+
+window.addEventListener('keyup', event => {
+    switch (event.key) {
+        case 'a':
+            keyboards[0].left = false;
+            break;
+        case 'd':
+            keyboards[0].right = false;
+            break;
+        case 'w':
+            keyboards[0].up = false;
+            break;
+        case 's':
+            keyboards[0].down = false;
+            break;
+        default:
+            break;
+    }
+    console.log('KEYDOWN', event.key, keyboards[0]);
+});
+
 canvas.addEventListener('pointermove', event => {
     mice[0].x = event.clientX - canvas.offsetLeft;
     mice[0].y = event.clientY -  canvas.offsetTop;
    // mice[0].isAnyButtonPressed = event.buttons.some(b => b.pressed)
-
-
 }, false);
 
 window.addEventListener("resize", function(event){
@@ -68,6 +107,26 @@ function gameLoop() {
         return g
     });
 
+    keyboards.forEach(k => {
+        k.xAxis = 0;
+        k.yAxis = 0;
+        if (k.left) {
+            k.xAxis--;
+        }
+        if (k.right) {
+            k.xAxis++;
+        }
+        if (k.up) {
+            k.yAxis--;
+        }
+        if (k.down) {
+            k.yAxis++;
+        }
+        k.isMoving = k.xAxis !== 0 || k.yAxis !== 0;
+    });
+
+    let players = [...virtualGamepads, ...keyboards];
+
    /* mice.forEach(m => {
         g = {}
         let x = m.x - canvas.x / 2;
@@ -83,7 +142,7 @@ function gameLoop() {
 
     dtToProcess += dt
     while(dtToProcess > dtFix) {
-        handleInput(virtualGamepads, figures)
+        handleInput(players, figures)
         handleAi(figures)
         updateGame(figures, dtFix)
         dtToProcess-=dtFix
@@ -104,12 +163,12 @@ function updateGame(figures, dt) {
     })
 }
 
-function handleInput(virtualGamepads, figures) {
-    virtualGamepads.forEach((g,i) => {
+function handleInput(players, figures) {
+    players.forEach((p,i) => {
         var f = figures[i]
-        f.angle = angle(0,0,g.xAxis,g.yAxis)
-        f.speed = g.isMoving ? f.maxSpeed : 0.0
-    })
+        f.angle = angle(0,0,p.xAxis,p.yAxis)
+        f.speed = p.isMoving ? f.maxSpeed : 0.0
+    });
 }
 
 function handleAi(figures) {
