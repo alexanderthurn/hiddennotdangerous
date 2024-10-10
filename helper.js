@@ -33,8 +33,15 @@ function clampStick(x, y) {
 
 const distance = (x1, y1, x2, y2) => Math.hypot(x2 - x1, y2 - y1); 
 const angle = (x1, y1, x2, y2) => Math.atan2(y2 - y1, x2 - x1); 
-const move = (x1, y1, angle, speed) => ({x: x1 + Math.cos(angle)*speed*dt, y: y1 + Math.sin(angle)*speed*dt}); 
-const rad2deg = rad => (rad * 180.0) / Math.PI + 180
+const move = (x1, y1, angle, speed) => ({x: x1 + Math.cos(angle)*speed*dt, y: y1 + Math.sin(angle)*speed*dt});
+const rad2deg = rad => (rad * 180.0) / Math.PI
+const rad2positivedeg = rad => {
+    let deg = -rad2deg(rad);
+    if (deg < 0) {
+        deg += 360.0;
+    }
+    return deg;
+}
 
 function resizeCanvasToDisplaySize(canvas) {
     // look up the size the canvas is being displayed

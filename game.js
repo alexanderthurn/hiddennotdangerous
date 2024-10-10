@@ -8,10 +8,12 @@ var keyboards = [{bindings: {
     'KeyD': {player: keyboardPlayers[0], action: 'right'},
     'KeyW': {player: keyboardPlayers[0], action: 'up'},
     'KeyS': {player: keyboardPlayers[0], action: 'down'},
+    'KeyT': {player: keyboardPlayers[0], action: 'attack'},
     'ArrowLeft': {player: keyboardPlayers[1], action: 'left'},
     'ArrowRight': {player: keyboardPlayers[1], action: 'right'},
     'ArrowUp': {player: keyboardPlayers[1], action: 'up'},
-    'ArrowDown': {player: keyboardPlayers[1], action: 'down'}}, pressed: {}}];
+    'ArrowDown': {player: keyboardPlayers[1], action: 'down'},
+    'Numpad0': {player: keyboardPlayers[1], action: 'attack'}}, pressed: {}}];
 var virtualGamepads = []
 var stop = false;
 var frameCount = 0;
@@ -97,7 +99,7 @@ function gameLoop() {
         [x, y] = clampStick(x, y);
         g.xAxis = x
         g.yAxis = y
-        g.isMoving = Math.abs(x) > 0 && Math.abs(y) > 0.0001
+        g.isMoving = x !== 0 || y !== 0;
         return g
     });
 
@@ -105,6 +107,7 @@ function gameLoop() {
         kp.xAxis = 0;
         kp.yAxis = 0;
         kp.isMoving = false;
+        kp.isAttacking = false;
     });
 
     keyboards.forEach(k => {
@@ -125,6 +128,9 @@ function gameLoop() {
                         break;
                     case 'down':
                         p.yAxis++;
+                        break;
+                    case 'attack':
+                        p.isAttacking = true;
                         break;
                     default:
                         break;
@@ -171,6 +177,17 @@ function updateGame(figures, dt) {
         f.y = xyNew.y
         f.anim += f.speed
     })
+
+    figures.forEach(f => {
+        if (f.isAttacking) {
+            figures.filter(fig => fig !== f).forEach(fig => {
+                let diffAngle = Math.abs(rad2deg(f.angle-angle(f.x,f.y,fig.x,fig.y)));
+                if (distance(f.x,f.y,fig.x,fig.y) < 40 && diffAngle <= 45) {
+                    fig.isDead = true;
+                }
+            });
+        }
+    })
 }
 
 function handleInput(players, figures) {
@@ -181,6 +198,7 @@ function handleInput(players, figures) {
             f.angle = angle(0,0,p.xAxis,p.yAxis)
             f.speed = f.maxSpeed
         }
+        f.isAttacking = p.isAttacking;
     });
 }
 
@@ -208,16 +226,16 @@ function draw(gamepads, mice, figures, dt) {
     ctx.stroke();
 
     figures.forEach(f => {
-        let deg = rad2deg(f.angle)
+        let deg = rad2positivedeg(f.angle)
         if (f.speed > 0 && !f.isAI) {
             console.log(deg)
         }
         if (deg <= 45 || deg > 315) {
-            frame = imageAnim.left.a
+            frame = imageAnim.right.a
         } else if (deg > 45 && deg <= 135){
             frame = imageAnim.up.a
         } else if (deg > 135 && deg <= 225){
-            frame = imageAnim.right.a
+            frame = imageAnim.left.a
         } else {
             frame = imageAnim.down.a
         }
@@ -231,6 +249,9 @@ function draw(gamepads, mice, figures, dt) {
         ctx.fillStyle = "green";
         if (!f.isAI) {
             ctx.fillStyle = "red";
+            if (f.isDead) {
+                ctx.fillStyle = "blue";
+            }
         }
         ctx.arc(f.x, f.y, 5, 0, 2 * Math.PI);
         ctx.fill();
