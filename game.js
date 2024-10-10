@@ -2,17 +2,16 @@ console.log('no need to hide')
 var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
 var mice = [{x: 0, y: 0, isAnyButtonPressed: false}];
-var defaultPlayer = {left: false, right : false, up : false, down : false};
+var keyboardPlayers = [{}, {}];
 var keyboards = [{bindings: {
-    'a': {player: 0, value: 'left'},
-    'd': {player: 0, value: 'right'},
-    'w': {player: 0, value: 'up'},
-    's': {player: 0, value: 'down'},
-    'ArrowLeft': {player: 1, value: 'left'},
-    'ArrowRight': {player: 1, value: 'right'},
-    'ArrowUp': {player: 1, value: 'up'},
-    'ArrowDown': {player: 1, value: 'down'}},
-    players: [{...defaultPlayer}, {...defaultPlayer}]}];
+    'a': {player: keyboardPlayers[0], value: 'left'},
+    'd': {player: keyboardPlayers[0], value: 'right'},
+    'w': {player: keyboardPlayers[0], value: 'up'},
+    's': {player: keyboardPlayers[0], value: 'down'},
+    'ArrowLeft': {player: keyboardPlayers[1], value: 'left'},
+    'ArrowRight': {player: keyboardPlayers[1], value: 'right'},
+    'ArrowUp': {player: keyboardPlayers[1], value: 'up'},
+    'ArrowDown': {player: keyboardPlayers[1], value: 'down'}}, pressed: {}}];
 var virtualGamepads = []
 var stop = false;
 var frameCount = 0;
@@ -58,19 +57,13 @@ document.addEventListener("DOMContentLoaded", function(event){
 
 window.addEventListener('keydown', event => {
     keyboards.forEach(k => {
-        let binding = k.bindings[event.key];
-        if (binding) {
-            k.players[binding.player][binding.value] = true;
-        }
+        k.pressed[event.key] = true;
     });
 });
 
 window.addEventListener('keyup', event => {
     keyboards.forEach(k => {
-        let binding = k.bindings[event.key];
-        if (binding) {
-            k.players[binding.player][binding.value] = false;
-        }
+        delete k.pressed[event.key];
     });
 });
 
@@ -104,23 +97,37 @@ function gameLoop() {
         return g
     });
 
-    let keyboardPlayers = keyboards.flatMap(k => k.players);
-    keyboardPlayers.forEach(p => {
-        p.xAxis = 0;
-        p.yAxis = 0;
-        if (p.left) {
-            p.xAxis--;
-        }
-        if (p.right) {
-            p.xAxis++;
-        }
-        if (p.up) {
-            p.yAxis--;
-        }
-        if (p.down) {
-            p.yAxis++;
-        }
-        p.isMoving = p.xAxis !== 0 || p.yAxis !== 0;
+    keyboardPlayers.forEach(kp => {
+        kp.xAxis = 0;
+        kp.yAxis = 0;
+        kp.isMoving = false;
+    });
+
+    keyboards.forEach(k => {
+        Object.keys(k.pressed).forEach(pressedButton => {
+            const binding = k.bindings[pressedButton];
+            if (binding) {
+                const action = binding.value;
+                let p = binding.player;
+                switch (action) {
+                    case 'left':
+                        p.xAxis--;
+                        break;
+                    case 'right':
+                        p.xAxis++;
+                        break;
+                    case 'up':
+                        p.yAxis--;
+                        break;
+                    case 'down':
+                        p.yAxis++;
+                        break;
+                    default:
+                        break;
+                }
+                p.isMoving = p.xAxis !== 0 || p.yAxis !== 0;
+            }
+        })
     });
 
     let players = [...virtualGamepads, ...keyboardPlayers];
