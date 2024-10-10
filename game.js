@@ -2,6 +2,7 @@ console.log('no need to hide')
 var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
 var mice = [{x: 0, y: 0, isAnyButtonPressed: false}];
+var defaultPlayer = {left: false, right : false, up : false, down : false};
 var keyboards = [{bindings: {
     'a': {player: 0, value: 'left'},
     'd': {player: 0, value: 'right'},
@@ -11,9 +12,7 @@ var keyboards = [{bindings: {
     'ArrowRight': {player: 1, value: 'right'},
     'ArrowUp': {player: 1, value: 'up'},
     'ArrowDown': {player: 1, value: 'down'}},
-    players: [{left: false, right : false, up : false, down : false},
-        {left: false, right : false, up : false, down : false}
-    ]}];
+    players: [{...defaultPlayer}, {...defaultPlayer}]}];
 var virtualGamepads = []
 var stop = false;
 var frameCount = 0;
