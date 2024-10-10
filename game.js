@@ -4,14 +4,14 @@ const ctx = canvas.getContext("2d");
 var mice = [{x: 0, y: 0, isAnyButtonPressed: false}];
 var keyboardPlayers = [{}, {}];
 var keyboards = [{bindings: {
-    'a': {player: keyboardPlayers[0], value: 'left'},
-    'd': {player: keyboardPlayers[0], value: 'right'},
-    'w': {player: keyboardPlayers[0], value: 'up'},
-    's': {player: keyboardPlayers[0], value: 'down'},
-    'ArrowLeft': {player: keyboardPlayers[1], value: 'left'},
-    'ArrowRight': {player: keyboardPlayers[1], value: 'right'},
-    'ArrowUp': {player: keyboardPlayers[1], value: 'up'},
-    'ArrowDown': {player: keyboardPlayers[1], value: 'down'}}, pressed: {}}];
+    'a': {player: keyboardPlayers[0], action: 'left'},
+    'd': {player: keyboardPlayers[0], action: 'right'},
+    'w': {player: keyboardPlayers[0], action: 'up'},
+    's': {player: keyboardPlayers[0], action: 'down'},
+    'ArrowLeft': {player: keyboardPlayers[1], action: 'left'},
+    'ArrowRight': {player: keyboardPlayers[1], action: 'right'},
+    'ArrowUp': {player: keyboardPlayers[1], action: 'up'},
+    'ArrowDown': {player: keyboardPlayers[1], action: 'down'}}, pressed: {}}];
 var virtualGamepads = []
 var stop = false;
 var frameCount = 0;
@@ -107,7 +107,7 @@ function gameLoop() {
         Object.keys(k.pressed).forEach(pressedButton => {
             const binding = k.bindings[pressedButton];
             if (binding) {
-                const action = binding.value;
+                const action = binding.action;
                 let p = binding.player;
                 switch (action) {
                     case 'left':
