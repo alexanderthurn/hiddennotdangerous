@@ -4,10 +4,10 @@ const ctx = canvas.getContext("2d");
 var mice = [{x: 0, y: 0, isAnyButtonPressed: false}];
 var keyboardPlayers = [{}, {}];
 var keyboards = [{bindings: {
-    'a': {player: keyboardPlayers[0], action: 'left'},
-    'd': {player: keyboardPlayers[0], action: 'right'},
-    'w': {player: keyboardPlayers[0], action: 'up'},
-    's': {player: keyboardPlayers[0], action: 'down'},
+    'KeyA': {player: keyboardPlayers[0], action: 'left'},
+    'KeyD': {player: keyboardPlayers[0], action: 'right'},
+    'KeyW': {player: keyboardPlayers[0], action: 'up'},
+    'KeyS': {player: keyboardPlayers[0], action: 'down'},
     'ArrowLeft': {player: keyboardPlayers[1], action: 'left'},
     'ArrowRight': {player: keyboardPlayers[1], action: 'right'},
     'ArrowUp': {player: keyboardPlayers[1], action: 'up'},
@@ -37,17 +37,21 @@ document.addEventListener("DOMContentLoaded", function(event){
     fpsTime = then
     figures = []
     for (var i = 0; i < 20; i++) {
+        const x = Math.random()*canvas.width;
+        const y = Math.random()*canvas.height;
+        const xTarget = Math.random()*canvas.width;
+        const yTarget = Math.random()*canvas.height;
         figures.push({
-            x: Math.random()*canvas.width,
-            y: Math.random()*canvas.height,
-            xTarget: Math.random()*canvas.width,
-            yTarget: Math.random()*canvas.height,
+            x,
+            y,
+            xTarget,
+            yTarget,
             maxSpeed: 0.08,
             speed: 0,
             isAlive: true, 
             isAI: i > 5,
             index: i,
-            angle: 0,
+            angle: angle(x,y,xTarget,yTarget),
             anim: 0
         })
     }
@@ -57,13 +61,13 @@ document.addEventListener("DOMContentLoaded", function(event){
 
 window.addEventListener('keydown', event => {
     keyboards.forEach(k => {
-        k.pressed[event.key] = true;
+        k.pressed[event.code] = true;
     });
 });
 
 window.addEventListener('keyup', event => {
     keyboards.forEach(k => {
-        delete k.pressed[event.key];
+        delete k.pressed[event.code];
     });
 });
 
