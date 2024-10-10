@@ -19,6 +19,14 @@ var frameCount = 0;
 var startTime, then, now, dt, fps=0, fpsTime
 var dtFix = 10, dtToProcess = 0
 var figures = []
+var image = new Image()
+image.src = 'character_base_16x16.png'
+var imageAnim = {
+    down: {a: [[0,0,16,16], [16,0,16,16], [32,0,16,16], [48,0,16,16]]},
+    up: {a: [[0,16,16,16], [16,16,16,16], [32,16,16,16], [48,16,16,16]]},
+    left: {a: [[0,48,16,16], [16,48,16,16], [32,48,16,16], [48,48,16,16]]},
+    right: {a: [[0,32,16,16], [16,32,16,16], [32,32,16,16], [48,32,16,16]]}
+}
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
@@ -40,7 +48,8 @@ document.addEventListener("DOMContentLoaded", function(event){
             isAlive: true, 
             isAI: i > 5,
             index: i,
-            angle: 0
+            angle: 0,
+            anim: 0
         })
     }
 
@@ -149,6 +158,7 @@ function updateGame(figures, dt) {
         let xyNew = move(f.x, f.y, f.angle,f.speed, dt)
         f.x = xyNew.x
         f.y = xyNew.y
+        f.anim += f.speed
     })
 }
 
@@ -184,7 +194,24 @@ function draw(gamepads, mice, figures, dt) {
     ctx.stroke();
 
     figures.forEach(f => {
-        
+        let deg = rad2deg(f.angle)
+        if (f.speed > 0 && !f.isAI) {
+            console.log(deg)
+        }
+        if (deg <= 45 || deg > 315) {
+            frame = imageAnim.left.a
+        } else if (deg > 45 && deg <= 135){
+            frame = imageAnim.up.a
+        } else if (deg > 135 && deg <= 225){
+            frame = imageAnim.right.a
+        } else {
+            frame = imageAnim.down.a
+        }
+
+        let sprite = frame[Math.floor(f.anim) % frame.length]
+        ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], f.x - 32, f.y - 32, 64, 64)
+
+
         ctx.beginPath()
         ctx.lineWidth = 1;
         ctx.fillStyle = "green";
