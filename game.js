@@ -165,7 +165,7 @@ function updateGame(figures, dt) {
 function handleInput(players, figures) {
     players.forEach((p,i) => {
         var f = figures[i]
-        if (p.xAxis !== 0 && p.yAxis !== 0)
+        if (p.isMoving)
             f.angle = angle(0,0,p.xAxis,p.yAxis)
         f.speed = p.isMoving ? f.maxSpeed : 0.0
     });
