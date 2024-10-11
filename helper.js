@@ -34,9 +34,14 @@ const mod = (n, m) => ((n % m) + m) % m;
 const distance = (x1, y1, x2, y2) => Math.hypot(x2 - x1, y2 - y1); 
 const angle = (x1, y1, x2, y2) => Math.atan2(y2 - y1, x2 - x1); 
 const move = (x1, y1, angle, speed) => ({x: x1 + Math.cos(angle)*speed*dt, y: y1 + Math.sin(angle)*speed*dt});
-const deg2rad = deg => deg * (Math.PI / 180)
-const rad2deg = rad => (rad * 180.0) / Math.PI
-const rad2adjusteddeg = rad => mod(-rad2deg(rad),360);
+// Function ]-∞;∞[ -> ]-∞;∞[
+const deg2rad = deg => deg * (Math.PI / 180);
+// Function ]-∞;∞[ -> [0;2π[
+const deg2limitedrad = deg => deg2rad(mod(deg,360));
+// Function ]-∞;∞[ -> ]-∞;∞[
+const rad2deg = rad => (rad * 180.0) / Math.PI;
+// Function ]-∞;∞[ -> [0;360[
+const rad2limiteddeg = rad => mod(rad2deg(rad),360);
 
 function resizeCanvasToDisplaySize(canvas) {
     // look up the size the canvas is being displayed

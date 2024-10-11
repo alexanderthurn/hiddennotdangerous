@@ -286,16 +286,18 @@ function draw(players, figures, dt) {
     ctx.stroke();*/
 
     figures.forEach(f => {
-        let deg = rad2adjusteddeg(f.angle)
-
-        if (deg <= 45 || deg > 315) {
+        let deg = rad2limiteddeg(f.angle)
+        if (!f.isAI) {
+            console.log('wtf',f.angle,deg);
+        }
+        if (deg < 45 || deg > 315) {
             frame = imageAnim.right.a
-        } else if (deg > 45 && deg <= 135){
-            frame = imageAnim.up.a
-        } else if (deg > 135 && deg <= 225){
+        } else if (deg >= 45 && deg <= 135){
+            frame = imageAnim.down.a
+        } else if (deg > 135 && deg < 225){
             frame = imageAnim.left.a
         } else {
-            frame = imageAnim.down.a
+            frame = imageAnim.up.a
         }
 
         let sprite = frame[Math.floor(f.anim) % frame.length]
