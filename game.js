@@ -229,7 +229,7 @@ function draw(gamepads, mice, figures, dt) {
     ctx.stroke();
 
     figures.forEach(f => {
-        let deg = rad2positivedeg(f.angle)
+        let deg = rad2adjusteddeg(f.angle)
 
         if (deg <= 45 || deg > 315) {
             frame = imageAnim.right.a
@@ -245,7 +245,7 @@ function draw(gamepads, mice, figures, dt) {
         ctx.save()
         ctx.translate(f.x, f.y)
         if (f.isAttacking) {
-            ctx.rotate(deg2rad(-30+rad2positivedeg(f.anim) % 60) )
+            ctx.rotate(deg2rad(-30+mod(rad2deg(f.anim),60)) )
         }
         ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
         ctx.restore()
