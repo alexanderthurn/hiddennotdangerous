@@ -181,6 +181,11 @@ function updateGame(figures, dt) {
         f.anim += f.speed
         f.anim += f.isAttacking ? 0.5 : 0
 
+        if (f.x > canvas.width) f.x = canvas.width
+        if (f.y > canvas.height) f.y = canvas.height
+        if (f.x < 0) f.x = 0
+        if (f.y < 0) f.y = 0
+        
     })
     figuresAlive.filter(f => f.isAttacking).forEach(f => {
         figures.filter(fig => fig !== f).forEach(fig => {
@@ -207,6 +212,12 @@ function handleInput(players, figures) {
 
 function handleAi(figures) {
     figures.filter(f => f.isAI && !f.isDead).forEach(f => {
+
+        if (f.xTarget > canvas.width) f.xTarget = canvas.width
+        if (f.yTarget > canvas.height) f.yTarget = canvas.height
+        if (f.xTarget < 0) f.xTarget = 0
+        if (f.yTarget < 0) f.yTarget = 0
+
         if (distance(f.x,f.y,f.xTarget,f.yTarget) < 5) {
             f.xTarget = Math.random()*canvas.width
             f.yTarget = Math.random()*canvas.height
