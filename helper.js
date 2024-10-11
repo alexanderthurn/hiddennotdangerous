@@ -38,7 +38,7 @@ const deg2rad = deg => deg * (Math.PI / 180)
 const rad2deg = rad => (rad * 180.0) / Math.PI
 const rad2positivedeg = rad => {
     let deg = -rad2deg(rad);
-    if (deg < 0) {
+    while (deg < 0) {
         deg += 360.0;
     }
     return deg;
