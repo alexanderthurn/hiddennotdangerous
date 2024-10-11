@@ -1,7 +1,7 @@
 console.log('no need to hide')
 var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
-var mice = [{x: 0, y: 0, isAttackButtonPressed: false}];
+var mousePlayers = [{x: 0, y: 0, isAttackButtonPressed: false}];
 var keyboardPlayers = [{}, {}];
 var keyboards = [{bindings: {
     'KeyA': {player: keyboardPlayers[0], action: 'left'},
@@ -19,8 +19,9 @@ var stop = false;
 var frameCount = 0;
 var startTime, then, now, dt, fps=0, fpsTime
 var dtFix = 10, dtToProcess = 0
-var figures = []
+var figures = [], maxFigures = 6
 var image = new Image()
+var showDebug = false
 image.src = 'character_base_16x16.png'
 var imageAnim = {
     down: {a: [[0,0,16,16], [16,0,16,16], [32,0,16,16], [48,0,16,16]]},
@@ -42,15 +43,18 @@ window.addEventListener('keydown', event => {
 });
 
 window.addEventListener('keyup', event => {
+    if (event.code === 'Escape') {
+        showDebug =!showDebug
+    }
     keyboards.forEach(k => {
         delete k.pressed[event.code];
     });
 });
 
 canvas.addEventListener('pointermove', event => {
-    mice[0].x = event.clientX - canvas.offsetLeft;
-    mice[0].y = event.clientY -  canvas.offsetTop;
-   // mice[0].isAttackButtonPressed = event.buttons.some(b => b.pressed)
+    mousePlayers[0].x = event.clientX - canvas.offsetLeft;
+    mousePlayers[0].y = event.clientY -  canvas.offsetTop;
+    //mousePlayers[0].isAttackButtonPressed = event.buttons.some(b => b.pressed)
 }, false);
 
 window.addEventListener("resize", function(event){
@@ -63,13 +67,15 @@ function gameInit() {
     then = Date.now();
     startTime = then;
     fpsTime = then
+    var activePlayerIds = figures.filter(f => f.playerId).map(f => f.playerId)
+    var oldFigures = figures
     figures = []
-    for (var i = 0; i < 6; i++) {
+    for (var i = 0; i < maxFigures; i++) {
         const x = Math.random()*canvas.width;
         const y = Math.random()*canvas.height;
         const xTarget = Math.random()*canvas.width;
         const yTarget = Math.random()*canvas.height;
-        figures.push({
+        var figure = {
             x,
             y,
             xTarget,
@@ -77,13 +83,23 @@ function gameInit() {
             maxSpeed: 0.08,
             speed: 0,
             isDead: false, 
-            isAI: i > 5,
+            isAI: true,
+            playerId: null,
             index: i,
             angle: angle(x,y,xTarget,yTarget),
             anim: 0,
             isAttacking: false,
+            points: 0,
             attackDistance: 40
-        })
+        }
+
+        if (activePlayerIds.length > i) {
+            figure.playerId = activePlayerIds[i]
+            figure.isAI = false
+            figure.points = oldFigures.find(f => f.playerId == figure.playerId).points
+        }
+
+        figures.push(figure)
     }
 }
 
@@ -94,7 +110,7 @@ function gameLoop() {
         fpsTime = now
         fps = Math.floor(1000/dt)
     }
-    virtualGamepads = navigator.getGamepads().filter(x => x && x.connected).map(g => {
+    gamepadPlayers = navigator.getGamepads().filter(x => x && x.connected).map(g => {
         g.isAttackButtonPressed = g.buttons.some(b => b.pressed)
         let x = g.axes[0];
         let y = g.axes[1];
@@ -103,14 +119,18 @@ function gameLoop() {
         g.xAxis = x
         g.yAxis = y
         g.isMoving = x !== 0 || y !== 0;
+        g.type = 'gamepad'
+        g.playerId = 'g' + g.index // id does not work as it returns just XBOX Controller
         return g
     });
 
-    keyboardPlayers.forEach(kp => {
+    keyboardPlayers.forEach((kp,i) => {
         kp.xAxis = 0;
         kp.yAxis = 0;
         kp.isMoving = false;
         kp.isAttackButtonPressed = false;
+        kp.type = 'keyboard'
+        kp.playerId = 'k' + i
     });
 
     keyboards.forEach(k => {
@@ -143,9 +163,9 @@ function gameLoop() {
         })
     });
 
-    let players = [...virtualGamepads, ...keyboardPlayers];
+    let players = [...gamepadPlayers, ...keyboardPlayers];
 
-   /* mice.forEach(m => {
+   /* mousePlayers.forEach(m => {
         g = {}
         let x = m.x - canvas.x / 2;
         let y = m.y - canvas.y / 2;
@@ -153,6 +173,7 @@ function gameLoop() {
         [x, y] = clampStick(x, y);
         g.xAxis = x
         g.yAxis = y
+        g.playerId = 'm0'
         g.isMoving = Math.abs(x) > 0 && Math.abs(y) > 0.0001
         virtualGamepads.unshift(g)
     })*/
@@ -166,12 +187,18 @@ function gameLoop() {
         dtToProcess-=dtFix
     }
     
-    draw(virtualGamepads, mice, figures, dt);
+    draw(players, figures, dt);
     then = now
 
-    if (figures.filter(f => !f.isDead).length < 2) {
+    var survivors = figures.filter(f => !f.isAI && !f.isDead)
+    var figuresWithPlayer = figures.filter(f => f.playerId)
+    if (survivors.length == 1 && figuresWithPlayer.length > 1) {
+        survivors[0].points++
         gameInit()
     }
+
+
+    
 
     window.requestAnimationFrame(gameLoop);
 }
@@ -202,15 +229,30 @@ function updateGame(figures, dt) {
 }
 
 function handleInput(players, figures) {
-    players.filter((_,i) => !figures[i].isDead).forEach((p,i) => {
-        var f = figures[i]
-        f.speed = 0.0
-        if (p.isMoving) {
-            f.angle = angle(0,0,p.xAxis,p.yAxis)
-            f.speed = f.maxSpeed
+
+    // join by doing anything
+    players.filter(p => p.isAttackButtonPressed || p.isMoving).forEach(p => {
+        var figure = figures.find(f => f.playerId === p.playerId)
+        if (!figure) {
+            var figure = figures.find(f => f.isAI)
+            figure.isAI = false
+            figure.playerId = p.playerId
         }
-        f.isAttacking = p.isAttackButtonPressed;
-    });
+    })
+
+    figures.filter(f => !f.isAI).forEach(f => {
+        var p = players.find(p => p.playerId === f.playerId)
+        f.speed = 0.0
+        if (!f.isDead) {
+            if (p.isMoving) {
+                f.angle = angle(0,0,p.xAxis,p.yAxis)
+                f.speed = f.maxSpeed
+            }
+            f.isAttacking = p.isAttackButtonPressed;
+        }
+    })
+
+
 }
 
 function handleAi(figures) {
@@ -230,17 +272,18 @@ function handleAi(figures) {
     })
 }
 
-function draw(gamepads, mice, figures, dt) {
+function draw(players, figures, dt) {
 
     /*HALLO*/
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.beginPath();
-    ctx.arc(mice[0].x, mice[0].y, 40, 0, 2 * Math.PI);
+    
+    /*ctx.beginPath();
+    ctx.arc(mousePlayers[0].x, mousePlayers[0].y, 40, 0, 2 * Math.PI);
     ctx.fillStyle = "yellow";
     ctx.fill();
     ctx.lineWidth = 4;
     ctx.strokeStyle = "red";
-    ctx.stroke();
+    ctx.stroke();*/
 
     figures.forEach(f => {
         let deg = rad2adjusteddeg(f.angle)
@@ -284,19 +327,56 @@ function draw(gamepads, mice, figures, dt) {
             ctx.fillStyle = "red";
             ctx.font = "16px serif";
             ctx.fillStyle = "white";
-            ctx.fillText(f.index + '',f.x,f.y)
+            ctx.fillText(f.playerId + '',f.x,f.y)
         }
     })
 
   
 
+    figures.filter(f => !f.isAI).forEach((f,i) => {
+        ctx.save()
+        ctx.fillStyle = "red";
+        ctx.beginPath();
+        ctx.translate(32+i*48, canvas.height-32)
+        ctx.arc(0,0,16,0, 2 * Math.PI);
+        ctx.fill();
+        ctx.textAlign = "center";
+        ctx.textBaseline='center'
+        ctx.fillStyle = "white";
+        ctx.font = "24px arial";
+        ctx.fillText(f.points,0,-12); // Punkte
+        ctx.stroke();
+        ctx.restore()
+    })
 
     ctx.font = "16px serif";
     ctx.fillStyle = "white";
     ctx.textAlign = "left";
     ctx.textBaseline='top'
-    ctx.fillText("FPS: " + fps + " Gamepads: " + gamepads.length + " Mouses: " + mice.length + " Time: " + (new Date().getTime() / 1000), 0, 0);
-    gamepads.forEach((g,i) => {
-        ctx.fillText("xAxis: " + g.xAxis + " yAxis: " + g.yAxis + " Attack?: " + g.isAttackButtonPressed,0,(1+i)*16) 
-    })
+
+    ctx.save()
+    ctx.textAlign = "right";
+    ctx.fillText(fps + " FPS", canvas.width, 0);
+    ctx.restore()
+
+    if (showDebug) {
+        ctx.save()
+        ctx.fillText('Players',0,0)
+        players.forEach((g,i) => {
+            ctx.translate(0,16)
+            ctx.fillText("xAxis: " + g.xAxis.toFixed(2) + " yAxis: " + g.yAxis.toFixed(2) + " Attack?: " + g.isAttackButtonPressed,0,0) 
+        })
+        ctx.restore()
+    
+        ctx.save()
+        ctx.textBaseline='bottom'
+        ctx.translate(0,canvas.height)
+        figures.forEach((g,i) => {
+            ctx.fillText("playerId: " + g.playerId + " x: " + Math.floor(g.x) + " y: " + Math.floor(g.y) + " Dead: " + g.isDead,0,0) 
+            ctx.translate(0,-16)
+        })
+        ctx.fillText('Figures',0,0)
+        ctx.restore()
+    }
+
 }
