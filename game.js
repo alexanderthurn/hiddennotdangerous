@@ -1,7 +1,7 @@
 console.log('no need to hide')
 var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
-var mice = [{x: 0, y: 0, isAnyButtonPressed: false}];
+var mice = [{x: 0, y: 0, isAttackButtonPressed: false}];
 var keyboardPlayers = [{}, {}];
 var keyboards = [{bindings: {
     'KeyA': {player: keyboardPlayers[0], action: 'left'},
@@ -54,7 +54,9 @@ document.addEventListener("DOMContentLoaded", function(event){
             isAI: i > 5,
             index: i,
             angle: angle(x,y,xTarget,yTarget),
-            anim: 0
+            anim: 0,
+            isAttacking: false,
+            attackDistance: 40
         })
     }
 
@@ -76,7 +78,7 @@ window.addEventListener('keyup', event => {
 canvas.addEventListener('pointermove', event => {
     mice[0].x = event.clientX - canvas.offsetLeft;
     mice[0].y = event.clientY -  canvas.offsetTop;
-   // mice[0].isAnyButtonPressed = event.buttons.some(b => b.pressed)
+   // mice[0].isAttackButtonPressed = event.buttons.some(b => b.pressed)
 }, false);
 
 window.addEventListener("resize", function(event){
@@ -92,7 +94,7 @@ function gameLoop() {
         fps = Math.floor(1000/dt)
     }
     virtualGamepads = navigator.getGamepads().filter(x => x && x.connected).map(g => {
-        g.isAnyButtonPressed = g.buttons.some(b => b.pressed)
+        g.isAttackButtonPressed = g.buttons.some(b => b.pressed)
         let x = g.axes[0];
         let y = g.axes[1];
         [x, y] = setDeadzone(x, y,0.0001);
@@ -107,7 +109,7 @@ function gameLoop() {
         kp.xAxis = 0;
         kp.yAxis = 0;
         kp.isMoving = false;
-        kp.isAttacking = false;
+        kp.isAttackButtonPressed = false;
     });
 
     keyboards.forEach(k => {
@@ -130,7 +132,7 @@ function gameLoop() {
                         p.yAxis++;
                         break;
                     case 'attack':
-                        p.isAttacking = true;
+                        p.isAttackButtonPressed = true;
                         break;
                     default:
                         break;
@@ -177,11 +179,13 @@ function updateGame(figures, dt) {
         f.x = xyNew.x
         f.y = xyNew.y
         f.anim += f.speed
+        f.anim += f.isAttacking ? 0.5 : 0
+
     })
-    figuresAlive.filter(f => f.isAttacking).forEach(f => {
+    figuresAlive.filterds(f => f.isAttacking).forEach(f => {
         figures.filter(fig => fig !== f).forEach(fig => {
             let diffAngle = Math.abs(rad2deg(f.angle-angle(f.x,f.y,fig.x,fig.y)));
-            if (distance(f.x,f.y,fig.x,fig.y) < 40 && diffAngle <= 45) {
+            if (distance(f.x,f.y,fig.x,fig.y) < attackDistance && diffAngle <= 45) {
                 fig.isDead = true;
             }
         });
@@ -197,7 +201,7 @@ function handleInput(players, figures) {
             f.angle = angle(0,0,p.xAxis,p.yAxis)
             f.speed = f.maxSpeed
         }
-        f.isAttacking = p.isAttacking;
+        f.isAttacking = p.isAttackButtonPressed;
     });
 }
 
@@ -226,9 +230,7 @@ function draw(gamepads, mice, figures, dt) {
 
     figures.forEach(f => {
         let deg = rad2positivedeg(f.angle)
-        if (f.speed > 0 && !f.isAI) {
-            console.log(deg)
-        }
+
         if (deg <= 45 || deg > 315) {
             frame = imageAnim.right.a
         } else if (deg > 45 && deg <= 135){
@@ -240,8 +242,15 @@ function draw(gamepads, mice, figures, dt) {
         }
 
         let sprite = frame[Math.floor(f.anim) % frame.length]
-        ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], f.x - 32, f.y - 32, 64, 64)
+        ctx.save()
+        ctx.translate(f.x, f.y)
+        if (f.isAttacking) {
+            ctx.rotate(f.anim)
+        }
+        ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
+        ctx.restore()
 
+       
 
         ctx.beginPath()
         ctx.lineWidth = 1;
@@ -272,6 +281,6 @@ function draw(gamepads, mice, figures, dt) {
     ctx.textBaseline='top'
     ctx.fillText("FPS: " + fps + " Gamepads: " + gamepads.length + " Mouses: " + mice.length + " Time: " + (new Date().getTime() / 1000), 0, 0);
     gamepads.forEach((g,i) => {
-        ctx.fillText("xAxis: " + g.xAxis + " yAxis: " + g.yAxis + " Button?: " + g.isAnyButtonPressed,0,(1+i)*16) 
+        ctx.fillText("xAxis: " + g.xAxis + " yAxis: " + g.yAxis + " Attack?: " + g.isAttackButtonPressed,0,(1+i)*16) 
     })
 }
