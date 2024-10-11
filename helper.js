@@ -34,6 +34,7 @@ function clampStick(x, y) {
 const distance = (x1, y1, x2, y2) => Math.hypot(x2 - x1, y2 - y1); 
 const angle = (x1, y1, x2, y2) => Math.atan2(y2 - y1, x2 - x1); 
 const move = (x1, y1, angle, speed) => ({x: x1 + Math.cos(angle)*speed*dt, y: y1 + Math.sin(angle)*speed*dt});
+const deg2rad = deg => deg * (Math.PI / 180)
 const rad2deg = rad => (rad * 180.0) / Math.PI
 const rad2positivedeg = rad => {
     let deg = -rad2deg(rad);

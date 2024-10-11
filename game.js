@@ -245,7 +245,7 @@ function draw(gamepads, mice, figures, dt) {
         ctx.save()
         ctx.translate(f.x, f.y)
         if (f.isAttacking) {
-            ctx.rotate(f.anim)
+            ctx.rotate(deg2rad(30+rad2positivedeg(f.anim) % 60) )
         }
         ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
         ctx.restore()
