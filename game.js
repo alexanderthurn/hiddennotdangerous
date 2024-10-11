@@ -182,10 +182,10 @@ function updateGame(figures, dt) {
         f.anim += f.isAttacking ? 0.5 : 0
 
     })
-    figuresAlive.filterds(f => f.isAttacking).forEach(f => {
+    figuresAlive.filter(f => f.isAttacking).forEach(f => {
         figures.filter(fig => fig !== f).forEach(fig => {
             let diffAngle = Math.abs(rad2deg(f.angle-angle(f.x,f.y,fig.x,fig.y)));
-            if (distance(f.x,f.y,fig.x,fig.y) < attackDistance && diffAngle <= 45) {
+            if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance && diffAngle <= 45) {
                 fig.isDead = true;
             }
         });
