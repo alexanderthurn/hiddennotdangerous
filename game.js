@@ -31,35 +31,7 @@ var imageAnim = {
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
-
-    console.log('hahahahahahaha')
-   
-    then = Date.now();
-    startTime = then;
-    fpsTime = then
-    figures = []
-    for (var i = 0; i < 20; i++) {
-        const x = Math.random()*canvas.width;
-        const y = Math.random()*canvas.height;
-        const xTarget = Math.random()*canvas.width;
-        const yTarget = Math.random()*canvas.height;
-        figures.push({
-            x,
-            y,
-            xTarget,
-            yTarget,
-            maxSpeed: 0.08,
-            speed: 0,
-            isAlive: true, 
-            isAI: i > 5,
-            index: i,
-            angle: angle(x,y,xTarget,yTarget),
-            anim: 0,
-            isAttacking: false,
-            attackDistance: 40
-        })
-    }
-
+    gameInit()
     window.requestAnimationFrame(gameLoop);
 })
 
@@ -85,6 +57,35 @@ window.addEventListener("resize", function(event){
     resizeCanvasToDisplaySize(canvas)
 });
 
+function gameInit() {
+    console.log('hahahahahahaha')
+   
+    then = Date.now();
+    startTime = then;
+    fpsTime = then
+    figures = []
+    for (var i = 0; i < 6; i++) {
+        const x = Math.random()*canvas.width;
+        const y = Math.random()*canvas.height;
+        const xTarget = Math.random()*canvas.width;
+        const yTarget = Math.random()*canvas.height;
+        figures.push({
+            x,
+            y,
+            xTarget,
+            yTarget,
+            maxSpeed: 0.08,
+            speed: 0,
+            isDead: false, 
+            isAI: i > 5,
+            index: i,
+            angle: angle(x,y,xTarget,yTarget),
+            anim: 0,
+            isAttacking: false,
+            attackDistance: 40
+        })
+    }
+}
 
 function gameLoop() {
     now = Date.now();
@@ -166,9 +167,12 @@ function gameLoop() {
     }
     
     draw(virtualGamepads, mice, figures, dt);
-
-
     then = now
+
+    if (figures.filter(f => !f.isDead).length < 2) {
+        gameInit()
+    }
+
     window.requestAnimationFrame(gameLoop);
 }
 
@@ -199,7 +203,6 @@ function updateGame(figures, dt) {
 
 function handleInput(players, figures) {
     players.filter((_,i) => !figures[i].isDead).forEach((p,i) => {
-        console.log('ALIVE', i);
         var f = figures[i]
         f.speed = 0.0
         if (p.isMoving) {
@@ -258,6 +261,10 @@ function draw(gamepads, mice, figures, dt) {
         if (f.isAttacking) {
             ctx.rotate(deg2rad(-30+rad2positivedeg(f.anim) % 60) )
         }
+        if (f.isDead) {
+            ctx.rotate(deg2rad(90))
+            ctx.scale(0.5,0.5)
+        }
         ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
         ctx.restore()
 
@@ -269,9 +276,7 @@ function draw(gamepads, mice, figures, dt) {
         if (!f.isAI) {
             ctx.fillStyle = "red";
         }
-        if (f.isDead) {
-            ctx.fillStyle = "blue";
-        }
+
         ctx.arc(f.x, f.y, 5, 0, 2 * Math.PI);
         ctx.fill();
 
