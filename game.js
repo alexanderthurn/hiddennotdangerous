@@ -171,27 +171,26 @@ function gameLoop() {
 }
 
 function updateGame(figures, dt) {
-    figures.forEach(f => {
+    let figuresAlive = figures.filter(f => !f.isDead);
+    figuresAlive.forEach(f => {
         let xyNew = move(f.x, f.y, f.angle,f.speed, dt)
         f.x = xyNew.x
         f.y = xyNew.y
         f.anim += f.speed
     })
-
-    figures.forEach(f => {
-        if (f.isAttacking) {
-            figures.filter(fig => fig !== f).forEach(fig => {
-                let diffAngle = Math.abs(rad2deg(f.angle-angle(f.x,f.y,fig.x,fig.y)));
-                if (distance(f.x,f.y,fig.x,fig.y) < 40 && diffAngle <= 45) {
-                    fig.isDead = true;
-                }
-            });
-        }
+    figuresAlive.filter(f => f.isAttacking).forEach(f => {
+        figures.filter(fig => fig !== f).forEach(fig => {
+            let diffAngle = Math.abs(rad2deg(f.angle-angle(f.x,f.y,fig.x,fig.y)));
+            if (distance(f.x,f.y,fig.x,fig.y) < 40 && diffAngle <= 45) {
+                fig.isDead = true;
+            }
+        });
     })
 }
 
 function handleInput(players, figures) {
-    players.forEach((p,i) => {
+    players.filter((_,i) => !figures[i].isDead).forEach((p,i) => {
+        console.log('ALIVE', i);
         var f = figures[i]
         f.speed = 0.0
         if (p.isMoving) {
@@ -203,7 +202,7 @@ function handleInput(players, figures) {
 }
 
 function handleAi(figures) {
-    figures.filter(f => f.isAI).forEach(f => {
+    figures.filter(f => f.isAI && !f.isDead).forEach(f => {
         if (distance(f.x,f.y,f.xTarget,f.yTarget) < 5) {
             f.xTarget = Math.random()*canvas.width
             f.yTarget = Math.random()*canvas.height
@@ -249,9 +248,9 @@ function draw(gamepads, mice, figures, dt) {
         ctx.fillStyle = "green";
         if (!f.isAI) {
             ctx.fillStyle = "red";
-            if (f.isDead) {
-                ctx.fillStyle = "blue";
-            }
+        }
+        if (f.isDead) {
+            ctx.fillStyle = "blue";
         }
         ctx.arc(f.x, f.y, 5, 0, 2 * Math.PI);
         ctx.fill();
