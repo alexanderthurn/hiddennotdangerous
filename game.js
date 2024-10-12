@@ -20,8 +20,8 @@ var frameCount = 0;
 var startTime, then, now, dt, fps=0, fpsTime
 var dtFix = 10, dtToProcess = 0
 var figures = [], maxFigures = 6
-var soundAttack = new Audio('sound2.mp3')
-var soundDeath = new Audio('sound1.mp3');
+//var soundAttack = new Audio('sound2.mp3');
+//var soundDeath = new Audio('sound1.mp3');
 var soundJoin = new Audio('sounddrum.mp3');
 var image = new Image()
 var showDebug = false
@@ -32,6 +32,15 @@ var imageAnim = {
     left: {a: [[0,48,16,16], [16,48,16,16], [32,48,16,16], [48,48,16,16]]},
     right: {a: [[0,32,16,16], [16,32,16,16], [32,32,16,16], [48,32,16,16]]}
 }
+const audio = {
+    attack: {title: 'sound2.mp3', startTime: 0},
+    death: {title: 'sound1.mp3', startTime: 1},
+    join: {title: 'sounddrum.mp3', startTime: 0}
+}
+
+function getAudio(key) {
+    return {file: new Audio(audio[key].title), ...audio[key]}
+} 
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
@@ -93,7 +102,9 @@ function gameInit() {
             anim: 0,
             isAttacking: false,
             points: 0,
-            attackDistance: 40
+            attackDistance: 40,
+            soundAttack: getAudio('attack'),
+            soundDeath: getAudio('death')
         }
 
         if (activePlayerIds.length > i) {
@@ -223,19 +234,21 @@ function updateGame(figures, dt) {
         
     })
     figuresAlive.filter(f => f.isAttacking).forEach(f => {
+        playAudio(f.soundAttack);
         figures.filter(fig => fig !== f).forEach(fig => {
             let diffAngle = Math.abs(rad2deg(f.angle-angle(f.x,f.y,fig.x,fig.y)));
             if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance && diffAngle <= 45) {
                 fig.isDead = true;
+                playAudio(f.soundDeath);
             }
         });
     })
-    if (figuresAlive.filter(f => f.isAttacking).length > 0) {
+    /*if (figuresAlive.filter(f => f.isAttacking).length > 0) {
         playSound(soundAttack);
     }
     if (figuresAlive.filter(f => f.isDead).length > 0) {
         playSound(soundDeath);
-    }
+    }*/
 }
 
 function handleInput(players, figures, time) {
@@ -247,7 +260,7 @@ function handleInput(players, figures, time) {
             var figure = figures.find(f => f.isAI)
             figure.isAI = false
             figure.playerId = p.playerId
-            playSound(soundJoin);
+            playAudio(soundJoin);
         }
     })
 

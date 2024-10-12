@@ -45,9 +45,12 @@ const rad2limiteddeg = rad => mod(rad2deg(rad),360);
 
 const getLastAttackTime = (lastAttackTime, then) => lastAttackTime && then-lastAttackTime < 500 ? lastAttackTime : then;
 
-const playSound = (sound) => {
-    sound?.load();
-    sound?.play();
+const playAudio = (audio) => {
+    audiofile = audio.file;
+    console.log('AUDIO', audio, audiofile);
+    audiofile?.load();
+    //audiofile.currentTime = audio.startTime;
+    audiofile?.play();
 }
 
 function resizeCanvasToDisplaySize(canvas) {
