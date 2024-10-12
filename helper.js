@@ -43,6 +43,8 @@ const rad2deg = rad => (rad * 180.0) / Math.PI;
 // Function ]-∞;∞[ -> [0;360[
 const rad2limiteddeg = rad => mod(rad2deg(rad),360);
 
+const getLastAttackTime = (lastAttackTime, then) => lastAttackTime && then-lastAttackTime < 500 ? lastAttackTime : then;
+
 function resizeCanvasToDisplaySize(canvas) {
     // look up the size the canvas is being displayed
     const width = canvas.clientWidth;

@@ -112,7 +112,7 @@ function gameLoop() {
     }
     gamepadPlayers = navigator.getGamepads().filter(x => x && x.connected).map(g => {
         if (g.buttons.some(b => b.pressed)) {
-            g.lastAttackTime = g.lastAttackTime && then-p.lastAttackTime < 500 ? p.lastAttackTime : then;
+            g.lastAttackTime = getLastAttackTime(g.lastAttackTime, then);
         }
         let x = g.axes[0];
         let y = g.axes[1];
@@ -154,7 +154,7 @@ function gameLoop() {
                         p.yAxis++;
                         break;
                     case 'attack':
-                        p.lastAttackTime = p.lastAttackTime && then-p.lastAttackTime < 500 ? p.lastAttackTime : then;
+                        p.lastAttackTime = getLastAttackTime(p.lastAttackTime, then);
                         break;
                     default:
                         break;
