@@ -30,6 +30,16 @@ var imageAnim = {
     left: {a: [[0,48,16,16], [16,48,16,16], [32,48,16,16], [48,48,16,16]]},
     right: {a: [[0,32,16,16], [16,32,16,16], [32,32,16,16], [48,32,16,16]]}
 }
+var texture = new Image()
+texture.src = 'texture_grass.jpg'
+const dimTileArea = [40, 25]
+let tileArea = [[]]
+const textureTiles = {
+    flowers: [1288, 23, 609, 609],
+    grass: [655, 23, 609, 609],
+    mushrooms: [23, 23, 609, 609]
+}
+const textureTilesList = Object.values(textureTiles);
 const audio = {
     attack: {title: 'sound2.mp3', startTime: 0.15},
     death: {title: 'sound1.mp3', startTime: 0.4},
@@ -70,6 +80,13 @@ window.addEventListener("resize", function(event){
 
 function gameInit() {
     console.log('hahahahahahaha')
+
+    for (let i = 0; i < dimTileArea[0]; i++) {
+        tileArea[i] = [];
+        for (let j = 0; j < dimTileArea[1]; j++) {
+            tileArea[i][j] = getRandomInt(3);
+        }
+    }
    
     then = Date.now();
     startTime = then;
@@ -289,6 +306,23 @@ function draw(players, figures, dt) {
 
     /*HALLO*/
     ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    ctx.save();
+    tileArea.forEach(row => {
+        row.forEach((entry, index, array) => {
+            const tile = textureTilesList[entry];
+            ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, 100, 100)
+            if(index < array.length - 1) {
+                ctx.translate(0, 100);
+            } else {
+                ctx.translate(0, -100 * index);
+            } 
+        })
+        ctx.translate(100, 0);
+    });
+    ctx.restore();
+
+    //ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, 100, 100)
     
     /*ctx.beginPath();
     ctx.arc(mousePlayers[0].x, mousePlayers[0].y, 40, 0, 2 * Math.PI);

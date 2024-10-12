@@ -31,6 +31,8 @@ function clampStick(x, y) {
 }
 
 const mod = (n, m) => ((n % m) + m) % m;
+const getRandomInt = max => Math.floor(Math.random() * max);
+
 const distance = (x1, y1, x2, y2) => Math.hypot(x2 - x1, y2 - y1); 
 const angle = (x1, y1, x2, y2) => Math.atan2(y2 - y1, x2 - x1); 
 const move = (x1, y1, angle, speed) => ({x: x1 + Math.cos(angle)*speed*dt, y: y1 + Math.sin(angle)*speed*dt});
