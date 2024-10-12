@@ -20,9 +20,7 @@ var frameCount = 0;
 var startTime, then, now, dt, fps=0, fpsTime
 var dtFix = 10, dtToProcess = 0
 var figures = [], maxFigures = 6
-//var soundAttack = new Audio('sound2.mp3');
-//var soundDeath = new Audio('sound1.mp3');
-var soundJoin = new Audio('sounddrum.mp3');
+
 var image = new Image()
 var showDebug = false
 image.src = 'character_base_16x16.png'
@@ -33,14 +31,11 @@ var imageAnim = {
     right: {a: [[0,32,16,16], [16,32,16,16], [32,32,16,16], [48,32,16,16]]}
 }
 const audio = {
-    attack: {title: 'sound2.mp3', startTime: 0},
-    death: {title: 'sound1.mp3', startTime: 1},
+    attack: {title: 'sound2.mp3', startTime: 0.15},
+    death: {title: 'sound1.mp3', startTime: 0.4},
     join: {title: 'sounddrum.mp3', startTime: 0}
 }
-
-function getAudio(key) {
-    return {file: new Audio(audio[key].title), ...audio[key]}
-} 
+var soundJoin = getAudio('join');
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
@@ -239,16 +234,10 @@ function updateGame(figures, dt) {
             let diffAngle = Math.abs(rad2deg(f.angle-angle(f.x,f.y,fig.x,fig.y)));
             if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance && diffAngle <= 45) {
                 fig.isDead = true;
-                playAudio(f.soundDeath);
+                playAudio(fig.soundDeath);
             }
         });
     })
-    /*if (figuresAlive.filter(f => f.isAttacking).length > 0) {
-        playSound(soundAttack);
-    }
-    if (figuresAlive.filter(f => f.isDead).length > 0) {
-        playSound(soundDeath);
-    }*/
 }
 
 function handleInput(players, figures, time) {
