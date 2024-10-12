@@ -20,6 +20,8 @@ var frameCount = 0;
 var startTime, then, now, dt, fps=0, fpsTime
 var dtFix = 10, dtToProcess = 0
 var figures = [], maxFigures = 6
+var soundAttack = new Audio('sound2.mp3')
+var soundDeath = new Audio('sound1.mp3');
 var image = new Image()
 var showDebug = false
 image.src = 'character_base_16x16.png'
@@ -224,9 +226,16 @@ function updateGame(figures, dt) {
             let diffAngle = Math.abs(rad2deg(f.angle-angle(f.x,f.y,fig.x,fig.y)));
             if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance && diffAngle <= 45) {
                 fig.isDead = true;
+                soundDeath.play();
             }
         });
     })
+    if (figuresAlive.filter(f => f.isAttacking).length > 0) {
+        soundAttack.play();
+    }
+    if (figuresAlive.filter(f => f.isDead).length > 0) {
+        soundDeath.play();
+    }
 }
 
 function handleInput(players, figures, time) {
