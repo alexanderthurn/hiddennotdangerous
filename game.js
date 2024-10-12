@@ -1,7 +1,7 @@
 console.log('no need to hide')
 var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
-var mousePlayers = [{x: 0, y: 0, isAttackButtonPressed: false}];
+var mousePlayers = [{x: 0, y: 0}];
 var keyboardPlayers = [{}, {}];
 var keyboards = [{bindings: {
     'KeyA': {player: keyboardPlayers[0], action: 'left'},
@@ -54,7 +54,7 @@ window.addEventListener('keyup', event => {
 canvas.addEventListener('pointermove', event => {
     mousePlayers[0].x = event.clientX - canvas.offsetLeft;
     mousePlayers[0].y = event.clientY -  canvas.offsetTop;
-    //mousePlayers[0].isAttackButtonPressed = event.buttons.some(b => b.pressed)
+    //mousePlayers[0].lastAttackTime = event.buttons.some(b => b.pressed)
 }, false);
 
 window.addEventListener("resize", function(event){
@@ -111,7 +111,9 @@ function gameLoop() {
         fps = Math.floor(1000/dt)
     }
     gamepadPlayers = navigator.getGamepads().filter(x => x && x.connected).map(g => {
-        g.isAttackButtonPressed = g.buttons.some(b => b.pressed)
+        if (g.buttons.some(b => b.pressed)) {
+            g.lastAttackTime = g.lastAttackTime && then-p.lastAttackTime < 500 ? p.lastAttackTime : then;
+        }
         let x = g.axes[0];
         let y = g.axes[1];
         [x, y] = setDeadzone(x, y,0.0001);
@@ -128,7 +130,6 @@ function gameLoop() {
         kp.xAxis = 0;
         kp.yAxis = 0;
         kp.isMoving = false;
-        kp.isAttackButtonPressed = false;
         kp.type = 'keyboard'
         kp.playerId = 'k' + i
     });
@@ -153,7 +154,7 @@ function gameLoop() {
                         p.yAxis++;
                         break;
                     case 'attack':
-                        p.isAttackButtonPressed = true;
+                        p.lastAttackTime = p.lastAttackTime && then-p.lastAttackTime < 500 ? p.lastAttackTime : then;
                         break;
                     default:
                         break;
@@ -181,7 +182,7 @@ function gameLoop() {
 
     dtToProcess += dt
     while(dtToProcess > dtFix) {
-        handleInput(players, figures)
+        handleInput(players, figures, now)
         handleAi(figures)
         updateGame(figures, dtFix)
         dtToProcess-=dtFix
@@ -228,10 +229,10 @@ function updateGame(figures, dt) {
     })
 }
 
-function handleInput(players, figures) {
+function handleInput(players, figures, time) {
 
     // join by doing anything
-    players.filter(p => p.isAttackButtonPressed || p.isMoving).forEach(p => {
+    players.filter(p => p.lastAttackTime || p.isMoving).forEach(p => {
         var figure = figures.find(f => f.playerId === p.playerId)
         if (!figure) {
             var figure = figures.find(f => f.isAI)
@@ -248,7 +249,7 @@ function handleInput(players, figures) {
                 f.angle = angle(0,0,p.xAxis,p.yAxis)
                 f.speed = f.maxSpeed
             }
-            f.isAttacking = p.isAttackButtonPressed;
+            f.isAttacking = time-p.lastAttackTime < 100 ? true : false;
         }
     })
 
@@ -287,9 +288,6 @@ function draw(players, figures, dt) {
 
     figures.forEach(f => {
         let deg = rad2limiteddeg(f.angle)
-        if (!f.isAI) {
-            console.log('wtf',f.angle,deg);
-        }
         if (deg < 45 || deg > 315) {
             frame = imageAnim.right.a
         } else if (deg >= 45 && deg <= 135){
@@ -366,7 +364,7 @@ function draw(players, figures, dt) {
         ctx.fillText('Players',0,0)
         players.forEach((g,i) => {
             ctx.translate(0,16)
-            ctx.fillText("xAxis: " + g.xAxis.toFixed(2) + " yAxis: " + g.yAxis.toFixed(2) + " Attack?: " + g.isAttackButtonPressed,0,0) 
+            ctx.fillText("xAxis: " + g.xAxis.toFixed(2) + " yAxis: " + g.yAxis.toFixed(2) + " Attack?: " + g.lastAttackTime,0,0) 
         })
         ctx.restore()
     
