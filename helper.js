@@ -45,7 +45,7 @@ const rad2deg = rad => (rad * 180.0) / Math.PI;
 // Function ]-∞;∞[ -> [0;360[
 const rad2limiteddeg = rad => mod(rad2deg(rad),360);
 
-const getLastAttackTime = (lastAttackTime, then) => lastAttackTime && then-lastAttackTime < 500 ? lastAttackTime : then;
+const getLastAttackTime = (lastAttackTime, time) => lastAttackTime && time-lastAttackTime < 500 ? lastAttackTime : time;
 
 const getAudio = (key) => ({file: new Audio(audio[key].title), ...audio[key]});
 const playAudio = (audio) => {

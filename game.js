@@ -33,12 +33,13 @@ var imageAnim = {
 var texture = new Image()
 texture.src = 'texture_grass.jpg'
 const dimTileArea = [40, 25]
-let tileArea = [[]]
+let tileArea = []
 const textureTiles = {
     flowers: [1288, 23, 609, 609],
     grass: [655, 23, 609, 609],
     mushrooms: [23, 23, 609, 609]
 }
+const tileWidth = 100;
 const textureTilesList = Object.values(textureTiles);
 const audio = {
     attack: {title: 'sound2.mp3', startTime: 0.15},
@@ -104,7 +105,9 @@ function gameInit() {
             y,
             xTarget,
             yTarget,
+            maxBreakDuration: 5000,
             maxSpeed: 0.08,
+            startWalkTime: then,
             speed: 0,
             isDead: false, 
             isAI: true,
@@ -209,7 +212,7 @@ function gameLoop() {
     dtToProcess += dt
     while(dtToProcess > dtFix) {
         handleInput(players, figures, now)
-        handleAi(figures)
+        handleAi(figures, then)
         updateGame(figures, dtFix)
         dtToProcess-=dtFix
     }
@@ -285,7 +288,7 @@ function handleInput(players, figures, time) {
 
 }
 
-function handleAi(figures) {
+function handleAi(figures, time) {
     figures.filter(f => f.isAI && !f.isDead).forEach(f => {
 
         if (f.xTarget > canvas.width) f.xTarget = canvas.width
@@ -293,16 +296,20 @@ function handleAi(figures) {
         if (f.xTarget < 0) f.xTarget = 0
         if (f.yTarget < 0) f.yTarget = 0
 
-        if (distance(f.x,f.y,f.xTarget,f.yTarget) < 5) {
+        if (distance(f.x,f.y,f.xTarget,f.yTarget) < 5 && f.speed > 0) {
             f.xTarget = Math.random()*canvas.width
             f.yTarget = Math.random()*canvas.height
+            f.startWalkTime = Math.random() * f.maxBreakDuration + time
+            f.speed = 0
         }
-        f.angle = angle(f.x,f.y,f.xTarget,f.yTarget)
-        f.speed = f.maxSpeed
+        if (time >= f.startWalkTime) {
+            f.angle = angle(f.x,f.y,f.xTarget,f.yTarget)
+            f.speed = f.maxSpeed
+        }
     })
 }
 
-function draw(players, figures, dt) {
+function draw(players, figures) {
 
     /*HALLO*/
     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -311,14 +318,14 @@ function draw(players, figures, dt) {
     tileArea.forEach(row => {
         row.forEach((entry, index, array) => {
             const tile = textureTilesList[entry];
-            ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, 100, 100)
+            ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, tileWidth, tileWidth)
             if(index < array.length - 1) {
-                ctx.translate(0, 100);
+                ctx.translate(0, tileWidth);
             } else {
-                ctx.translate(0, -100 * index);
+                ctx.translate(0, -tileWidth * index);
             } 
         })
-        ctx.translate(100, 0);
+        ctx.translate(tileWidth, 0);
     });
     ctx.restore();
 
