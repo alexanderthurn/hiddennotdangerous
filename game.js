@@ -77,7 +77,7 @@ window.addEventListener('keyup', event => {
 canvas.addEventListener('pointermove', event => {
     mousePlayers[0].x = event.clientX - canvas.offsetLeft;
     mousePlayers[0].y = event.clientY -  canvas.offsetTop;
-    //mousePlayers[0].lastAttackTime = event.buttons.some(b => b.pressed)
+    //mousePlayers[0].isAttackButtonPressed = event.buttons.some(b => b.pressed)
 }, false);
 
 window.addEventListener("resize", function(event){
@@ -120,6 +120,9 @@ function gameInit() {
             angle: angle(x,y,xTarget,yTarget),
             anim: 0,
             isAttacking: false,
+            attackDuration: 500,
+            attackBreakDuration: 2000,
+            lastAttackTime: 0,
             points: 0,
             attackDistance: 40,
             soundAttack: getAudio('attack'),
@@ -145,7 +148,9 @@ function gameLoop() {
     }
     gamepadPlayers = navigator.getGamepads().filter(x => x && x.connected).map(g => {
         if (g.buttons.some(b => b.pressed)) {
-            g.lastAttackTime = getLastAttackTime(g.lastAttackTime, then);
+            g.isAttackButtonPressed = true
+        } else {
+            g.isAttackButtonPressed = false
         }
         let x = g.axes[0];
         let y = g.axes[1];
@@ -165,6 +170,7 @@ function gameLoop() {
         kp.isMoving = false;
         kp.type = 'keyboard'
         kp.playerId = 'k' + i
+        kp.isAttackButtonPressed = false
     });
 
     keyboards.forEach(k => {
@@ -187,7 +193,7 @@ function gameLoop() {
                         p.yAxis++;
                         break;
                     case 'attack':
-                        p.lastAttackTime = getLastAttackTime(p.lastAttackTime, then);
+                        p.isAttackButtonPressed = true
                         break;
                     default:
                         break;
@@ -253,7 +259,6 @@ function updateGame(figures, dt) {
         
     })
     figuresAlive.filter(f => f.isAttacking).forEach(f => {
-        playAudio(f.soundAttack);
         figures.filter(fig => fig !== f).forEach(fig => {
             let diffAngle = Math.abs(rad2deg(f.angle-angle(f.x,f.y,fig.x,fig.y)));
             if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance && diffAngle <= 45) {
@@ -265,9 +270,9 @@ function updateGame(figures, dt) {
 }
 
 function handleInput(players, figures, time) {
-
+    
     // join by doing anything
-    players.filter(p => p.lastAttackTime || p.isMoving).forEach(p => {
+    players.filter(p => p.isAttackButtonPressed || p.isMoving).forEach(p => {
         var figure = figures.find(f => f.playerId === p.playerId)
         if (!figure) {
             var figure = figures.find(f => f.isAI)
@@ -285,13 +290,26 @@ function handleInput(players, figures, time) {
 
     figures.filter(f => !f.isAI).forEach(f => {
         var p = players.find(p => p.playerId === f.playerId)
+
+ 
+
         f.speed = 0.0
         if (!f.isDead) {
             if (p.isMoving) {
                 f.angle = angle(0,0,p.xAxis,p.yAxis)
                 f.speed = f.maxSpeed
             }
-            f.isAttacking = time-p.lastAttackTime < 100 ? true : false;
+
+            if (p.isAttackButtonPressed && !f.isAttacking) {
+
+                if (time-f.lastAttackTime > f.attackBreakDuration) {
+                    f.lastAttackTime = time
+                    playAudio(f.soundAttack);
+                }
+            }
+
+            f.isAttacking = time-f.lastAttackTime < f.attackDuration ? true : false;
+           
         }
     })
 
@@ -428,7 +446,7 @@ function draw(players, figures) {
         ctx.fillText('Players',0,0)
         players.forEach((g,i) => {
             ctx.translate(0,16)
-            ctx.fillText("xAxis: " + g.xAxis.toFixed(2) + " yAxis: " + g.yAxis.toFixed(2) + " Attack?: " + g.lastAttackTime,0,0) 
+            ctx.fillText("xAxis: " + g.xAxis.toFixed(2) + " yAxis: " + g.yAxis.toFixed(2) + " Attack?: " + g.isAttackButtonPressed,0,0) 
         })
         ctx.restore()
     
