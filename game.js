@@ -47,6 +47,10 @@ const audio = {
 }
 var musicIntro = getAudio('intro');
 var soundJoin = getAudio('join');
+var soundMusic = getAudio('music')
+soundMusic.file.volume = 0.5
+soundMusic.file.loop = true
+
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
@@ -74,7 +78,7 @@ window.addEventListener('keyup', event => {
 canvas.addEventListener('pointermove', event => {
     mousePlayers[0].x = event.clientX - canvas.offsetLeft;
     mousePlayers[0].y = event.clientY -  canvas.offsetTop;
-    //mousePlayers[0].lastAttackTime = event.buttons.some(b => b.pressed)
+    //mousePlayers[0].isAttackButtonPressed = event.buttons.some(b => b.pressed)
 }, false);
 
 window.addEventListener("resize", function(event){
@@ -111,8 +115,11 @@ function gameInit() {
             angle: angle(x,y,xTarget,yTarget),
             anim: 0,
             isAttacking: false,
+            attackDuration: 500,
+            attackBreakDuration: 2000,
+            lastAttackTime: 0,
             points: 0,
-            attackDistance: 40,
+            attackDistance: 80,
             soundAttack: getAudio('attack'),
             soundDeath: getAudio('death')
         }
@@ -135,9 +142,10 @@ function gameLoop() {
         fps = Math.floor(1000/dt)
     }
     gamepadPlayers = navigator.getGamepads().filter(x => x && x.connected).map(g => {
+        g.isAttackButtonPressed = false
         if (g.buttons.some(b => b.pressed)) {
-            g.lastAttackTime = getLastAttackTime(g.lastAttackTime, then);
-        }
+            g.isAttackButtonPressed = true
+        } 
         let x = g.axes[0];
         let y = g.axes[1];
         [x, y] = setDeadzone(x, y,0.0001);
@@ -156,6 +164,7 @@ function gameLoop() {
         kp.isMoving = false;
         kp.type = 'keyboard'
         kp.playerId = 'k' + i
+        kp.isAttackButtonPressed = false
     });
 
     keyboards.forEach(k => {
@@ -178,7 +187,7 @@ function gameLoop() {
                         p.yAxis++;
                         break;
                     case 'attack':
-                        p.lastAttackTime = getLastAttackTime(p.lastAttackTime, then);
+                        p.isAttackButtonPressed = true
                         break;
                     default:
                         break;
@@ -244,10 +253,9 @@ function updateGame(figures, dt) {
         
     })
     figuresAlive.filter(f => f.isAttacking).forEach(f => {
-        playAudio(f.soundAttack);
-        figures.filter(fig => fig !== f).forEach(fig => {
-            let diffAngle = Math.abs(rad2deg(f.angle-angle(f.x,f.y,fig.x,fig.y)));
-            if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance && diffAngle <= 45) {
+        figures.filter(fig => fig !== f && !fig.isDead).forEach(fig => {
+            let diffAngle = Math.abs(rad2deg(f.angle-deg2rad(180)-angle(f.x,f.y,fig.x,fig.y)));
+            if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance && diffAngle <= 90) {
                 fig.isDead = true;
                 playAudio(fig.soundDeath);
             }
@@ -256,27 +264,46 @@ function updateGame(figures, dt) {
 }
 
 function handleInput(players, figures, time) {
-
+    
     // join by doing anything
-    players.filter(p => p.lastAttackTime || p.isMoving).forEach(p => {
+    players.filter(p => p.isAttackButtonPressed || p.isMoving).forEach(p => {
         var figure = figures.find(f => f.playerId === p.playerId)
         if (!figure) {
             var figure = figures.find(f => f.isAI)
             figure.isAI = false
             figure.playerId = p.playerId
             playAudio(soundJoin);
+
+            if (figures.filter(f => !f.isAI).length == 2) {
+                playAudio(soundMusic)
+                soundMusic.volume = 0.2
+            }
+               
         }
     })
 
     figures.filter(f => !f.isAI).forEach(f => {
         var p = players.find(p => p.playerId === f.playerId)
+
+ 
+
         f.speed = 0.0
         if (!f.isDead) {
             if (p.isMoving) {
                 f.angle = angle(0,0,p.xAxis,p.yAxis)
                 f.speed = f.maxSpeed
             }
-            f.isAttacking = time-p.lastAttackTime < 100 ? true : false;
+
+            if (p.isAttackButtonPressed && !f.isAttacking) {
+
+                if (time-f.lastAttackTime > f.attackBreakDuration) {
+                    f.lastAttackTime = time
+                    playAudio(f.soundAttack);
+                }
+            }
+
+            f.isAttacking = time-f.lastAttackTime < f.attackDuration ? true : false;
+           
         }
     })
 
@@ -347,7 +374,7 @@ function draw(players, figures) {
     ctx.strokeStyle = "red";
     ctx.stroke();*/
 
-    figures.forEach(f => {
+    figures.sort((f1,f2) => f2.isDead - f1.isDead).forEach(f => {
         let deg = rad2limiteddeg(f.angle)
         if (deg < 45 || deg > 315) {
             frame = imageAnim.right.a
@@ -365,6 +392,7 @@ function draw(players, figures) {
         if (f.isAttacking) {
             ctx.rotate(deg2rad(-30+mod(rad2deg(f.anim),60)) )
         }
+ 
         if (f.isDead) {
             ctx.rotate(deg2rad(90))
             ctx.scale(0.5,0.5)
@@ -372,23 +400,42 @@ function draw(players, figures) {
         ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
         ctx.restore()
 
-       
-
-        ctx.beginPath()
-        ctx.lineWidth = 1;
-        ctx.fillStyle = "green";
-        if (!f.isAI) {
-            ctx.fillStyle = "red";
+        if (f.isAttacking) {
+            ctx.save()
+            let startAngle = f.angle- deg2rad(45) - deg2rad(180)
+            let endAngle = startAngle + deg2rad(90)
+            ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+            ctx.translate(f.x, f.y)
+            ctx.rotate(startAngle )
+            ctx.fillRect(0,-5,f.attackDistance,10)
+           // ctx.beginPath();
+            //ctx.arc(0,0,f.attackDistance, 0,  deg2rad(120))
+           // ctx.fill();
+           // ctx.closePath()
+            ctx.rotate( deg2rad(90))
+            ctx.fillRect(0,-5,f.attackDistance,10)
+            ctx.restore()
+    
         }
+       
+        if (showDebug) {
+            ctx.beginPath()
+            ctx.lineWidth = 1;
+            ctx.fillStyle = "green";
+            if (!f.isAI) {
+                ctx.fillStyle = "red";
+            }
 
-        ctx.arc(f.x, f.y, 5, 0, 2 * Math.PI);
-        ctx.fill();
+            ctx.arc(f.x, f.y, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.closePath()
 
-        if (!f.isAI) {
-            ctx.fillStyle = "red";
-            ctx.font = "16px serif";
-            ctx.fillStyle = "white";
-            ctx.fillText(f.playerId + '',f.x,f.y)
+            if (!f.isAI) {
+                ctx.fillStyle = "red";
+                ctx.font = "16px serif";
+                ctx.fillStyle = "white";
+                ctx.fillText(f.playerId + '',f.x,f.y)
+            }
         }
     })
 
@@ -401,6 +448,7 @@ function draw(players, figures) {
         ctx.translate(32+i*48, canvas.height-32)
         ctx.arc(0,0,16,0, 2 * Math.PI);
         ctx.fill();
+        ctx.closePath()
         ctx.textAlign = "center";
         ctx.textBaseline='center'
         ctx.fillStyle = "white";
@@ -417,7 +465,7 @@ function draw(players, figures) {
 
     ctx.save()
     ctx.textAlign = "right";
-    ctx.fillText(fps + " FPS", canvas.width, 0);
+    ctx.fillText(fps + " FPS\r\naa", canvas.width, 0);
     ctx.restore()
 
     if (showDebug) {
@@ -425,7 +473,7 @@ function draw(players, figures) {
         ctx.fillText('Players',0,0)
         players.forEach((g,i) => {
             ctx.translate(0,16)
-            ctx.fillText("xAxis: " + g.xAxis.toFixed(2) + " yAxis: " + g.yAxis.toFixed(2) + " Attack?: " + g.lastAttackTime,0,0) 
+            ctx.fillText("xAxis: " + g.xAxis.toFixed(2) + " yAxis: " + g.yAxis.toFixed(2) + " Attack?: " + g.isAttackButtonPressed,0,0) 
         })
         ctx.restore()
     
