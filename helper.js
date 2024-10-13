@@ -35,7 +35,7 @@ const getRandomInt = max => Math.floor(Math.random() * max);
 
 const distance = (x1, y1, x2, y2) => Math.hypot(x2 - x1, y2 - y1); 
 const angle = (x1, y1, x2, y2) => Math.atan2(y2 - y1, x2 - x1); 
-const move = (x1, y1, angle, speed) => ({x: x1 + Math.cos(angle)*speed*dt, y: y1 + Math.sin(angle)*speed*dt});
+const move = (x1, y1, angle, speed, dt) => ({x: x1 + Math.cos(angle)*speed*dt, y: y1 + Math.sin(angle)*speed*dt});
 // Function ]-∞;∞[ -> ]-∞;∞[
 const deg2rad = deg => deg * (Math.PI / 180);
 // Function ]-∞;∞[ -> [0;2π[
@@ -45,6 +45,8 @@ const rad2deg = rad => (rad * 180.0) / Math.PI;
 // Function ]-∞;∞[ -> [0;360[
 const rad2limiteddeg = rad => mod(rad2deg(rad),360);
 
+const getHeightInTiles = () => Math.ceil(canvas.height/tileWidth);
+const getWidthInTiles = () => Math.ceil(canvas.width/tileWidth);
 const getLastAttackTime = (lastAttackTime, time) => lastAttackTime && time-lastAttackTime < 500 ? lastAttackTime : time;
 
 const getAudio = (key) => ({file: new Audio(audio[key].title), ...audio[key]});

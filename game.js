@@ -20,7 +20,6 @@ var frameCount = 0;
 var startTime, then, now, dt, fps=0, fpsTime
 var dtFix = 10, dtToProcess = 0
 var figures = [], maxFigures = 6
-
 var image = new Image()
 var showDebug = false
 image.src = 'character_base_16x16.png'
@@ -32,7 +31,6 @@ var imageAnim = {
 }
 var texture = new Image()
 texture.src = 'texture_grass.jpg'
-const dimTileArea = [40, 25]
 let tileArea = []
 const textureTiles = {
     flowers: [1288, 23, 609, 609],
@@ -44,12 +42,16 @@ const textureTilesList = Object.values(textureTiles);
 const audio = {
     attack: {title: 'sound2.mp3', startTime: 0.15},
     death: {title: 'sound1.mp3', startTime: 0.4},
+    intro: {title: 'music.mp3', startTime: 20},
     join: {title: 'sounddrum.mp3', startTime: 0}
 }
+var musicIntro = getAudio('intro');
 var soundJoin = getAudio('join');
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
+    widthInTiles2 = Math.ceil(canvas.width/tileWidth);
+
     gameInit()
     window.requestAnimationFrame(gameLoop);
 })
@@ -80,14 +82,7 @@ window.addEventListener("resize", function(event){
 });
 
 function gameInit() {
-    console.log('hahahahahahaha')
-
-    for (let i = 0; i < dimTileArea[0]; i++) {
-        tileArea[i] = [];
-        for (let j = 0; j < dimTileArea[1]; j++) {
-            tileArea[i][j] = getRandomInt(3);
-        }
-    }
+    playAudio(musicIntro);
    
     then = Date.now();
     startTime = then;
@@ -311,22 +306,35 @@ function handleAi(figures, time) {
 
 function draw(players, figures) {
 
-    /*HALLO*/
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
+    const heightInTiles = getHeightInTiles();
+    const widthInTiles = getWidthInTiles();
+
+    for (let i = 0; i < tileArea.length; i++) {
+        for (let j = tileArea[i].length; j < heightInTiles; j++) {
+            tileArea[i][j] = getRandomInt(3);
+        }
+    }
+    for (let i = tileArea.length; i < widthInTiles; i++) {
+        tileArea[i] = [];
+        for (let j = 0; j < heightInTiles; j++) {
+            tileArea[i][j] = getRandomInt(3);
+        }
+    }
+
     ctx.save();
-    tileArea.forEach(row => {
-        row.forEach((entry, index, array) => {
-            const tile = textureTilesList[entry];
+    for (let i = 0; i < Math.min(tileArea.length, widthInTiles); i++) {
+        for (let j = 0; j < Math.min(tileArea[i].length, heightInTiles); j++) {
+            const tile = textureTilesList[tileArea[i][j]];
             ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, tileWidth, tileWidth)
-            if(index < array.length - 1) {
+            if(j < Math.min(tileArea[i].length, heightInTiles)-1) {
                 ctx.translate(0, tileWidth);
             } else {
-                ctx.translate(0, -tileWidth * index);
+                ctx.translate(tileWidth, -tileWidth * j);
             } 
-        })
-        ctx.translate(tileWidth, 0);
-    });
+        }
+    }
     ctx.restore();
 
     //ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, 100, 100)
