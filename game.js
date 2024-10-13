@@ -44,9 +44,14 @@ const textureTilesList = Object.values(textureTiles);
 const audio = {
     attack: {title: 'sound2.mp3', startTime: 0.15},
     death: {title: 'sound1.mp3', startTime: 0.4},
-    join: {title: 'sounddrum.mp3', startTime: 0}
+    join: {title: 'sounddrum.mp3', startTime: 0},
+    music: {title: 'music.mp3', startTime: 0}
 }
 var soundJoin = getAudio('join');
+var soundMusic = getAudio('music')
+soundMusic.file.volume = 0.5
+soundMusic.file.loop = true
+
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
@@ -81,7 +86,6 @@ window.addEventListener("resize", function(event){
 
 function gameInit() {
     console.log('hahahahahahaha')
-
     for (let i = 0; i < dimTileArea[0]; i++) {
         tileArea[i] = [];
         for (let j = 0; j < dimTileArea[1]; j++) {
@@ -270,6 +274,12 @@ function handleInput(players, figures, time) {
             figure.isAI = false
             figure.playerId = p.playerId
             playAudio(soundJoin);
+
+            if (figures.filter(f => !f.isAI).length == 2) {
+                playAudio(soundMusic)
+                soundMusic.volume = 0.2
+            }
+               
         }
     })
 
@@ -365,22 +375,23 @@ function draw(players, figures) {
         ctx.restore()
 
        
+        if (showDebug) {
+            ctx.beginPath()
+            ctx.lineWidth = 1;
+            ctx.fillStyle = "green";
+            if (!f.isAI) {
+                ctx.fillStyle = "red";
+            }
 
-        ctx.beginPath()
-        ctx.lineWidth = 1;
-        ctx.fillStyle = "green";
-        if (!f.isAI) {
-            ctx.fillStyle = "red";
-        }
+            ctx.arc(f.x, f.y, 5, 0, 2 * Math.PI);
+            ctx.fill();
 
-        ctx.arc(f.x, f.y, 5, 0, 2 * Math.PI);
-        ctx.fill();
-
-        if (!f.isAI) {
-            ctx.fillStyle = "red";
-            ctx.font = "16px serif";
-            ctx.fillStyle = "white";
-            ctx.fillText(f.playerId + '',f.x,f.y)
+            if (!f.isAI) {
+                ctx.fillStyle = "red";
+                ctx.font = "16px serif";
+                ctx.fillStyle = "white";
+                ctx.fillText(f.playerId + '',f.x,f.y)
+            }
         }
     })
 

@@ -52,7 +52,7 @@ const playAudio = (audio) => {
     audiofile = audio.file;
     audiofile?.load();
     audiofile.currentTime = audio.startTime;
-    audiofile?.play()?.catch(() => {});
+    audiofile?.play()?.catch((err) => {console.log(err)});
 }
 
 function resizeCanvasToDisplaySize(canvas) {
