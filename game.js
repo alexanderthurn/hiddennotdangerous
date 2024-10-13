@@ -19,7 +19,7 @@ var stop = false;
 var frameCount = 0;
 var startTime, then, now, dt, fps=0, fpsTime
 var dtFix = 10, dtToProcess = 0
-var figures = [], maxFigures = 6
+var figures = [], maxFigures = 12
 
 var image = new Image()
 var showDebug = false
@@ -124,7 +124,7 @@ function gameInit() {
             attackBreakDuration: 2000,
             lastAttackTime: 0,
             points: 0,
-            attackDistance: 40,
+            attackDistance: 80,
             soundAttack: getAudio('attack'),
             soundDeath: getAudio('death')
         }
@@ -147,11 +147,10 @@ function gameLoop() {
         fps = Math.floor(1000/dt)
     }
     gamepadPlayers = navigator.getGamepads().filter(x => x && x.connected).map(g => {
+        g.isAttackButtonPressed = false
         if (g.buttons.some(b => b.pressed)) {
             g.isAttackButtonPressed = true
-        } else {
-            g.isAttackButtonPressed = false
-        }
+        } 
         let x = g.axes[0];
         let y = g.axes[1];
         [x, y] = setDeadzone(x, y,0.0001);
@@ -259,9 +258,9 @@ function updateGame(figures, dt) {
         
     })
     figuresAlive.filter(f => f.isAttacking).forEach(f => {
-        figures.filter(fig => fig !== f).forEach(fig => {
-            let diffAngle = Math.abs(rad2deg(f.angle-angle(f.x,f.y,fig.x,fig.y)));
-            if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance && diffAngle <= 45) {
+        figures.filter(fig => fig !== f && !fig.isDead).forEach(fig => {
+            let diffAngle = Math.abs(rad2deg(f.angle-deg2rad(180)-angle(f.x,f.y,fig.x,fig.y)));
+            if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance && diffAngle <= 90) {
                 fig.isDead = true;
                 playAudio(fig.soundDeath);
             }
@@ -367,7 +366,7 @@ function draw(players, figures) {
     ctx.strokeStyle = "red";
     ctx.stroke();*/
 
-    figures.forEach(f => {
+    figures.sort((f1,f2) => f2.isDead - f1.isDead).forEach(f => {
         let deg = rad2limiteddeg(f.angle)
         if (deg < 45 || deg > 315) {
             frame = imageAnim.right.a
@@ -385,6 +384,7 @@ function draw(players, figures) {
         if (f.isAttacking) {
             ctx.rotate(deg2rad(-30+mod(rad2deg(f.anim),60)) )
         }
+ 
         if (f.isDead) {
             ctx.rotate(deg2rad(90))
             ctx.scale(0.5,0.5)
@@ -392,6 +392,23 @@ function draw(players, figures) {
         ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
         ctx.restore()
 
+        if (f.isAttacking) {
+            ctx.save()
+            let startAngle = f.angle- deg2rad(45) - deg2rad(180)
+            let endAngle = startAngle + deg2rad(90)
+            ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+            ctx.translate(f.x, f.y)
+            ctx.rotate(startAngle )
+            ctx.fillRect(0,-5,f.attackDistance,10)
+           // ctx.beginPath();
+            //ctx.arc(0,0,f.attackDistance, 0,  deg2rad(120))
+           // ctx.fill();
+           // ctx.closePath()
+            ctx.rotate( deg2rad(90))
+            ctx.fillRect(0,-5,f.attackDistance,10)
+            ctx.restore()
+    
+        }
        
         if (showDebug) {
             ctx.beginPath()
@@ -403,6 +420,7 @@ function draw(players, figures) {
 
             ctx.arc(f.x, f.y, 5, 0, 2 * Math.PI);
             ctx.fill();
+            ctx.closePath()
 
             if (!f.isAI) {
                 ctx.fillStyle = "red";
@@ -422,6 +440,7 @@ function draw(players, figures) {
         ctx.translate(32+i*48, canvas.height-32)
         ctx.arc(0,0,16,0, 2 * Math.PI);
         ctx.fill();
+        ctx.closePath()
         ctx.textAlign = "center";
         ctx.textBaseline='center'
         ctx.fillStyle = "white";
@@ -438,7 +457,7 @@ function draw(players, figures) {
 
     ctx.save()
     ctx.textAlign = "right";
-    ctx.fillText(fps + " FPS", canvas.width, 0);
+    ctx.fillText(fps + " FPS\r\naa", canvas.width, 0);
     ctx.restore()
 
     if (showDebug) {
