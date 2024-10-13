@@ -47,9 +47,8 @@ const audio = {
 }
 var musicIntro = getAudio('intro');
 var soundJoin = getAudio('join');
-var soundMusic = getAudio('music')
-soundMusic.file.volume = 0.5
-soundMusic.file.loop = true
+musicIntro.file.volume = 0.5
+musicIntro.file.loop = true
 
 
 document.addEventListener("DOMContentLoaded", function(event){
@@ -86,8 +85,6 @@ window.addEventListener("resize", function(event){
 });
 
 function gameInit() {
-    playAudio(musicIntro);
-   
     then = Date.now();
     startTime = then;
     fpsTime = then
@@ -275,8 +272,7 @@ function handleInput(players, figures, time) {
             playAudio(soundJoin);
 
             if (figures.filter(f => !f.isAI).length == 2) {
-                playAudio(soundMusic)
-                soundMusic.volume = 0.2
+                playAudio(musicIntro)
             }
                
         }

@@ -52,9 +52,9 @@ const getLastAttackTime = (lastAttackTime, time) => lastAttackTime && time-lastA
 const getAudio = (key) => ({file: new Audio(audio[key].title), ...audio[key]});
 const playAudio = (audio) => {
     audiofile = audio.file;
-    audiofile?.load();
+    audiofile.load();
     audiofile.currentTime = audio.startTime;
-    audiofile?.play()?.catch((err) => {console.log(err)});
+    audiofile.play().catch((err) => {console.log(err)});
 }
 
 function resizeCanvasToDisplaySize(canvas) {
