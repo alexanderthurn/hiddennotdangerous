@@ -301,7 +301,7 @@ function handleInput(players, figures, time) {
             playAudio(soundJoin);
 
             if (figures.filter(f => !f.isAI).length == 2) {
-                playPlaylist(shuffle([music1, music2, music3]))
+                playPlaylist(shuffle([music1, music2, music3]))                                                                                                                                                                                             
             }
                
         }
@@ -426,27 +426,24 @@ function draw(players, figures) {
             ctx.scale(0.5,0.5)
         }
         ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
-        ctx.restore()
-
-        if (f.isAttacking) {
-            ctx.save()
-            let startAngle = f.angle- deg2rad(45) - deg2rad(180)
-            let endAngle = startAngle + deg2rad(90)
-            ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
-            ctx.translate(f.x, f.y)
-            ctx.rotate(startAngle )
-            ctx.fillRect(0,-5,f.attackDistance,10)
-           // ctx.beginPath();
-            //ctx.arc(0,0,f.attackDistance, 0,  deg2rad(120))
-           // ctx.fill();
-           // ctx.closePath()
-            ctx.rotate( deg2rad(90))
-            ctx.fillRect(0,-5,f.attackDistance,10)
-            ctx.restore()
-    
-        }
+        ctx.restore()  
        
         if (showDebug) {
+            if (f.isAttacking) {
+                ctx.save()
+                let startAngle = f.angle + deg2rad(135)
+                let endAngle = startAngle + deg2rad(90)
+                ctx.translate(f.x, f.y)
+                ctx.lineWidth = 1;
+                ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+                ctx.beginPath();
+                ctx.moveTo(0,0);
+                ctx.arc(0,0,f.attackDistance, startAngle, endAngle)
+                ctx.closePath()
+                ctx.fill();
+                ctx.restore()
+            }
+
             ctx.beginPath()
             ctx.lineWidth = 1;
             ctx.fillStyle = "green";
