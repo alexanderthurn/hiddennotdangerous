@@ -32,6 +32,10 @@ function clampStick(x, y) {
 
 const mod = (n, m) => ((n % m) + m) % m;
 const getRandomInt = max => Math.floor(Math.random() * max);
+const shuffle = (arr) => arr
+    .map(value => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value)
 
 const distance = (x1, y1, x2, y2) => Math.hypot(x2 - x1, y2 - y1); 
 const angle = (x1, y1, x2, y2) => Math.atan2(y2 - y1, x2 - x1); 
@@ -69,9 +73,8 @@ const playAudio = (audio) => {
 const getPlayAudio = (audio) => () => playAudio(audio)
 
 const playPlaylist = (playlist) => {
-    let startAudio = playlist[0];
-    startAudio.file.addEventListener("ended", getPlayAudio(playlist[0]));
-    playAudio(startAudio);
+    playlist.forEach((track, index, list) => track.file.addEventListener("ended", getPlayAudio(playlist[(index+1)%list.length])));
+    playAudio(playlist[0]);
 }
 
 function resizeCanvasToDisplaySize(canvas) {

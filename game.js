@@ -42,10 +42,14 @@ const textureTilesList = Object.values(textureTiles);
 const audio = {
     attack: {title: 'sound2.mp3', currentTime: 0.15},
     death: {title: 'sound1.mp3', currentTime: 0.4},
-    intro: {title: 'music.mp3', currentTime: 20, volume: 0.5},
+    music1: {title: 'music1.mp3', currentTime: 20, volume: 0.5},
+    music2: {title: 'music2.mp3', volume: 0.5},
+    music3: {title: 'music3.mp3', volume: 0.5},
     join: {title: 'sounddrum.mp3'}
 }
-var musicIntro = getAudio('intro');
+var music1 = getAudio('music1');
+var music2 = getAudio('music2');
+var music3 = getAudio('music3');
 var soundJoin = getAudio('join');
 
 document.addEventListener("DOMContentLoaded", function(event){
@@ -297,7 +301,7 @@ function handleInput(players, figures, time) {
             playAudio(soundJoin);
 
             if (figures.filter(f => !f.isAI).length == 2) {
-                playPlaylist([musicIntro])
+                playPlaylist(shuffle([music1, music2, music3]))
             }
                
         }
