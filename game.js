@@ -42,7 +42,7 @@ const textureTilesList = Object.values(textureTiles);
 const audio = {
     attack: {title: 'sound2.mp3', currentTime: 0.15},
     death: {title: 'sound1.mp3', currentTime: 0.4},
-    intro: {title: 'music.mp3', currentTime: 20, loop: true, volume: 0.5},
+    intro: {title: 'music.mp3', currentTime: 20, volume: 0.5},
     join: {title: 'sounddrum.mp3'}
 }
 var musicIntro = getAudio('intro');
@@ -297,7 +297,7 @@ function handleInput(players, figures, time) {
             playAudio(soundJoin);
 
             if (figures.filter(f => !f.isAI).length == 2) {
-                playAudio(musicIntro)
+                playPlaylist([musicIntro])
             }
                
         }

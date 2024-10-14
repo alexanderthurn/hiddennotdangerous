@@ -66,6 +66,14 @@ const playAudio = (audio) => {
     file.play().catch((err) => {console.log(err)});
 }
 
+const getPlayAudio = (audio) => () => playAudio(audio)
+
+const playPlaylist = (playlist) => {
+    let startAudio = playlist[0];
+    startAudio.file.addEventListener("ended", getPlayAudio(playlist[0]));
+    playAudio(startAudio);
+}
+
 function resizeCanvasToDisplaySize(canvas) {
     // look up the size the canvas is being displayed
     const width = canvas.clientWidth;
