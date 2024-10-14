@@ -63,6 +63,7 @@ window.addEventListener('keydown', event => {
     keyboards.forEach(k => {
         k.pressed[event.code] = true;
     });
+    event.preventDefault();
 });
 
 window.addEventListener('keyup', event => {
@@ -476,7 +477,7 @@ function draw(players, figures) {
 
     ctx.save()
     ctx.textAlign = "right";
-    ctx.fillText(fps + " FPS\r\naa", canvas.width, 0);
+    ctx.fillText(fps + " FPS", canvas.width, 0);
     ctx.restore()
 
     if (showDebug) {
