@@ -18,7 +18,7 @@ var virtualGamepads = []
 var stop = false;
 var frameCount = 0;
 var startTime, then, now, dt, fps=0, fpsTime
-var dtFix = 10, dtToProcess = 0
+var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figures = [], maxFigures = 21
 var image = new Image()
 var showDebug = false
@@ -121,7 +121,7 @@ function gameInit() {
             yTarget,
             maxBreakDuration: 5000,
             maxSpeed: 0.08,
-            startWalkTime: then,
+            startWalkTime: 0,
             speed: 0,
             isDead: false, 
             isAI: true,
@@ -239,10 +239,11 @@ function gameLoop() {
 
     dtToProcess += dt
     while(dtToProcess > dtFix) {
-        handleInput(players, figures, now)
-        handleAi(figures, then)
+        handleInput(players, figures, dtProcessed)
+        handleAi(figures, dtProcessed)
         updateGame(figures, dtFix)
         dtToProcess-=dtFix
+        dtProcessed+=dtFix
     }
     
     draw(players, figures, dt);
