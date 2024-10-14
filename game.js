@@ -19,7 +19,7 @@ var stop = false;
 var frameCount = 0;
 var startTime, then, now, dt, fps=0, fpsTime
 var dtFix = 10, dtToProcess = 0
-var figures = [], maxFigures = 6
+var figures = [], maxFigures = 21
 var image = new Image()
 var showDebug = false
 image.src = 'character_base_16x16.png'
@@ -63,6 +63,11 @@ window.addEventListener('keydown', event => {
     keyboards.forEach(k => {
         k.pressed[event.code] = true;
     });
+
+    if (event.code === 'ArrowDown' || event.code === 'ArrowUp') { /* prevent scrolling of website */
+        event.preventDefault();
+    }
+  
 });
 
 window.addEventListener('keyup', event => {
@@ -76,15 +81,18 @@ window.addEventListener('keyup', event => {
 
 window.addEventListener('pointerdown', event => {
     mousePlayers[0].pressed[event.button] = true;
+    event.preventDefault();
 });
 
 window.addEventListener('pointerup', event => {
     delete mousePlayers[0].pressed[event.button];
+    event.preventDefault();
 });
 
 canvas.addEventListener('pointermove', event => {
     mousePlayers[0].x = event.clientX - canvas.offsetLeft;
     mousePlayers[0].y = event.clientY -  canvas.offsetTop;
+    event.preventDefault();
 }, false);
 
 window.addEventListener("resize", function(event){
@@ -205,7 +213,8 @@ function gameLoop() {
     mousePlayers.forEach((mp,i) => {
         mp.type = 'mouse'
         mp.playerId = 'm' + i
-        mp.isAttackButtonPressed = mp.pressed[0]
+        mp.isAttackButtonPressed = !mp.pressed[0] && mp.pressedLastFrame
+        mp.pressedLastFrame = mp.pressed[0]
         mp.xAxis = 0
         mp.yAxis = 0
         mp.isMoving = 0
@@ -479,7 +488,7 @@ function draw(players, figures) {
 
     ctx.save()
     ctx.textAlign = "right";
-    ctx.fillText(fps + " FPS\r\naa", canvas.width, 0);
+    ctx.fillText(fps + " FPS", canvas.width, 0);
     ctx.restore()
 
     if (showDebug) {
