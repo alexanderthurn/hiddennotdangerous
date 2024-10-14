@@ -336,18 +336,21 @@ function handleInput(players, figures, time) {
 function handleAi(figures, time) {
     figures.filter(f => f.isAI && !f.isDead).forEach(f => {
 
-        if (f.xTarget > canvas.width) f.xTarget = canvas.width
-        if (f.yTarget > canvas.height) f.yTarget = canvas.height
-        if (f.xTarget < 0) f.xTarget = 0
-        if (f.yTarget < 0) f.yTarget = 0
-
         if (distance(f.x,f.y,f.xTarget,f.yTarget) < 5 && f.speed > 0) {
-            f.xTarget = Math.random()*canvas.width
-            f.yTarget = Math.random()*canvas.height
             f.startWalkTime = Math.random() * f.maxBreakDuration + time
             f.speed = 0
         }
         if (time >= f.startWalkTime) {
+            if (f.speed === 0) {
+                f.xTarget = Math.random()*canvas.width
+                f.yTarget = Math.random()*canvas.height
+            }
+            
+            if (f.xTarget > canvas.width) f.xTarget = canvas.width
+            if (f.yTarget > canvas.height) f.yTarget = canvas.height
+            if (f.xTarget < 0) f.xTarget = 0
+            if (f.yTarget < 0) f.yTarget = 0
+
             f.angle = angle(f.x,f.y,f.xTarget,f.yTarget)
             f.speed = f.maxSpeed
         }
