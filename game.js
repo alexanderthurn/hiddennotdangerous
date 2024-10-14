@@ -1,7 +1,7 @@
 console.log('no need to hide')
 var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
-var mousePlayers = [{x: 0, y: 0}];
+var mousePlayers = [{x: 0, y: 0, pressed: {}}];
 var keyboardPlayers = [{}, {}];
 var keyboards = [{bindings: {
     'KeyA': {player: keyboardPlayers[0], action: 'left'},
@@ -74,10 +74,17 @@ window.addEventListener('keyup', event => {
     });
 });
 
+window.addEventListener('pointerdown', event => {
+    mousePlayers[0].pressed[event.button] = true;
+});
+
+window.addEventListener('pointerup', event => {
+    delete mousePlayers[0].pressed[event.button];
+});
+
 canvas.addEventListener('pointermove', event => {
     mousePlayers[0].x = event.clientX - canvas.offsetLeft;
     mousePlayers[0].y = event.clientY -  canvas.offsetTop;
-    //mousePlayers[0].isAttackButtonPressed = event.buttons.some(b => b.pressed)
 }, false);
 
 window.addEventListener("resize", function(event){
@@ -140,7 +147,7 @@ function gameLoop() {
     }
     gamepadPlayers = navigator.getGamepads().filter(x => x && x.connected).map(g => {
         g.isAttackButtonPressed = false
-        if (g.buttons.some(b => b.pressed)) {
+        if (g.buttons[0].pressed) {
             g.isAttackButtonPressed = true
         } 
         let x = g.axes[0];
@@ -194,21 +201,29 @@ function gameLoop() {
         })
     });
 
-    let players = [...gamepadPlayers, ...keyboardPlayers];
+    
+    mousePlayers.forEach((mp,i) => {
+        mp.type = 'mouse'
+        mp.playerId = 'm' + i
+        mp.isAttackButtonPressed = mp.pressed[0]
+        mp.xAxis = 0
+        mp.yAxis = 0
+        mp.isMoving = 0
 
-   /* mousePlayers.forEach(m => {
-        g = {}
-        let x = m.x - canvas.x / 2;
-        let y = m.y - canvas.y / 2;
-        [x, y] = setDeadzone(x, y,0.0001);
-        [x, y] = clampStick(x, y);
-        g.xAxis = x
-        g.yAxis = y
-        g.playerId = 'm0'
-        g.isMoving = Math.abs(x) > 0 && Math.abs(y) > 0.0001
-        virtualGamepads.unshift(g)
-    })*/
+        var f = figures.find(f => f.playerId)
+        if (f) {
+            let x = mp.x - f.x;
+            let y = mp.y - f.y;
+            //[x, y] = setDeadzone(x, y,0.1);
+            //[x, y] = clampStick(x, y);
+            mp.xAxis = x
+            mp.yAxis = y
+            mp.isMoving = Math.abs(x) > 1 && Math.abs(y) > 1
+        }
+       
+    })
    
+    let players = [...gamepadPlayers, ...keyboardPlayers, ...mousePlayers];
 
     dtToProcess += dt
     while(dtToProcess > dtFix) {
@@ -370,7 +385,7 @@ function draw(players, figures) {
     ctx.strokeStyle = "red";
     ctx.stroke();*/
 
-    figures.sort((f1,f2) => f2.isDead - f1.isDead).forEach(f => {
+    figures.sort((f1,f2) => (f2.isDead || f1.isDead) ? f2.isDead - f1.isDead:  f1.y - f2.y ).forEach(f => {
         let deg = rad2limiteddeg(f.angle)
         if (deg < 45 || deg > 315) {
             frame = imageAnim.right.a
