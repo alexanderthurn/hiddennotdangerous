@@ -1,7 +1,7 @@
 console.log('no need to hide')
 var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
-var mousePlayers = [{x: 0, y: 0, pressed: {}}];
+var mousePlayers = [{x: 0, y: 0, pressed: {}, pressedLastFrame: false}];
 var keyboardPlayers = [{}, {}];
 var keyboards = [{bindings: {
     'KeyA': {player: keyboardPlayers[0], action: 'left'},
@@ -216,13 +216,13 @@ function gameLoop() {
     mousePlayers.forEach((mp,i) => {
         mp.type = 'mouse'
         mp.playerId = 'm' + i
-        mp.isAttackButtonPressed = !mp.pressed[0] && mp.pressedLastFrame
+        mp.isAttackButtonPressed = !mp.pressed[0] && mp.pressedLastFrame || false
         mp.pressedLastFrame = mp.pressed[0]
         mp.xAxis = 0
         mp.yAxis = 0
         mp.isMoving = 0
 
-        var f = figures.find(f => f.playerId)
+        var f = figures.find(f => f.playerId ===  mp.playerId)
         if (f) {
             let x = mp.x - f.x;
             let y = mp.y - f.y;
