@@ -210,7 +210,8 @@ function gameLoop() {
     mousePlayers.forEach((mp,i) => {
         mp.type = 'mouse'
         mp.playerId = 'm' + i
-        mp.isAttackButtonPressed = mp.pressed[0]
+        mp.isAttackButtonPressed = !mp.pressed[0] && mp.pressedLastFrame
+        mp.pressedLastFrame = mp.pressed[0]
         mp.xAxis = 0
         mp.yAxis = 0
         mp.isMoving = 0

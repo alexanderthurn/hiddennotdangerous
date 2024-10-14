@@ -16,3 +16,9 @@ h1 {
     margin: auto;
     text-align: center;
 }
+
+#overlay {
+    height: 0px;
+    visibility: collapse;
+    display: none;
+}
