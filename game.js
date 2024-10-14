@@ -19,7 +19,7 @@ var stop = false;
 var frameCount = 0;
 var startTime, then, now, dt, fps=0, fpsTime
 var dtFix = 10, dtToProcess = 0
-var figures = [], maxFigures = 6
+var figures = [], maxFigures = 21
 var image = new Image()
 var showDebug = false
 image.src = 'character_base_16x16.png'
@@ -63,7 +63,11 @@ window.addEventListener('keydown', event => {
     keyboards.forEach(k => {
         k.pressed[event.code] = true;
     });
-    event.preventDefault();
+
+    if (event.code === 'ArrowDown' || event.code === 'ArrowUp') { /* prevent scrolling of website */
+        event.preventDefault();
+    }
+  
 });
 
 window.addEventListener('keyup', event => {
