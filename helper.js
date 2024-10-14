@@ -49,12 +49,21 @@ const getHeightInTiles = () => Math.ceil(canvas.height/tileWidth);
 const getWidthInTiles = () => Math.ceil(canvas.width/tileWidth);
 const getLastAttackTime = (lastAttackTime, time) => lastAttackTime && time-lastAttackTime < 500 ? lastAttackTime : time;
 
-const getAudio = (key) => ({file: new Audio(audio[key].title), ...audio[key]});
+const getAudio = (key) => {
+    const {title, ...props} = audio[key];
+    const file = new Audio(title);
+    return {file, ...props};
+};
+
 const playAudio = (audio) => {
-    audiofile = audio.file;
-    audiofile.load();
-    audiofile.currentTime = audio.startTime;
-    audiofile.play().catch((err) => {console.log(err)});
+    const {file, ...props} = audio;
+    file.load();
+    Object.entries(props).forEach(([key, value]) => {
+        if (value) {
+            file[key] = value;
+        }
+    });
+    file.play().catch((err) => {console.log(err)});
 }
 
 function resizeCanvasToDisplaySize(canvas) {

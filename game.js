@@ -40,16 +40,13 @@ const textureTiles = {
 const tileWidth = 100;
 const textureTilesList = Object.values(textureTiles);
 const audio = {
-    attack: {title: 'sound2.mp3', startTime: 0.15},
-    death: {title: 'sound1.mp3', startTime: 0.4},
-    intro: {title: 'music.mp3', startTime: 20},
-    join: {title: 'sounddrum.mp3', startTime: 0}
+    attack: {title: 'sound2.mp3', currentTime: 0.15},
+    death: {title: 'sound1.mp3', currentTime: 0.4},
+    intro: {title: 'music.mp3', currentTime: 20, loop: true, volume: 0.5},
+    join: {title: 'sounddrum.mp3'}
 }
 var musicIntro = getAudio('intro');
 var soundJoin = getAudio('join');
-musicIntro.file.volume = 0.5
-musicIntro.file.loop = true
-
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
