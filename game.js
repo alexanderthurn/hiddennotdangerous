@@ -346,6 +346,34 @@ function handleAi(figures, time) {
             if (f.speed === 0) {
                 f.xTarget = Math.random()*canvas.width
                 f.yTarget = Math.random()*canvas.height
+
+                if (false) {
+                    let xTarget = Math.random()*canvas.width
+                    let yTarget = Math.random()*canvas.height
+                    let angl = rad2deg(angle(f.x, f.y, xTarget, yTarget));
+                    angl = deg2rad(Math.round(angl/45)*45);
+                    const direction = {x: Math.cos(angl), y: Math.sin(angl)};
+                    let distanceToBorder;
+                    if (direction.x !== 0) {
+                        const xBorder = direction.x > 0 ? canvas.width : 0;
+                        let t = (xBorder - f.x)/direction.x;
+                        let y = t*direction.y + f.y;
+                        if (y >= 0 && y < canvas.height) {
+                            distanceToBorder = t;
+                        }
+                    }
+                    if (direction.y !== 0) {
+                        const yBorder = direction.y > 0 ? canvas.height : 0;
+                        let t = (yBorder - f.y)/direction.y;
+                        let x = t*direction.x + f.x;
+                        if (x >= 0 && x < canvas.width) {
+                            distanceToBorder = t;
+                        }
+                    }
+                    const tRandom = Math.random() * distanceToBorder;
+                    f.xTarget = tRandom * direction.x + f.x;
+                    f.yTarget = tRandom * direction.y + f.y;
+                }
             }
             
             if (f.xTarget > canvas.width) f.xTarget = canvas.width
