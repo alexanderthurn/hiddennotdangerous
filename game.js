@@ -82,17 +82,20 @@ window.addEventListener('keyup', event => {
 window.addEventListener('pointerdown', event => {
     mousePlayers[0].pressed[event.button] = true;
     event.preventDefault();
+    event.stopPropagation();
 });
 
 window.addEventListener('pointerup', event => {
     delete mousePlayers[0].pressed[event.button];
     event.preventDefault();
+    event.stopPropagation();
 });
 
 canvas.addEventListener('pointermove', event => {
     mousePlayers[0].x = event.clientX - canvas.offsetLeft;
     mousePlayers[0].y = event.clientY -  canvas.offsetTop;
     event.preventDefault();
+    event.stopPropagation();
 }, false);
 
 window.addEventListener("resize", function(event){
