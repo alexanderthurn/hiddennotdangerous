@@ -1,6 +1,5 @@
 console.log('no need to hide')
 var canvas = document.getElementById('canvas')
-var first = false;
 const ctx = canvas.getContext("2d");
 var mousePlayers = [{x: 0, y: 0, pressed: {}, pressedLastFrame: false}];
 var keyboardPlayers = [{}, {}];
