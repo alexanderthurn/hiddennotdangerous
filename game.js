@@ -439,16 +439,22 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
     if (!isGameStarted) {
         ctx.save()
-        ctx.shadowColor = "rgba(0,0,0,0.5)"
+        ctx.shadowColor = "rgba(0,0,0,1)"
         ctx.shadowOffsetX = -canvas.width;
         ctx.shadowOffsetY = 0;
-        ctx.shadowBlur = 5+Math.sin(dtProcessed*0.001)*5;
+        ctx.shadowBlur = 2+Math.sin(dtProcessed*0.001)*2;
         ctx.font = canvas.width*0.06+"px serif";
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
         ctx.textBaseline='center'
         ctx.translate(canvas.width*1.5,canvas.height*0.3)
         ctx.fillText('Hidden Not Dangerous',0,0)
+        ctx.font = canvas.width*0.03+"px serif";
+        ctx.shadowBlur = 1;
+        ctx.fillText('WASDT',0,96)
+        ctx.fillText(String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0',0,96*2)
+        ctx.fillText('Gamepad',0,96*3)
+        ctx.fillText('Mouse',0,96*4)
         ctx.restore()
     }
 
@@ -575,7 +581,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.translate(32+i*48, canvas.height-32)
             } else {
                 var dtt = dtProcessed - lastWinnerPlayerIdThen
-                var lastWinnerPlayerIdDuration = 2000
+                var lastWinnerPlayerIdDuration = 1000
                 if (dtt > lastWinnerPlayerIdDuration) {
                     dtt = lastWinnerPlayerIdDuration
                 }
@@ -583,7 +589,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 var lp = dtt / (lastWinnerPlayerIdDuration)
                 var lpi = 1-lp
                 ctx.translate(lpi * (canvas.width*0.5) + lp*(32+i*48), lpi*(canvas.height*0.5) + lp*(canvas.height-32))
-                ctx.scale(5.0*lpi + 1*lp,5.0*lpi +1*lp)
+                ctx.scale(12.0*lpi + 1*lp,12.0*lpi +1*lp)
 
             }
 
