@@ -1,7 +1,7 @@
 console.log('no need to hide')
 var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
-var mousePlayers = [{x: 0, y: 0, pressed: {}, pressedLastFrame: false}];
+var mousePlayers = [{x: 0, y: 0, offsetCursorX: 0, offsetCursorY: 0,pressed: {}, pressedLastFrame: false}];
 var keyboardPlayers = [{}, {}];
 var keyboards = [{bindings: {
     'KeyA': {playerId: 'k0', action: 'left'},
@@ -160,6 +160,11 @@ function gameInit() {
         }
 
         figures.push(figure)
+
+        mousePlayers.forEach(mp => {
+            mp.offsetCursorX = -canvas.width*0.1+Math.random()*canvas.width*0.2
+            mp.offsetCursorY = -canvas.height*0.1+Math.random()*canvas.height*0.2
+        })
     }
 }
 
@@ -474,13 +479,18 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
     //ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, 100, 100)
     ctx.save()
-    ctx.beginPath();
-    ctx.arc(mousePlayers[0].x, mousePlayers[0].y, 10, 0, 2 * Math.PI);
-    ctx.fillStyle = "yellow";
-    ctx.fill();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "red";
-    ctx.stroke();
+    
+    for (x = -2; x < 2;x ++) {
+        for (y = -2;y < 2;y++) {
+            ctx.beginPath();
+            ctx.arc(mousePlayers[0].x + mousePlayers[0].offsetCursorX + x*canvas.width*0.5, mousePlayers[0].y + mousePlayers[0].offsetCursorY + y*canvas.height*0.5, 5, 0, 2 * Math.PI);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "rgba(0,0,0,0.5)";
+            ctx.stroke();
+        }
+    }
+    
+
     ctx.restore()
 
     figures.toSorted((f1,f2) => (f2.isDead || f1.isDead) ? f2.isDead - f1.isDead:  f1.y - f2.y ).forEach(f => {
