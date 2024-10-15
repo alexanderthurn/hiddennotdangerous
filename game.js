@@ -258,7 +258,7 @@ function gameLoop() {
     if (survivors.length == 1 && figuresWithPlayer.length > 1) {
         if (isGameStarted) {
             survivors[0].points++
-            lastWinnerPlayerId = survivor[0].playerId
+            lastWinnerPlayerId = survivors[0].playerId
             lastWinnerPlayerIdThen = dtProcessed
         } else {
             isGameStarted = true
@@ -314,7 +314,8 @@ function handleInput(players, figures, dtProcessed) {
             lastWinnerPlayerIdThen = dtProcessed
 
             if (figures.filter(f => !f.isAI).length == 2) {
-                playPlaylist(shuffle([music1, music2, music3]))                                                                                                                                                                                    
+                playPlaylist(shuffle([music1, music2, music3]))   
+                isGameStarted = true                                                                                                                                                                                 
             }  
         }
     })
