@@ -72,6 +72,18 @@ window.addEventListener('keydown', event => {
   
 });
 
+
+window.addEventListener('touchstart', event => {
+    if (event.target == canvas) {e.preventDefault();}
+});
+window.addEventListener('touchend', event => {
+    if (event.target == canvas) {e.preventDefault();}
+});
+window.addEventListener('touchmove', event => {
+    if (event.target == canvas) {e.preventDefault();}
+});
+
+
 window.addEventListener('keyup', event => {
     if (event.code === 'Escape') {
         showDebug =!showDebug
