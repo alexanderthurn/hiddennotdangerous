@@ -110,15 +110,15 @@ const playKillingSounds = (numberKilledFigures, killTime) => {
         }
 
         if (totalkillCounter >= 5*(lastTotalkillAudio+1)) {
-            if (lastTotalkillAudio == 0) {
+            if (lastTotalkillAudio === 0) {
                 playAudio(soundKillingSpree);
-            } else if (lastTotalkillAudio == 1) {
+            } else if (lastTotalkillAudio === 1) {
                 playAudio(soundRampage);
-            } else if (lastTotalkillAudio == 2) {
+            } else if (lastTotalkillAudio === 2) {
                 playAudio(soundDominating);
-            } else if (lastTotalkillAudio == 3) {
+            } else if (lastTotalkillAudio === 3) {
                 playAudio(soundUnstoppable);
-            } else if (lastTotalkillAudio == 4) {
+            } else if (lastTotalkillAudio === 4) {
                 playAudio(soundGodlike);
             } else if (lastTotalkillAudio > 4) {
                 playAudio(soundWickedSick);
