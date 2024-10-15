@@ -339,21 +339,22 @@ function handleInput(players, figures, time) {
 function handleAi(figures, time, oldNumberJoinedKeyboardPlayers) {
     const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.filter(f => !f.isAI).map(f => f.playerId).includes(k.playerId)).length;
     const startKeyboardMovement = oldNumberJoinedKeyboardPlayers === 0 && numberJoinedKeyboardPlayers > 0;
-    const stopKeyboardMovement = oldNumberJoinedKeyboardPlayers > 0 && numberJoinedKeyboardPlayers === 0;
 
     figures.filter(f => f.isAI && !f.isDead).forEach(f => {
-        if ((distance(f.x,f.y,f.xTarget,f.yTarget) < 5 || startKeyboardMovement || stopKeyboardMovement) && f.speed > 0) {
-            const breakDuration = startKeyboardMovement || stopKeyboardMovement ? 0 : Math.random() * f.maxBreakDuration;
+        if ((distance(f.x,f.y,f.xTarget,f.yTarget) < 5 || startKeyboardMovement) && f.speed > 0) {
+            const breakDuration = startKeyboardMovement ? 0 : Math.random() * f.maxBreakDuration;
             f.startWalkTime = Math.random() * breakDuration + time
             f.speed = 0
         }
         if (time >= f.startWalkTime) {
             if (f.speed === 0) {
-                f.xTarget = Math.random()*canvas.width
-                f.yTarget = Math.random()*canvas.height
+                if (!startKeyboardMovement) {
+                    f.xTarget = Math.random()*canvas.width
+                    f.yTarget = Math.random()*canvas.height
+                }
 
                 if (numberJoinedKeyboardPlayers > 0) {
-                    discreteAngle = deg2rad(Math.round(rad2deg(angle(f.x, f.y, f.xTarget, f.yTarget))/45)*45);
+                    discreteAngle = getNextDiscreteAngle(angle(f.x, f.y, f.xTarget, f.yTarget), 8);
                     const direction = {x: Math.cos(discreteAngle), y: Math.sin(discreteAngle)};
                     let distanceToBorder;
                     if (direction.x !== 0) {
