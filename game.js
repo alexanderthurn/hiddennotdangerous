@@ -582,7 +582,6 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
                 var lp = dtt / (lastWinnerPlayerIdDuration)
                 var lpi = 1-lp
-                console.log(lp, lpi)
                 ctx.translate(lpi * (canvas.width*0.5) + lp*(32+i*48), lpi*(canvas.height*0.5) + lp*(canvas.height-32))
                 ctx.scale(5.0*lpi + 1*lp,5.0*lpi +1*lp)
 
