@@ -18,7 +18,7 @@ var virtualGamepads = []
 var stop = false;
 var frameCount = 0;
 var startTime, then, now, dt, fps=0, fpsTime
-var isGameStarted = false
+var isGameStarted = false, lastWinnerPlayerId = null, lastWinnerPlayerIdThen
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figures = [], maxFigures = 21
 var image = new Image()
@@ -258,6 +258,8 @@ function gameLoop() {
     if (survivors.length == 1 && figuresWithPlayer.length > 1) {
         if (isGameStarted) {
             survivors[0].points++
+            lastWinnerPlayerId = survivor[0].playerId
+            lastWinnerPlayerIdThen = dtProcessed
         } else {
             isGameStarted = true
         }
@@ -298,7 +300,7 @@ function updateGame(figures, dt, dtProcessed) {
     })
 }
 
-function handleInput(players, figures, time) {
+function handleInput(players, figures, dtProcessed) {
     // join by doing anything
     players.filter(p => p.isAttackButtonPressed || p.isMoving).forEach(p => {
         var figure = figures.find(f => f.playerId === p.playerId)
@@ -308,6 +310,8 @@ function handleInput(players, figures, time) {
             figure.isDead = false
             figure.playerId = p.playerId
             playAudio(soundJoin);
+            lastWinnerPlayerId = figure.playerId  
+            lastWinnerPlayerIdThen = dtProcessed
 
             if (figures.filter(f => !f.isAI).length == 2) {
                 playPlaylist(shuffle([music1, music2, music3]))                                                                                                                                                                                    
@@ -326,12 +330,12 @@ function handleInput(players, figures, time) {
             }
             if (p.isAttackButtonPressed && !f.isAttacking) {
 
-                if (time-f.lastAttackTime > f.attackBreakDuration) {
-                    f.lastAttackTime = time
+                if (dtProcessed-f.lastAttackTime > f.attackBreakDuration) {
+                    f.lastAttackTime = dtProcessed
                     playAudio(f.soundAttack);
                 }
             }
-            f.isAttacking = time-f.lastAttackTime < f.attackDuration ? true : false;
+            f.isAttacking = dtProcessed-f.lastAttackTime < f.attackDuration ? true : false;
         }
     })
 }
@@ -446,8 +450,6 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.fillText('Hidden Not Dangerous',0,0)
         ctx.restore()
     }
-    
-    
 
     //ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, 100, 100)
     ctx.save()
@@ -491,10 +493,10 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
             } else {
                 // shadow
-                ctx.shadowColor = "#000"
+                ctx.shadowColor = "rgba(0,0,0,0.5)"
                 ctx.shadowOffsetX = -canvas.width;
                 ctx.shadowOffsetY = 0;
-                ctx.shadowBlur = 10;
+                ctx.shadowBlur = 16;
                 ctx.translate(canvas.width+24,-8)
                 ctx.transform(1, 0.1, -0.8, 1, 0, 0);
                 ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
@@ -568,7 +570,23 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.save()
             ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
             ctx.beginPath();
-            ctx.translate(32+i*48, canvas.height-32)
+            if (lastWinnerPlayerId !== f.playerId) {
+                ctx.translate(32+i*48, canvas.height-32)
+            } else {
+                var dtt = dtProcessed - lastWinnerPlayerIdThen
+                var lastWinnerPlayerIdDuration = 2000
+                if (dtt > lastWinnerPlayerIdDuration) {
+                    dtt = lastWinnerPlayerIdDuration
+                }
+
+                var lp = dtt / (lastWinnerPlayerIdDuration)
+                var lpi = 1-lp
+                console.log(lp, lpi)
+                ctx.translate(lpi * (canvas.width*0.5) + lp*(32+i*48), lpi*(canvas.height*0.5) + lp*(canvas.height-32))
+                ctx.scale(5.0*lpi + 1*lp,5.0*lpi +1*lp)
+
+            }
+
             ctx.arc(0,0,16,0, 2 * Math.PI);
             ctx.fill();
             ctx.closePath()
@@ -576,7 +594,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.textBaseline='center'
             ctx.fillStyle = "white";
             ctx.font = "24px arial";
-            ctx.fillText(f.points,0,-12); // Punkte
+            ctx.fillText(f.points,0,-10); // Punkte
             ctx.stroke();
             ctx.restore()
         })
