@@ -74,14 +74,17 @@ window.addEventListener('keydown', event => {
 
 
 window.addEventListener('touchstart', event => {
-    if (event.target == canvas) {e.preventDefault();}
-});
+    event.preventDefault();
+    event.stopPropagation();
+}, { passive: false });
 window.addEventListener('touchend', event => {
-    if (event.target == canvas) {e.preventDefault();}
-});
+    event.preventDefault();
+    event.stopPropagation();
+}, { passive: false });
 window.addEventListener('touchmove', event => {
-    if (event.target == canvas) {e.preventDefault();}
-});
+    event.preventDefault();
+    event.stopPropagation();
+}, { passive: false });
 
 
 window.addEventListener('keyup', event => {

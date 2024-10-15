@@ -6,6 +6,7 @@
     padding: 0;
     display: block;
     cursor: none;
+    touch-action: none;
 }
 body {
     margin: 0px;
@@ -21,4 +22,11 @@ h1 {
     height: 0px;
     visibility: collapse;
     display: none;
+}
+
+.lock-screen {
+    height: 100%;
+    overflow: hidden;
+    width: 100%;
+    position: fixed;
 }
