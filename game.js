@@ -248,7 +248,8 @@ function gameLoop() {
         dtProcessed+=dtFix
     }
     
-    draw(players, figures, dt);
+    draw(players, figures, dt, 0);
+    draw(players, figures, dt, 1);
     then = now
 
     var survivors = figures.filter(f => !f.isAI && !f.isDead)
@@ -382,38 +383,41 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers) {
     })
 }
 
-function draw(players, figures) {
+function draw(players, figures, dt, layer) {
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    const heightInTiles = getHeightInTiles();
-    const widthInTiles = getWidthInTiles();
-
-    for (let i = 0; i < tileArea.length; i++) {
-        for (let j = tileArea[i].length; j < heightInTiles; j++) {
-            tileArea[i][j] = getRandomInt(3);
+    if (layer === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        const heightInTiles = getHeightInTiles();
+        const widthInTiles = getWidthInTiles();
+        for (let i = 0; i < tileArea.length; i++) {
+            for (let j = tileArea[i].length; j < heightInTiles; j++) {
+                tileArea[i][j] = getRandomInt(3);
+            }
         }
-    }
-    for (let i = tileArea.length; i < widthInTiles; i++) {
-        tileArea[i] = [];
-        for (let j = 0; j < heightInTiles; j++) {
-            tileArea[i][j] = getRandomInt(3);
+        for (let i = tileArea.length; i < widthInTiles; i++) {
+            tileArea[i] = [];
+            for (let j = 0; j < heightInTiles; j++) {
+                tileArea[i][j] = getRandomInt(3);
+            }
         }
-    }
 
-    ctx.save();
-    for (let i = 0; i < Math.min(tileArea.length, widthInTiles); i++) {
-        for (let j = 0; j < Math.min(tileArea[i].length, heightInTiles); j++) {
-            const tile = textureTilesList[tileArea[i][j]];
-            ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, tileWidth, tileWidth)
-            if(j < Math.min(tileArea[i].length, heightInTiles)-1) {
-                ctx.translate(0, tileWidth);
-            } else {
-                ctx.translate(tileWidth, -tileWidth * j);
-            } 
+        ctx.save();
+        for (let i = 0; i < Math.min(tileArea.length, widthInTiles); i++) {
+            for (let j = 0; j < Math.min(tileArea[i].length, heightInTiles); j++) {
+                const tile = textureTilesList[tileArea[i][j]];
+                ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, tileWidth, tileWidth)
+                if(j < Math.min(tileArea[i].length, heightInTiles)-1) {
+                    ctx.translate(0, tileWidth);
+                } else {
+                    ctx.translate(tileWidth, -tileWidth * j);
+                } 
+                
+            }
         }
+        ctx.restore();
+
     }
-    ctx.restore();
+    
 
     //ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, 100, 100)
     
@@ -444,18 +448,37 @@ function draw(players, figures) {
         let sprite = frame[indexFrame]
         ctx.save()
         ctx.translate(f.x, f.y)
-        if (f.isAttacking) {
-            ctx.rotate(deg2rad(-30+mod(rad2deg(f.anim),60)) )
-        }
+
  
         if (f.isDead) {
             ctx.rotate(deg2rad(90))
             ctx.scale(0.5,0.5)
         }
-        ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
+
+        if (layer === 0) {
+
+            // shadow
+            ctx.shadowColor = "#000"
+            ctx.shadowOffsetX = -canvas.width;
+            ctx.shadowOffsetY = 0;
+            ctx.shadowBlur = 10;
+            ctx.translate(canvas.width+24,-8)
+            ctx.transform(1, 0.1, -0.8, 1, 0, 0);
+            ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
+
+        } else {
+
+            if (f.isAttacking) {
+                ctx.rotate(deg2rad(-30+mod(rad2deg(f.anim),60)) )
+            }
+
+
+            ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
+        }
+       
         ctx.restore()  
        
-        if (showDebug) {
+        if (showDebug && layer === 1) {
             if (f.isAttacking) {
                 ctx.save()
                 let startAngle = f.angle + deg2rad(135)
@@ -492,52 +515,55 @@ function draw(players, figures) {
     })
 
   
-
-    figures.filter(f => !f.isAI).forEach((f,i) => {
-        ctx.save()
-        ctx.fillStyle = "red";
-        ctx.beginPath();
-        ctx.translate(32+i*48, canvas.height-32)
-        ctx.arc(0,0,16,0, 2 * Math.PI);
-        ctx.fill();
-        ctx.closePath()
-        ctx.textAlign = "center";
-        ctx.textBaseline='center'
-        ctx.fillStyle = "white";
-        ctx.font = "24px arial";
-        ctx.fillText(f.points,0,-12); // Punkte
-        ctx.stroke();
-        ctx.restore()
-    })
-
-    ctx.font = "16px serif";
-    ctx.fillStyle = "white";
-    ctx.textAlign = "left";
-    ctx.textBaseline='top'
-
-    ctx.save()
-    ctx.textAlign = "right";
-    ctx.fillText(fps + " FPS", canvas.width, 0);
-    ctx.restore()
-
-    if (showDebug) {
-        ctx.save()
-        ctx.fillText('Players',0,0)
-        players.forEach((g,i) => {
-            ctx.translate(0,16)
-            ctx.fillText("xAxis: " + g.xAxis.toFixed(2) + " yAxis: " + g.yAxis.toFixed(2) + " Attack?: " + g.isAttackButtonPressed,0,0) 
+    if (layer === 1) {
+        figures.filter(f => !f.isAI).forEach((f,i) => {
+            ctx.save()
+            ctx.fillStyle = "red";
+            ctx.beginPath();
+            ctx.translate(32+i*48, canvas.height-32)
+            ctx.arc(0,0,16,0, 2 * Math.PI);
+            ctx.fill();
+            ctx.closePath()
+            ctx.textAlign = "center";
+            ctx.textBaseline='center'
+            ctx.fillStyle = "white";
+            ctx.font = "24px arial";
+            ctx.fillText(f.points,0,-12); // Punkte
+            ctx.stroke();
+            ctx.restore()
         })
-        ctx.restore()
+    
+        ctx.font = "16px serif";
+        ctx.fillStyle = "white";
+        ctx.textAlign = "left";
+        ctx.textBaseline='top'
     
         ctx.save()
-        ctx.textBaseline='bottom'
-        ctx.translate(0,canvas.height)
-        figures.forEach((g,i) => {
-            ctx.fillText("playerId: " + g.playerId + " x: " + Math.floor(g.x) + " y: " + Math.floor(g.y) + " Dead: " + g.isDead,0,0) 
-            ctx.translate(0,-16)
-        })
-        ctx.fillText('Figures',0,0)
+        ctx.textAlign = "right";
+        ctx.fillText(fps + " FPS", canvas.width, 0);
         ctx.restore()
+    
+    
+        if (showDebug) {
+            ctx.save()
+            ctx.fillText('Players',0,0)
+            players.forEach((g,i) => {
+                ctx.translate(0,16)
+                ctx.fillText("xAxis: " + g.xAxis.toFixed(2) + " yAxis: " + g.yAxis.toFixed(2) + " Attack?: " + g.isAttackButtonPressed,0,0) 
+            })
+            ctx.restore()
+        
+            ctx.save()
+            ctx.textBaseline='bottom'
+            ctx.translate(0,canvas.height)
+            figures.forEach((g,i) => {
+                ctx.fillText("playerId: " + g.playerId + " x: " + Math.floor(g.x) + " y: " + Math.floor(g.y) + " Dead: " + g.isDead,0,0) 
+                ctx.translate(0,-16)
+            })
+            ctx.fillText('Figures',0,0)
+            ctx.restore()
+        }
     }
+    
 
 }
