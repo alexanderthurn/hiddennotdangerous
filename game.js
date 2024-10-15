@@ -1,5 +1,6 @@
 console.log('no need to hide')
 var canvas = document.getElementById('canvas')
+var first = false;
 const ctx = canvas.getContext("2d");
 var mousePlayers = [{x: 0, y: 0, pressed: {}, pressedLastFrame: false}];
 var keyboardPlayers = [{}, {}];
@@ -356,7 +357,6 @@ function handleInput(players, figures, dtProcessed) {
 function handleAi(figures, time, oldNumberJoinedKeyboardPlayers) {
     const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.filter(f => !f.isAI).map(f => f.playerId).includes(k.playerId)).length;
     const startKeyboardMovement = oldNumberJoinedKeyboardPlayers === 0 && numberJoinedKeyboardPlayers > 0;
-    
     const livingAIFigures = figures.filter(f => f.isAI && !f.isDead);
     let shuffledIndexes;
     if (startKeyboardMovement) {
@@ -413,7 +413,6 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers) {
 }
 
 function draw(players, figures, dt, dtProcessed, layer) {
-
     if (layer === 0) {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         const heightInTiles = getHeightInTiles();
@@ -485,7 +484,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
     ctx.stroke();
     ctx.restore()
 
-    figures.sort((f1,f2) => (f2.isDead || f1.isDead) ? f2.isDead - f1.isDead:  f1.y - f2.y ).forEach(f => {
+    figures.toSorted((f1,f2) => (f2.isDead || f1.isDead) ? f2.isDead - f1.isDead:  f1.y - f2.y ).forEach(f => {
         let deg = rad2limiteddeg(f.angle)
         if (deg < 45 || deg > 315) {
             frame = imageAnim.right.a
@@ -505,11 +504,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.save()
         ctx.translate(f.x, f.y)
 
- 
-   
-
         if (layer === 0) {
-
             if (f.isDead) {
                 ctx.rotate(deg2rad(90))
                 ctx.scale(0.5,0.5)
@@ -524,11 +519,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.transform(1, 0.1, -0.8, 1, 0, 0);
                 ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
             }
-
-          
-
         } else {
-
             if (!f.isDead) {
                 if (f.isAttacking) {
                     //ctx.rotate(deg2rad(-10+mod(dtProcessed*0.5,20)) )
@@ -542,13 +533,10 @@ function draw(players, figures, dt, dtProcessed, layer) {
                     } else {
                         ctx.rotate(deg2rad(20))
                     }
-    
                 }
                 ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
             }
-          
         }
-       
         ctx.restore()  
        
         if (showDebug && layer === 1) {
@@ -587,7 +575,6 @@ function draw(players, figures, dt, dtProcessed, layer) {
         }
     })
 
-  
     if (layer === 1) {
         figures.filter(f => !f.isAI).forEach((f,i) => {
             ctx.save()
