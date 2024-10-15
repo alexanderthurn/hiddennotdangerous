@@ -14,5 +14,7 @@ sound1: https://pixabay.com/de/sound-effects/fart-9-228245/
 sound2: https://pixabay.com/de/sound-effects/fart-83471/
 sounddrum: https://pixabay.com/de/sound-effects/awesome-kick-drum-41824/
 
+shooter memes: https://tuna.voicemod.net/user/shiftingratechorus77356, https://dotawiki.de/index.php?title=Killing_Sounds
+
 
 local dev: python3 -m http.server 3333

@@ -55,8 +55,8 @@ const getHeightInTiles = () => Math.ceil(canvas.height/tileWidth);
 const getWidthInTiles = () => Math.ceil(canvas.width/tileWidth);
 const getLastAttackTime = (lastAttackTime, time) => lastAttackTime && time-lastAttackTime < 500 ? lastAttackTime : time;
 
-const getAudio = (key) => {
-    const {title, ...props} = audio[key];
+const getAudio = (audio) => {
+    const {title, ...props} = audio;
     const file = new Audio(title);
     return {file, ...props};
 };
