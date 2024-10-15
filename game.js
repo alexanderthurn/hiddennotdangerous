@@ -243,13 +243,13 @@ function gameLoop() {
     while(dtToProcess > dtFix) {
         handleInput(players, figures, dtProcessed)
         handleAi(figures, dtProcessed, oldNumberJoinedKeyboardPlayers)
-        updateGame(figures, dtFix)
+        updateGame(figures, dtFix,dtProcessed)
         dtToProcess-=dtFix
         dtProcessed+=dtFix
     }
     
-    draw(players, figures, dt, 0);
-    draw(players, figures, dt, 1);
+    draw(players, figures, dt, dtProcessed, 0);
+    draw(players, figures, dt, dtProcessed, 1);
     then = now
 
     var survivors = figures.filter(f => !f.isAI && !f.isDead)
@@ -265,14 +265,14 @@ function gameLoop() {
     window.requestAnimationFrame(gameLoop);
 }
 
-function updateGame(figures, dt) {
+function updateGame(figures, dt, dtProcessed) {
     let figuresAlive = figures.filter(f => !f.isDead);
     figuresAlive.forEach(f => {
         let xyNew = move(f.x, f.y, f.angle,f.speed, dt)
         f.x = xyNew.x
         f.y = xyNew.y
         f.anim += f.speed
-        f.anim += f.isAttacking ? 0.5 : 0
+       // f.anim += f.isAttacking ? 0.5 : 0
 
         if (f.x > canvas.width) f.x = canvas.width
         if (f.y > canvas.height) f.y = canvas.height
@@ -383,7 +383,7 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers) {
     })
 }
 
-function draw(players, figures, dt, layer) {
+function draw(players, figures, dt, dtProcessed, layer) {
 
     if (layer === 0) {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -469,10 +469,19 @@ function draw(players, figures, dt, layer) {
         } else {
 
             if (f.isAttacking) {
-                ctx.rotate(deg2rad(-30+mod(rad2deg(f.anim),60)) )
+                //ctx.rotate(deg2rad(-10+mod(dtProcessed*0.5,20)) )
+               
+                if (deg < 45 || deg > 315) {
+                    ctx.rotate(deg2rad(20))
+                } else if (deg >= 45 && deg <= 135){
+                    ctx.rotate(deg2rad(-20))
+                } else if (deg > 135 && deg < 225){
+                    ctx.rotate(deg2rad(-20))
+                } else {
+                    ctx.rotate(deg2rad(20))
+                }
+
             }
-
-
             ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
         }
        
@@ -518,7 +527,7 @@ function draw(players, figures, dt, layer) {
     if (layer === 1) {
         figures.filter(f => !f.isAI).forEach((f,i) => {
             ctx.save()
-            ctx.fillStyle = "red";
+            ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
             ctx.beginPath();
             ctx.translate(32+i*48, canvas.height-32)
             ctx.arc(0,0,16,0, 2 * Math.PI);
@@ -528,7 +537,7 @@ function draw(players, figures, dt, layer) {
             ctx.textBaseline='center'
             ctx.fillStyle = "white";
             ctx.font = "24px arial";
-            ctx.fillText(f.points,0,-12); // Punkte
+            ctx.fillText(f.points+20,0,-12); // Punkte
             ctx.stroke();
             ctx.restore()
         })
