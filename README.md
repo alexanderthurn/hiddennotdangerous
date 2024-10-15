@@ -13,3 +13,6 @@ music3: https://pixabay.com/de/music/schlaflieder-brahms-lullaby-wiegenlied-op49
 sound1: https://pixabay.com/de/sound-effects/fart-9-228245/
 sound2: https://pixabay.com/de/sound-effects/fart-83471/
 sounddrum: https://pixabay.com/de/sound-effects/awesome-kick-drum-41824/
+
+
+local dev: python3 -m http.server 3333

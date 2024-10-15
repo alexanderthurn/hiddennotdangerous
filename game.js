@@ -75,15 +75,12 @@ window.addEventListener('keydown', event => {
 
 window.addEventListener('touchstart', event => {
     event.preventDefault();
-    event.stopPropagation();
 }, { passive: false });
 window.addEventListener('touchend', event => {
     event.preventDefault();
-    event.stopPropagation();
 }, { passive: false });
 window.addEventListener('touchmove', event => {
     event.preventDefault();
-    event.stopPropagation();
 }, { passive: false });
 
 
