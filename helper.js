@@ -79,6 +79,55 @@ const playPlaylist = (playlist) => {
     playAudio(playlist[0]);
 }
 
+const playKillingSounds = (numberKilledFigures, killTime) => {
+    if (numberKilledFigures > 0) {
+        if (!lastKillTime || lastKillTime + multikillTimeWindow < dtProcessed) {
+            multikillCounter = 0;
+            if (!lastKillTime) {
+                playAudio(soundFirstBlood);
+            }
+        }
+        lastKillTime = killTime;
+        multikillCounter += numberKilledFigures;
+        totalkillCounter += numberKilledFigures;
+
+        if (multikillCounter === 2) {
+            playAudio(soundDoubleKill);
+        } else if (multikillCounter === 3) {
+            playAudio(soundTripleKill);
+        } else if (multikillCounter === 4) {
+            playAudio(soundMultiKill);
+        } else if (multikillCounter === 5) {
+            playAudio(soundMegaKill);
+        } else if (multikillCounter === 6) {
+            playAudio(soundUltraKill);
+        } else if (multikillCounter === 7) {
+            playAudio(soundMonsterKill);
+        } else if (multikillCounter === 8) {
+            playAudio(soundLudicrousKill);
+        } else if (multikillCounter > 8) {
+            playAudio(soundHolyShit);
+        }
+
+        if (totalkillCounter >= 5*(lastTotalkillAudio+1)) {
+            if (lastTotalkillAudio == 0) {
+                playAudio(soundKillingSpree);
+            } else if (lastTotalkillAudio == 1) {
+                playAudio(soundRampage);
+            } else if (lastTotalkillAudio == 2) {
+                playAudio(soundDominating);
+            } else if (lastTotalkillAudio == 3) {
+                playAudio(soundUnstoppable);
+            } else if (lastTotalkillAudio == 4) {
+                playAudio(soundGodlike);
+            } else if (lastTotalkillAudio > 4) {
+                playAudio(soundWickedSick);
+            }
+            lastTotalkillAudio++;
+        }
+    }
+}
+
 function resizeCanvasToDisplaySize(canvas) {
     // look up the size the canvas is being displayed
     const width = canvas.clientWidth;

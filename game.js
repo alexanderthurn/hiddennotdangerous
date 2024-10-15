@@ -24,6 +24,8 @@ var showDebug = false
 var lastKillTime;
 var multikillCounter = 0;
 var multikillTimeWindow = 4000;
+var lastTotalkillAudio = 0;
+var totalkillCounter = 0;
 image.src = 'character_base_16x16.png'
 var imageAnim = {
     down: {a: [[0,0,16,16], [16,0,16,16], [32,0,16,16], [48,0,16,16]]},
@@ -48,6 +50,7 @@ const audio = {
     music2: {title: 'music2.mp3', volume: 0.5},
     music3: {title: 'music3.mp3', volume: 0.5},
     join: {title: 'sounddrum.mp3'},
+    firstBlood: {title: 'first-blood.mp3', volume: 0.5},
     doubleKill: {title: 'double-kill.mp3', volume: 0.5},
     tripleKill: {title: 'triple-kill.mp3', volume: 0.5},
     multiKill: {title: 'multi-kill.mp3', volume: 0.5},
@@ -55,11 +58,20 @@ const audio = {
     ultraKill: {title: 'ultra-kill.mp3', volume: 0.5},
     monsterKill: {title: 'monster-kill.mp3', volume: 0.5},
     ludicrousKill: {title: 'ludicrous-kill.mp3', volume: 0.5},
-    holyShit: {title: 'holy-shit.ogg', volume: 0.5}
+    holyShit: {title: 'holy-shit.ogg'},
+
+    killingSpree: {title: 'killing-spree.mp3', volume: 0.5},
+    rampage: {title: 'rampage.mp3', volume: 0.5},
+    dominating: {title: 'dominating.mp3', volume: 0.5},
+    unstoppable: {title: 'unstoppable.ogg'},
+    godlike: {title: 'god-like.mp3', volume: 0.5},
+    wickedSick: {title: 'wicked-sick.ogg'}
 }
 var music1 = getAudio(audio.music1);
 var music2 = getAudio(audio.music2);
 var music3 = getAudio(audio.music3);
+var soundJoin = getAudio(audio.join);
+var soundFirstBlood = getAudio(audio.firstBlood);
 var soundDoubleKill = getAudio(audio.doubleKill);
 var soundTripleKill = getAudio(audio.tripleKill);
 var soundMultiKill = getAudio(audio.multiKill);
@@ -68,7 +80,12 @@ var soundUltraKill = getAudio(audio.ultraKill);
 var soundMonsterKill = getAudio(audio.monsterKill);
 var soundLudicrousKill = getAudio(audio.ludicrousKill);
 var soundHolyShit = getAudio(audio.holyShit);
-var soundJoin = getAudio(audio.join);
+var soundKillingSpree = getAudio(audio.killingSpree);
+var soundRampage = getAudio(audio.rampage);
+var soundDominating = getAudio(audio.dominating);
+var soundUnstoppable = getAudio(audio.unstoppable);
+var soundGodlike = getAudio(audio.godlike);
+var soundWickedSick = getAudio(audio.wickedSick);
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
@@ -336,32 +353,7 @@ function updateGame(figures, dt, dtProcessed) {
             }
         });
     })
-
-    if (numberKilledFigures > 0) {
-        if (!lastKillTime || lastKillTime + multikillTimeWindow < dtProcessed) {
-            multikillCounter = 0;
-        }
-        lastKillTime = killTime;
-        multikillCounter += numberKilledFigures;
-        console.log('LASTKILL', lastKillTime, multikillTimeWindow, dtProcessed);
-        if (multikillCounter === 2) {
-            playAudio(soundDoubleKill);
-        } else if (multikillCounter === 3) {
-            playAudio(soundTripleKill);
-        } else if (multikillCounter === 4) {
-            playAudio(soundMultiKill);
-        } else if (multikillCounter === 5) {
-            playAudio(soundMegaKill);
-        } else if (multikillCounter === 6) {
-            playAudio(soundUltraKill);
-        } else if (multikillCounter === 7) {
-            playAudio(soundMonsterKill);
-        } else if (multikillCounter === 8) {
-            playAudio(soundLudicrousKill);
-        } else if (multikillCounter > 8) {
-            playAudio(soundHolyShit);
-        }
-    }
+    playKillingSounds(numberKilledFigures, killTime);
 }
 
 function handleInput(players, figures, dtProcessed) {
