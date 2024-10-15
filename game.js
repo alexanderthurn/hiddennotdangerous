@@ -282,7 +282,7 @@ function updateGame(figures, dt, dtProcessed) {
     })
     figuresAlive.filter(f => f.isAttacking).forEach(f => {
         figures.filter(fig => fig !== f && !fig.isDead).forEach(fig => {
-            let diffAngle = Math.abs(rad2deg(f.angle-deg2rad(180)-angle(f.x,f.y,fig.x,fig.y)));
+            let diffAngle = Math.abs(rad2limiteddeg(f.angle-angle(f.x,f.y,fig.x,fig.y))-180);
             if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance && diffAngle <= 90) {
                 fig.isDead = true;
                 playAudio(fig.soundDeath);
