@@ -344,10 +344,14 @@ function handleInput(players, figures, dtProcessed) {
 function handleAi(figures, time, oldNumberJoinedKeyboardPlayers) {
     const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.filter(f => !f.isAI).map(f => f.playerId).includes(k.playerId)).length;
     const startKeyboardMovement = oldNumberJoinedKeyboardPlayers === 0 && numberJoinedKeyboardPlayers > 0;
-    figures = shuffle(figures);
-
-    figures.filter(f => f.isAI && !f.isDead).forEach((f,i,array) => {
-        if ((distance(f.x,f.y,f.xTarget,f.yTarget) < 5 || (startKeyboardMovement && i < array.length/2)) && f.speed > 0) {
+    
+    const livingAIFigures = figures.filter(f => f.isAI && !f.isDead);
+    let shuffledIndexes;
+    if (startKeyboardMovement) {
+        shuffledIndexes = shuffle([...Array(livingAIFigures.length).keys()]);
+    }
+    livingAIFigures.forEach((f,i,array) => {
+        if (((startKeyboardMovement && shuffledIndexes[i] < array.length/2) || distance(f.x,f.y,f.xTarget,f.yTarget) < 5) && f.speed > 0) {
             const breakDuration = startKeyboardMovement ? 0 : Math.random() * f.maxBreakDuration;
             f.startWalkTime = Math.random() * breakDuration + time
             f.speed = 0
