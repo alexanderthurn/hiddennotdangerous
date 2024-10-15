@@ -443,8 +443,12 @@ function draw(players, figures) {
         } else {
             frame = imageAnim.up.a
         }
-
-        let sprite = frame[Math.floor(f.anim) % frame.length]
+        
+        let indexFrame = 0;
+        if (f.speed > 0) {
+            indexFrame = Math.floor(f.anim) % frame.length;
+        }
+        let sprite = frame[indexFrame]
         ctx.save()
         ctx.translate(f.x, f.y)
         if (f.isAttacking) {
