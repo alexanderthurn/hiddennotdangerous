@@ -292,7 +292,6 @@ function updateGame(figures, dt) {
 }
 
 function handleInput(players, figures, time) {
-    
     // join by doing anything
     players.filter(p => p.isAttackButtonPressed || p.isMoving).forEach(p => {
         var figure = figures.find(f => f.playerId === p.playerId)
@@ -304,15 +303,12 @@ function handleInput(players, figures, time) {
 
             if (figures.filter(f => !f.isAI).length == 2) {
                 playPlaylist(shuffle([music1, music2, music3]))                                                                                                                                                                                             
-            }
-               
+            }  
         }
     })
 
     figures.filter(f => !f.isAI).forEach(f => {
         var p = players.find(p => p.playerId === f.playerId)
-
- 
 
         f.speed = 0.0
         if (!f.isDead) {
@@ -320,7 +316,6 @@ function handleInput(players, figures, time) {
                 f.angle = angle(0,0,p.xAxis,p.yAxis)
                 f.speed = f.maxSpeed
             }
-
             if (p.isAttackButtonPressed && !f.isAttacking) {
 
                 if (time-f.lastAttackTime > f.attackBreakDuration) {
@@ -328,21 +323,18 @@ function handleInput(players, figures, time) {
                     playAudio(f.soundAttack);
                 }
             }
-
             f.isAttacking = time-f.lastAttackTime < f.attackDuration ? true : false;
-           
         }
     })
-
-
 }
 
 function handleAi(figures, time, oldNumberJoinedKeyboardPlayers) {
     const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.filter(f => !f.isAI).map(f => f.playerId).includes(k.playerId)).length;
     const startKeyboardMovement = oldNumberJoinedKeyboardPlayers === 0 && numberJoinedKeyboardPlayers > 0;
+    figures = shuffle(figures);
 
-    figures.filter(f => f.isAI && !f.isDead).forEach(f => {
-        if ((distance(f.x,f.y,f.xTarget,f.yTarget) < 5 || startKeyboardMovement) && f.speed > 0) {
+    figures.filter(f => f.isAI && !f.isDead).forEach((f,i,array) => {
+        if ((distance(f.x,f.y,f.xTarget,f.yTarget) < 5 || (startKeyboardMovement && i < array.length/2)) && f.speed > 0) {
             const breakDuration = startKeyboardMovement ? 0 : Math.random() * f.maxBreakDuration;
             f.startWalkTime = Math.random() * breakDuration + time
             f.speed = 0
