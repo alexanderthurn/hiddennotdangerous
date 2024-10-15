@@ -18,6 +18,7 @@ var virtualGamepads = []
 var stop = false;
 var frameCount = 0;
 var startTime, then, now, dt, fps=0, fpsTime
+var isGameStarted = false
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figures = [], maxFigures = 21
 var image = new Image()
@@ -255,7 +256,12 @@ function gameLoop() {
     var survivors = figures.filter(f => !f.isAI && !f.isDead)
     var figuresWithPlayer = figures.filter(f => f.playerId)
     if (survivors.length == 1 && figuresWithPlayer.length > 1) {
-        survivors[0].points++
+        if (isGameStarted) {
+            survivors[0].points++
+        } else {
+            isGameStarted = true
+        }
+        
         gameInit()
     }
 
@@ -299,11 +305,12 @@ function handleInput(players, figures, time) {
         if (!figure) {
             var figure = figures.find(f => f.isAI)
             figure.isAI = false
+            figure.isDead = false
             figure.playerId = p.playerId
             playAudio(soundJoin);
 
             if (figures.filter(f => !f.isAI).length == 2) {
-                playPlaylist(shuffle([music1, music2, music3]))                                                                                                                                                                                             
+                playPlaylist(shuffle([music1, music2, music3]))                                                                                                                                                                                    
             }  
         }
     })
@@ -418,17 +425,40 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.restore();
 
     }
+    ctx.save()
+    ctx.strokeStyle = "rgba(165,24,24,0.5)";
+    ctx.lineWidth = 15;
+    ctx.lineJoin = "bevel";
+    ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    ctx.restore()
+
+    if (!isGameStarted) {
+        ctx.save()
+        ctx.shadowColor = "rgba(0,0,0,0.5)"
+        ctx.shadowOffsetX = -canvas.width;
+        ctx.shadowOffsetY = 0;
+        ctx.shadowBlur = 5+Math.sin(dtProcessed*0.001)*5;
+        ctx.font = canvas.width*0.06+"px serif";
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+        ctx.textBaseline='center'
+        ctx.translate(canvas.width*1.5,canvas.height*0.3)
+        ctx.fillText('Hidden Not Dangerous',0,0)
+        ctx.restore()
+    }
+    
     
 
     //ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, 100, 100)
-    
-    /*ctx.beginPath();
-    ctx.arc(mousePlayers[0].x, mousePlayers[0].y, 40, 0, 2 * Math.PI);
+    ctx.save()
+    ctx.beginPath();
+    ctx.arc(mousePlayers[0].x, mousePlayers[0].y, 10, 0, 2 * Math.PI);
     ctx.fillStyle = "yellow";
     ctx.fill();
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 2;
     ctx.strokeStyle = "red";
-    ctx.stroke();*/
+    ctx.stroke();
+    ctx.restore()
 
     figures.sort((f1,f2) => (f2.isDead || f1.isDead) ? f2.isDead - f1.isDead:  f1.y - f2.y ).forEach(f => {
         let deg = rad2limiteddeg(f.angle)
@@ -546,7 +576,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.textBaseline='center'
             ctx.fillStyle = "white";
             ctx.font = "24px arial";
-            ctx.fillText(f.points+20,0,-12); // Punkte
+            ctx.fillText(f.points,0,-12); // Punkte
             ctx.stroke();
             ctx.restore()
         })
