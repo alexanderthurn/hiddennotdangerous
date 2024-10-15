@@ -4,16 +4,16 @@ const ctx = canvas.getContext("2d");
 var mousePlayers = [{x: 0, y: 0, pressed: {}, pressedLastFrame: false}];
 var keyboardPlayers = [{}, {}];
 var keyboards = [{bindings: {
-    'KeyA': {player: keyboardPlayers[0], action: 'left'},
-    'KeyD': {player: keyboardPlayers[0], action: 'right'},
-    'KeyW': {player: keyboardPlayers[0], action: 'up'},
-    'KeyS': {player: keyboardPlayers[0], action: 'down'},
-    'KeyT': {player: keyboardPlayers[0], action: 'attack'},
-    'ArrowLeft': {player: keyboardPlayers[1], action: 'left'},
-    'ArrowRight': {player: keyboardPlayers[1], action: 'right'},
-    'ArrowUp': {player: keyboardPlayers[1], action: 'up'},
-    'ArrowDown': {player: keyboardPlayers[1], action: 'down'},
-    'Numpad0': {player: keyboardPlayers[1], action: 'attack'}}, pressed: {}}];
+    'KeyA': {playerId: 'k0', action: 'left'},
+    'KeyD': {playerId: 'k0', action: 'right'},
+    'KeyW': {playerId: 'k0', action: 'up'},
+    'KeyS': {playerId: 'k0', action: 'down'},
+    'KeyT': {playerId: 'k0', action: 'attack'},
+    'ArrowLeft': {playerId: 'k1', action: 'left'},
+    'ArrowRight': {playerId: 'k1', action: 'right'},
+    'ArrowUp': {playerId: 'k1', action: 'up'},
+    'ArrowDown': {playerId: 'k1', action: 'down'},
+    'Numpad0': {playerId: 'k1', action: 'attack'}}, pressed: {}}];
 var virtualGamepads = []
 var stop = false;
 var frameCount = 0;
@@ -188,7 +188,7 @@ function gameLoop() {
             const binding = k.bindings[pressedButton];
             if (binding) {
                 const action = binding.action;
-                let p = binding.player;
+                let p = keyboardPlayers.find(kp => binding.playerId ===  kp.playerId);
                 switch (action) {
                     case 'left':
                         p.xAxis--;
