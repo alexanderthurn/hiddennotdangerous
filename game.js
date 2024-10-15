@@ -237,11 +237,12 @@ function gameLoop() {
     })
    
     let players = [...gamepadPlayers, ...keyboardPlayers, ...mousePlayers];
+    const oldNumberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.filter(f => !f.isAI).map(f => f.playerId).includes(k.playerId)).length;
 
     dtToProcess += dt
     while(dtToProcess > dtFix) {
         handleInput(players, figures, dtProcessed)
-        handleAi(figures, dtProcessed)
+        handleAi(figures, dtProcessed, oldNumberJoinedKeyboardPlayers)
         updateGame(figures, dtFix)
         dtToProcess-=dtFix
         dtProcessed+=dtFix
@@ -335,11 +336,15 @@ function handleInput(players, figures, time) {
 
 }
 
-function handleAi(figures, time) {
-    figures.filter(f => f.isAI && !f.isDead).forEach(f => {
+function handleAi(figures, time, oldNumberJoinedKeyboardPlayers) {
+    const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.filter(f => !f.isAI).map(f => f.playerId).includes(k.playerId)).length;
+    const startKeyboardMovement = oldNumberJoinedKeyboardPlayers === 0 && numberJoinedKeyboardPlayers > 0;
+    const stopKeyboardMovement = oldNumberJoinedKeyboardPlayers > 0 && numberJoinedKeyboardPlayers === 0;
 
-        if (distance(f.x,f.y,f.xTarget,f.yTarget) < 5 && f.speed > 0) {
-            f.startWalkTime = Math.random() * f.maxBreakDuration + time
+    figures.filter(f => f.isAI && !f.isDead).forEach(f => {
+        if ((distance(f.x,f.y,f.xTarget,f.yTarget) < 5 || startKeyboardMovement || stopKeyboardMovement) && f.speed > 0) {
+            const breakDuration = startKeyboardMovement || stopKeyboardMovement ? 0 : Math.random() * f.maxBreakDuration;
+            f.startWalkTime = Math.random() * breakDuration + time
             f.speed = 0
         }
         if (time >= f.startWalkTime) {
@@ -347,12 +352,9 @@ function handleAi(figures, time) {
                 f.xTarget = Math.random()*canvas.width
                 f.yTarget = Math.random()*canvas.height
 
-                if (false) {
-                    let xTarget = Math.random()*canvas.width
-                    let yTarget = Math.random()*canvas.height
-                    let angl = rad2deg(angle(f.x, f.y, xTarget, yTarget));
-                    angl = deg2rad(Math.round(angl/45)*45);
-                    const direction = {x: Math.cos(angl), y: Math.sin(angl)};
+                if (numberJoinedKeyboardPlayers > 0) {
+                    discreteAngle = deg2rad(Math.round(rad2deg(angle(f.x, f.y, f.xTarget, f.yTarget))/45)*45);
+                    const direction = {x: Math.cos(discreteAngle), y: Math.sin(discreteAngle)};
                     let distanceToBorder;
                     if (direction.x !== 0) {
                         const xBorder = direction.x > 0 ? canvas.width : 0;
