@@ -285,6 +285,7 @@ function updateGame(figures, dt, dtProcessed) {
             let diffAngle = Math.abs(rad2limiteddeg(f.angle-angle(f.x,f.y,fig.x,fig.y))-180);
             if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance && diffAngle <= 90) {
                 fig.isDead = true;
+                fig.y+=16
                 playAudio(fig.soundDeath);
             }
         });
@@ -450,39 +451,47 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.translate(f.x, f.y)
 
  
-        if (f.isDead) {
-            ctx.rotate(deg2rad(90))
-            ctx.scale(0.5,0.5)
-        }
+   
 
         if (layer === 0) {
 
-            // shadow
-            ctx.shadowColor = "#000"
-            ctx.shadowOffsetX = -canvas.width;
-            ctx.shadowOffsetY = 0;
-            ctx.shadowBlur = 10;
-            ctx.translate(canvas.width+24,-8)
-            ctx.transform(1, 0.1, -0.8, 1, 0, 0);
-            ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
+            if (f.isDead) {
+                ctx.rotate(deg2rad(90))
+                ctx.scale(0.5,0.5)
+                ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
+            } else {
+                // shadow
+                ctx.shadowColor = "#000"
+                ctx.shadowOffsetX = -canvas.width;
+                ctx.shadowOffsetY = 0;
+                ctx.shadowBlur = 10;
+                ctx.translate(canvas.width+24,-8)
+                ctx.transform(1, 0.1, -0.8, 1, 0, 0);
+                ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
+            }
+
+          
 
         } else {
 
-            if (f.isAttacking) {
-                //ctx.rotate(deg2rad(-10+mod(dtProcessed*0.5,20)) )
-               
-                if (deg < 45 || deg > 315) {
-                    ctx.rotate(deg2rad(20))
-                } else if (deg >= 45 && deg <= 135){
-                    ctx.rotate(deg2rad(-20))
-                } else if (deg > 135 && deg < 225){
-                    ctx.rotate(deg2rad(-20))
-                } else {
-                    ctx.rotate(deg2rad(20))
+            if (!f.isDead) {
+                if (f.isAttacking) {
+                    //ctx.rotate(deg2rad(-10+mod(dtProcessed*0.5,20)) )
+                   
+                    if (deg < 45 || deg > 315) {
+                        ctx.rotate(deg2rad(20))
+                    } else if (deg >= 45 && deg <= 135){
+                        ctx.rotate(deg2rad(-20))
+                    } else if (deg > 135 && deg < 225){
+                        ctx.rotate(deg2rad(-20))
+                    } else {
+                        ctx.rotate(deg2rad(20))
+                    }
+    
                 }
-
+                ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
             }
-            ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
+          
         }
        
         ctx.restore()  
