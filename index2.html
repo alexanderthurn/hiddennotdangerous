@@ -1,0 +1,68 @@
+<html>
+
+<head>
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+
+<body>
+    Peer-ID: <input type="text" id="inputPeer" value="" />
+    <button id="btnPeer">Connect</button>
+
+    Send:<input type="text" id="inputSend" value="Welt" />
+    <button id="btnSend">Send</button>
+
+    <br />
+    Response:<br />
+    <textarea id="textAreaLog" rows="20" cols="80"></textarea>
+
+
+
+    <script type="text/javascript">
+        var peer, conn
+      
+        /* https://peerjs.com/docs/#start */
+
+        function tlog(d) {
+            document.getElementById('textAreaLog').value += (d + "\n")
+        }
+
+        document.addEventListener("DOMContentLoaded", function (event) {
+
+            
+            tlog('init')
+            peer = new Peer();
+            peer.on('open', function(id) {
+                tlog('My peer ID is: ' + id);
+            });
+            
+            document.getElementById('btnPeer').addEventListener('click', function (event) {
+                tlog('Connecting to peer: ' + document.getElementById('inputPeer').value)
+                
+                conn = peer.connect( document.getElementById('inputPeer').value);
+                // on open will be launch when you successfully connect to PeerServer
+                conn.on('open', function () {
+                    // here you have conn.id
+                    conn.send('hi!');
+                });
+
+            })
+            document.getElementById('btnSend').addEventListener('click', function (event) {
+                tlog('Sending to peer: ' + document.getElementById('inputSend').value)
+                conn.send(document.getElementById('inputSend').value);
+            })
+          
+           
+            
+            peer.on('connection', function (conn) {
+                tlog('connected...' + conn.id)
+
+                conn.on('data', function (data) {
+                    tlog('data:' + data)
+                });
+            });
+        })
+    </script>
+
+</body>
+
+</html>
