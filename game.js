@@ -340,8 +340,8 @@ function updateGame(figures, dt, dtProcessed) {
     let killTime;
     figuresAlive.filter(f => f.isAttacking).forEach(f => {
         figures.filter(fig => fig !== f && !fig.isDead).forEach(fig => {
-            let diffAngle = Math.abs(rad2limiteddeg(f.angle-angle(f.x,f.y,fig.x,fig.y))-180);
-            if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance && diffAngle <= 90) {
+            let distAngles = distanceAngles(rad2deg(f.angle), rad2deg(angle(f.x,f.y,fig.x,fig.y)+180));
+            if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance && distAngles <= 90) {
                 fig.isDead = true;
                 fig.y+=16
                 playAudio(fig.soundDeath);
@@ -530,11 +530,11 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
     figures.toSorted((f1,f2) => (f2.isDead || f1.isDead) ? f2.isDead - f1.isDead:  f1.y - f2.y ).forEach(f => {
         let deg = rad2limiteddeg(f.angle)
-        if (deg < 45 || deg > 315) {
+        if (distanceAngles(deg, 0) < 45) {
             frame = imageAnim.right.a
-        } else if (deg >= 45 && deg <= 135){
+        } else if (distanceAngles(deg, 90) <= 45){
             frame = imageAnim.down.a
-        } else if (deg > 135 && deg < 225){
+        } else if (distanceAngles(deg, 180) < 45){
             frame = imageAnim.left.a
         } else {
             frame = imageAnim.up.a
@@ -568,11 +568,11 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 if (f.isAttacking) {
                     //ctx.rotate(deg2rad(-10+mod(dtProcessed*0.5,20)) )
                    
-                    if (deg < 45 || deg > 315) {
+                    if (distanceAngles(deg, 0) < 45) {
                         ctx.rotate(deg2rad(20))
-                    } else if (deg >= 45 && deg <= 135){
+                    } else if (distanceAngles(deg, 90) <= 45){
                         ctx.rotate(deg2rad(-20))
-                    } else if (deg > 135 && deg < 225){
+                    } else if (distanceAngles(deg, 180) < 45){
                         ctx.rotate(deg2rad(-20))
                     } else {
                         ctx.rotate(deg2rad(20))
