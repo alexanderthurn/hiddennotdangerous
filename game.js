@@ -22,10 +22,10 @@ var figures = [], maxFigures = 21
 var image = new Image()
 var showDebug = false
 var lastKillTime;
-var multikillCounter = 0;
+var multikillCounter;
 var multikillTimeWindow = 4000;
-var lastTotalkillAudio = 0;
-var totalkillCounter = 0;
+var lastTotalkillAudio;
+var totalkillCounter;
 image.src = 'character_base_16x16.png'
 var imageAnim = {
     down: {a: [[0,0,16,16], [16,0,16,16], [32,0,16,16], [48,0,16,16]]},
@@ -154,6 +154,10 @@ function gameInit() {
     then = Date.now();
     startTime = then;
     fpsTime = then
+    lastKillTime = undefined;
+    multikillCounter = 0;
+    lastTotalkillAudio = 0;
+    totalkillCounter = 0;
     var activePlayerIds = figures.filter(f => f.playerId).map(f => f.playerId)
     var oldFigures = figures
     figures = []
@@ -172,7 +176,6 @@ function gameInit() {
             startWalkTime: 0,
             speed: 0,
             isDead: false, 
-            isAI: true,
             playerId: null,
             index: i,
             angle: angle(x,y,xTarget,yTarget),
@@ -189,7 +192,6 @@ function gameInit() {
 
         if (activePlayerIds.length > i) {
             figure.playerId = activePlayerIds[i]
-            figure.isAI = false
             figure.points = oldFigures.find(f => f.playerId == figure.playerId).points
         }
 
@@ -289,7 +291,7 @@ function gameLoop() {
     })
    
     let players = [...gamepadPlayers, ...keyboardPlayers, ...mousePlayers];
-    const oldNumberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.filter(f => !f.isAI).map(f => f.playerId).includes(k.playerId)).length;
+    const oldNumberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.map(f => f.playerId).includes(k.playerId)).length;
 
     dtToProcess += dt
     while(dtToProcess > dtFix) {
@@ -304,8 +306,8 @@ function gameLoop() {
     draw(players, figures, dt, dtProcessed, 1);
     then = now
 
-    var survivors = figures.filter(f => !f.isAI && !f.isDead)
     var figuresWithPlayer = figures.filter(f => f.playerId)
+    var survivors = figuresWithPlayer.filter(f => !f.isDead)
     if (survivors.length == 1 && figuresWithPlayer.length > 1) {
         if (isGameStarted) {
             survivors[0].points++
@@ -314,13 +316,8 @@ function gameLoop() {
         } else {
             isGameStarted = true
         }
-        
         gameInit()
     }
-
-
-    
-
     window.requestAnimationFrame(gameLoop);
 }
 
@@ -361,22 +358,21 @@ function handleInput(players, figures, dtProcessed) {
     players.filter(p => p.isAttackButtonPressed || p.isMoving).forEach(p => {
         var figure = figures.find(f => f.playerId === p.playerId)
         if (!figure) {
-            var figure = figures.find(f => f.isAI)
-            figure.isAI = false
+            var figure = figures.find(f => !f.playerId)
             figure.isDead = false
             figure.playerId = p.playerId
             playAudio(soundJoin);
             lastWinnerPlayerId = figure.playerId  
             lastWinnerPlayerIdThen = dtProcessed
 
-            if (figures.filter(f => !f.isAI).length == 2) {
+            if (figures.filter(f => f.playerId).length == 2) {
                 playPlaylist(shuffle([music1, music2, music3]))   
                 isGameStarted = true                                                                                                                                                                                 
             }  
         }
     })
 
-    figures.filter(f => !f.isAI).forEach(f => {
+    figures.filter(f => f.playerId).forEach(f => {
         var p = players.find(p => p.playerId === f.playerId)
 
         f.speed = 0.0
@@ -398,9 +394,9 @@ function handleInput(players, figures, dtProcessed) {
 }
 
 function handleAi(figures, time, oldNumberJoinedKeyboardPlayers) {
-    const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.filter(f => !f.isAI).map(f => f.playerId).includes(k.playerId)).length;
+    const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.map(f => f.playerId).includes(k.playerId)).length;
     const startKeyboardMovement = oldNumberJoinedKeyboardPlayers === 0 && numberJoinedKeyboardPlayers > 0;
-    const livingAIFigures = figures.filter(f => f.isAI && !f.isDead);
+    const livingAIFigures = figures.filter(f => !f.playerId && !f.isDead);
     let shuffledIndexes;
     if (startKeyboardMovement) {
         shuffledIndexes = shuffle([...Array(livingAIFigures.length).keys()]);
@@ -606,7 +602,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.beginPath()
             ctx.lineWidth = 1;
             ctx.fillStyle = "green";
-            if (!f.isAI) {
+            if (f.playerId) {
                 ctx.fillStyle = "red";
             }
 
@@ -614,7 +610,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.fill();
             ctx.closePath()
 
-            if (!f.isAI) {
+            if (f.playerId) {
                 ctx.fillStyle = "red";
                 ctx.font = "16px serif";
                 ctx.fillStyle = "white";
@@ -624,7 +620,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
     })
 
     if (layer === 1) {
-        figures.filter(f => !f.isAI).forEach((f,i) => {
+        figures.filter(f => f.playerId).forEach((f,i) => {
             ctx.save()
             ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
             ctx.beginPath();
