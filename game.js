@@ -15,7 +15,7 @@ var keyboards = [{bindings: {
     'ArrowDown': {playerId: 'k1', action: 'down'},
     'Numpad0': {playerId: 'k1', action: 'attack'}}, pressed: {}}];
 var virtualGamepads = []
-var startTime, then, now, dt, fps=0, fpsTime
+var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var isGameStarted = false, lastWinnerPlayerId = null, lastWinnerPlayerIdThen
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figures = [], maxFigures = 21
@@ -554,14 +554,18 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.scale(0.5,0.5)
                 ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
             } else {
-                // shadow
-                ctx.shadowColor = "rgba(0,0,0,0.5)"
-                ctx.shadowOffsetX = -canvas.width;
-                ctx.shadowOffsetY = 0;
-                ctx.shadowBlur = 16;
-                ctx.translate(canvas.width+24,-8)
-                ctx.transform(1, 0.1, -0.8, 1, 0, 0);
-                ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
+
+                if (fps > fpsMinForEffects) {
+                    // shadow
+                    ctx.shadowColor = "rgba(0,0,0,0.5)"
+                    ctx.shadowOffsetX = -canvas.width;
+                    ctx.shadowOffsetY = 0;
+                    ctx.shadowBlur = 16;
+                    ctx.translate(canvas.width+24,-8)
+                    ctx.transform(1, 0.1, -0.8, 1, 0, 0);
+                    ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
+                }
+                
             }
         } else {
             if (!f.isDead) {
