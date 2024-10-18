@@ -23,6 +23,7 @@ function gameLoop() {
     handleInput(dt)
     render()
     then = now
+    sendData()
 
     window.requestAnimationFrame(gameLoop);
 }
@@ -67,9 +68,15 @@ document.addEventListener('DOMContentLoaded', function (event) {
     document
     .getElementById('btnSend')
     .addEventListener('click', function (event) {
-      var jsonMessage = { hallo: document.getElementById('inputSend').value };
-      var peers = getConnectedPeers(peer)
-      sendJsonToPeers(jsonMessage, peers)
+      var message = document.getElementById('inputSend').value
+      var jsonObject = null
+      try {
+        jsonObject = JSON.parse(message)
+      } catch(e) {
+        jsonObject = {error: message}
+      }
+      
+      sendJsonToAllPeers(jsonObject)
     });
   
     initNetwork('hiddennotdangerous', {logMethod: textareaLog, dataReceivedMethod: dataReceived})
@@ -83,9 +90,9 @@ function textareaLog(d) {
     var color = 'white'
     if (peer && peer.open) {
         if (isMaster(peer)) {
-        color = 'gold'
+            color = 'gold'
         } else {
-        color = 'silver'
+            color = 'silver'
         }
     } 
 
@@ -93,5 +100,19 @@ function textareaLog(d) {
 }
 
 function dataReceived(d) {
+    var jsonObject = d
+    if (jsonObject.players) {
+        players = jsonObject.players
+    }
+    if (jsonObject.figures) {
+        figures = jsonObject.figures
+    }
+}
 
+function sendData() {
+    var jsonObject = {
+        figures: figures,
+        players: players
+    }
+    document.getElementById('inputSend').value = JSON.stringify(jsonObject)
 }

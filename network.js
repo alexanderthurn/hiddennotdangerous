@@ -44,6 +44,10 @@ function sendJsonToPeers(jsonObject, peers) {
   peers.forEach((k) => {k.send(jsonObject)});
 }
 
+function sendJsonToAllPeers(jsonObject) {
+  sendJsonToPeers(jsonObject, getConnectedPeers(peer))
+}
+
 function initNetwork(roomName, options) {
   logMethod = options.logMethod
   dataReceivedMethod = options.dataReceivedMethod
@@ -54,15 +58,13 @@ function initNetwork(roomName, options) {
   peer = new Peer(peerIdDefault, {debug: 3, config: {iceServers: iceServers,}});
   peer.on('close', () => tlog('peer closed'))
   peer.on('disconnected', () => tlog('peer disconnected'))
-  peer.on('open', function (id) {
-    tlog('peer open: ' + id);
-  });
+  peer.on('open', function (id) { tlog('peer open: ' + id); });
   peer.on('connection', function (conn) {
-    tlog('connected...' + conn.peer);
-    conn.on('close', () => tlog('conn closed'))
-    conn.on('open', () => tlog('conn opened'))
-    conn.on('error', (err) => tlog('conn error' + err))
-    conn.on('data', (data) => {tlog('conn data: ' + JSON.stringify(data)); dataReceivedMethod(data); /* sendJsonToPeers(data, getConnectedPeers(peer).filter(p => p.peer !== conn.peer))*/})
+    tlog('peer connection: ' + conn.peer);
+    conn.on('close', () => tlog('conn('+conn.peer+') closed'))
+    conn.on('open', () => tlog('conn('+conn.peer+') opened'))
+    conn.on('error', (err) => tlog('conn('+conn.peer+') error:' + err))
+    conn.on('data', (data) => {tlog('conn('+conn.peer+') data: ' + JSON.stringify(data)); dataReceivedMethod(data); /* sendJsonToPeers(data, getConnectedPeers(peer).filter(p => p.peer !== conn.peer))*/})
   });
 
   peer.on('error', function (err) {
@@ -76,14 +78,14 @@ function initNetwork(roomName, options) {
         tlog('new peer: ' + id);
         tlog(`connecting to peer ${peerIdDefault} `);
         conn = peer.connect(peerIdDefault, {serialization: 'json',reliable:false});
-        conn.on('close', () => {tlog('conn closed'); initNetwork(options)})
-        conn.on('open', () => tlog('conn opened'))
-        conn.on('error', () => tlog('conn error' + data))
-        conn.on('data', (data) => {tlog('conn data: ' + JSON.stringify(data)); dataReceivedMethod(data)})
+        conn.on('close', () => {tlog('conn('+conn.peer+') closed'); initNetwork(options)})
+        conn.on('open', () => tlog('conn('+conn.peer+') opened'))
+        conn.on('error', () => tlog('conn('+conn.peer+') error' + data))
+        conn.on('data', (data) => {tlog('conn('+conn.peer+') data: ' + JSON.stringify(data)); dataReceivedMethod(data)})
       });
 
     } else {
-      tlog('Error: ' + err.type);
+      tlog('peer error: ' + err.type);
     }
   });
 }
