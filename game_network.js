@@ -7,7 +7,7 @@ window.onkeyup = function(e) { pressedKeys[e.keyCode] = false; }
 window.onkeydown = function(e) { pressedKeys[e.keyCode] =true; }
 
 var players = [{playerId: 'a', peerId: 'local', type: 'keyboard', keyboardIndex:0 }, {playerId: 'b',  peerId: 'local', type: 'keyboard', keyboardIndex:1}]
-var figures = [{playerId: 'a', x: 60, y:160}, {playerId: 'b', x: 260, y:160}]
+var figures = [{playerId: 'a', x: Math.random()*320, y:Math.random()*320}, {playerId: 'b', x: Math.random()*320, y:Math.random()*320}]
 
 
 document.addEventListener('DOMContentLoaded', function (event) {
@@ -61,4 +61,37 @@ function render() {
     figures.forEach(f => {
         ctx.fillText(f.playerId,f.x,f.y); // Punkte
     })
+}
+
+document.addEventListener('DOMContentLoaded', function (event) {
+    document
+    .getElementById('btnSend')
+    .addEventListener('click', function (event) {
+      var jsonMessage = { hallo: document.getElementById('inputSend').value };
+      var peers = getConnectedPeers(peer)
+      sendJsonToPeers(jsonMessage, peers)
+    });
+  
+    initNetwork('hiddennotdangerous', {logMethod: textareaLog, dataReceivedMethod: dataReceived})
+  
+  })
+
+function textareaLog(d) {
+    var textArea = document.getElementById('textAreaLog')
+    textArea.value += d + '\n';
+    textArea.scrollTop = textArea.scrollHeight;
+    var color = 'white'
+    if (peer && peer.open) {
+        if (isMaster(peer)) {
+        color = 'gold'
+        } else {
+        color = 'silver'
+        }
+    } 
+
+    document.getElementsByTagName('body')[0].style.backgroundColor = color
+}
+
+function dataReceived(d) {
+
 }

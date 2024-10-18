@@ -1,5 +1,7 @@
 var peer;
-const peerIdDefault = 'hiddennotdangerous'
+var tlog
+var peerIdDefault
+
 const iceServers = [
     {
       urls: 'stun:stun.relay.metered.ca:80',
@@ -42,23 +44,12 @@ function sendJsonToPeers(jsonObject, peers) {
   peers.forEach((k) => {k.send(jsonObject)});
 }
 
+function initNetwork(roomName, options) {
+  logMethod = options.logMethod
+  dataReceivedMethod = options.dataReceivedMethod
 
-function tlog(d) {
-  document.getElementById('textAreaLog').value += d + '\n';
-
-  var color = 'white'
-  if (peer && peer.open) {
-    if (isMaster(peer)) {
-      color = 'gold'
-    } else {
-      color = 'silver'
-    }
-  } 
-
-  document.getElementsByTagName('body')[0].style.backgroundColor = color
-}
-
-function initNetwork() {
+  peerIdDefault = roomName
+  tlog = logMethod
   tlog('starting peer: ' + peerIdDefault);
   peer = new Peer(peerIdDefault, {debug: 3, config: {iceServers: iceServers,}});
   peer.on('close', () => tlog('peer closed'))
@@ -68,11 +59,10 @@ function initNetwork() {
   });
   peer.on('connection', function (conn) {
     tlog('connected...' + conn.peer);
-
     conn.on('close', () => tlog('conn closed'))
     conn.on('open', () => tlog('conn opened'))
-    conn.on('error', () => tlog('conn error' + data))
-    conn.on('data', (data) => {tlog('conn data: ' + JSON.stringify(data)); sendJsonToPeers(data, getConnectedPeers(peer).filter(p => p.peer !== conn.peer))})
+    conn.on('error', (err) => tlog('conn error' + err))
+    conn.on('data', (data) => {tlog('conn data: ' + JSON.stringify(data)); dataReceivedMethod(data); /* sendJsonToPeers(data, getConnectedPeers(peer).filter(p => p.peer !== conn.peer))*/})
   });
 
   peer.on('error', function (err) {
@@ -86,10 +76,10 @@ function initNetwork() {
         tlog('new peer: ' + id);
         tlog(`connecting to peer ${peerIdDefault} `);
         conn = peer.connect(peerIdDefault, {serialization: 'json',reliable:false});
-        conn.on('close', () => {tlog('conn closed'); initNetwork()})
+        conn.on('close', () => {tlog('conn closed'); initNetwork(options)})
         conn.on('open', () => tlog('conn opened'))
         conn.on('error', () => tlog('conn error' + data))
-        conn.on('data', (data) => tlog('conn data: ' + JSON.stringify(data)))
+        conn.on('data', (data) => {tlog('conn data: ' + JSON.stringify(data)); dataReceivedMethod(data)})
       });
 
     } else {
@@ -99,15 +89,3 @@ function initNetwork() {
 }
 
 
-document.addEventListener('DOMContentLoaded', function (event) {
-  document
-  .getElementById('btnSend')
-  .addEventListener('click', function (event) {
-    var jsonMessage = { hallo: document.getElementById('inputSend').value };
-    var peers = getConnectedPeers(peer)
-    sendJsonToPeers(jsonMessage, peers)
-  });
-
-  initNetwork()
-
-})
