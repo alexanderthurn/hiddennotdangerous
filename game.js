@@ -18,15 +18,15 @@ var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var isGameStarted = false, lastWinnerPlayerId = null, lastWinnerPlayerIdThen
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
-var figures = [], maxFigures = 21
-var image = new Image()
+var figures = [], maxPlayerFigures = 21
+var playerImage = new Image()
 var showDebug = false
 var lastKillTime;
 var multikillCounter;
 var multikillTimeWindow = 4000;
 var lastTotalkillAudio;
 var totalkillCounter;
-image.src = 'character_base_16x16.png'
+playerImage.src = 'character_base_16x16.png'
 var imageAnim = {
     down: {a: [[0,0,16,16], [16,0,16,16], [32,0,16,16], [48,0,16,16]]},
     up: {a: [[0,16,16,16], [16,16,16,16], [32,16,16,16], [48,16,16,16]]},
@@ -89,7 +89,6 @@ var soundWickedSick = getAudio(audio.wickedSick);
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
-    widthInTiles2 = Math.ceil(canvas.width/tileWidth);
 
     gameInit()
     window.requestAnimationFrame(gameLoop);
@@ -161,7 +160,7 @@ function gameInit() {
     var activePlayerIds = figures.filter(f => f.playerId).map(f => f.playerId)
     var oldFigures = figures
     figures = []
-    for (var i = 0; i < maxFigures; i++) {
+    for (var i = 0; i < maxPlayerFigures; i++) {
         const x = Math.random()*canvas.width;
         const y = Math.random()*canvas.height;
         const xTarget = Math.random()*canvas.width;
@@ -202,6 +201,31 @@ function gameInit() {
             mp.offsetCursorY = -canvas.height*0.1+Math.random()*canvas.height*0.2
         })
     }
+    figures.push({
+        type: 'bean',
+        x: canvas.width/5,
+        y: canvas.height/5,
+    });
+    figures.push({
+        type: 'bean',
+        x: canvas.width*4/5,
+        y: canvas.height/5
+    });
+    figures.push({
+        type: 'bean',
+        x: canvas.width/5,
+        y: canvas.height*4/5
+    });
+    figures.push({
+        type: 'bean',
+        x: canvas.width*4/5,
+        y: canvas.height*4/5
+    });
+    figures.push({
+        type: 'bean',
+        x: canvas.width/2,
+        y: canvas.height/2
+    });
 }
 
 function gameLoop() {
@@ -322,7 +346,7 @@ function gameLoop() {
 }
 
 function updateGame(figures, dt, dtProcessed) {
-    let figuresAlive = figures.filter(f => !f.isDead);
+    let figuresAlive = figures.filter(f => !f.isDead && f.type !== 'bean');
     figuresAlive.forEach(f => {
         let xyNew = move(f.x, f.y, f.angle,f.speed, dt)
         f.x = xyNew.x
@@ -339,7 +363,7 @@ function updateGame(figures, dt, dtProcessed) {
     let numberKilledFigures = 0;
     let killTime;
     figuresAlive.filter(f => f.isAttacking).forEach(f => {
-        figures.filter(fig => fig !== f && !fig.isDead).forEach(fig => {
+        figures.filter(fig => fig !== f && !fig.isDead && fig.type !== 'bean').forEach(fig => {
             let distAngles = distanceAngles(rad2deg(f.angle), rad2deg(angle(f.x,f.y,fig.x,fig.y)+180));
             if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance && distAngles <= 90) {
                 fig.isDead = true;
@@ -396,7 +420,7 @@ function handleInput(players, figures, dtProcessed) {
 function handleAi(figures, time, oldNumberJoinedKeyboardPlayers) {
     const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.map(f => f.playerId).includes(k.playerId)).length;
     const startKeyboardMovement = oldNumberJoinedKeyboardPlayers === 0 && numberJoinedKeyboardPlayers > 0;
-    const livingAIFigures = figures.filter(f => !f.playerId && !f.isDead);
+    const livingAIFigures = figures.filter(f => !f.playerId && !f.isDead && f.type !== 'bean');
     let shuffledIndexes;
     if (startKeyboardMovement) {
         shuffledIndexes = shuffle([...Array(livingAIFigures.length).keys()]);
@@ -552,10 +576,12 @@ function draw(players, figures, dt, dtProcessed, layer) {
             if (f.isDead) {
                 ctx.rotate(deg2rad(90))
                 ctx.scale(0.5,0.5)
-                ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
+                ctx.drawImage(playerImage, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
+            } else if(f.type === 'bean') {
+                // shadow of bean
             } else {
 
-                if (fps > fpsMinForEffects) {
+                //if (fps > fpsMinForEffects) {
                     // shadow
                     ctx.shadowColor = "rgba(0,0,0,0.5)"
                     ctx.shadowOffsetX = -canvas.width;
@@ -563,12 +589,22 @@ function draw(players, figures, dt, dtProcessed, layer) {
                     ctx.shadowBlur = 16;
                     ctx.translate(canvas.width+24,-8)
                     ctx.transform(1, 0.1, -0.8, 1, 0, 0);
-                    ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
-                }
+                    ctx.drawImage(playerImage, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
+                //}
                 
             }
         } else {
-            if (!f.isDead) {
+            if (f.type === 'bean') {
+                // bean image
+                let startAngle = f.angle + deg2rad(135)
+                let endAngle = startAngle + deg2rad(90)
+                ctx.fillStyle = "blue";
+                ctx.beginPath();
+                ctx.arc(0,0,10, 0, 2 * Math.PI)
+                ctx.closePath()
+                ctx.fill();
+                console.log('wtf', f);
+            } else if (!f.isDead) {
                 if (f.isAttacking) {
                     //ctx.rotate(deg2rad(-10+mod(dtProcessed*0.5,20)) )
                    
@@ -582,7 +618,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                         ctx.rotate(deg2rad(20))
                     }
                 }
-                ctx.drawImage(image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
+                ctx.drawImage(playerImage, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
             }
         }
         ctx.restore()  
@@ -606,6 +642,9 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.beginPath()
             ctx.lineWidth = 1;
             ctx.fillStyle = "green";
+            if (f.type === 'bean') {
+                ctx.fillStyle = "blue";
+            }
             if (f.playerId) {
                 ctx.fillStyle = "red";
             }
