@@ -6,7 +6,7 @@ var pressedKeys = {}; /* https://www.toptal.com/developers/keycode */
 window.onkeyup = function(e) { pressedKeys[e.keyCode] = false; }
 window.onkeydown = function(e) { pressedKeys[e.keyCode] =true; }
 
-var players = [{playerId: 'a', peerId: 'local', type: 'keyboard', keyboardIndex:0 }, {playerId: 'b',  peerId: 'local', type: 'keyboard', keyboardIndex:1}]
+var players = [{playerId: 'a', peerId: 'local', type: 'keyboard', keyboardIndex:0, xAxis: 0, yAxis: 0 }, {playerId: 'b',  peerId: 'local', type: 'keyboard', keyboardIndex:1, xAxis: 0, yAxis: 0}]
 var figures = [{playerId: 'a', x: Math.random()*320, y:Math.random()*320}, {playerId: 'b', x: Math.random()*320, y:Math.random()*320}]
 
 
@@ -21,6 +21,7 @@ function gameLoop() {
     now = Date.now();
     var dt = now - then
     handleInput(dt)
+    update(dt)
     render()
     then = now
     sendData()
@@ -31,26 +32,42 @@ function gameLoop() {
 function handleInput(dt) {
     players.filter(p => p.peerId === 'local').forEach(p => {
         var keyboard = keyboards[p.keyboardIndex]
-        var figure = figures.find(f => f.playerId === p.playerId)
+        p.xAxis = 0
+        p.yAxis = 0
         if (pressedKeys[keyboard.left]) {
-            figure.x-=0.1*dt
+            p.xAxis = -1
         } 
         if (pressedKeys[keyboard.right]) {
-            figure.x+=0.1*dt
+            p.xAxis = 1
         } 
         if (pressedKeys[keyboard.up]) {
-            figure.y-=0.1*dt
+            p.yAxis = -1
         } 
         if (pressedKeys[keyboard.down]) {
-            figure.y+=0.1*dt
+            p.yAxis = 1
         } 
+    })
+}
+
+function update(dt) {
+    figures.forEach(f => {
+        if (f.playerId) {
+            var p = players.find(p => f.playerId === p.playerId)
+            f.x += p.xAxis*0.1*dt
+            f.y += p.yAxis*0.1*dt
+        }
+
+        if (f.x > canvas.width) f.x = canvas.width
+        if (f.y > canvas.height) f.y = canvas.height
+        if (f.x < 0) f.x = 0
+        if (f.y < 0) f.y = 0
     })
 }
 
 function render() {
 
     ctx.textAlign = "center";
-    ctx.textBaseline='center'
+    ctx.textBaseline='middle'
     ctx.fillStyle = "white";
     ctx.font = "24px arial";
 
