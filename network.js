@@ -30,6 +30,14 @@ const iceServers = [
 
 /* https://peerjs.com/docs/#start */
 
+function isMaster() {
+  return isMaster(peer)
+}
+
+function getPeerId() {
+  return peer.id
+}
+
 function isMaster(peer) {
   return peer && peer.open && peer.id === peerIdDefault
 }
@@ -64,7 +72,7 @@ function initNetwork(roomName, options) {
     conn.on('close', () => tlog('conn('+conn.peer+') closed'))
     conn.on('open', () => tlog('conn('+conn.peer+') opened'))
     conn.on('error', (err) => tlog('conn('+conn.peer+') error:' + err))
-    conn.on('data', (data) => {tlog('conn('+conn.peer+') data: ' + JSON.stringify(data)); dataReceivedMethod(data); /* sendJsonToPeers(data, getConnectedPeers(peer).filter(p => p.peer !== conn.peer))*/})
+    conn.on('data', (data) => {tlog('conn('+conn.peer+') data: ' + JSON.stringify(data)); dataReceivedMethod(data, peer, conn); /* sendJsonToPeers(data, getConnectedPeers(peer).filter(p => p.peer !== conn.peer))*/})
   });
 
   peer.on('error', function (err) {
@@ -81,7 +89,7 @@ function initNetwork(roomName, options) {
         conn.on('close', () => {tlog('conn('+conn.peer+') closed'); initNetwork(options)})
         conn.on('open', () => tlog('conn('+conn.peer+') opened'))
         conn.on('error', () => tlog('conn('+conn.peer+') error' + data))
-        conn.on('data', (data) => {tlog('conn('+conn.peer+') data: ' + JSON.stringify(data)); dataReceivedMethod(data)})
+        conn.on('data', (data) => {tlog('conn('+conn.peer+') data: ' + JSON.stringify(data)); dataReceivedMethod(data, peer, conn)})
       });
 
     } else {

@@ -1,14 +1,13 @@
 var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
 var now, then
-var keyboards = [{left: 65, up: 87, right: 68, down: 83, action: 69}, {left: 37, up: 38, right: 39, down: 40, action: 96}]
+var keyboards = [{left: 65, up: 87, right: 68, down: 83, action: 69, peerId: '', index: 1}, {left: 37, up: 38, right: 39, down: 40, action: 96, peerId: '', index: 2}]
 var pressedKeys = {}; /* https://www.toptal.com/developers/keycode */
 window.onkeyup = function(e) { pressedKeys[e.keyCode] = false; }
 window.onkeydown = function(e) { pressedKeys[e.keyCode] =true; }
 
-var players = [{playerId: 'a', peerId: 'local', type: 'keyboard', keyboardIndex:0, xAxis: 0, yAxis: 0 }, {playerId: 'b',  peerId: 'local', type: 'keyboard', keyboardIndex:1, xAxis: 0, yAxis: 0}]
-var figures = [{playerId: 'a', x: Math.random()*320, y:Math.random()*320}, {playerId: 'b', x: Math.random()*320, y:Math.random()*320}]
-
+var players = [{playerIndex: 1, peerId: '', type: 'keyboard', keyboardIndex:1, xAxis: 0, yAxis: 0 }, {playerIndex: 2, peerId: '', type: 'keyboard', keyboardIndex:2, xAxis: 0, yAxis: 0}]
+var figures = [{playerIndex: 1, x: Math.random()*320, y:Math.random()*320}, {playerIndex: 2, x: Math.random()*320, y:Math.random()*320}]
 
 document.addEventListener('DOMContentLoaded', function (event) {
     now = Date.now();
@@ -34,6 +33,8 @@ function handleInput(dt) {
         var keyboard = keyboards[p.keyboardIndex]
         p.xAxis = 0
         p.yAxis = 0
+        p.isActionButtonPressed = pressedKeys[keyboard.action]
+
         if (pressedKeys[keyboard.left]) {
             p.xAxis = -1
         } 
@@ -51,8 +52,8 @@ function handleInput(dt) {
 
 function update(dt) {
     figures.forEach(f => {
-        if (f.playerId) {
-            var p = players.find(p => f.playerId === p.playerId)
+        if (f.playerIndex) {
+            var p = players.find(p => f.playerIndex === p.playerIndex)
             f.x += p.xAxis*0.1*dt
             f.y += p.yAxis*0.1*dt
         }
@@ -77,7 +78,7 @@ function render() {
     ctx.fillStyle = "white";
 
     figures.forEach(f => {
-        ctx.fillText(f.playerId,f.x,f.y); // Punkte
+        ctx.fillText(f.playerIndex,f.x,f.y); // Punkte
     })
 }
 
@@ -116,20 +117,53 @@ function textareaLog(d) {
     document.getElementsByTagName('body')[0].style.backgroundColor = color
 }
 
-function dataReceived(d) {
+function findFreePlayerIndex(players) {
+    return players.map(p => p.playerIndex).sort().slice(-1)[0]
+}
+function dataReceived(d, peer, conn) {
     var jsonObject = d
+    var fromPeerId = conn.peer
+
+    if (jsonObject.keyboards) {
+        jsonObject.keyboards.forEach(k => {
+            var indexInArray = keyboards.findIndex(kk => fromPeerId === k.peerId && kk.index === k.index)
+            if (indexInArray >= 0) {
+                keyboards[indexInArray] = k
+            } else {
+                k.peerId = fromPeerId
+                keyboards.push(k)
+                players.push({playerIndex: findFreePlayerIndex(), peerId: fromPeerId, type: 'keyboard', keyboardIndex:k.keyboardIndex, xAxis: 0, yAxis: 0 })
+                figures.push({playerIndex: player.playerIndex, peerId: fromPeerId, x: Math.random()*320, y:Math.random()*320})
+            }
+        })
+    }
+
     if (jsonObject.players) {
-        players = jsonObject.players
+        players = jsonObject.players.map(p => {
+            if (isMaster()) { p.peerId = fromPeerId }
+            return p
+        })
     }
     if (jsonObject.figures) {
-        figures = jsonObject.figures
+        figures = jsonObject.figures.map(f => {
+            if (isMaster()) { f.peerId = fromPeerId }
+            return f
+        })
     }
+
 }
 
 function sendData() {
     var jsonObject = {
-        figures: figures,
-        players: players
+
     }
+
+    if (isMaster()) {
+        jsonObject.figures = figures
+        jsonObject.players = players
+    } else {
+        jsonObject.keyboards = keyboards
+    }
+
     document.getElementById('inputSend').value = JSON.stringify(jsonObject)
 }
