@@ -218,7 +218,7 @@ function gameLoop() {
         } 
         let x = g.axes[0];
         let y = g.axes[1];
-        [x, y] = setDeadzone(x, y,0.0001);
+        [x, y] = setDeadzone(x, y,0.1);
         [x, y] = clampStick(x, y);
         g.xAxis = x
         g.yAxis = y
