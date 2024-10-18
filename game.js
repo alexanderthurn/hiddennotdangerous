@@ -500,7 +500,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.font = canvas.width*0.06+"px serif";
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
-        ctx.textBaseline='center'
+        ctx.textBaseline='middle'
         ctx.translate(canvas.width*1.5,canvas.height*0.3)
         ctx.fillText('Hidden Not Dangerous',0,0)
         ctx.font = canvas.width*0.03+"px serif";
@@ -648,10 +648,10 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.fill();
             ctx.closePath()
             ctx.textAlign = "center";
-            ctx.textBaseline='center'
+            ctx.textBaseline='middle'
             ctx.fillStyle = "white";
             ctx.font = "24px arial";
-            ctx.fillText(f.points,0,-10); // Punkte
+            ctx.fillText(f.points,0,0); // Punkte
             ctx.stroke();
             ctx.restore()
         })
