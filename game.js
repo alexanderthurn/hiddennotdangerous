@@ -152,6 +152,7 @@ window.addEventListener("resize", function(event){
 function gameInit() {
     then = Date.now();
     startTime = then;
+    //dtProcessed = 0
     fpsTime = then
     lastKillTime = undefined;
     multikillCounter = 0;
@@ -171,8 +172,8 @@ function gameInit() {
             xTarget,
             yTarget,
             maxBreakDuration: 5000,
+            startWalkTime: Math.random() * 5000 + dtProcessed,
             maxSpeed: 0.08,
-            startWalkTime: 0,
             speed: 0,
             isDead: false, 
             playerId: null,
@@ -248,7 +249,7 @@ function gameLoop() {
         } 
         let x = g.axes[0];
         let y = g.axes[1];
-        [x, y] = setDeadzone(x, y,0.1);
+        [x, y] = setDeadzone(x, y,0.2);
         [x, y] = clampStick(x, y);
         g.xAxis = x
         g.yAxis = y
@@ -592,7 +593,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
     figures.toSorted((f1,f2) => (f2.isDead || f1.isDead) ? f2.isDead - f1.isDead:  f1.y - f2.y ).forEach(f => {
         let deg = rad2limiteddeg(f.angle)
-        if (distanceAngles(deg, 0) < 45) {
+        if (distanceAngles(deg, 0) < 45 || distanceAngles(deg, 0) > 360-45) {
             frame = imageAnim.right.a
         } else if (distanceAngles(deg, 90) <= 45){
             frame = imageAnim.down.a
@@ -694,7 +695,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.fillStyle = "red";
                 ctx.font = "16px serif";
                 ctx.fillStyle = "white";
-                ctx.fillText(f.playerId + '',f.x,f.y)
+                ctx.fillText(f.playerId + ' ' + distanceAngles(rad2limiteddeg(f.angle), 0),f.x,f.y)
             }
         }
     })
