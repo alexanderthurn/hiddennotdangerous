@@ -186,7 +186,8 @@ function gameInit() {
             points: 0,
             attackDistance: 80,
             soundAttack: getAudio(audio.attack),
-            soundDeath: getAudio(audio.death)
+            soundDeath: getAudio(audio.death),
+            beans: []
         }
 
         if (activePlayerIds.length > i) {
@@ -202,26 +203,31 @@ function gameInit() {
         })
     }
     figures.push({
+        id: 1,
         type: 'bean',
         x: canvas.width/5,
         y: canvas.height/5,
     });
     figures.push({
+        id: 2,
         type: 'bean',
         x: canvas.width*4/5,
         y: canvas.height/5
     });
     figures.push({
+        id: 3,
         type: 'bean',
         x: canvas.width/5,
         y: canvas.height*4/5
     });
     figures.push({
+        id: 4,
         type: 'bean',
         x: canvas.width*4/5,
         y: canvas.height*4/5
     });
     figures.push({
+        id: 5,
         type: 'bean',
         x: canvas.width/2,
         y: canvas.height/2
@@ -341,6 +347,25 @@ function gameLoop() {
             isGameStarted = true
         }
         gameInit()
+    } else if (survivors.length == 0 && figuresWithPlayer.length > 0) {
+        if (!isGameStarted) {
+            isGameStarted = true
+        }
+        gameInit()
+    }
+
+    let fullbeaners = figuresWithPlayer.filter(f => Object.values(f.beans).filter(value => value).length === 5);
+    if (fullbeaners.length > 0 && figuresWithPlayer.length > 1) {
+        if (isGameStarted) {
+            fullbeaners.forEach(f => {
+                f.points++
+                lastWinnerPlayerId = fullbeaners[0].playerId
+            });
+            lastWinnerPlayerIdThen = dtProcessed
+        } else {
+            isGameStarted = true
+        }
+        gameInit()
     }
     window.requestAnimationFrame(gameLoop);
 }
@@ -360,6 +385,16 @@ function updateGame(figures, dt, dtProcessed) {
         if (f.y < 0) f.y = 0
         
     })
+    
+    let playerFigures = figures.filter(f => f.playerId);
+    figures.filter(f => f.type === 'bean').forEach(f => {
+        playerFigures.forEach(fig => {
+            if (distance(f.x,f.y,fig.x,fig.y) < 15) {
+                fig.beans[f.id] = true;
+            }
+        })
+    })
+
     let numberKilledFigures = 0;
     let killTime;
     figuresAlive.filter(f => f.isAttacking).forEach(f => {
@@ -603,7 +638,6 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.arc(0,0,10, 0, 2 * Math.PI)
                 ctx.closePath()
                 ctx.fill();
-                console.log('wtf', f);
             } else if (!f.isDead) {
                 if (f.isAttacking) {
                     //ctx.rotate(deg2rad(-10+mod(dtProcessed*0.5,20)) )
