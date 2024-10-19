@@ -1,7 +1,7 @@
 console.log('no need to hide')
 var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
-var mousePlayers = [{x: 0, y: 0, offsetCursorX: 0, offsetCursorY: 0,pressed: {}, pressedLastFrame: false}];
+var mousePlayers = [{x: 0, y: 0, offsetCursorX: 0, offsetCursorY: 0,pressed: new Set(), pressedLastFrame: false}];
 var keyboardPlayers = [{}, {}];
 var keyboards = [{bindings: {
     'KeyA': {playerId: 'k0', action: 'left'},
@@ -13,10 +13,10 @@ var keyboards = [{bindings: {
     'ArrowRight': {playerId: 'k1', action: 'right'},
     'ArrowUp': {playerId: 'k1', action: 'up'},
     'ArrowDown': {playerId: 'k1', action: 'down'},
-    'Numpad0': {playerId: 'k1', action: 'attack'}}, pressed: {}}];
+    'Numpad0': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var isGameStarted = false, lastWinnerPlayerId = null, lastWinnerPlayerIdThen
+var isGameStarted = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figures = [], maxPlayerFigures = 21
 var playerImage = new Image()
@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", function(event){
 
 window.addEventListener('keydown', event => {
     keyboards.forEach(k => {
-        k.pressed[event.code] = true;
+        k.pressed.add(event.code);
     });
 
     if (event.code === 'ArrowDown' || event.code === 'ArrowUp') { /* prevent scrolling of website */
@@ -122,18 +122,18 @@ window.addEventListener('keyup', event => {
         showDebug =!showDebug
     }
     keyboards.forEach(k => {
-        delete k.pressed[event.code];
+        k.pressed.delete(event.code);
     });
 });
 
 window.addEventListener('pointerdown', event => {
-    mousePlayers[0].pressed[event.button] = true;
+    mousePlayers[0].pressed.add(event.button);
     event.preventDefault();
     event.stopPropagation();
 });
 
 window.addEventListener('pointerup', event => {
-    delete mousePlayers[0].pressed[event.button];
+    mousePlayers[0].pressed.delete(event.button);
     event.preventDefault();
     event.stopPropagation();
 });
@@ -187,7 +187,7 @@ function gameInit() {
             attackDistance: 80,
             soundAttack: getAudio(audio.attack),
             soundDeath: getAudio(audio.death),
-            beans: []
+            beans: new Set()
         }
 
         if (activePlayerIds.length > i) {
@@ -268,7 +268,7 @@ function gameLoop() {
     });
 
     keyboards.forEach(k => {
-        Object.keys(k.pressed).forEach(pressedButton => {
+        k.pressed.values().forEach(pressedButton => {
             const binding = k.bindings[pressedButton];
             if (binding) {
                 const action = binding.action;
@@ -301,8 +301,8 @@ function gameLoop() {
     mousePlayers.forEach((mp,i) => {
         mp.type = 'mouse'
         mp.playerId = 'm' + i
-        mp.isAttackButtonPressed = !mp.pressed[0] && mp.pressedLastFrame || false
-        mp.pressedLastFrame = mp.pressed[0]
+        mp.isAttackButtonPressed = !mp.pressed.has(0) && mp.pressedLastFrame || false
+        mp.pressedLastFrame = mp.pressed.has(0)
         mp.xAxis = 0
         mp.yAxis = 0
         mp.isMoving = 0
@@ -341,7 +341,8 @@ function gameLoop() {
     if (survivors.length == 1 && figuresWithPlayer.length > 1) {
         if (isGameStarted) {
             survivors[0].points++
-            lastWinnerPlayerId = survivors[0].playerId
+            lastWinnerPlayerIds.clear();
+            lastWinnerPlayerIds.add(survivors[0].playerId);
             lastWinnerPlayerIdThen = dtProcessed
         } else {
             isGameStarted = true
@@ -354,12 +355,13 @@ function gameLoop() {
         gameInit()
     }
 
-    let fullbeaners = figuresWithPlayer.filter(f => Object.values(f.beans).filter(value => value).length === 5);
+    let fullbeaners = figuresWithPlayer.filter(f => f.beans.size === 5);
     if (fullbeaners.length > 0 && figuresWithPlayer.length > 1) {
         if (isGameStarted) {
+            lastWinnerPlayerIds.clear();
             fullbeaners.forEach(f => {
                 f.points++
-                lastWinnerPlayerId = fullbeaners[0].playerId
+                lastWinnerPlayerIds.add(f.playerId);
             });
             lastWinnerPlayerIdThen = dtProcessed
         } else {
@@ -390,7 +392,7 @@ function updateGame(figures, dt, dtProcessed) {
     figures.filter(f => f.type === 'bean').forEach(f => {
         playerFigures.forEach(fig => {
             if (distance(f.x,f.y,fig.x,fig.y) < 15) {
-                fig.beans[f.id] = true;
+                fig.beans.add(f.id);
             }
         })
     })
@@ -421,7 +423,8 @@ function handleInput(players, figures, dtProcessed) {
             figure.isDead = false
             figure.playerId = p.playerId
             playAudio(soundJoin);
-            lastWinnerPlayerId = figure.playerId  
+            lastWinnerPlayerIds.clear();
+            lastWinnerPlayerIds.add(figure.playerId);
             lastWinnerPlayerIdThen = dtProcessed
 
             if (figures.filter(f => f.playerId).length == 2) {
@@ -701,7 +704,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.save()
             ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
             ctx.beginPath();
-            if (lastWinnerPlayerId !== f.playerId) {
+            if (!lastWinnerPlayerIds.has(f.playerId)) {
                 ctx.translate(32+i*48, canvas.height-32)
             } else {
                 var dtt = dtProcessed - lastWinnerPlayerIdThen
