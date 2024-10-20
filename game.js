@@ -210,6 +210,7 @@ function gameInit() {
             soundAttack: getAudio(audio.attack),
             soundDeath: getAudio(audio.death),
             beans: new Set(),
+            beansFarted: new Set(),
             image: playerImage,
             imageAnim: playerImageAnim,
             type: 'fighter',
@@ -528,7 +529,8 @@ function handleInput(players, figures, dtProcessed) {
 
 
                 if (dtProcessed-f.lastAttackTime > f.attackBreakDuration) {
-                    addFartCloud(f.x,f.y,f.playerId,1+f.beans.size)
+                    addFartCloud(f.x,f.y,f.playerId,f.beans.size - f.beansFarted.size)
+                    f.beans.forEach(b => f.beansFarted.add(b))
                     f.lastAttackTime = dtProcessed
                     playAudio(f.soundAttack);
                 }
