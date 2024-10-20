@@ -26,6 +26,7 @@ var multikillCounter;
 var multikillTimeWindow = 4000;
 var lastTotalkillAudio;
 var totalkillCounter;
+var level = {}
 playerImage.src = 'character_base_16x16.png'
 var playerImageAnim = {
     width: 64,
@@ -109,10 +110,19 @@ var soundWickedSick = getAudio(audio.wickedSick);
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
-
+    level.width = canvas.width // 1920
+    level.height = canvas.height // 1080
+    level.scale = 1.0 // Math.min(canvas.width / level.width,canvas.height / level.height)
     gameInit()
     window.requestAnimationFrame(gameLoop);
 })
+
+window.addEventListener("resize", function(event){
+    resizeCanvasToDisplaySize(canvas)
+    level.width = canvas.width // 1920
+    level.height = canvas.height // 1080
+    level.scale = 1.0 // Math.min(canvas.width / level.width,canvas.height / level.height)
+});
 
 window.addEventListener('keydown', event => {
     keyboards.forEach(k => {
@@ -165,9 +175,7 @@ canvas.addEventListener('pointermove', event => {
     event.stopPropagation();
 }, false);
 
-window.addEventListener("resize", function(event){
-    resizeCanvasToDisplaySize(canvas)
-});
+
 
 function gameInit() {
     then = Date.now();
@@ -182,10 +190,10 @@ function gameInit() {
     var oldFigures = figures
     figures = []
     for (var i = 0; i < maxPlayerFigures; i++) {
-        const x = Math.random()*canvas.width;
-        const y = Math.random()*canvas.height;
-        const xTarget = Math.random()*canvas.width;
-        const yTarget = Math.random()*canvas.height;
+        const x = Math.random()*level.width;
+        const y = Math.random()*level.height;
+        const xTarget = Math.random()*level.width;
+        const yTarget = Math.random()*level.height;
         var figure = {
             x,
             y,
@@ -227,15 +235,15 @@ function gameInit() {
         figures.push(figure)
 
         mousePlayers.forEach(mp => {
-            mp.offsetCursorX = -canvas.width*0.1+Math.random()*canvas.width*0.2
-            mp.offsetCursorY = -canvas.height*0.1+Math.random()*canvas.height*0.2
+            mp.offsetCursorX = -level.width*0.1+Math.random()*level.width*0.2
+            mp.offsetCursorY = -level.height*0.1+Math.random()*level.height*0.2
         })
     }
     figures.push({
         id: 1,
         type: 'bean',
-        x: canvas.width/5,
-        y: canvas.height/5,
+        x: level.width/5,
+        y: level.height/5,
         image: null,
         imageAnim: null,    
         speed: 0,
@@ -246,8 +254,8 @@ function gameInit() {
     figures.push({
         id: 2,
         type: 'bean',
-        x: canvas.width*4/5,
-        y: canvas.height/5,
+        x: level.width*4/5,
+        y: level.height/5,
         image: null,
         imageAnim: null,    
         speed: 0,
@@ -258,8 +266,8 @@ function gameInit() {
     figures.push({
         id: 3,
         type: 'bean',
-        x: canvas.width/5,
-        y: canvas.height*4/5,
+        x: level.width/5,
+        y: level.height*4/5,
         image: null,
         imageAnim: null,    
         speed: 0,
@@ -270,8 +278,8 @@ function gameInit() {
     figures.push({
         id: 4,
         type: 'bean',
-        x: canvas.width*4/5,
-        y: canvas.height*4/5,
+        x: level.width*4/5,
+        y: level.height*4/5,
         image: null,
         imageAnim: null,    
         speed: 0,
@@ -282,8 +290,8 @@ function gameInit() {
     figures.push({
         id: 5,
         type: 'bean',
-        x: canvas.width/2,
-        y: canvas.height/2,
+        x: level.width/2,
+        y: level.height/2,
         image: null,
         imageAnim: null,    
         speed: 0,
@@ -465,8 +473,8 @@ function updateGame(figures, dt, dtProcessed) {
         f.anim += f.speed + f.imageAnim?.animDefaultSpeed
        // f.anim += f.isAttacking ? 0.5 : 0
 
-        if (f.x > canvas.width) f.x = canvas.width
-        if (f.y > canvas.height) f.y = canvas.height
+        if (f.x > level.width) f.x = level.width
+        if (f.y > level.height) f.y = level.height
         if (f.x < 0) f.x = 0
         if (f.y < 0) f.y = 0
         
@@ -563,8 +571,8 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
         if (time >= f.startWalkTime) {
             if (f.speed === 0) {
                 if (!startKeyboardMovement) {
-                    f.xTarget = Math.random()*canvas.width
-                    f.yTarget = Math.random()*canvas.height
+                    f.xTarget = Math.random()*level.width
+                    f.yTarget = Math.random()*level.height
                 }
 
                 if (numberJoinedKeyboardPlayers > 0) {
@@ -572,18 +580,18 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
                     const direction = {x: Math.cos(discreteAngle), y: Math.sin(discreteAngle)};
                     let distanceToBorder;
                     if (direction.x !== 0) {
-                        const xBorder = direction.x > 0 ? canvas.width : 0;
+                        const xBorder = direction.x > 0 ? level.width : 0;
                         let t = (xBorder - f.x)/direction.x;
                         let y = t*direction.y + f.y;
-                        if (y >= 0 && y < canvas.height) {
+                        if (y >= 0 && y < level.height) {
                             distanceToBorder = t;
                         }
                     }
                     if (direction.y !== 0) {
-                        const yBorder = direction.y > 0 ? canvas.height : 0;
+                        const yBorder = direction.y > 0 ? level.height : 0;
                         let t = (yBorder - f.y)/direction.y;
                         let x = t*direction.x + f.x;
-                        if (x >= 0 && x < canvas.width) {
+                        if (x >= 0 && x < level.width) {
                             distanceToBorder = t;
                         }
                     }
@@ -593,8 +601,8 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
                 }
             }
             
-            if (f.xTarget > canvas.width) f.xTarget = canvas.width
-            if (f.yTarget > canvas.height) f.yTarget = canvas.height
+            if (f.xTarget > level.width) f.xTarget = level.width
+            if (f.yTarget > level.height) f.yTarget = level.height
             if (f.xTarget < 0) f.xTarget = 0
             if (f.yTarget < 0) f.yTarget = 0
 
@@ -631,6 +639,9 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
 }
 
 function draw(players, figures, dt, dtProcessed, layer) {
+    ctx.save()
+    ctx.scale(level.scale, level.scale)
+
     if (layer === 0) {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         const heightInTiles = getHeightInTiles();
@@ -667,22 +678,22 @@ function draw(players, figures, dt, dtProcessed, layer) {
     ctx.strokeStyle = "rgba(165,24,24,0.5)";
     ctx.lineWidth = 15;
     ctx.lineJoin = "bevel";
-    ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeRect(0, 0, level.width, level.height);
     ctx.restore()
 
     if (!isGameStarted) {
         ctx.save()
         ctx.shadowColor = "rgba(0,0,0,1)"
-        ctx.shadowOffsetX = -canvas.width;
+        ctx.shadowOffsetX = -level.width;
         ctx.shadowOffsetY = 0;
         ctx.shadowBlur = 2+Math.sin(dtProcessed*0.001)*2;
-        ctx.font = canvas.width*0.06+"px serif";
+        ctx.font = level.width*0.06+"px serif";
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
         ctx.textBaseline='middle'
-        ctx.translate(canvas.width*1.5,canvas.height*0.3)
+        ctx.translate(level.width*1.5,level.height*0.3)
         ctx.fillText('Hidden Not Dangerous',0,0)
-        ctx.font = canvas.width*0.03+"px serif";
+        ctx.font = level.width*0.03+"px serif";
         ctx.shadowBlur = 1;
         ctx.fillText('WASDT',0,96)
         ctx.fillText(String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0',0,96*2)
@@ -697,7 +708,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
     for (x = -2; x < 2;x ++) {
         for (y = -2;y < 2;y++) {
             ctx.beginPath();
-            ctx.arc(mousePlayers[0].x + mousePlayers[0].offsetCursorX + x*canvas.width*0.5, mousePlayers[0].y + mousePlayers[0].offsetCursorY + y*canvas.height*0.5, 5, 0, 2 * Math.PI);
+            ctx.arc(mousePlayers[0].x + mousePlayers[0].offsetCursorX + x*level.width*0.5, mousePlayers[0].y + mousePlayers[0].offsetCursorY + y*level.height*0.5, 5, 0, 2 * Math.PI);
             ctx.lineWidth = 1;
             ctx.strokeStyle = "rgba(0,0,0,0.5)";
             ctx.stroke();
@@ -752,10 +763,10 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 //if (fps > fpsMinForEffects) {
                     // shadow
                     ctx.shadowColor = "rgba(0,0,0,0.5)"
-                    ctx.shadowOffsetX = -canvas.width;
+                    ctx.shadowOffsetX = -level.width;
                     ctx.shadowOffsetY = 0;
                     ctx.shadowBlur = 16;
-                    ctx.translate(canvas.width+24,-8)
+                    ctx.translate(level.width+24,-8)
                     ctx.transform(1, 0.1, -0.8, 1, 0, 0);
                     ctx.scale(1.0*f.scale,1.0*f.scale)
                     ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
@@ -845,7 +856,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
             ctx.beginPath();
             if (!lastWinnerPlayerIds.has(f.playerId)) {
-                ctx.translate(32+i*48, canvas.height-32)
+                ctx.translate(32+i*48, level.height-32)
             } else {
                 var dtt = dtProcessed - lastWinnerPlayerIdThen
                 var lastWinnerPlayerIdDuration = 1000
@@ -855,7 +866,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
                 var lp = dtt / (lastWinnerPlayerIdDuration)
                 var lpi = 1-lp
-                ctx.translate(lpi * (canvas.width*0.5) + lp*(32+i*48), lpi*(canvas.height*0.5) + lp*(canvas.height-32))
+                ctx.translate(lpi * (level.width*0.5) + lp*(32+i*48), lpi*(level.height*0.5) + lp*(level.height-32))
                 ctx.scale(12.0*lpi + 1*lp,12.0*lpi +1*lp)
 
             }
@@ -904,5 +915,6 @@ function draw(players, figures, dt, dtProcessed, layer) {
         }
     }
     
+    ctx.restore()
 
 }
