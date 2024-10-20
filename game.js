@@ -221,7 +221,7 @@ function gameInit() {
             yTarget,
             maxBreakDuration: 5000,
             startWalkTime: Math.random() * 5000 + dtProcessed,
-            maxSpeed: 0.18,
+            maxSpeed: 0.08,
             speed: 0,
             isDead: false, 
             playerId: null,
