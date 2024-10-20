@@ -73,7 +73,7 @@ const textureTiles = {
     grass: [655, 23, 609, 609],
     mushrooms: [23, 23, 609, 609]
 }
-const tileWidth = 100;
+const tileWidth = 120;
 const textureTilesList = Object.values(textureTiles);
 const audio = {
     attack: {title: 'sound2.mp3', currentTime: 0.15},
@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
     level.width = 1920
     level.height = 1080
-    level.scale = Math.min(canvas.width / level.width,canvas.height / level.height)
+    level.scale = Math.min(canvas.width / level.width, canvas.height / level.height)
     gameInit()
     window.requestAnimationFrame(gameLoop);
 })
@@ -141,7 +141,7 @@ window.addEventListener("resize", function(event){
     resizeCanvasToDisplaySize(canvas)
     level.width = 1920
     level.height = 1080
-    level.scale = Math.min(canvas.width / level.width,canvas.height / level.height)
+    level.scale = Math.min(canvas.width / level.width, canvas.height / level.height)
 });
 
 window.addEventListener('keydown', event => {
@@ -694,10 +694,22 @@ function draw(players, figures, dt, dtProcessed, layer) {
         }
 
         ctx.save();
-        for (let i = 0; i < Math.min(tileArea.length, widthInTiles); i++) {
+        maxI = Math.min(tileArea.length, widthInTiles);
+        for (let i = 0; i < maxI; i++) {
+            maxJ = Math.min(tileArea[i].length, heightInTiles);
             for (let j = 0; j < Math.min(tileArea[i].length, heightInTiles); j++) {
                 const tile = textureTilesList[tileArea[i][j]];
-                ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, tileWidth, tileWidth)
+                let relTileWidth = 1;
+                let relTileHeight = 1;
+                if (i === maxI-1) {
+                    relTileWidth = (level.width % tileWidth) / tileWidth;
+                    relTileWidth = relTileWidth > 0 ? relTileWidth : 1;
+                }
+                if (j === maxJ-1) {
+                    relTileHeight = (level.height % tileWidth) / tileWidth;
+                    relTileHeight = relTileHeight > 0 ? relTileHeight : 1;
+                }
+                ctx.drawImage(texture, tile[0], tile[1], relTileWidth * tile[2], relTileHeight * tile[3], 0, 0, relTileWidth * tileWidth, relTileHeight * tileWidth)
                 if(j < Math.min(tileArea[i].length, heightInTiles)-1) {
                     ctx.translate(0, tileWidth);
                 } else {
@@ -941,7 +953,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
     
         ctx.save()
         ctx.textAlign = "right";
-        ctx.fillText(fps + " FPS", canvas.width/level.scale, 0);
+        ctx.fillText(fps + " FPS", level.width, 0);
         ctx.restore()
     
     
