@@ -429,8 +429,10 @@ function gameLoop() {
 
         var f = figures.find(f => f.playerId ===  mp.playerId && f.type === 'fighter')
         if (f) {
-            let x = mp.x - f.x;
-            let y = mp.y - f.y;
+            //let x = mp.x - f.x;
+            //let y = mp.y - f.y;
+            let x = mp.x - canvas.width / 2;
+            let y = mp.y - canvas.height / 2;
             //[x, y] = setDeadzone(x, y,0.1);
             //[x, y] = clampStick(x, y);
             mp.xAxis = x
@@ -748,7 +750,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
     //ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, 100, 100)
     ctx.save()
     
-    for (x = -2; x < 2;x ++) {
+    /*for (x = -2; x < 2;x ++) {
         for (y = -2;y < 2;y++) {
             ctx.beginPath();
             ctx.arc(mousePlayers[0].x + mousePlayers[0].offsetCursorX + x*level.width*0.5, mousePlayers[0].y + mousePlayers[0].offsetCursorY + y*level.height*0.5, 5, 0, 2 * Math.PI);
@@ -756,7 +758,13 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.strokeStyle = "rgba(0,0,0,0.5)";
             ctx.stroke();
         }
-    }
+    }*/
+
+        ctx.beginPath();
+            ctx.arc(mousePlayers[0].x, mousePlayers[0].y, 5, 0, 2 * Math.PI);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "rgba(0,0,0,0.5)";
+            ctx.stroke();
     
 
     ctx.restore()
