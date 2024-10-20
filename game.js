@@ -352,9 +352,6 @@ function gameLoop() {
     });
 
     keyboards.forEach(k => {
-        console.log(k.pressed)
-        console.log(k.pressed.values())
-        console.log(k.pressed.values().forEach)
         Array.from(k.pressed.values()).forEach(pressedButton => {
             const binding = k.bindings[pressedButton];
             if (binding) {
