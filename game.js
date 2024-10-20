@@ -130,18 +130,14 @@ var soundEat = [getAudio(audio.eat[0]),getAudio(audio.eat[1]),getAudio(audio.eat
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
-    level.width = 1920
-    level.height = 1080
-    level.scale = Math.min(canvas.width / level.width, canvas.height / level.height)
+    adjustLevelToCanvas(level, canvas)
     gameInit()
     window.requestAnimationFrame(gameLoop);
 })
 
 window.addEventListener("resize", function(event){
     resizeCanvasToDisplaySize(canvas)
-    level.width = 1920
-    level.height = 1080
-    level.scale = Math.min(canvas.width / level.width, canvas.height / level.height)
+    adjustLevelToCanvas(level, canvas)
 });
 
 window.addEventListener('keydown', event => {
@@ -189,8 +185,8 @@ window.addEventListener('pointerup', event => {
 });
 
 canvas.addEventListener('pointermove', event => {
-    mousePlayers[0].x = (event.clientX - canvas.offsetLeft)/level.scale;
-    mousePlayers[0].y = (event.clientY -  canvas.offsetTop)/level.scale;
+    mousePlayers[0].x = (event.clientX - canvas.offsetLeft - level.offsetX)/level.scale;
+    mousePlayers[0].y = (event.clientY -  canvas.offsetTop - level.offsetY)/level.scale;
     event.preventDefault();
     event.stopPropagation();
 }, false);
@@ -675,10 +671,11 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
 
 function draw(players, figures, dt, dtProcessed, layer) {
     ctx.save()
-    ctx.scale(level.scale, level.scale)
+    ctx.transform(level.scale, 0, 0, level.scale, level.offsetX, level.offsetY)
+    //ctx.scale(level.scale, level.scale)
 
     if (layer === 0) {
-        ctx.clearRect(0, 0, level.width, level.height)
+        ctx.clearRect(-8, -8, level.width+8, level.height+8)
         const heightInTiles = getHeightInTiles();
         const widthInTiles = getWidthInTiles();
         for (let i = 0; i < tileArea.length; i++) {

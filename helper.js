@@ -145,6 +145,14 @@ function resizeCanvasToDisplaySize(canvas) {
     return false;
  }
 
+ function adjustLevelToCanvas(level, canvas) {
+    level.width = 1920
+    level.height = 1080
+    level.scale = Math.min(canvas.width / level.width, canvas.height / level.height)
+    level.offsetX = (canvas.width - level.scale * level.width) / 2
+    level.offsetY = (canvas.height - level.scale * level.height) / 2
+ }
+
 
  const colorize = (image, r, g, b) => {
     const imageSize = image.width;
