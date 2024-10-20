@@ -15,5 +15,9 @@ shooter memes: https://tuna.voicemod.net/user/shiftingratechorus77356, https://d
 cloud: https://opengameart.org/content/vaporizng-cloud-particle
 food: https://opengameart.org/content/cc0-food-icons
 eat sound: https://cdn.pixabay.com/download/audio/2022/01/18/audio_9f09ebc2fa.mp3?filename=eatingsfxwav-14588.mp3 
+eat sound2: <a href="https://pixabay.com/sound-effects/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=83240">Pixabay</a>
+eat sound3: <a href="https://pixabay.com/sound-effects/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=95783">Pixabay</a>
+
+eat sound: <a href="https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=92106">Pixabay</a>
 
 local dev: python3 -m http.server 3333

@@ -98,7 +98,14 @@ const audio = {
     unstoppable: {title: 'unstoppable.ogg'},
     godlike: {title: 'god-like.mp3', volume: 0.5},
     wickedSick: {title: 'wicked-sick.ogg'},
-    eat: {title: 'eatingsfxwav-14588.mp3'}
+
+    eat: [
+        {title: 'eatingsfxwav-14588.mp3'},
+        {title: 'carrotnom-92106.mp3'},
+        {title: 'eat-a-cracker-95783.mp3', volume: 0.5},
+        {title: 'game-eat-sound-83240.mp3', volume: 1.0},
+        {title: 'game-eat-sound-83240.mp3'}
+    ]
 }
 var music1 = getAudio(audio.music1);
 var music2 = getAudio(audio.music2);
@@ -119,7 +126,7 @@ var soundDominating = getAudio(audio.dominating);
 var soundUnstoppable = getAudio(audio.unstoppable);
 var soundGodlike = getAudio(audio.godlike);
 var soundWickedSick = getAudio(audio.wickedSick);
-var soundEat = getAudio(audio.eat);
+var soundEat = [getAudio(audio.eat[0]),getAudio(audio.eat[1]),getAudio(audio.eat[2]),getAudio(audio.eat[3]),getAudio(audio.eat[4])];
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
@@ -214,7 +221,7 @@ function gameInit() {
             yTarget,
             maxBreakDuration: 5000,
             startWalkTime: Math.random() * 5000 + dtProcessed,
-            maxSpeed: 0.08,
+            maxSpeed: 0.18,
             speed: 0,
             isDead: false, 
             playerId: null,
@@ -510,7 +517,7 @@ function updateGame(figures, dt, dtProcessed) {
         playerFigures.forEach(fig => {
             if (distance(f.x,f.y,fig.x,fig.y + f.imageAnim.height*0.5) < f.attackDistance) {
                 if (!fig.beans.has(f.id)) {
-                    playAudio(soundEat);
+                    playAudio(soundEat[fig.beans.size]);
                     fig.beans.add(f.id);
                 }
             }
