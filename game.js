@@ -307,12 +307,14 @@ function addFartCloud(x,y,playerId, size=1) {
         speed: 0,
         angle: 0,
         anim: 0,
-        scale: 2*size,
+        size: size,
+        scale: 0,
         zIndex: 1000,
         attackAngle: 360,
-        isAttacking: true,
+        isAttacking: false,
         attackDuration: 10000000,
-        attackDistance: 64
+        attackDistance: 64,
+        lifetime: 0
     })
 }
 
@@ -529,8 +531,12 @@ function handleInput(players, figures, dtProcessed) {
 
 
                 if (dtProcessed-f.lastAttackTime > f.attackBreakDuration) {
-                    addFartCloud(f.x,f.y,f.playerId,f.beans.size - f.beansFarted.size)
+
+                    let xyNew = move(f.x, f.y, f.angle+deg2rad(180),f.attackDistance*0.5, 1)
+
+                    addFartCloud(xyNew.x,xyNew.y,f.playerId,f.beans.size)
                     f.beans.forEach(b => f.beansFarted.add(b))
+                    f.beans.clear()
                     f.lastAttackTime = dtProcessed
                     playAudio(f.soundAttack);
                 }
@@ -598,11 +604,26 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
     })
 
     figures.filter(f => f.type === 'cloud').forEach(f => {
-        f.scale*=Math.pow(0.999,dt)
-        if (f.scale < 0.1) {
-            f.scale = 0
-            f.isDead = true
+        f.lifetime+=dt
+        if (f.lifetime > 2000) {
+            if (!f.isAttacking) {
+                f.isAttacking = true
+                f.scale = 1.0*f.size
+            }
+            f.scale*=Math.pow(0.999,dt)
+            if (f.scale < 0.1) {
+                f.scale = 0
+                f.isDead = true
+            }
+
+        } else {
+            if (f.scale <0.1) {
+                f.scale = 0.1*f.size
+            }
+            f.scale*=Math.pow(1.0008,dt)
         }
+        
+        
     })
     var toDelete = figures.findIndex(f => f.type === 'cloud' && f.isDead)
     if (toDelete >= 0)
@@ -765,8 +786,14 @@ function draw(players, figures, dt, dtProcessed, layer) {
                         ctx.rotate(deg2rad(20))
                     }
                 }
-                if (f.type === 'cloud')
-                    ctx.globalCompositeOperation = "difference";
+                if (f.type === 'cloud') {
+                    if (f.isAttacking) {
+                        ctx.globalCompositeOperation = "difference";
+                    } else {
+
+                    }
+                }
+               
                 ctx.scale(1.0*f.scale,1.0*f.scale)
                 ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
             }
