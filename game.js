@@ -27,11 +27,31 @@ var multikillTimeWindow = 4000;
 var lastTotalkillAudio;
 var totalkillCounter;
 playerImage.src = 'character_base_16x16.png'
-var imageAnim = {
+var playerImageAnim = {
+    width: 64,
+    height: 64,
+    hasDirections: true,
+    animDefaultSpeed: 0,
     down: {a: [[0,0,16,16], [16,0,16,16], [32,0,16,16], [48,0,16,16]]},
     up: {a: [[0,16,16,16], [16,16,16,16], [32,16,16,16], [48,16,16,16]]},
     left: {a: [[0,48,16,16], [16,48,16,16], [32,48,16,16], [48,48,16,16]]},
-    right: {a: [[0,32,16,16], [16,32,16,16], [32,32,16,16], [48,32,16,16]]}
+    right: {a: [[0,32,16,16], [16,32,16,16], [32,32,16,16], [48,32,16,16]]},
+    default: {a: [[0,0,16,16]]}
+}
+var cloudImage = new Image()
+cloudImage.src = 'vapor_cloud.png'
+
+
+cloudImage.onload = () => {
+   // cloudImage = colorize(cloudImage, 1,1,0)
+}
+
+cloudImageAnim = {
+    hasDirections: false,
+    width: 128,
+    height: 128,
+    animDefaultSpeed: 0.1,
+    default: {a: [[0,0,64,64],[64,0,64,64],[128,0,64,64],[0,64,64,64],[64,64,64,64],[128,64,64,64],[0,128,64,64],[64,128,64,64],[128,128,64,64]]}
 }
 var texture = new Image()
 texture.src = 'texture_grass.jpg'
@@ -158,7 +178,7 @@ function gameInit() {
     multikillCounter = 0;
     lastTotalkillAudio = 0;
     totalkillCounter = 0;
-    var activePlayerIds = figures.filter(f => f.playerId).map(f => f.playerId)
+    var activePlayerIds = figures.filter(f => f.playerId && f.type === 'fighter').map(f => f.playerId)
     var oldFigures = figures
     figures = []
     for (var i = 0; i < maxPlayerFigures; i++) {
@@ -186,9 +206,16 @@ function gameInit() {
             lastAttackTime: 0,
             points: 0,
             attackDistance: 80,
+            attackAngle: 90,
             soundAttack: getAudio(audio.attack),
             soundDeath: getAudio(audio.death),
-            beans: new Set()
+            beans: new Set(),
+            image: playerImage,
+            imageAnim: playerImageAnim,
+            type: 'fighter',
+            shadow: true,
+            scale: 1,
+            zIndex: 0
         }
 
         if (activePlayerIds.length > i) {
@@ -208,31 +235,84 @@ function gameInit() {
         type: 'bean',
         x: canvas.width/5,
         y: canvas.height/5,
+        image: null,
+        imageAnim: null,    
+        speed: 0,
+        angle: 0,
+        scale: 1,
+        zIndex: 0
     });
     figures.push({
         id: 2,
         type: 'bean',
         x: canvas.width*4/5,
-        y: canvas.height/5
+        y: canvas.height/5,
+        image: null,
+        imageAnim: null,    
+        speed: 0,
+        angle: 0,
+        scale: 1,
+        zIndex: 0
     });
     figures.push({
         id: 3,
         type: 'bean',
         x: canvas.width/5,
-        y: canvas.height*4/5
+        y: canvas.height*4/5,
+        image: null,
+        imageAnim: null,    
+        speed: 0,
+        angle: 0,
+        scale: 1,
+        zIndex: 0
     });
     figures.push({
         id: 4,
         type: 'bean',
         x: canvas.width*4/5,
-        y: canvas.height*4/5
+        y: canvas.height*4/5,
+        image: null,
+        imageAnim: null,    
+        speed: 0,
+        angle: 0,
+        scale: 1,
+        zIndex: 0
     });
     figures.push({
         id: 5,
         type: 'bean',
         x: canvas.width/2,
-        y: canvas.height/2
+        y: canvas.height/2,
+        image: null,
+        imageAnim: null,    
+        speed: 0,
+        angle: 0,
+        scale: 1,
+        zIndex: 0
     });
+
+    
+}
+
+
+function addFartCloud(x,y,playerId, size=1) {
+    figures.push({
+        type: 'cloud',
+        x: x,
+        y: y,
+        playerId, playerId,
+        image: cloudImage,
+        imageAnim: cloudImageAnim,    
+        speed: 0,
+        angle: 0,
+        anim: 0,
+        scale: 2*size,
+        zIndex: 1000,
+        attackAngle: 360,
+        isAttacking: true,
+        attackDuration: 10000000,
+        attackDistance: 64
+    })
 }
 
 function gameLoop() {
@@ -308,7 +388,7 @@ function gameLoop() {
         mp.yAxis = 0
         mp.isMoving = 0
 
-        var f = figures.find(f => f.playerId ===  mp.playerId)
+        var f = figures.find(f => f.playerId ===  mp.playerId && f.type === 'fighter')
         if (f) {
             let x = mp.x - f.x;
             let y = mp.y - f.y;
@@ -322,12 +402,12 @@ function gameLoop() {
     })
    
     let players = [...gamepadPlayers, ...keyboardPlayers, ...mousePlayers];
-    const oldNumberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.map(f => f.playerId).includes(k.playerId)).length;
+    const oldNumberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.map(f => f.type === 'fighter' && f.playerId).includes(k.playerId)).length;
 
     dtToProcess += dt
     while(dtToProcess > dtFix) {
         handleInput(players, figures, dtProcessed)
-        handleAi(figures, dtProcessed, oldNumberJoinedKeyboardPlayers)
+        handleAi(figures, dtProcessed, oldNumberJoinedKeyboardPlayers, dtFix)
         updateGame(figures, dtFix,dtProcessed)
         dtToProcess-=dtFix
         dtProcessed+=dtFix
@@ -337,7 +417,7 @@ function gameLoop() {
     draw(players, figures, dt, dtProcessed, 1);
     then = now
 
-    var figuresWithPlayer = figures.filter(f => f.playerId)
+    var figuresWithPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
     var survivors = figuresWithPlayer.filter(f => !f.isDead)
     if (survivors.length == 1 && figuresWithPlayer.length > 1) {
         if (isGameStarted) {
@@ -374,12 +454,12 @@ function gameLoop() {
 }
 
 function updateGame(figures, dt, dtProcessed) {
-    let figuresAlive = figures.filter(f => !f.isDead && f.type !== 'bean');
+    let figuresAlive = figures.filter(f => !f.isDead);
     figuresAlive.forEach(f => {
         let xyNew = move(f.x, f.y, f.angle,f.speed, dt)
         f.x = xyNew.x
         f.y = xyNew.y
-        f.anim += f.speed
+        f.anim += f.speed + f.imageAnim?.animDefaultSpeed
        // f.anim += f.isAttacking ? 0.5 : 0
 
         if (f.x > canvas.width) f.x = canvas.width
@@ -389,7 +469,7 @@ function updateGame(figures, dt, dtProcessed) {
         
     })
     
-    let playerFigures = figures.filter(f => f.playerId);
+    let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter');
     figures.filter(f => f.type === 'bean').forEach(f => {
         playerFigures.forEach(fig => {
             if (distance(f.x,f.y,fig.x,fig.y) < 15) {
@@ -401,9 +481,9 @@ function updateGame(figures, dt, dtProcessed) {
     let numberKilledFigures = 0;
     let killTime;
     figuresAlive.filter(f => f.isAttacking).forEach(f => {
-        figures.filter(fig => fig !== f && !fig.isDead && fig.type !== 'bean').forEach(fig => {
+        figures.filter(fig => fig !== f && fig.playerId !== f.playerId && !fig.isDead && fig.type === 'fighter').forEach(fig => {
             let distAngles = distanceAngles(rad2deg(f.angle), rad2deg(angle(f.x,f.y,fig.x,fig.y)+180));
-            if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance && distAngles <= 90) {
+            if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance*f.scale && distAngles <= f.attackAngle) {
                 fig.isDead = true;
                 fig.y+=16
                 playAudio(fig.soundDeath);
@@ -418,9 +498,9 @@ function updateGame(figures, dt, dtProcessed) {
 function handleInput(players, figures, dtProcessed) {
     // join by doing anything
     players.filter(p => p.isAttackButtonPressed || p.isMoving).forEach(p => {
-        var figure = figures.find(f => f.playerId === p.playerId)
+        var figure = figures.find(f => f.playerId === p.playerId && f.type === 'fighter')
         if (!figure) {
-            var figure = figures.find(f => !f.playerId)
+            var figure = figures.find(f => !f.playerId && f.type === 'fighter')
             figure.isDead = false
             figure.playerId = p.playerId
             playAudio(soundJoin);
@@ -435,8 +515,8 @@ function handleInput(players, figures, dtProcessed) {
         }
     })
 
-    figures.filter(f => f.playerId).forEach(f => {
-        var p = players.find(p => p.playerId === f.playerId)
+    figures.filter(f => f.playerId && f.type === 'fighter').forEach(f => {
+        var p = players.find(p => p.playerId === f.playerId && f.type === 'fighter')
 
         f.speed = 0.0
         if (!f.isDead) {
@@ -446,7 +526,9 @@ function handleInput(players, figures, dtProcessed) {
             }
             if (p.isAttackButtonPressed && !f.isAttacking) {
 
+
                 if (dtProcessed-f.lastAttackTime > f.attackBreakDuration) {
+                    addFartCloud(f.x,f.y,f.playerId,1+f.beans.size)
                     f.lastAttackTime = dtProcessed
                     playAudio(f.soundAttack);
                 }
@@ -456,10 +538,10 @@ function handleInput(players, figures, dtProcessed) {
     })
 }
 
-function handleAi(figures, time, oldNumberJoinedKeyboardPlayers) {
-    const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.map(f => f.playerId).includes(k.playerId)).length;
+function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
+    const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.map(f => f.type === 'fighter' && f.playerId).includes(k.playerId)).length;
     const startKeyboardMovement = oldNumberJoinedKeyboardPlayers === 0 && numberJoinedKeyboardPlayers > 0;
-    const livingAIFigures = figures.filter(f => !f.playerId && !f.isDead && f.type !== 'bean');
+    const livingAIFigures = figures.filter(f => !f.playerId && !f.isDead && f.type === 'fighter');
     let shuffledIndexes;
     if (startKeyboardMovement) {
         shuffledIndexes = shuffle([...Array(livingAIFigures.length).keys()]);
@@ -512,6 +594,17 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers) {
             f.speed = f.maxSpeed
         }
     })
+
+    figures.filter(f => f.type === 'cloud').forEach(f => {
+        f.scale*=Math.pow(0.999,dt)
+        if (f.scale < 0.1) {
+            f.scale = 0
+            f.isDead = true
+        }
+    })
+    var toDelete = figures.findIndex(f => f.type === 'cloud' && f.isDead)
+    if (toDelete >= 0)
+        figures.splice(toDelete,1)
 }
 
 function draw(players, figures, dt, dtProcessed, layer) {
@@ -591,34 +684,47 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
     ctx.restore()
 
-    figures.toSorted((f1,f2) => (f2.isDead || f1.isDead) ? f2.isDead - f1.isDead:  f1.y - f2.y ).forEach(f => {
+    figures.toSorted((f1,f2) => (f1.y +f1.zIndex) - (f2.y +f2.zIndex) ).forEach(f => {
+        
         let deg = rad2limiteddeg(f.angle)
-        if (distanceAngles(deg, 0) < 45) {
-            frame = imageAnim.right.a
-        } else if (distanceAngles(deg, 90) <= 45){
-            frame = imageAnim.down.a
-        } else if (distanceAngles(deg, 180) < 45){
-            frame = imageAnim.left.a
-        } else {
-            frame = imageAnim.up.a
+        let sprite = null
+
+        if (f.imageAnim) {
+            let frame
+            if (f.imageAnim.hasDirections) {
+                if (distanceAngles(deg, 0) < 45) {
+                    frame = f.imageAnim.right.a
+                } else if (distanceAngles(deg, 90) <= 45){
+                    frame = f.imageAnim.down.a
+                } else if (distanceAngles(deg, 180) < 45){
+                    frame = f.imageAnim.left.a
+                } else {
+                    frame = f.imageAnim.up.a
+                }
+            } else {
+                frame = f.imageAnim.default.a
+            }
+
+            let indexFrame = 0;
+            if (f.anim > 0) {
+                indexFrame = Math.floor(f.anim) % frame.length;
+            }
+
+            sprite = frame[indexFrame]
         }
         
-        let indexFrame = 0;
-        if (f.speed > 0) {
-            indexFrame = Math.floor(f.anim) % frame.length;
-        }
-        let sprite = frame[indexFrame]
+        
+
+
         ctx.save()
         ctx.translate(f.x, f.y)
 
         if (layer === 0) {
             if (f.isDead) {
                 ctx.rotate(deg2rad(90))
-                ctx.scale(0.5,0.5)
-                ctx.drawImage(playerImage, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
-            } else if(f.type === 'bean') {
-                // shadow of bean
-            } else {
+                ctx.scale(0.5*f.scale,0.5*f.scale)
+                ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
+            } else if (f.shadow && f.image) {
 
                 //if (fps > fpsMinForEffects) {
                     // shadow
@@ -628,7 +734,8 @@ function draw(players, figures, dt, dtProcessed, layer) {
                     ctx.shadowBlur = 16;
                     ctx.translate(canvas.width+24,-8)
                     ctx.transform(1, 0.1, -0.8, 1, 0, 0);
-                    ctx.drawImage(playerImage, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
+                    ctx.scale(1.0*f.scale,1.0*f.scale)
+                    ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
                 //}
                 
             }
@@ -656,7 +763,10 @@ function draw(players, figures, dt, dtProcessed, layer) {
                         ctx.rotate(deg2rad(20))
                     }
                 }
-                ctx.drawImage(playerImage, sprite[0], sprite[1], sprite[2], sprite[3], 0 - 32, 0 - 32, 64, 64)
+                if (f.type === 'cloud')
+                    ctx.globalCompositeOperation = "difference";
+                ctx.scale(1.0*f.scale,1.0*f.scale)
+                ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
             }
         }
         ctx.restore()  
@@ -664,14 +774,14 @@ function draw(players, figures, dt, dtProcessed, layer) {
         if (showDebug && layer === 1) {
             if (f.isAttacking) {
                 ctx.save()
-                let startAngle = f.angle + deg2rad(135)
-                let endAngle = startAngle + deg2rad(90)
+                let startAngle = f.angle + deg2rad(45+f.attackAngle)
+                let endAngle = startAngle + deg2rad(f.attackAngle)
                 ctx.translate(f.x, f.y)
                 ctx.lineWidth = 1;
                 ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
                 ctx.beginPath();
                 ctx.moveTo(0,0);
-                ctx.arc(0,0,f.attackDistance, startAngle, endAngle)
+                ctx.arc(0,0,f.attackDistance*f.scale, startAngle, endAngle)
                 ctx.closePath()
                 ctx.fill();
                 ctx.restore()
@@ -701,7 +811,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
     })
 
     if (layer === 1) {
-        figures.filter(f => f.playerId).forEach((f,i) => {
+        figures.filter(f => f.playerId && f.type === 'fighter').forEach((f,i) => {
             ctx.save()
             ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
             ctx.beginPath();
