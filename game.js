@@ -41,12 +41,9 @@ var playerImageAnim = {
 }
 var cloudImage = new Image()
 cloudImage.src = 'vapor_cloud.png'
-
-
 cloudImage.onload = () => {
    // cloudImage = colorize(cloudImage, 1,1,0)
 }
-
 cloudImageAnim = {
     hasDirections: false,
     width: 128,
@@ -54,6 +51,20 @@ cloudImageAnim = {
     animDefaultSpeed: 0.1,
     default: {a: [[0,0,64,64],[64,0,64,64],[128,0,64,64],[0,64,64,64],[64,64,64,64],[128,64,64,64],[0,128,64,64],[64,128,64,64],[128,128,64,64]]}
 }
+var foodImage = new Image()
+foodImage.src = 'food-OCAL.png'
+foodImageAnim = {
+    hasDirections: false,
+    width: 64,
+    height: 64,
+    animDefaultSpeed: 0,
+    down: {a: [[192,64,32,32]]},
+    up: {a: [[64,64,32,32]]},
+    left: {a: [[256,32,32,32]]},
+    right: {a: [[32,192,32,32]]},
+    default: {a: [[224,256,32,32]]}
+}
+
 var texture = new Image()
 texture.src = 'texture_grass.jpg'
 let tileArea = []
@@ -224,7 +235,8 @@ function gameInit() {
             type: 'fighter',
             shadow: true,
             scale: 1,
-            zIndex: 0
+            zIndex: 0,
+            frame: null
         }
 
         if (activePlayerIds.length > i) {
@@ -244,60 +256,71 @@ function gameInit() {
         type: 'bean',
         x: level.width/5,
         y: level.height/5,
-        image: null,
-        imageAnim: null,    
+        image: foodImage,
+        imageAnim: foodImageAnim,
+        frame: foodImageAnim.left.a,
+        attackDistance: 32,
+        angle: 0,    
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: 0
+        zIndex: -canvas.height
     });
     figures.push({
         id: 2,
         type: 'bean',
         x: level.width*4/5,
         y: level.height/5,
-        image: null,
-        imageAnim: null,    
+        image: foodImage,
+        attackDistance: 32,
+        imageAnim: foodImageAnim,
+        frame: foodImageAnim.up.a,
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: 0
+        zIndex: -canvas.height
     });
     figures.push({
         id: 3,
         type: 'bean',
         x: level.width/5,
         y: level.height*4/5,
-        image: null,
-        imageAnim: null,    
+        image: foodImage,
+        attackDistance: 32,
+        imageAnim: foodImageAnim,
+        frame: foodImageAnim.down.a,
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: 0
+        zIndex: -canvas.height
     });
     figures.push({
         id: 4,
         type: 'bean',
         x: level.width*4/5,
         y: level.height*4/5,
-        image: null,
-        imageAnim: null,    
+        image: foodImage,
+        attackDistance: 32,
+        imageAnim: foodImageAnim,
+        frame: foodImageAnim.right.a,
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: 0
+        zIndex: -canvas.height
     });
     figures.push({
         id: 5,
         type: 'bean',
         x: level.width/2,
         y: level.height/2,
-        image: null,
-        imageAnim: null,    
+        image: foodImage,
+        attackDistance: 32,
+        imageAnim: foodImageAnim,
+        frame: foodImageAnim.default.a,
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: 0
+        zIndex: -canvas.height
     });
 
     
@@ -483,7 +506,7 @@ function updateGame(figures, dt, dtProcessed) {
     let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter');
     figures.filter(f => f.type === 'bean').forEach(f => {
         playerFigures.forEach(fig => {
-            if (distance(f.x,f.y,fig.x,fig.y) < 15) {
+            if (distance(f.x,f.y,fig.x,fig.y + f.imageAnim.height*0.5) < f.attackDistance) {
                 fig.beans.add(f.id);
             }
         })
@@ -725,7 +748,9 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
         if (f.imageAnim) {
             let frame
-            if (f.imageAnim.hasDirections) {
+            if (f.frame) {
+                frame = f.frame
+            } else if (f.imageAnim.hasDirections) {
                 if (distanceAngles(deg, 0) < 45) {
                     frame = f.imageAnim.right.a
                 } else if (distanceAngles(deg, 90) <= 45){
@@ -778,11 +803,25 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 // bean image
                 let startAngle = f.angle + deg2rad(135)
                 let endAngle = startAngle + deg2rad(90)
-                ctx.fillStyle = "blue";
+  
+                ctx.scale(1.0*f.scale,1.0*f.scale)
                 ctx.beginPath();
-                ctx.arc(0,0,10, 0, 2 * Math.PI)
+                ctx.fillStyle = "rgba(256,256,256,0.5)";
+                ctx.arc(0,0,f.attackDistance, 0, 2 * Math.PI)
                 ctx.closePath()
                 ctx.fill();
+
+                ctx.beginPath();
+                ctx.fillStyle = "rgba(0,0,0,0.5)";
+                ctx.arc(0,0,f.attackDistance*0.8, 0, 2 * Math.PI)
+                ctx.closePath()
+                ctx.fill();
+
+                ctx.scale(0.5+0.1*Math.sin(dtProcessed*0.001), 0.5+0.1*Math.sin(dtProcessed*0.001))
+                ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
+         
+               
+
             } else if (!f.isDead) {
                 if (f.isAttacking) {
                     //ctx.rotate(deg2rad(-10+mod(dtProcessed*0.5,20)) )
@@ -841,11 +880,11 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.fill();
             ctx.closePath()
 
-            if (f.playerId) {
+            if (f.playerId && f.type === 'fighter') {
                 ctx.fillStyle = "red";
                 ctx.font = "16px serif";
                 ctx.fillStyle = "white";
-                ctx.fillText(f.playerId + ' ' + distanceAngles(rad2limiteddeg(f.angle), 0),f.x,f.y)
+                ctx.fillText(f.playerId + ' ' + f.beans.size,f.x,f.y)
             }
         }
     })
@@ -907,7 +946,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.textBaseline='bottom'
             ctx.translate(0,canvas.height)
             figures.forEach((g,i) => {
-                ctx.fillText("playerId: " + g.playerId + " x: " + Math.floor(g.x) + " y: " + Math.floor(g.y) + " Dead: " + g.isDead,0,0) 
+                ctx.fillText("playerId: " + g.playerId + " x: " + Math.floor(g.x) + " y: " + Math.floor(g.y) + " Beans: " + g.beans?.size,0,0) 
                 ctx.translate(0,-16)
             })
             ctx.fillText('Figures',0,0)
