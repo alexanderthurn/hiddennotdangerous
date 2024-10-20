@@ -97,7 +97,8 @@ const audio = {
     dominating: {title: 'dominating.mp3', volume: 0.5},
     unstoppable: {title: 'unstoppable.ogg'},
     godlike: {title: 'god-like.mp3', volume: 0.5},
-    wickedSick: {title: 'wicked-sick.ogg'}
+    wickedSick: {title: 'wicked-sick.ogg'},
+    eat: {title: 'eatingsfxwav-14588.mp3'}
 }
 var music1 = getAudio(audio.music1);
 var music2 = getAudio(audio.music2);
@@ -118,6 +119,7 @@ var soundDominating = getAudio(audio.dominating);
 var soundUnstoppable = getAudio(audio.unstoppable);
 var soundGodlike = getAudio(audio.godlike);
 var soundWickedSick = getAudio(audio.wickedSick);
+var soundEat = getAudio(audio.eat);
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
@@ -507,7 +509,10 @@ function updateGame(figures, dt, dtProcessed) {
     figures.filter(f => f.type === 'bean').forEach(f => {
         playerFigures.forEach(fig => {
             if (distance(f.x,f.y,fig.x,fig.y + f.imageAnim.height*0.5) < f.attackDistance) {
-                fig.beans.add(f.id);
+                if (!fig.beans.has(f.id)) {
+                    playAudio(soundEat);
+                    fig.beans.add(f.id);
+                }
             }
         })
     })
