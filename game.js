@@ -273,7 +273,7 @@ function gameInit() {
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: -canvas.height
+        zIndex: -level.height
     });
     figures.push({
         id: 2,
@@ -287,7 +287,7 @@ function gameInit() {
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: -canvas.height
+        zIndex: -level.height
     });
     figures.push({
         id: 3,
@@ -301,7 +301,7 @@ function gameInit() {
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: -canvas.height
+        zIndex: -level.height
     });
     figures.push({
         id: 4,
@@ -315,7 +315,7 @@ function gameInit() {
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: -canvas.height
+        zIndex: -level.height
     });
     figures.push({
         id: 5,
@@ -329,7 +329,7 @@ function gameInit() {
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: -canvas.height
+        zIndex: -level.height
     });
 
     

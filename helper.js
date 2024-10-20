@@ -53,8 +53,8 @@ const distanceAngles = (a1, a2) => {let d = mod(Math.abs(a1 - a2),360); return M
 
 const getNextDiscreteAngle = (angle, numberDiscreteAngles) => deg2rad(Math.round(rad2deg(angle)*numberDiscreteAngles/360)*360/numberDiscreteAngles);
 
-const getHeightInTiles = () => Math.ceil(canvas.height/tileWidth);
-const getWidthInTiles = () => Math.ceil(canvas.width/tileWidth);
+const getHeightInTiles = () => Math.ceil(level.height/tileWidth);
+const getWidthInTiles = () => Math.ceil(level.width/tileWidth);
 const getLastAttackTime = (lastAttackTime, time) => lastAttackTime && time-lastAttackTime < 500 ? lastAttackTime : time;
 
 const getAudio = (audio) => {
