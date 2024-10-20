@@ -672,10 +672,9 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
 function draw(players, figures, dt, dtProcessed, layer) {
     ctx.save()
     ctx.transform(level.scale, 0, 0, level.scale, level.offsetX, level.offsetY)
-    //ctx.scale(level.scale, level.scale)
 
     if (layer === 0) {
-        ctx.clearRect(-8, -8, level.width+8, level.height+8)
+        ctx.clearRect(-0.5*playerImageAnim.width, -0.5*playerImageAnim.height, level.width+playerImageAnim.width, level.height+playerImageAnim.height)
         const heightInTiles = getHeightInTiles();
         const widthInTiles = getWidthInTiles();
         for (let i = 0; i < tileArea.length; i++) {
