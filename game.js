@@ -130,18 +130,18 @@ var soundEat = [getAudio(audio.eat[0]),getAudio(audio.eat[1]),getAudio(audio.eat
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
-    level.width = canvas.width // 1920
-    level.height = canvas.height // 1080
-    level.scale = 1.0 // Math.min(canvas.width / level.width,canvas.height / level.height)
+    level.width = 1920
+    level.height = 1080
+    level.scale = Math.min(canvas.width / level.width,canvas.height / level.height)
     gameInit()
     window.requestAnimationFrame(gameLoop);
 })
 
 window.addEventListener("resize", function(event){
     resizeCanvasToDisplaySize(canvas)
-    level.width = canvas.width // 1920
-    level.height = canvas.height // 1080
-    level.scale = 1.0 // Math.min(canvas.width / level.width,canvas.height / level.height)
+    level.width = 1920
+    level.height = 1080
+    level.scale = Math.min(canvas.width / level.width,canvas.height / level.height)
 });
 
 window.addEventListener('keydown', event => {
@@ -189,8 +189,8 @@ window.addEventListener('pointerup', event => {
 });
 
 canvas.addEventListener('pointermove', event => {
-    mousePlayers[0].x = event.clientX - canvas.offsetLeft;
-    mousePlayers[0].y = event.clientY -  canvas.offsetTop;
+    mousePlayers[0].x = (event.clientX - canvas.offsetLeft)/level.scale;
+    mousePlayers[0].y = (event.clientY -  canvas.offsetTop)/level.scale;
     event.preventDefault();
     event.stopPropagation();
 }, false);
@@ -719,16 +719,16 @@ function draw(players, figures, dt, dtProcessed, layer) {
     if (!isGameStarted) {
         ctx.save()
         ctx.shadowColor = "rgba(0,0,0,1)"
-        ctx.shadowOffsetX = -level.width;
+        ctx.shadowOffsetX = -canvas.width;
         ctx.shadowOffsetY = 0;
         ctx.shadowBlur = 2+Math.sin(dtProcessed*0.001)*2;
         ctx.font = level.width*0.06+"px serif";
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
         ctx.textBaseline='middle'
-        ctx.translate(level.width*1.5,level.height*0.3)
+        ctx.translate(canvas.width/level.scale+0.5*level.width, level.height*0.3)
         ctx.fillText('Hidden Not Dangerous',0,0)
-        ctx.font = level.width*0.03+"px serif";
+        ctx.font = level.width*level.scale*0.03+"px serif";
         ctx.shadowBlur = 1;
         ctx.fillText('WASDT',0,96)
         ctx.fillText(String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0',0,96*2)
@@ -801,10 +801,9 @@ function draw(players, figures, dt, dtProcessed, layer) {
                     // shadow
                     ctx.shadowColor = "rgba(0,0,0,0.5)"
                     ctx.shadowOffsetX = -canvas.width;
-                    ctx.shadowOffsetY = 0;
+                    ctx.shadowOffsetY = -8;
                     ctx.shadowBlur = 16;
-                    console.log('AAAH', canvas.width)
-                    ctx.translate(canvas.width+24,-8)
+                    ctx.translate(canvas.width/level.scale+24,-8)
                     ctx.transform(1, 0.1, -0.8, 1, 0, 0);
                     ctx.scale(1.0*f.scale,1.0*f.scale)
                     ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
@@ -942,7 +941,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
     
         ctx.save()
         ctx.textAlign = "right";
-        ctx.fillText(fps + " FPS", canvas.width, 0);
+        ctx.fillText(fps + " FPS", canvas.width/level.scale, 0);
         ctx.restore()
     
     
@@ -957,7 +956,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
         
             ctx.save()
             ctx.textBaseline='bottom'
-            ctx.translate(0,canvas.height)
+            ctx.translate(0,canvas.height/level.scale)
             figures.forEach((g,i) => {
                 ctx.fillText("playerId: " + g.playerId + " x: " + Math.floor(g.x) + " y: " + Math.floor(g.y) + " Beans: " + g.beans?.size,0,0) 
                 ctx.translate(0,-16)
