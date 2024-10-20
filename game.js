@@ -339,15 +339,15 @@ function gameInit() {
 function addFartCloud(x,y,playerId, size=1) {
     figures.push({
         type: 'cloud',
-        x: x,
-        y: y,
+        x,
+        y,
         playerId, playerId,
         image: cloudImage,
         imageAnim: cloudImageAnim,    
         speed: 0,
         angle: 0,
         anim: 0,
-        size: size,
+        size,
         scale: 0,
         zIndex: 1000,
         attackAngle: 360,
@@ -678,7 +678,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
     ctx.scale(level.scale, level.scale)
 
     if (layer === 0) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.clearRect(0, 0, level.width, level.height)
         const heightInTiles = getHeightInTiles();
         const widthInTiles = getWidthInTiles();
         for (let i = 0; i < tileArea.length; i++) {
@@ -800,10 +800,11 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 //if (fps > fpsMinForEffects) {
                     // shadow
                     ctx.shadowColor = "rgba(0,0,0,0.5)"
-                    ctx.shadowOffsetX = -level.width;
+                    ctx.shadowOffsetX = -canvas.width;
                     ctx.shadowOffsetY = 0;
                     ctx.shadowBlur = 16;
-                    ctx.translate(level.width+24,-8)
+                    console.log('AAAH', canvas.width)
+                    ctx.translate(canvas.width+24,-8)
                     ctx.transform(1, 0.1, -0.8, 1, 0, 0);
                     ctx.scale(1.0*f.scale,1.0*f.scale)
                     ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
