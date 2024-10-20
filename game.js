@@ -593,7 +593,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
     figures.toSorted((f1,f2) => (f2.isDead || f1.isDead) ? f2.isDead - f1.isDead:  f1.y - f2.y ).forEach(f => {
         let deg = rad2limiteddeg(f.angle)
-        if (distanceAngles(deg, 0) < 45 || distanceAngles(deg, 0) > 360-45) {
+        if (distanceAngles(deg, 0) < 45) {
             frame = imageAnim.right.a
         } else if (distanceAngles(deg, 90) <= 45){
             frame = imageAnim.down.a
