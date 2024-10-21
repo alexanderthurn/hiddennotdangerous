@@ -473,13 +473,21 @@ function gameLoop() {
         if (f) {
             //let x = mp.x - f.x;
             //let y = mp.y - f.y;
+            //let x = mp.x - level.width / 2;
+           // let y = mp.y - level.height / 2;
             let x = mp.x - canvas.width / 2;
             let y = mp.y - canvas.height / 2;
             //[x, y] = setDeadzone(x, y,0.1);
             //[x, y] = clampStick(x, y);
             mp.xAxis = x
             mp.yAxis = y
-            mp.isMoving = Math.abs(x) > 1 && Math.abs(y) > 1
+
+            if (!mp.pressed.has(0)) {
+                mp.xAxis = 0
+                mp.yAxis = 0
+            }
+            //console.log(x,y,mp.x, mp.y, mp.xAxis,mp.yAxis)
+            mp.isMoving = Math.abs(mp.xAxis) > 0 || Math.abs(mp.yAxis) > 0
         }
        
     })
