@@ -106,21 +106,25 @@ const audio = {
     music3: {title: 'music3.mp3', volume: 0.5},
     join: {title: 'sounddrum.mp3'},
     firstBlood: {title: 'first-blood.mp3', volume: 0.2},
-    doubleKill: {title: 'double-kill.mp3', volume: 0.3},
-    tripleKill: {title: 'triple-kill.mp3', volume: 0.4},
-    multiKill: {title: 'multi-kill.mp3', volume: 0.5},
-    megaKill: {title: 'mega-kill.ogg'},
-    ultraKill: {title: 'ultra-kill.mp3', volume: 0.5},
-    monsterKill: {title: 'monster-kill.mp3', volume: 0.5},
-    ludicrousKill: {title: 'ludicrous-kill.mp3', volume: 0.5},
-    holyShit: {title: 'holy-shit.ogg'},
 
-    killingSpree: {title: 'killing-spree.mp3', volume: 0.5},
-    rampage: {title: 'rampage.mp3', volume: 0.5},
-    dominating: {title: 'dominating.mp3', volume: 0.5},
-    unstoppable: {title: 'unstoppable.ogg'},
-    godlike: {title: 'god-like.mp3', volume: 0.5},
-    wickedSick: {title: 'wicked-sick.ogg'},
+    multiKill: [
+        {title: 'double-kill.mp3', volume: 0.3},
+        {title: 'triple-kill.mp3', volume: 0.4},
+        {title: 'multi-kill.mp3', volume: 0.5},
+        {title: 'mega-kill.ogg'},
+        {title: 'ultra-kill.mp3', volume: 0.5},
+        {title: 'monster-kill.mp3', volume: 0.5},
+        {title: 'ludicrous-kill.mp3', volume: 0.5},
+        {title: 'holy-shit.ogg'}
+    ],
+    totalKill: [
+        {title: 'killing-spree.mp3', volume: 0.5},
+        {title: 'rampage.mp3', volume: 0.5},
+        {title: 'dominating.mp3', volume: 0.5},
+        {title: 'unstoppable.ogg'},
+        {title: 'god-like.mp3', volume: 0.5},
+        {title: 'wicked-sick.ogg'}
+    ],
 
     eat: [
         {title: 'eatingsfxwav-14588.mp3'},
@@ -135,20 +139,9 @@ var music2 = getAudio(audio.music2);
 var music3 = getAudio(audio.music3);
 var soundJoin = getAudio(audio.join);
 var soundFirstBlood = getAudio(audio.firstBlood);
-var soundDoubleKill = getAudio(audio.doubleKill);
-var soundTripleKill = getAudio(audio.tripleKill);
-var soundMultiKill = getAudio(audio.multiKill);
-var soundMegaKill = getAudio(audio.megaKill);
-var soundUltraKill = getAudio(audio.ultraKill);
-var soundMonsterKill = getAudio(audio.monsterKill);
-var soundLudicrousKill = getAudio(audio.ludicrousKill);
-var soundHolyShit = getAudio(audio.holyShit);
-var soundKillingSpree = getAudio(audio.killingSpree);
-var soundRampage = getAudio(audio.rampage);
-var soundDominating = getAudio(audio.dominating);
-var soundUnstoppable = getAudio(audio.unstoppable);
-var soundGodlike = getAudio(audio.godlike);
-var soundWickedSick = getAudio(audio.wickedSick);
+
+var soundMultiKill = [getAudio(audio.multiKill[0]), getAudio(audio.multiKill[1]), getAudio(audio.multiKill[2]), getAudio(audio.multiKill[3]), getAudio(audio.multiKill[4]), getAudio(audio.multiKill[5]), getAudio(audio.multiKill[6]), getAudio(audio.multiKill[7])];
+var soundTotalKill = [getAudio(audio.totalKill[0]), getAudio(audio.totalKill[1]), getAudio(audio.totalKill[2]), getAudio(audio.totalKill[3]), getAudio(audio.totalKill[4]), getAudio(audio.totalKill[5])];
 var soundEat = [getAudio(audio.eat[0]),getAudio(audio.eat[1]),getAudio(audio.eat[2]),getAudio(audio.eat[3]),getAudio(audio.eat[4])];
 
 document.addEventListener("DOMContentLoaded", function(event){
