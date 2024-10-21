@@ -257,7 +257,7 @@ function gameInit() {
             yTarget,
             maxBreakDuration: 5000,
             startWalkTime: Math.random() * 5000 + dtProcessed,
-            maxSpeed: 0.08,
+            maxSpeed: 0.38,
             speed: 0,
             isDead: false, 
             playerId: null,
@@ -385,7 +385,7 @@ function addFartCloud(x,y,playerId, size=1) {
         speed: 0,
         angle: 0,
         anim: 0,
-        size,
+        size: size < 5 ? size : 10,
         scale: 0,
         zIndex: 1000,
         attackAngle: 360,
@@ -519,6 +519,7 @@ function gameLoop() {
         gameInit()
     }
 
+    /*
     let fullbeaners = figuresWithPlayer.filter(f => f.beans.size === 5);
     if (fullbeaners.length > 0 && figuresWithPlayer.length > 1) {
         if (isGameStarted) {
@@ -533,6 +534,7 @@ function gameLoop() {
         }
         gameInit()
     }
+        */
     window.requestAnimationFrame(gameLoop);
 }
 
