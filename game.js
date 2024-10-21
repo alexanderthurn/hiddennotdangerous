@@ -32,6 +32,8 @@ playerImage.src = 'character_base_16x16.png'
 var playerImageAnim = {
     width: 64,
     height: 64,
+    tileWidth: 16,
+    tileHeight: 16,
     hasDirections: true,
     animDefaultSpeed: 0,
     down: {a: [[0,0,16,16], [16,0,16,16], [32,0,16,16], [48,0,16,16]]},

@@ -175,35 +175,32 @@ function resizeCanvasToDisplaySize(canvas) {
     return offscreen;
   }
 
-  const shadowrize = (image, anim, animOut) => {
-    const tileWidth = 16
-    const tileHeight = 16
+  const shadowrize = (image, anim) => {
+    const tileWidth = anim.tileWidth
+    const tileHeight = anim.tileHeight
     const scale = 2
-    const imageSize = image.width;
-    const offscreen = new OffscreenCanvas(imageSize*scale, imageSize*scale);
+    const w = image.width / tileWidth
+    const h = image.height / tileHeight
+    const offscreen = new OffscreenCanvas(image.width*scale, image.height*scale);
     const ctx = offscreen.getContext("2d");
     ctx.shadowColor = "rgba(0,0,0,0.5)"
-    ctx.shadowOffsetX = -500;
+    ctx.shadowOffsetX = -image.width*10;
     ctx.shadowOffsetY = -8;
     ctx.shadowBlur = 2;
     
-    for (var x = 0; x < 4;x++) {
-        for (var y=0; y <4;y++) {
-            //
+    for (var x = 0; x < w;x++) {
+        for (var y=0; y <h;y++) {
             ctx.save()
-            ctx.translate(x*tileWidth*scale+500+tileWidth*scale*0.6,y*tileHeight*scale+tileHeight*scale*0.5)
+            ctx.translate(x*tileWidth*scale+image.width*10+tileWidth*scale*0.6,y*tileHeight*scale+tileHeight*scale*0.5)
             ctx.transform(1, 0.1, -0.8, 1, 0, 0);
             ctx.drawImage(image, x*tileWidth,y*tileHeight, tileWidth, tileHeight, 0,0, tileWidth, tileHeight)
             ctx.restore()
         }
     }
 
-    //ctx.drawImage(image, 0, 0);
-  
-    const imageData = ctx.getImageData(0, 0, imageSize, imageSize);
-  
-    ctx.putImageData(imageData, 0, 0);
 
+    const imageData = ctx.getImageData(0, 0, image.width*scale, image.height*scale);
+    ctx.putImageData(imageData, 0, 0);
     animOut = JSON.parse(JSON.stringify(anim))
     animOut.width*=scale
     animOut.height*=scale
