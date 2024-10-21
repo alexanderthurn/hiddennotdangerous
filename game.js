@@ -19,7 +19,7 @@ var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var isGameStarted = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
-var figures = [], maxPlayerFigures = 21
+var figures = [], maxPlayerFigures = 32
 var showDebug = false
 var lastKillTime;
 var multikillCounter;
@@ -257,7 +257,7 @@ function gameInit() {
             yTarget,
             maxBreakDuration: 5000,
             startWalkTime: Math.random() * 5000 + dtProcessed,
-            maxSpeed: 0.38,
+            maxSpeed: 0.08,
             speed: 0,
             isDead: false, 
             playerId: null,
