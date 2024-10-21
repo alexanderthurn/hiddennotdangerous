@@ -40,12 +40,11 @@ var playerImageAnim = {
     right: {a: [[0,32,16,16], [16,32,16,16], [32,32,16,16], [48,32,16,16]]},
     default: {a: [[0,0,16,16]]}
 }
-var playerShadowImage = new Image()
-var playerImageShadowAnim = JSON.parse(JSON.stringify(playerImageAnim))
-
+var playerShadowImage
+var playerImageShadowAnim
 loadPromises.push(new Promise((resolve, reject) => {
     playerImage.onload = () => {
-        playerShadowImage = shadowrize(playerImage,playerImageAnim, playerImageShadowAnim)
+        [playerShadowImage, playerImageShadowAnim] = shadowrize(playerImage,playerImageAnim)
         resolve()
     }
 }))
@@ -61,6 +60,7 @@ loadPromises.push(new Promise((resolve, reject) => {
     }
 }))
 loadPromises.push(new Promise((resolve, reject) => {
+    resolve()
 }))
 
 

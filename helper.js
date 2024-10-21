@@ -204,6 +204,7 @@ function resizeCanvasToDisplaySize(canvas) {
   
     ctx.putImageData(imageData, 0, 0);
 
+    animOut = JSON.parse(JSON.stringify(anim))
     animOut.width*=scale
     animOut.height*=scale
     animOut.down.a = animOut.down.a.map(array => array.map(a => a*scale))
@@ -232,5 +233,5 @@ function resizeCanvasToDisplaySize(canvas) {
 */
 
 
-    return offscreen;
+    return [offscreen,animOut];
   } 
