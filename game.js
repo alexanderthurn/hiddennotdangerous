@@ -721,9 +721,9 @@ function draw(players, figures, dt, dtProcessed, layer) {
     }
     ctx.save()
     ctx.strokeStyle = "rgba(165,24,24,0.5)";
-    ctx.lineWidth = 15;
+    ctx.lineWidth = 7;
     ctx.lineJoin = "bevel";
-    ctx.strokeRect(0, 0, level.width, level.height);
+    ctx.strokeRect(3, 3, level.width-6, level.height-6);
     ctx.restore()
 
     if (!isGameStarted) {
