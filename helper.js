@@ -174,3 +174,63 @@ function resizeCanvasToDisplaySize(canvas) {
   
     return offscreen;
   }
+
+  const shadowrize = (image, anim, animOut) => {
+    const tileWidth = 16
+    const tileHeight = 16
+    const scale = 2
+    const imageSize = image.width;
+    const offscreen = new OffscreenCanvas(imageSize*scale, imageSize*scale);
+    const ctx = offscreen.getContext("2d");
+    ctx.shadowColor = "rgba(0,0,0,0.5)"
+    ctx.shadowOffsetX = -500;
+    ctx.shadowOffsetY = -8;
+    ctx.shadowBlur = 2;
+    
+    for (var x = 0; x < 4;x++) {
+        for (var y=0; y <4;y++) {
+            //
+            ctx.save()
+            ctx.translate(x*tileWidth*scale+500+tileWidth*scale*0.6,y*tileHeight*scale+tileHeight*scale*0.5)
+            ctx.transform(1, 0.1, -0.8, 1, 0, 0);
+            ctx.drawImage(image, x*tileWidth,y*tileHeight, tileWidth, tileHeight, 0,0, tileWidth, tileHeight)
+            ctx.restore()
+        }
+    }
+
+    //ctx.drawImage(image, 0, 0);
+  
+    const imageData = ctx.getImageData(0, 0, imageSize, imageSize);
+  
+    ctx.putImageData(imageData, 0, 0);
+
+    animOut.width*=scale
+    animOut.height*=scale
+    animOut.down.a = animOut.down.a.map(array => array.map(a => a*scale))
+    animOut.up.a = animOut.up.a.map(array => array.map(a => a*scale))
+    animOut.left.a = animOut.left.a.map(array => array.map(a => a*scale))
+    animOut.right.a = animOut.right.a.map(array => array.map(a => a*scale))
+    animOut.default.a = animOut.default.a.map(array => array.map(a => a*scale))
+
+
+       /* test for game.js draw
+    ctx.save()
+    ctx.scale(3.0,3.0)
+    ctx.fillStyle = "white";
+    ctx.fillRect(100,100,playerShadowImage.width, playerShadowImage.height)
+    ctx.drawImage(playerShadowImage, 100,100)
+    ctx.restore()
+
+    ctx.save()
+    ctx.translate(300,100)
+    ctx.fillRect(-playerShadowImage.width*0.5,-playerShadowImage.height*0.5,playerShadowImage.width, playerShadowImage.height)
+    var sprite = playerImageAnim.right.a[0]
+    var spriteShadow = playerImageShadowAnim.right.a[0]
+    ctx.drawImage(playerShadowImage, spriteShadow[0], spriteShadow[1], spriteShadow[2], spriteShadow[3], 0 - playerImageShadowAnim.width*0.5, 0 - playerImageShadowAnim.height*0.5, playerImageShadowAnim.width, playerImageShadowAnim.height)
+    ctx.drawImage(playerImage, sprite[0], sprite[1], sprite[2], sprite[3], 0 - playerImageAnim.width*0.5, 0 - playerImageAnim.height*0.5, playerImageAnim.width, playerImageAnim.height)
+    ctx.restore()        
+*/
+
+
+    return offscreen;
+  } 

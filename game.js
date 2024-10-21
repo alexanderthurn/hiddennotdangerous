@@ -1,4 +1,5 @@
 console.log('no need to hide')
+var loadPromises = []
 var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
 var mousePlayers = [{x: 0, y: 0, offsetCursorX: 0, offsetCursorY: 0,pressed: new Set(), pressedLastFrame: false}];
@@ -19,7 +20,6 @@ var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var isGameStarted = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figures = [], maxPlayerFigures = 21
-var playerImage = new Image()
 var showDebug = false
 var lastKillTime;
 var multikillCounter;
@@ -27,6 +27,7 @@ var multikillTimeWindow = 4000;
 var lastTotalkillAudio;
 var totalkillCounter;
 var level = {}
+var playerImage = new Image()
 playerImage.src = 'character_base_16x16.png'
 var playerImageAnim = {
     width: 64,
@@ -39,11 +40,30 @@ var playerImageAnim = {
     right: {a: [[0,32,16,16], [16,32,16,16], [32,32,16,16], [48,32,16,16]]},
     default: {a: [[0,0,16,16]]}
 }
+var playerShadowImage = new Image()
+var playerImageShadowAnim = JSON.parse(JSON.stringify(playerImageAnim))
+
+loadPromises.push(new Promise((resolve, reject) => {
+    playerImage.onload = () => {
+        playerShadowImage = shadowrize(playerImage,playerImageAnim, playerImageShadowAnim)
+        resolve()
+    }
+}))
+
+
+
 var cloudImage = new Image()
 cloudImage.src = 'vapor_cloud.png'
-cloudImage.onload = () => {
-    cloudImage = colorize(cloudImage, 139.0/256,69.0/256,19.0/256)
-}
+loadPromises.push(new Promise((resolve, reject) => {
+    cloudImage.onload = () => {
+        cloudImage = colorize(cloudImage, 139.0/256,69.0/256,19.0/256)
+        resolve()
+    }
+}))
+loadPromises.push(new Promise((resolve, reject) => {
+}))
+
+
 cloudImageAnim = {
     hasDirections: false,
     width: 128,
@@ -129,10 +149,24 @@ var soundWickedSick = getAudio(audio.wickedSick);
 var soundEat = [getAudio(audio.eat[0]),getAudio(audio.eat[1]),getAudio(audio.eat[2]),getAudio(audio.eat[3]),getAudio(audio.eat[4])];
 
 document.addEventListener("DOMContentLoaded", function(event){
+   
     resizeCanvasToDisplaySize(canvas)
     adjustLevelToCanvas(level, canvas)
-    gameInit()
-    window.requestAnimationFrame(gameLoop);
+
+    // loading images
+    ctx.save()
+    ctx.font = canvas.height*0.1+"px serif";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "left";
+    ctx.textBaseline='top'
+    ctx.fillText('Loading...',0,0)
+    ctx.restore()
+
+    Promise.all(loadPromises).then(() => { 
+        gameInit()
+        window.requestAnimationFrame(gameLoop);
+    })
+   
 })
 
 window.addEventListener("resize", function(event){
@@ -237,6 +271,8 @@ function gameInit() {
             beansFarted: new Set(),
             image: playerImage,
             imageAnim: playerImageAnim,
+            imageShadow: playerShadowImage,
+            imageShadowAnim: playerImageAnim,
             type: 'fighter',
             shadow: true,
             scale: 1,
@@ -773,23 +809,30 @@ function draw(players, figures, dt, dtProcessed, layer) {
         
         let deg = rad2limiteddeg(f.angle)
         let sprite = null
+        let spriteShadow = null
 
         if (f.imageAnim) {
             let frame
+            let frameShadow
             if (f.frame) {
                 frame = f.frame
             } else if (f.imageAnim.hasDirections) {
                 if (distanceAngles(deg, 0) < 45) {
                     frame = f.imageAnim.right.a
+                    frameShadow = f.imageShadowAnim && f.imageShadowAnim.right.a
                 } else if (distanceAngles(deg, 90) <= 45){
                     frame = f.imageAnim.down.a
+                    frameShadow = f.imageShadowAnim && f.imageShadowAnim.down.a
                 } else if (distanceAngles(deg, 180) < 45){
                     frame = f.imageAnim.left.a
+                    frameShadow = f.imageShadowAnim && f.imageShadowAnim.left.a
                 } else {
                     frame = f.imageAnim.up.a
+                    frameShadow = f.imageShadowAnim && f.imageShadowAnim.up.a
                 }
             } else {
                 frame = f.imageAnim.default.a
+                frameShadow = f.imageShadowAnim && f.imageShadowAnim.default.a
             }
 
             let indexFrame = 0;
@@ -798,10 +841,10 @@ function draw(players, figures, dt, dtProcessed, layer) {
             }
 
             sprite = frame[indexFrame]
+            spriteShadow = frameShadow && frameShadow[indexFrame]
         }
         
-        
-
+     
 
         ctx.save()
         ctx.translate(f.x, f.y)
@@ -811,20 +854,8 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.rotate(deg2rad(90))
                 ctx.scale(0.5*f.scale,0.5*f.scale)
                 ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
-            } else if (f.shadow && f.image) {
-
-                //if (fps > fpsMinForEffects) {
-                    // shadow
-                    ctx.shadowColor = "rgba(0,0,0,0.5)"
-                    ctx.shadowOffsetX = -canvas.width;
-                    ctx.shadowOffsetY = -8;
-                    ctx.shadowBlur = 16;
-                    ctx.translate(canvas.width/level.scale+24,-8)
-                    ctx.transform(1, 0.1, -0.8, 1, 0, 0);
-                    ctx.scale(1.0*f.scale,1.0*f.scale)
-                    ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
-                //}
-                
+            } else if (f.shadow && f.imageShadow) {
+                ctx.drawImage(f.imageShadow, spriteShadow[0], spriteShadow[1], spriteShadow[2], spriteShadow[3], 0 - f.imageShadowAnim.width*0.5, 0 - f.imageShadowAnim.height*0.5, f.imageShadowAnim.width, f.imageShadowAnim.height)
             }
         } else {
             if (f.type === 'bean') {
@@ -874,7 +905,8 @@ function draw(players, figures, dt, dtProcessed, layer) {
                
                 ctx.scale(1.0*f.scale,1.0*f.scale)
                 ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
-            }
+     
+        }
         }
         ctx.restore()  
        
@@ -981,7 +1013,26 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.restore()
         }
     }
-    
+
+
+    ctx.save()
+    ctx.scale(3.0,3.0)
+    ctx.fillStyle = "white";
+    ctx.fillRect(100,100,playerShadowImage.width, playerShadowImage.height)
+    ctx.drawImage(playerShadowImage, 100,100)
     ctx.restore()
 
+    ctx.save()
+    ctx.translate(300,100)
+    ctx.fillRect(-playerShadowImage.width*0.5,-playerShadowImage.height*0.5,playerShadowImage.width, playerShadowImage.height)
+    var sprite = playerImageAnim.right.a[0]
+    var spriteShadow = playerImageShadowAnim.right.a[0]
+    ctx.drawImage(playerShadowImage, spriteShadow[0], spriteShadow[1], spriteShadow[2], spriteShadow[3], 0 - playerImageShadowAnim.width*0.5, 0 - playerImageShadowAnim.height*0.5, playerImageShadowAnim.width, playerImageShadowAnim.height)
+    ctx.drawImage(playerImage, sprite[0], sprite[1], sprite[2], sprite[3], 0 - playerImageAnim.width*0.5, 0 - playerImageAnim.height*0.5, playerImageAnim.width, playerImageAnim.height)
+    ctx.restore()   
+ 
+    ctx.restore()
+
+
+    
 }
