@@ -163,6 +163,9 @@ document.addEventListener("DOMContentLoaded", function(event){
     ctx.restore()
 
     Promise.all(loadPromises).then(() => { 
+        ctx.clearRect(0,0, canvas.width, canvas.height)
+      
+
         gameInit()
         window.requestAnimationFrame(gameLoop);
     })
@@ -272,9 +275,8 @@ function gameInit() {
             image: playerImage,
             imageAnim: playerImageAnim,
             imageShadow: playerShadowImage,
-            imageShadowAnim: playerImageAnim,
+            imageShadowAnim: playerImageShadowAnim,
             type: 'fighter',
-            shadow: true,
             scale: 1,
             zIndex: 0,
             frame: null
@@ -764,18 +766,17 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
     if (!isGameStarted) {
         ctx.save()
-        ctx.shadowColor = "rgba(0,0,0,1)"
-        ctx.shadowOffsetX = -canvas.width;
-        ctx.shadowOffsetY = 0;
-        ctx.shadowBlur = 2+Math.sin(dtProcessed*0.001)*2;
         ctx.font = level.width*0.06+"px serif";
-        ctx.fillStyle = "white";
+        ctx.fillStyle = "rgba(139,69,19,1.0)";
+        ctx.strokeStyle = "black";
         ctx.textAlign = "center";
         ctx.textBaseline='middle'
-        ctx.translate(canvas.width/level.scale+0.5*level.width, level.height*0.3)
+        ctx.lineWidth = 2
+        ctx.translate(0.5*level.width,level.height*0.3)
         ctx.fillText('Hidden Not Dangerous',0,0)
+        ctx.strokeText('Hidden Not Dangerous',0,0)
         ctx.font = level.width*level.scale*0.03+"px serif";
-        ctx.shadowBlur = 1;
+        ctx.fillStyle = "black";
         ctx.fillText('WASDT',0,96)
         ctx.fillText(String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0',0,96*2)
         ctx.fillText('Gamepad',0,96*3)
@@ -854,7 +855,8 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.rotate(deg2rad(90))
                 ctx.scale(0.5*f.scale,0.5*f.scale)
                 ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
-            } else if (f.shadow && f.imageShadow) {
+            } else if (f.imageShadow) {
+                ctx.scale(1.0*f.scale,1.0*f.scale)
                 ctx.drawImage(f.imageShadow, spriteShadow[0], spriteShadow[1], spriteShadow[2], spriteShadow[3], 0 - f.imageShadowAnim.width*0.5, 0 - f.imageShadowAnim.height*0.5, f.imageShadowAnim.width, f.imageShadowAnim.height)
             }
         } else {
@@ -1014,25 +1016,5 @@ function draw(players, figures, dt, dtProcessed, layer) {
         }
     }
 
-
-    ctx.save()
-    ctx.scale(3.0,3.0)
-    ctx.fillStyle = "white";
-    ctx.fillRect(100,100,playerShadowImage.width, playerShadowImage.height)
-    ctx.drawImage(playerShadowImage, 100,100)
     ctx.restore()
-
-    ctx.save()
-    ctx.translate(300,100)
-    ctx.fillRect(-playerShadowImage.width*0.5,-playerShadowImage.height*0.5,playerShadowImage.width, playerShadowImage.height)
-    var sprite = playerImageAnim.right.a[0]
-    var spriteShadow = playerImageShadowAnim.right.a[0]
-    ctx.drawImage(playerShadowImage, spriteShadow[0], spriteShadow[1], spriteShadow[2], spriteShadow[3], 0 - playerImageShadowAnim.width*0.5, 0 - playerImageShadowAnim.height*0.5, playerImageShadowAnim.width, playerImageShadowAnim.height)
-    ctx.drawImage(playerImage, sprite[0], sprite[1], sprite[2], sprite[3], 0 - playerImageAnim.width*0.5, 0 - playerImageAnim.height*0.5, playerImageAnim.width, playerImageAnim.height)
-    ctx.restore()   
- 
-    ctx.restore()
-
-
-    
 }
