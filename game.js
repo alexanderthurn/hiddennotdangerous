@@ -385,7 +385,7 @@ function addFartCloud(x,y,playerId, size=1) {
         speed: 0,
         angle: 0,
         anim: 0,
-        size: size < 5 ? size : 10,
+        size: size,
         scale: 0,
         zIndex: 1000,
         attackAngle: 360,
@@ -596,6 +596,7 @@ function handleInput(players, figures, dtProcessed) {
             lastWinnerPlayerIds.add(figure.playerId);
             lastWinnerPlayerIdThen = dtProcessed
 
+            figures.forEach(f => f.isDead = false)
             if (figures.filter(f => f.playerId).length == 2) {
                 playPlaylist(shuffle([music1, music2, music3]))   
                 isGameStarted = true                                                                                                                                                                                 
@@ -878,13 +879,13 @@ function draw(players, figures, dt, dtProcessed, layer) {
   
                 ctx.scale(1.0*f.scale,1.0*f.scale)
                 ctx.beginPath();
-                ctx.fillStyle = "rgba(256,256,256,0.5)";
+                ctx.fillStyle = "rgba(255,255,255,0.3)";
                 ctx.arc(0,0,f.attackDistance, 0, 2 * Math.PI)
                 ctx.closePath()
                 ctx.fill();
 
                 ctx.beginPath();
-                ctx.fillStyle = "rgba(0,0,0,0.5)";
+                ctx.fillStyle = "rgba(255,255,255,0.3)";
                 ctx.arc(0,0,f.attackDistance*0.8, 0, 2 * Math.PI)
                 ctx.closePath()
                 ctx.fill();
