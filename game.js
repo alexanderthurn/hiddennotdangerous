@@ -42,7 +42,7 @@ var playerImageAnim = {
 var cloudImage = new Image()
 cloudImage.src = 'vapor_cloud.png'
 cloudImage.onload = () => {
-   // cloudImage = colorize(cloudImage, 1,1,0)
+    cloudImage = colorize(cloudImage, 139.0/256,69.0/256,19.0/256)
 }
 cloudImageAnim = {
     hasDirections: false,
