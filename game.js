@@ -73,7 +73,7 @@ const textureTiles = {
     grass: [655, 23, 609, 609],
     mushrooms: [23, 23, 609, 609]
 }
-const tileWidth = 100;
+const tileWidth = 120;
 const textureTilesList = Object.values(textureTiles);
 const audio = {
     attack: {title: 'sound2.mp3', currentTime: 0.15},
@@ -130,18 +130,14 @@ var soundEat = [getAudio(audio.eat[0]),getAudio(audio.eat[1]),getAudio(audio.eat
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
-    level.width = canvas.width // 1920
-    level.height = canvas.height // 1080
-    level.scale = 1.0 // Math.min(canvas.width / level.width,canvas.height / level.height)
+    adjustLevelToCanvas(level, canvas)
     gameInit()
     window.requestAnimationFrame(gameLoop);
 })
 
 window.addEventListener("resize", function(event){
     resizeCanvasToDisplaySize(canvas)
-    level.width = canvas.width // 1920
-    level.height = canvas.height // 1080
-    level.scale = 1.0 // Math.min(canvas.width / level.width,canvas.height / level.height)
+    adjustLevelToCanvas(level, canvas)
 });
 
 window.addEventListener('keydown', event => {
@@ -189,8 +185,8 @@ window.addEventListener('pointerup', event => {
 });
 
 canvas.addEventListener('pointermove', event => {
-    mousePlayers[0].x = event.clientX - canvas.offsetLeft;
-    mousePlayers[0].y = event.clientY -  canvas.offsetTop;
+    mousePlayers[0].x = (event.clientX - canvas.offsetLeft - level.offsetX)/level.scale;
+    mousePlayers[0].y = (event.clientY -  canvas.offsetTop - level.offsetY)/level.scale;
     event.preventDefault();
     event.stopPropagation();
 }, false);
@@ -273,7 +269,7 @@ function gameInit() {
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: -canvas.height
+        zIndex: -level.height
     });
     figures.push({
         id: 2,
@@ -287,7 +283,7 @@ function gameInit() {
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: -canvas.height
+        zIndex: -level.height
     });
     figures.push({
         id: 3,
@@ -301,7 +297,7 @@ function gameInit() {
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: -canvas.height
+        zIndex: -level.height
     });
     figures.push({
         id: 4,
@@ -315,7 +311,7 @@ function gameInit() {
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: -canvas.height
+        zIndex: -level.height
     });
     figures.push({
         id: 5,
@@ -329,7 +325,7 @@ function gameInit() {
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: -canvas.height
+        zIndex: -level.height
     });
 
     
@@ -339,15 +335,15 @@ function gameInit() {
 function addFartCloud(x,y,playerId, size=1) {
     figures.push({
         type: 'cloud',
-        x: x,
-        y: y,
+        x,
+        y,
         playerId, playerId,
         image: cloudImage,
         imageAnim: cloudImageAnim,    
         speed: 0,
         angle: 0,
         anim: 0,
-        size: size,
+        size,
         scale: 0,
         zIndex: 1000,
         attackAngle: 360,
@@ -433,8 +429,10 @@ function gameLoop() {
 
         var f = figures.find(f => f.playerId ===  mp.playerId && f.type === 'fighter')
         if (f) {
-            let x = mp.x - f.x;
-            let y = mp.y - f.y;
+            //let x = mp.x - f.x;
+            //let y = mp.y - f.y;
+            let x = mp.x - canvas.width / 2;
+            let y = mp.y - canvas.height / 2;
             //[x, y] = setDeadzone(x, y,0.1);
             //[x, y] = clampStick(x, y);
             mp.xAxis = x
@@ -675,10 +673,10 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
 
 function draw(players, figures, dt, dtProcessed, layer) {
     ctx.save()
-    ctx.scale(level.scale, level.scale)
+    ctx.transform(level.scale, 0, 0, level.scale, level.offsetX, level.offsetY)
 
     if (layer === 0) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.clearRect(-0.5*playerImageAnim.width, -0.5*playerImageAnim.height, level.width+playerImageAnim.width, level.height+playerImageAnim.height)
         const heightInTiles = getHeightInTiles();
         const widthInTiles = getWidthInTiles();
         for (let i = 0; i < tileArea.length; i++) {
@@ -694,10 +692,22 @@ function draw(players, figures, dt, dtProcessed, layer) {
         }
 
         ctx.save();
-        for (let i = 0; i < Math.min(tileArea.length, widthInTiles); i++) {
+        maxI = Math.min(tileArea.length, widthInTiles);
+        for (let i = 0; i < maxI; i++) {
+            maxJ = Math.min(tileArea[i].length, heightInTiles);
             for (let j = 0; j < Math.min(tileArea[i].length, heightInTiles); j++) {
                 const tile = textureTilesList[tileArea[i][j]];
-                ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, tileWidth, tileWidth)
+                let relTileWidth = 1;
+                let relTileHeight = 1;
+                if (i === maxI-1) {
+                    relTileWidth = (level.width % tileWidth) / tileWidth;
+                    relTileWidth = relTileWidth > 0 ? relTileWidth : 1;
+                }
+                if (j === maxJ-1) {
+                    relTileHeight = (level.height % tileWidth) / tileWidth;
+                    relTileHeight = relTileHeight > 0 ? relTileHeight : 1;
+                }
+                ctx.drawImage(texture, tile[0], tile[1], relTileWidth * tile[2], relTileHeight * tile[3], 0, 0, relTileWidth * tileWidth, relTileHeight * tileWidth)
                 if(j < Math.min(tileArea[i].length, heightInTiles)-1) {
                     ctx.translate(0, tileWidth);
                 } else {
@@ -711,24 +721,24 @@ function draw(players, figures, dt, dtProcessed, layer) {
     }
     ctx.save()
     ctx.strokeStyle = "rgba(165,24,24,0.5)";
-    ctx.lineWidth = 15;
+    ctx.lineWidth = 7;
     ctx.lineJoin = "bevel";
-    ctx.strokeRect(0, 0, level.width, level.height);
+    ctx.strokeRect(3, 3, level.width-6, level.height-6);
     ctx.restore()
 
     if (!isGameStarted) {
         ctx.save()
         ctx.shadowColor = "rgba(0,0,0,1)"
-        ctx.shadowOffsetX = -level.width;
+        ctx.shadowOffsetX = -canvas.width;
         ctx.shadowOffsetY = 0;
         ctx.shadowBlur = 2+Math.sin(dtProcessed*0.001)*2;
         ctx.font = level.width*0.06+"px serif";
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
         ctx.textBaseline='middle'
-        ctx.translate(level.width*1.5,level.height*0.3)
+        ctx.translate(canvas.width/level.scale+0.5*level.width, level.height*0.3)
         ctx.fillText('Hidden Not Dangerous',0,0)
-        ctx.font = level.width*0.03+"px serif";
+        ctx.font = level.width*level.scale*0.03+"px serif";
         ctx.shadowBlur = 1;
         ctx.fillText('WASDT',0,96)
         ctx.fillText(String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0',0,96*2)
@@ -740,7 +750,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
     //ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, 100, 100)
     ctx.save()
     
-    for (x = -2; x < 2;x ++) {
+    /*for (x = -2; x < 2;x ++) {
         for (y = -2;y < 2;y++) {
             ctx.beginPath();
             ctx.arc(mousePlayers[0].x + mousePlayers[0].offsetCursorX + x*level.width*0.5, mousePlayers[0].y + mousePlayers[0].offsetCursorY + y*level.height*0.5, 5, 0, 2 * Math.PI);
@@ -748,7 +758,13 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.strokeStyle = "rgba(0,0,0,0.5)";
             ctx.stroke();
         }
-    }
+    }*/
+
+        ctx.beginPath();
+            ctx.arc(mousePlayers[0].x, mousePlayers[0].y, 5, 0, 2 * Math.PI);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "rgba(0,0,0,0.5)";
+            ctx.stroke();
     
 
     ctx.restore()
@@ -800,10 +816,10 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 //if (fps > fpsMinForEffects) {
                     // shadow
                     ctx.shadowColor = "rgba(0,0,0,0.5)"
-                    ctx.shadowOffsetX = -level.width;
-                    ctx.shadowOffsetY = 0;
+                    ctx.shadowOffsetX = -canvas.width;
+                    ctx.shadowOffsetY = -8;
                     ctx.shadowBlur = 16;
-                    ctx.translate(level.width+24,-8)
+                    ctx.translate(canvas.width/level.scale+24,-8)
                     ctx.transform(1, 0.1, -0.8, 1, 0, 0);
                     ctx.scale(1.0*f.scale,1.0*f.scale)
                     ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
@@ -941,7 +957,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
     
         ctx.save()
         ctx.textAlign = "right";
-        ctx.fillText(fps + " FPS", canvas.width, 0);
+        ctx.fillText(fps + " FPS", level.width, 0);
         ctx.restore()
     
     
@@ -956,7 +972,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
         
             ctx.save()
             ctx.textBaseline='bottom'
-            ctx.translate(0,canvas.height)
+            ctx.translate(0,canvas.height/level.scale)
             figures.forEach((g,i) => {
                 ctx.fillText("playerId: " + g.playerId + " x: " + Math.floor(g.x) + " y: " + Math.floor(g.y) + " Beans: " + g.beans?.size,0,0) 
                 ctx.translate(0,-16)
