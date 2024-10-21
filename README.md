@@ -19,5 +19,10 @@ eat sound2: <a href="https://pixabay.com/sound-effects/?utm_source=link-attribut
 eat sound3: <a href="https://pixabay.com/sound-effects/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=95783">Pixabay</a>
 
 eat sound: <a href="https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=92106">Pixabay</a>
+vomit: Sound Effect from <a href="https://pixabay.com/sound-effects/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=41796">Pixabay</a>
+
+vomit2 Sound Effect by <a href="https://pixabay.com/de/users/soundreality-31074404/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=150122">Jurij</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=150122">Pixabay</a>
+
+vomit3 Sound Effect from <a href="https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=41207">Pixabay</a>
 
 local dev: python3 -m http.server 3333

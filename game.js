@@ -99,14 +99,15 @@ const tileWidth = 120;
 const textureTilesList = Object.values(textureTiles);
 const audio = {
     attack: {title: 'sound2.mp3', currentTime: 0.15},
-    death: {title: 'sound1.mp3', currentTime: 0.4},
+    attack2: {title: 'sound1.mp3', currentTime: 0.15},
+    death: {title: 'gag-reflex-41207.mp3', currentTime: 0.0},
     music1: {title: 'music1.mp3', currentTime: 20, volume: 0.5},
     music2: {title: 'music2.mp3', volume: 0.5},
     music3: {title: 'music3.mp3', volume: 0.5},
     join: {title: 'sounddrum.mp3'},
-    firstBlood: {title: 'first-blood.mp3', volume: 0.5},
-    doubleKill: {title: 'double-kill.mp3', volume: 0.5},
-    tripleKill: {title: 'triple-kill.mp3', volume: 0.5},
+    firstBlood: {title: 'first-blood.mp3', volume: 0.2},
+    doubleKill: {title: 'double-kill.mp3', volume: 0.3},
+    tripleKill: {title: 'triple-kill.mp3', volume: 0.4},
     multiKill: {title: 'multi-kill.mp3', volume: 0.5},
     megaKill: {title: 'mega-kill.ogg'},
     ultraKill: {title: 'ultra-kill.mp3', volume: 0.5},
@@ -271,6 +272,7 @@ function gameInit() {
             attackDistance: 80,
             attackAngle: 90,
             soundAttack: getAudio(audio.attack),
+            soundAttack2: getAudio(audio.attack2),
             soundDeath: getAudio(audio.death),
             beans: new Set(),
             beansFarted: new Set(),
@@ -615,11 +617,16 @@ function handleInput(players, figures, dtProcessed) {
 
                     let xyNew = move(f.x, f.y, f.angle+deg2rad(180),f.attackDistance*0.5, 1)
 
-                    addFartCloud(xyNew.x,xyNew.y,f.playerId,f.beans.size)
+                    if (f.beans.size > 0) {
+                        playAudio(f.soundAttack2);
+                        addFartCloud(xyNew.x,xyNew.y,f.playerId,f.beans.size)
+                    } else {
+                        playAudio(f.soundAttack);
+                    }
                     f.beans.forEach(b => f.beansFarted.add(b))
                     f.beans.clear()
                     f.lastAttackTime = dtProcessed
-                    playAudio(f.soundAttack);
+
                 }
             }
             f.isAttacking = dtProcessed-f.lastAttackTime < f.attackDuration ? true : false;
@@ -689,7 +696,7 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
         if (f.lifetime > 2000) {
             if (!f.isAttacking) {
                 f.isAttacking = true
-                f.scale = 1.0*f.size
+                f.scale = 3.0*f.size
             }
             f.scale*=Math.pow(0.999,dt)
             if (f.scale < 0.1) {
