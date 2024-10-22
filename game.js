@@ -17,7 +17,7 @@ var keyboards = [{bindings: {
     'Numpad0': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var isGameStarted = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastGameBreak, gameBreakDuration = 5000;
+var isGameStarted = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId, lastFinalWinnerPlayerIdThen, gameBreakDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figures = [], maxPlayerFigures = 32
 var showDebug = false
@@ -500,6 +500,7 @@ function gameLoop() {
     draw(players, figures, dt, dtProcessed, 1);
     then = now
 
+    let restartGame = false;
     var figuresWithPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
     var survivors = figuresWithPlayer.filter(f => !f.isDead)
     if (survivors.length < 2 && figuresWithPlayer.length > survivors.length) {
@@ -509,6 +510,20 @@ function gameLoop() {
             lastWinnerPlayerIds.add(survivors[0].playerId);
             lastWinnerPlayerIdThen = dtProcessed
         }
+        restartGame = true;
+    }
+
+    const maxPoints = Math.max(figuresWithPlayer.map(f => f.points));
+    if (maxPoints > 3) {
+        const figuresWithMaxPoints = figuresWithPlayer.filter(f => f.points === maxPoints);
+        if (figuresWithMaxPoints.length === 1) {
+            lastFinalWinnerPlayerId = figuresWithMaxPoints[0].playerId;
+            lastFinalWinnerPlayerIdThen = dtProcessed;
+            restartGame = false;
+        }
+    }
+
+    if (restartGame) {
         isGameStarted = true;
         gameInit()
     }
@@ -527,8 +542,7 @@ function gameLoop() {
             isGameStarted = true
         }
         gameInit()
-    }
-        */
+    }*/
     window.requestAnimationFrame(gameLoop);
 }
 
