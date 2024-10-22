@@ -27,6 +27,7 @@ var multikillTimeWindow = 4000;
 var lastTotalkillAudio;
 var totalkillCounter;
 var level = {}
+var tileMap;
 var playerImage = new Image()
 playerImage.src = 'character_base_16x16.png'
 var playerImageAnim = {
@@ -54,13 +55,13 @@ loadPromises.push(new Promise((resolve, reject) => {
 
 
 var cloudImage = new Image()
-cloudImage.src = 'vapor_cloud.png'
-loadPromises.push(new Promise((resolve, reject) => {
+cloudImage.src = 'fart.png'
+/*loadPromises.push(new Promise((resolve, reject) => {
     cloudImage.onload = () => {
         cloudImage = colorize(cloudImage, 139.0/256,69.0/256,19.0/256)
         resolve()
     }
-}))
+}))*/
 loadPromises.push(new Promise((resolve, reject) => {
     resolve()
 }))
@@ -231,6 +232,7 @@ function gameInit() {
     startTime = then;
     //dtProcessed = 0
     fpsTime = then
+    tileMap = tileMapFunc(texture);
     lastKillTime = undefined;
     multikillCounter = 0;
     lastTotalkillAudio = 0;
@@ -728,7 +730,10 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
     if (layer === 0) {
         ctx.clearRect(-0.5*playerImageAnim.width, -0.5*playerImageAnim.height, level.width+playerImageAnim.width, level.height+playerImageAnim.height)
-        const heightInTiles = getHeightInTiles();
+
+        ctx.drawImage(tileMap, 0, 0, level.width, level.height, 0, 0, level.width, level.height);
+        
+        /*const heightInTiles = getHeightInTiles();
         const widthInTiles = getWidthInTiles();
         for (let i = 0; i < tileArea.length; i++) {
             for (let j = tileArea[i].length; j < heightInTiles; j++) {
@@ -767,7 +772,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 
             }
         }
-        ctx.restore();
+        ctx.restore();*/
 
     }
     ctx.save()
