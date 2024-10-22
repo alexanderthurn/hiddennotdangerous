@@ -857,35 +857,25 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
                 ctx.scale(0.5+0.1*Math.sin(dtProcessed*0.001), 0.5+0.1*Math.sin(dtProcessed*0.001))
                 ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
-         
-               
-
             } else if (!f.isDead) {
                 if (f.isAttacking) {
-                    //ctx.rotate(deg2rad(-10+mod(dtProcessed*0.5,20)) )
-                   
-                    if (distanceAngles(deg, 0) < 45) {
-                        ctx.rotate(deg2rad(20))
-                    } else if (distanceAngles(deg, 90) <= 45){
-                        ctx.rotate(deg2rad(-20))
-                    } else if (distanceAngles(deg, 180) < 45){
-                        ctx.rotate(deg2rad(-20))
-                    } else {
-                        ctx.rotate(deg2rad(20))
-                    }
-                }
-                if (f.type === 'cloud') {
-                    if (f.isAttacking) {
+                    if (f.type == 'fighter') {
+                        if (distanceAngles(deg, 0) < 45) {
+                            ctx.rotate(deg2rad(20))
+                        } else if (distanceAngles(deg, 90) <= 45){
+                            ctx.rotate(deg2rad(-20))
+                        } else if (distanceAngles(deg, 180) < 45){
+                            ctx.rotate(deg2rad(-20))
+                        } else {
+                            ctx.rotate(deg2rad(20))
+                        }
+                    } else if (f.type === 'cloud') {
                         ctx.globalCompositeOperation = "difference";
-                    } else {
-
                     }
-                }
-               
+                } 
                 ctx.scale(1.0*f.scale,1.0*f.scale)
                 ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
-     
-        }
+            }
         }
         ctx.restore()  
        
