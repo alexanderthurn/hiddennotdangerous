@@ -17,15 +17,11 @@ var keyboards = [{bindings: {
     'Numpad0': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var isGameStarted = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen
+var isGameStarted = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastGameBreak, gameBreakDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figures = [], maxPlayerFigures = 32
 var showDebug = false
-var lastKillTime;
-var multikillCounter;
-var multikillTimeWindow = 4000;
-var lastTotalkillAudio;
-var totalkillCounter;
+var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = {}
 var tileMap;
 var playerImage = new Image()
@@ -506,20 +502,14 @@ function gameLoop() {
 
     var figuresWithPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
     var survivors = figuresWithPlayer.filter(f => !f.isDead)
-    if (survivors.length == 1 && figuresWithPlayer.length > 1) {
-        if (isGameStarted) {
+    if (survivors.length < 2 && figuresWithPlayer.length > survivors.length) {
+        if (isGameStarted && survivors.length == 1) {
             survivors[0].points++
             lastWinnerPlayerIds.clear();
             lastWinnerPlayerIds.add(survivors[0].playerId);
             lastWinnerPlayerIdThen = dtProcessed
-        } else {
-            isGameStarted = true
         }
-        gameInit()
-    } else if (survivors.length == 0 && figuresWithPlayer.length > 0) {
-        if (!isGameStarted) {
-            isGameStarted = true
-        }
+        isGameStarted = true;
         gameInit()
     }
 
@@ -936,7 +926,6 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 var lpi = 1-lp
                 ctx.translate(lpi * (level.width*0.5) + lp*(32+i*48), lpi*(level.height*0.5) + lp*(level.height-32))
                 ctx.scale(12.0*lpi + 1*lp,12.0*lpi +1*lp)
-
             }
 
             ctx.arc(0,0,16,0, 2 * Math.PI);
