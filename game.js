@@ -27,6 +27,7 @@ var multikillTimeWindow = 4000;
 var lastTotalkillAudio;
 var totalkillCounter;
 var level = {}
+var tileMap;
 var playerImage = new Image()
 playerImage.src = 'character_base_16x16.png'
 var playerImageAnim = {
@@ -54,15 +55,20 @@ loadPromises.push(new Promise((resolve, reject) => {
 
 
 var cloudImage = new Image()
-cloudImage.src = 'vapor_cloud.png'
-loadPromises.push(new Promise((resolve, reject) => {
+cloudImage.src = 'fart.png'
+/*loadPromises.push(new Promise((resolve, reject) => {
     cloudImage.onload = () => {
         cloudImage = colorize(cloudImage, 139.0/256,69.0/256,19.0/256)
         resolve()
     }
-}))
+}))*/
+var texture = new Image()
+texture.src = 'texture_grass.jpg'
 loadPromises.push(new Promise((resolve, reject) => {
-    resolve()
+    texture.onload = () => {
+        tileMap = tileMapFunc(texture);
+        resolve();
+    }
 }))
 
 
@@ -87,8 +93,7 @@ foodImageAnim = {
     default: {a: [[224,256,32,32]]}
 }
 
-var texture = new Image()
-texture.src = 'texture_grass.jpg'
+
 let tileArea = []
 const textureTiles = {
     flowers: [1288, 23, 609, 609],
@@ -145,9 +150,9 @@ var soundTotalKill = [getAudio(audio.totalKill[0]), getAudio(audio.totalKill[1])
 var soundEat = [getAudio(audio.eat[0]),getAudio(audio.eat[1]),getAudio(audio.eat[2]),getAudio(audio.eat[3]),getAudio(audio.eat[4])];
 
 document.addEventListener("DOMContentLoaded", function(event){
-   
     resizeCanvasToDisplaySize(canvas)
     adjustLevelToCanvas(level, canvas)
+    tileMap = tileMapFunc(texture);
 
     // loading images
     ctx.save()
@@ -726,48 +731,9 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
     if (layer === 0) {
         ctx.clearRect(-0.5*playerImageAnim.width, -0.5*playerImageAnim.height, level.width+playerImageAnim.width, level.height+playerImageAnim.height)
-        const heightInTiles = getHeightInTiles();
-        const widthInTiles = getWidthInTiles();
-        for (let i = 0; i < tileArea.length; i++) {
-            for (let j = tileArea[i].length; j < heightInTiles; j++) {
-                tileArea[i][j] = getRandomInt(3);
-            }
-        }
-        for (let i = tileArea.length; i < widthInTiles; i++) {
-            tileArea[i] = [];
-            for (let j = 0; j < heightInTiles; j++) {
-                tileArea[i][j] = getRandomInt(3);
-            }
-        }
-
-        ctx.save();
-        maxI = Math.min(tileArea.length, widthInTiles);
-        for (let i = 0; i < maxI; i++) {
-            maxJ = Math.min(tileArea[i].length, heightInTiles);
-            for (let j = 0; j < Math.min(tileArea[i].length, heightInTiles); j++) {
-                const tile = textureTilesList[tileArea[i][j]];
-                let relTileWidth = 1;
-                let relTileHeight = 1;
-                if (i === maxI-1) {
-                    relTileWidth = (level.width % tileWidth) / tileWidth;
-                    relTileWidth = relTileWidth > 0 ? relTileWidth : 1;
-                }
-                if (j === maxJ-1) {
-                    relTileHeight = (level.height % tileWidth) / tileWidth;
-                    relTileHeight = relTileHeight > 0 ? relTileHeight : 1;
-                }
-                ctx.drawImage(texture, tile[0], tile[1], relTileWidth * tile[2], relTileHeight * tile[3], 0, 0, relTileWidth * tileWidth, relTileHeight * tileWidth)
-                if(j < Math.min(tileArea[i].length, heightInTiles)-1) {
-                    ctx.translate(0, tileWidth);
-                } else {
-                    ctx.translate(tileWidth, -tileWidth * j);
-                } 
-                
-            }
-        }
-        ctx.restore();
-
+        ctx.drawImage(tileMap, 0, 0, level.width, level.height, 0, 0, level.width, level.height);
     }
+
     ctx.save()
     ctx.strokeStyle = "rgba(165,24,24,0.5)";
     ctx.lineWidth = 7;

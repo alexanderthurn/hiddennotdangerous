@@ -116,18 +116,18 @@ function resizeCanvasToDisplaySize(canvas) {
     }
  
     return false;
- }
+}
 
- function adjustLevelToCanvas(level, canvas) {
+function adjustLevelToCanvas(level, canvas) {
     level.width = 1920
     level.height = 1080
     level.scale = Math.min(canvas.width / level.width, canvas.height / level.height)
     level.offsetX = (canvas.width - level.scale * level.width) / 2
     level.offsetY = (canvas.height - level.scale * level.height) / 2
- }
+}
 
 
- const colorize = (image, r, g, b) => {
+const colorize = (image, r, g, b) => {
     const imageSize = image.width;
   
     const offscreen = new OffscreenCanvas(imageSize, imageSize);
@@ -146,9 +146,53 @@ function resizeCanvasToDisplaySize(canvas) {
     ctx.putImageData(imageData, 0, 0);
   
     return offscreen;
-  }
+}
 
-  const shadowrize = (image, anim) => {
+const tileMapFunc = (image) => {
+    const offscreen = new OffscreenCanvas(level.width, level.height);
+    const ctx = offscreen.getContext("2d");
+
+    const heightInTiles = getHeightInTiles();
+    const widthInTiles = getWidthInTiles();
+    for (let i = 0; i < tileArea.length; i++) {
+        for (let j = tileArea[i].length; j < heightInTiles; j++) {
+            tileArea[i][j] = getRandomInt(3);
+        }
+    }
+    for (let i = tileArea.length; i < widthInTiles; i++) {
+        tileArea[i] = [];
+        for (let j = 0; j < heightInTiles; j++) {
+            tileArea[i][j] = getRandomInt(3);
+        }
+    }
+
+    maxI = Math.min(tileArea.length, widthInTiles);
+    for (let i = 0; i < maxI; i++) {
+        maxJ = Math.min(tileArea[i].length, heightInTiles);
+        for (let j = 0; j < Math.min(tileArea[i].length, heightInTiles); j++) {
+            const tile = textureTilesList[tileArea[i][j]];
+            let relTileWidth = 1;
+            let relTileHeight = 1;
+            if (i === maxI-1) {
+                relTileWidth = (level.width % tileWidth) / tileWidth;
+                relTileWidth = relTileWidth > 0 ? relTileWidth : 1;
+            }
+            if (j === maxJ-1) {
+                relTileHeight = (level.height % tileWidth) / tileWidth;
+                relTileHeight = relTileHeight > 0 ? relTileHeight : 1;
+            }
+            ctx.drawImage(image, tile[0], tile[1], relTileWidth * tile[2], relTileHeight * tile[3], 0, 0, relTileWidth * tileWidth, relTileHeight * tileWidth)
+            if(j < Math.min(tileArea[i].length, heightInTiles)-1) {
+                ctx.translate(0, tileWidth);
+            } else {
+                ctx.translate(tileWidth, -tileWidth * j);
+            }   
+        }
+    }
+    return offscreen;
+}
+
+const shadowrize = (image, anim) => {
     const tileWidth = anim.tileWidth
     const tileHeight = anim.tileHeight
     const scale = 2
@@ -170,10 +214,7 @@ function resizeCanvasToDisplaySize(canvas) {
             ctx.restore()
         }
     }
-
-
-    const imageData = ctx.getImageData(0, 0, image.width*scale, image.height*scale);
-    ctx.putImageData(imageData, 0, 0);
+    
     animOut = JSON.parse(JSON.stringify(anim))
     animOut.width*=scale
     animOut.height*=scale
@@ -182,7 +223,6 @@ function resizeCanvasToDisplaySize(canvas) {
     animOut.left.a = animOut.left.a.map(array => array.map(a => a*scale))
     animOut.right.a = animOut.right.a.map(array => array.map(a => a*scale))
     animOut.default.a = animOut.default.a.map(array => array.map(a => a*scale))
-
 
        /* test for game.js draw
     ctx.save()
@@ -201,7 +241,5 @@ function resizeCanvasToDisplaySize(canvas) {
     ctx.drawImage(playerImage, sprite[0], sprite[1], sprite[2], sprite[3], 0 - playerImageAnim.width*0.5, 0 - playerImageAnim.height*0.5, playerImageAnim.width, playerImageAnim.height)
     ctx.restore()        
 */
-
-
     return [offscreen,animOut];
-  } 
+} 
