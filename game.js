@@ -468,10 +468,8 @@ function gameLoop() {
         if (f) {
             //let x = mp.x - f.x;
             //let y = mp.y - f.y;
-            //let x = mp.x - level.width / 2;
-           // let y = mp.y - level.height / 2;
-            let x = mp.x - canvas.width / 2;
-            let y = mp.y - canvas.height / 2;
+            let x = mp.x - level.width / 2;
+            let y = mp.y - level.height / 2;
             //[x, y] = setDeadzone(x, y,0.1);
             //[x, y] = clampStick(x, y);
             mp.xAxis = x
