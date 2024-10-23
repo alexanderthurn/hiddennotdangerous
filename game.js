@@ -489,9 +489,11 @@ function gameLoop() {
 
     dtToProcess += dt
     while(dtToProcess > dtFix) {
-        handleInput(players, figures, dtProcessed)
-        handleAi(figures, dtProcessed, oldNumberJoinedKeyboardPlayers, dtFix)
-        updateGame(figures, dtFix,dtProcessed)
+        if (!restartGame) {
+            handleInput(players, figures, dtProcessed)
+            handleAi(figures, dtProcessed, oldNumberJoinedKeyboardPlayers, dtFix)
+            updateGame(figures, dtFix,dtProcessed)
+        }
         dtToProcess-=dtFix
         dtProcessed+=dtFix
     }
