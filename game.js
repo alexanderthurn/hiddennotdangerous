@@ -513,8 +513,8 @@ function gameLoop() {
         restartGame = true;
     }
 
-    const maxPoints = Math.max(figuresWithPlayer.map(f => f.points));
-    if (maxPoints > 3) {
+    const maxPoints = Math.max(...figuresWithPlayer.map(f => f.points));
+    if (maxPoints > 2) {
         const figuresWithMaxPoints = figuresWithPlayer.filter(f => f.points === maxPoints);
         if (figuresWithMaxPoints.length === 1) {
             lastFinalWinnerPlayerId = figuresWithMaxPoints[0].playerId;
