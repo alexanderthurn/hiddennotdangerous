@@ -931,19 +931,21 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.save()
             ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
             ctx.beginPath();
-            if (!lastWinnerPlayerIds.has(f.playerId)) {
-                ctx.translate(32+i*48, level.height-32)
-            } else {
-                var dtt = dtProcessed - lastWinnerPlayerIdThen
-                var lastWinnerPlayerIdDuration = 1000
-                if (dtt > lastWinnerPlayerIdDuration) {
-                    dtt = lastWinnerPlayerIdDuration
-                }
 
-                var lp = dtt / (lastWinnerPlayerIdDuration)
-                var lpi = 1-lp
-                ctx.translate(lpi * (level.width*0.5) + lp*(32+i*48), lpi*(level.height*0.5) + lp*(level.height-32))
-                ctx.scale(12.0*lpi + 1*lp,12.0*lpi +1*lp)
+            var dtt = dtProcessed - lastWinnerPlayerIdThen
+            var lastWinnerPlayerIdDuration = 1000
+
+            if (dtt < lastWinnerPlayerIdDuration) {
+                if (!lastWinnerPlayerIds.has(f.playerId)) {
+                    ctx.translate(32+i*48, level.height-32)
+                } else {
+                    var lp = dtt / (lastWinnerPlayerIdDuration)
+                    var lpi = 1-lp
+                    ctx.translate(lpi * (level.width*0.5) + lp*(32+i*48), lpi*(level.height*0.5) + lp*(level.height-32))
+                    ctx.scale(12.0*lpi + 1*lp,12.0*lpi +1*lp)
+                }   
+            } else {
+                ctx.translate(32+i*48, level.height-32)
             }
 
             ctx.arc(0,0,16,0, 2 * Math.PI);
