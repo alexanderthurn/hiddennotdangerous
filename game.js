@@ -523,7 +523,7 @@ function gameLoop() {
         }
     }
 
-    if (restartGame && dtProcessed - lastFinalWinnerPlayerIdThen > gameBreakDuration) {
+    if (restartGame && (!lastFinalWinnerPlayerIdThen || dtProcessed - lastFinalWinnerPlayerIdThen > gameBreakDuration)) {
         restartGame = false;
         isGameStarted = true;
         gameInit()
