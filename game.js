@@ -227,11 +227,12 @@ canvas.addEventListener('pointermove', event => {
 
 
 
-function gameInit() {
+function gameInit(completeRestart) {
     console.log('gameInit');
     then = Date.now();
     startTime = then;
     //dtProcessed = 0
+    lastFinalWinnerPlayerId = undefined
     fpsTime = then
     lastKillTime = undefined;
     multikillCounter = 0;
@@ -281,7 +282,7 @@ function gameInit() {
             frame: null
         }
 
-        if (activePlayerIds.length > i) {
+        if (!completeRestart && activePlayerIds.length > i) {
             figure.playerId = activePlayerIds[i]
             figure.points = oldFigures.find(f => f.playerId == figure.playerId).points
         }
@@ -517,7 +518,7 @@ function gameLoop() {
         }
 
         const maxPoints = Math.max(...figuresWithPlayer.map(f => f.points));
-        if (maxPoints > 2) {
+        if (maxPoints > 0) {
             const figuresWithMaxPoints = figuresWithPlayer.filter(f => f.points === maxPoints);
             if (figuresWithMaxPoints.length === 1) {
                 lastFinalWinnerPlayerId = figuresWithMaxPoints[0].playerId;
@@ -526,10 +527,10 @@ function gameLoop() {
         }
     }
 
-    if (restartGame && (!lastFinalWinnerPlayerIdThen || dtProcessed - lastFinalWinnerPlayerIdThen > gameBreakDuration)) {
+    if (restartGame && (!lastFinalWinnerPlayerId || dtProcessed - lastWinnerPlayerIdThen > gameBreakDuration)) {
         restartGame = false;
         isGameStarted = true;
-        gameInit()
+        gameInit(!!lastFinalWinnerPlayerId)
     }
 
     /*
@@ -934,16 +935,26 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
             var dtt = dtProcessed - lastWinnerPlayerIdThen
             var lastWinnerPlayerIdDuration = 1000
+            let moveScoreToPlayerDuration = 1000;
 
             if (dtt < lastWinnerPlayerIdDuration) {
                 if (!lastWinnerPlayerIds.has(f.playerId)) {
                     ctx.translate(32+i*48, level.height-32)
                 } else {
-                    var lp = dtt / (lastWinnerPlayerIdDuration)
+                    var lp = dtt / lastWinnerPlayerIdDuration
                     var lpi = 1-lp
                     ctx.translate(lpi * (level.width*0.5) + lp*(32+i*48), lpi*(level.height*0.5) + lp*(level.height-32))
                     ctx.scale(12.0*lpi + 1*lp,12.0*lpi +1*lp)
                 }   
+            } else if (lastFinalWinnerPlayerId && dtProcessed - (lastWinnerPlayerIdThen + lastWinnerPlayerIdDuration) < moveScoreToPlayerDuration) {
+                if (lastFinalWinnerPlayerId !== f.playerId) {
+                    ctx.translate(32+i*48, level.height-32)
+                } else {
+                    let lp = (dtProcessed - (lastWinnerPlayerIdThen + lastWinnerPlayerIdDuration)) / moveScoreToPlayerDuration
+                    let lpi = 1-lp
+                    ctx.translate(lpi*(32+i*48) + lp*(f.x), lpi*(level.height-32) + lp*(f.y))
+                    ctx.scale(1*lpi + 2.0*lp, 1*lpi + 2.0*lp)
+                } 
             } else {
                 ctx.translate(32+i*48, level.height-32)
             }
