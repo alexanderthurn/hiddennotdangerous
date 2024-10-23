@@ -228,6 +228,7 @@ canvas.addEventListener('pointermove', event => {
 
 
 function gameInit() {
+    console.log('gameInit');
     then = Date.now();
     startTime = then;
     //dtProcessed = 0
@@ -610,7 +611,7 @@ function handleInput(players, figures, dtProcessed) {
             figures.forEach(f => f.isDead = false)
             if (figures.filter(f => f.playerId).length == 2) {
                 playPlaylist(shuffle([music1, music2, music3]))   
-                isGameStarted = true                                                                                                                                                                                 
+                restartGame = true                                                                                                                                                                                 
             }  
         }
     })
