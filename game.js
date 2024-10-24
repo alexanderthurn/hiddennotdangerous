@@ -17,7 +17,8 @@ var keyboards = [{bindings: {
     'Numpad0': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var isGameStarted = false, restartGame = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId, lastFinalWinnerPlayerIdThen, gameBreakDuration = 5000;
+var isGameStarted = false, restartGame = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId, lastFinalWinnerPlayerIdThen;
+const moveNewScoreDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 3000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figures = [], maxPlayerFigures = 32
 var showDebug = false
@@ -162,7 +163,6 @@ document.addEventListener("DOMContentLoaded", function(event){
     Promise.all(loadPromises).then(() => { 
         ctx.clearRect(0,0, canvas.width, canvas.height)
       
-
         gameInit()
         window.requestAnimationFrame(gameLoop);
     })
@@ -228,7 +228,6 @@ canvas.addEventListener('pointermove', event => {
 
 
 function gameInit(completeRestart) {
-    console.log('gameInit');
     then = Date.now();
     startTime = then;
     //dtProcessed = 0
@@ -480,7 +479,6 @@ function gameLoop() {
                 mp.xAxis = 0
                 mp.yAxis = 0
             }
-            //console.log(x,y,mp.x, mp.y, mp.xAxis,mp.yAxis)
             mp.isMoving = Math.abs(mp.xAxis) > 0 || Math.abs(mp.yAxis) > 0
         }
        
@@ -504,8 +502,8 @@ function gameLoop() {
     draw(players, figures, dt, dtProcessed, 1);
     then = now
 
+    const figuresWithPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
     if (!restartGame) {
-        var figuresWithPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
         var survivors = figuresWithPlayer.filter(f => !f.isDead)
         if (survivors.length < 2 && figuresWithPlayer.length > survivors.length) {
             if (isGameStarted && survivors.length == 1) {
@@ -527,6 +525,7 @@ function gameLoop() {
         }
     }
 
+    const gameBreakDuration = moveNewScoreDuration + figuresWithPlayer.length*(moveScoreToPlayerDuration+1) + showFinalWinnerDuration;
     if (restartGame && (!lastFinalWinnerPlayerId || dtProcessed - lastWinnerPlayerIdThen > gameBreakDuration)) {
         restartGame = false;
         isGameStarted = true;
@@ -928,38 +927,50 @@ function draw(players, figures, dt, dtProcessed, layer) {
     })
 
     if (layer === 1) {
-        figures.filter(f => f.playerId && f.type === 'fighter').forEach((f,i) => {
+        const playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
+        const playerFiguresSortedByPoints = playerFigures.toSorted((f1,f2) => f1.points - f2.points);
+        playerFigures.forEach((f,i) => {
             ctx.save()
-            ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
             ctx.beginPath();
 
             var dtt = dtProcessed - lastWinnerPlayerIdThen
-            var lastWinnerPlayerIdDuration = 1000
-            let moveScoreToPlayerDuration = 1000;
+            const sortIndex = playerFiguresSortedByPoints.findIndex(fig => fig.playerId === f.playerId);
+            let fillStyle = 'rgba(0, 0, 0, 0.5)';
 
-            if (dtt < lastWinnerPlayerIdDuration) {
+            if (dtt < moveNewScoreDuration) {
                 if (!lastWinnerPlayerIds.has(f.playerId)) {
                     ctx.translate(32+i*48, level.height-32)
                 } else {
-                    var lp = dtt / lastWinnerPlayerIdDuration
+                    var lp = dtt / moveNewScoreDuration
                     var lpi = 1-lp
                     ctx.translate(lpi * (level.width*0.5) + lp*(32+i*48), lpi*(level.height*0.5) + lp*(level.height-32))
                     ctx.scale(12.0*lpi + 1*lp,12.0*lpi +1*lp)
                 }   
-            } else if (lastFinalWinnerPlayerId && dtProcessed - (lastWinnerPlayerIdThen + lastWinnerPlayerIdDuration) < moveScoreToPlayerDuration) {
-                if (lastFinalWinnerPlayerId !== f.playerId) {
-                    ctx.translate(32+i*48, level.height-32)
-                } else {
-                    let lp = (dtProcessed - (lastWinnerPlayerIdThen + lastWinnerPlayerIdDuration)) / moveScoreToPlayerDuration
-                    let lpi = 1-lp
-                    ctx.translate(lpi*(32+i*48) + lp*(f.x), lpi*(level.height-32) + lp*(f.y))
-                    ctx.scale(1*lpi + 2.0*lp, 1*lpi + 2.0*lp)
-                } 
+            } else if (lastFinalWinnerPlayerId && dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + sortIndex*moveScoreToPlayerDuration) >= 0 && dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + sortIndex*moveScoreToPlayerDuration) < moveScoreToPlayerDuration) {
+                const lp = (dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + sortIndex*moveScoreToPlayerDuration)) / moveScoreToPlayerDuration
+                const lpi = 1-lp
+                ctx.translate(lpi*(32+i*48) + lp*f.x, lpi*(level.height-32) + lp*f.y)
+                ctx.scale(1*lpi + 2.0*lp, 1*lpi + 2.0*lp)
+                if (lastFinalWinnerPlayerId === f.playerId) {
+                    fillStyle = 'rgba(178, 145, 70, 0.5)'
+                }
+            } else if (lastFinalWinnerPlayerId && dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + sortIndex*moveScoreToPlayerDuration) >= moveScoreToPlayerDuration && dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration) < showFinalWinnerDuration) {
+                ctx.translate(f.x, f.y)
+                ctx.scale(2.0, 2.0)
+                if (lastFinalWinnerPlayerId === f.playerId) {
+                    fillStyle = 'rgba(178, 145, 70, 0.5)'
+                }
+            } else if (lastFinalWinnerPlayerId && dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration) >= 0 && dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration) < moveScoreToPlayerDuration) {
+                const lp = (dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration)) / moveScoreToPlayerDuration
+                const lpi = 1-lp
+                ctx.translate(lpi*f.x + lp*(32+i*48), lpi*f.y + lp*(level.height-32))
+                ctx.scale(2.0*lpi + 1*lp, 2.0*lpi + 1*lp)
             } else {
                 ctx.translate(32+i*48, level.height-32)
             }
 
             ctx.arc(0,0,16,0, 2 * Math.PI);
+            ctx.fillStyle = fillStyle;
             ctx.fill();
             ctx.closePath()
             ctx.textAlign = "center";
