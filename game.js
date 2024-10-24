@@ -17,7 +17,7 @@ var keyboards = [{bindings: {
     'Numpad0': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var isGameStarted = false, restartGame = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId, lastFinalWinnerPlayerIdThen;
+var isGameStarted = false, restartGame = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
 const moveNewScoreDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 3000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figures = [], maxPlayerFigures = 32
@@ -281,9 +281,11 @@ function gameInit(completeRestart) {
             frame: null
         }
 
-        if (!completeRestart && activePlayerIds.length > i) {
+        if (activePlayerIds.length > i) {
             figure.playerId = activePlayerIds[i]
-            figure.points = oldFigures.find(f => f.playerId == figure.playerId).points
+            if (!completeRestart) {
+                figure.points = oldFigures.find(f => f.playerId == figure.playerId).points
+            } 
         }
 
         figures.push(figure)
@@ -516,20 +518,19 @@ function gameLoop() {
         }
 
         const maxPoints = Math.max(...figuresWithPlayer.map(f => f.points));
-        if (maxPoints > 0) {
+        if (maxPoints > 2) {
             const figuresWithMaxPoints = figuresWithPlayer.filter(f => f.points === maxPoints);
             if (figuresWithMaxPoints.length === 1) {
                 lastFinalWinnerPlayerId = figuresWithMaxPoints[0].playerId;
-                lastFinalWinnerPlayerIdThen = dtProcessed;
             }
         }
     }
 
-    const gameBreakDuration = moveNewScoreDuration + figuresWithPlayer.length*(moveScoreToPlayerDuration+1) + showFinalWinnerDuration;
+    const gameBreakDuration = moveNewScoreDuration + (figuresWithPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
     if (restartGame && (!lastFinalWinnerPlayerId || dtProcessed - lastWinnerPlayerIdThen > gameBreakDuration)) {
         restartGame = false;
         isGameStarted = true;
-        gameInit(!!lastFinalWinnerPlayerId)
+        gameInit(!!lastFinalWinnerPlayerId);
     }
 
     /*
@@ -936,6 +937,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
             var dtt = dtProcessed - lastWinnerPlayerIdThen
             const sortIndex = playerFiguresSortedByPoints.findIndex(fig => fig.playerId === f.playerId);
             let fillStyle = 'rgba(0, 0, 0, 0.5)';
+            let points = f.points;
 
             if (dtt < moveNewScoreDuration) {
                 if (!lastWinnerPlayerIds.has(f.playerId)) {
@@ -965,6 +967,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 const lpi = 1-lp
                 ctx.translate(lpi*f.x + lp*(32+i*48), lpi*f.y + lp*(level.height-32))
                 ctx.scale(2.0*lpi + 1*lp, 2.0*lpi + 1*lp)
+                points = 0;
             } else {
                 ctx.translate(32+i*48, level.height-32)
             }
@@ -977,9 +980,23 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.textBaseline='middle'
             ctx.fillStyle = "white";
             ctx.font = "24px arial";
-            ctx.fillText(f.points,0,0); // Punkte
+            ctx.fillText(points,0,0); // Punkte
             ctx.stroke();
             ctx.restore()
+
+            if (f.playerId === lastFinalWinnerPlayerId && dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration) >= 0 && dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration) < showFinalWinnerDuration) {
+                ctx.save();
+                ctx.font = level.width*0.06+"px serif";
+                ctx.fillStyle = "rgba(178, 145, 70, 1.0)";
+                ctx.strokeStyle = "black";
+                ctx.textAlign = "center";
+                ctx.textBaseline='middle'
+                ctx.lineWidth = 2
+                ctx.translate(0.5*level.width,level.height*0.3)
+                ctx.fillText(`Player ${i+1} wins`,0,0)
+                ctx.strokeText(`Player ${i+1} wins`,0,0)
+                ctx.restore()
+            }
         })
     
         ctx.font = "16px serif";
