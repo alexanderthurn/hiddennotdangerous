@@ -103,12 +103,14 @@ const audio = {
     attack: {title: 'sound2.mp3', currentTime: 0.15},
     attack2: {title: 'sound1.mp3', currentTime: 0.15},
     death: {title: 'gag-reflex-41207.mp3', currentTime: 0.0},
-    music1: {title: 'music1.mp3', currentTime: 20, volume: 0.5},
-    music2: {title: 'music2.mp3', volume: 0.5},
-    music3: {title: 'music3.mp3', volume: 0.5},
     join: {title: 'sounddrum.mp3'},
     firstBlood: {title: 'first-blood.mp3', volume: 0.2},
 
+    music: [
+        {title: 'music1.mp3', currentTime: 20, volume: 0.5},
+        {title: 'music2.mp3', volume: 0.5},
+        {title: 'music3.mp3', volume: 0.5}
+    ],
     multiKill: [
         {title: 'double-kill.mp3', volume: 0.3},
         {title: 'triple-kill.mp3', volume: 0.4},
@@ -136,15 +138,14 @@ const audio = {
         {title: 'game-eat-sound-83240.mp3'}
     ]
 }
-var music1 = getAudio(audio.music1);
-var music2 = getAudio(audio.music2);
-var music3 = getAudio(audio.music3);
+
+var music = shuffle(audio.music.map(audio => getAudio(audio)));
 var soundJoin = getAudio(audio.join);
 var soundFirstBlood = getAudio(audio.firstBlood);
 
-var soundMultiKill = [getAudio(audio.multiKill[0]), getAudio(audio.multiKill[1]), getAudio(audio.multiKill[2]), getAudio(audio.multiKill[3]), getAudio(audio.multiKill[4]), getAudio(audio.multiKill[5]), getAudio(audio.multiKill[6]), getAudio(audio.multiKill[7])];
-var soundTotalKill = [getAudio(audio.totalKill[0]), getAudio(audio.totalKill[1]), getAudio(audio.totalKill[2]), getAudio(audio.totalKill[3]), getAudio(audio.totalKill[4]), getAudio(audio.totalKill[5])];
-var soundEat = [getAudio(audio.eat[0]),getAudio(audio.eat[1]),getAudio(audio.eat[2]),getAudio(audio.eat[3]),getAudio(audio.eat[4])];
+var soundMultiKill = audio.multiKill.map(audio => getAudio(audio));
+var soundTotalKill = audio.totalKill.map(audio => getAudio(audio));
+var soundEat = audio.eat.map(audio => getAudio(audio));
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
@@ -611,7 +612,7 @@ function handleInput(players, figures, dtProcessed) {
 
             figures.forEach(f => f.isDead = false)
             if (figures.filter(f => f.playerId).length == 2) {
-                playPlaylist(shuffle([music1, music2, music3]))   
+                playPlaylist(music)   
                 restartGame = true                                                                                                                                                                                 
             }  
         }
