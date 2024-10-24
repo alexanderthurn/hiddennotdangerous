@@ -742,7 +742,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
     ctx.transform(level.scale, 0, 0, level.scale, level.offsetX, level.offsetY)
 
     if (layer === 0) {
-        ctx.clearRect(-0.5*playerImageAnim.width, -0.5*playerImageAnim.height, level.width+playerImageAnim.width, level.height+playerImageAnim.height)
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
         ctx.drawImage(tileMap, 0, 0, level.width, level.height, 0, 0, level.width, level.height);
     }
 
@@ -822,7 +822,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
             }
 
             let indexFrame = 0;
-            if (f.anim > 0) {
+            if (f.imageAnim?.animDefaultSpeed > 0 || f.speed > 0) {
                 indexFrame = Math.floor(f.anim) % frame.length;
             }
 
