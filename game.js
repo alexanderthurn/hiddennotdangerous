@@ -229,6 +229,7 @@ canvas.addEventListener('pointermove', event => {
 
 
 function gameInit(completeRestart) {
+    console.log('start game init')
     then = Date.now();
     startTime = then;
     //dtProcessed = 0
@@ -291,11 +292,12 @@ function gameInit(completeRestart) {
 
         figures.push(figure)
 
-        mousePlayers.forEach(mp => {
+        /*mousePlayers.forEach(mp => {
             mp.offsetCursorX = -level.width*0.1+Math.random()*level.width*0.2
             mp.offsetCursorY = -level.height*0.1+Math.random()*level.height*0.2
-        })
+        })*/
     }
+    console.log('HALF game init')
     figures.push({
         id: 1,
         type: 'bean',
@@ -368,7 +370,7 @@ function gameInit(completeRestart) {
         zIndex: -level.height
     });
 
-    
+    console.log('FINISH game init')
 }
 
 
@@ -612,8 +614,8 @@ function handleInput(players, figures, dtProcessed) {
 
             figures.forEach(f => f.isDead = false)
             if (figures.filter(f => f.playerId).length == 2) {
-                playPlaylist(music)   
-                restartGame = true                                                                                                                                                                                 
+                playPlaylist(music);
+                restartGame = true;
             }  
         }
     })
@@ -773,7 +775,6 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
     //ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, 100, 100)
     ctx.save()
-    
     /*for (x = -2; x < 2;x ++) {
         for (y = -2;y < 2;y++) {
             ctx.beginPath();
@@ -783,14 +784,11 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.stroke();
         }
     }*/
-
-        ctx.beginPath();
-            ctx.arc(mousePlayers[0].x, mousePlayers[0].y, 5, 0, 2 * Math.PI);
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = "rgba(0,0,0,0.5)";
-            ctx.stroke();
-    
-
+    ctx.beginPath();
+    ctx.arc(mousePlayers[0].x, mousePlayers[0].y, 5, 0, 2 * Math.PI);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(0,0,0,0.5)";
+    ctx.stroke();
     ctx.restore()
 
     figures.toSorted((f1,f2) => (f1.y +f1.zIndex) - (f2.y +f2.zIndex) ).forEach(f => {
@@ -934,37 +932,39 @@ function draw(players, figures, dt, dtProcessed, layer) {
         playerFigures.forEach((f,i) => {
             ctx.save()
             ctx.beginPath();
-
-            var dtt = dtProcessed - lastWinnerPlayerIdThen
             const sortIndex = playerFiguresSortedByPoints.findIndex(fig => fig.playerId === f.playerId);
+            const dt1 = dtProcessed - lastWinnerPlayerIdThen;
+            const dt2 = dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + sortIndex*moveScoreToPlayerDuration);
+            const dt3 = dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration);
+            const dt4 = dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
             let fillStyle = 'rgba(0, 0, 0, 0.5)';
             let points = f.points;
 
-            if (dtt < moveNewScoreDuration) {
+            if (dt1 < moveNewScoreDuration) {
                 if (!lastWinnerPlayerIds.has(f.playerId)) {
                     ctx.translate(32+i*48, level.height-32)
                 } else {
-                    var lp = dtt / moveNewScoreDuration
+                    var lp = dt1 / moveNewScoreDuration
                     var lpi = 1-lp
                     ctx.translate(lpi * (level.width*0.5) + lp*(32+i*48), lpi*(level.height*0.5) + lp*(level.height-32))
                     ctx.scale(12.0*lpi + 1*lp,12.0*lpi +1*lp)
                 }   
-            } else if (lastFinalWinnerPlayerId && dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + sortIndex*moveScoreToPlayerDuration) >= 0 && dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + sortIndex*moveScoreToPlayerDuration) < moveScoreToPlayerDuration) {
-                const lp = (dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + sortIndex*moveScoreToPlayerDuration)) / moveScoreToPlayerDuration
+            } else if (lastFinalWinnerPlayerId && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
+                const lp = dt2 / moveScoreToPlayerDuration
                 const lpi = 1-lp
                 ctx.translate(lpi*(32+i*48) + lp*f.x, lpi*(level.height-32) + lp*f.y)
                 ctx.scale(1*lpi + 2.0*lp, 1*lpi + 2.0*lp)
                 if (lastFinalWinnerPlayerId === f.playerId) {
                     fillStyle = 'rgba(178, 145, 70, 0.5)'
                 }
-            } else if (lastFinalWinnerPlayerId && dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + sortIndex*moveScoreToPlayerDuration) >= moveScoreToPlayerDuration && dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration) < showFinalWinnerDuration) {
+            } else if (lastFinalWinnerPlayerId && dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
                 ctx.translate(f.x, f.y)
                 ctx.scale(2.0, 2.0)
                 if (lastFinalWinnerPlayerId === f.playerId) {
                     fillStyle = 'rgba(178, 145, 70, 0.5)'
                 }
-            } else if (lastFinalWinnerPlayerId && dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration) >= 0 && dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration) < moveScoreToPlayerDuration) {
-                const lp = (dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration)) / moveScoreToPlayerDuration
+            } else if (lastFinalWinnerPlayerId && dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
+                const lp = dt4 / moveScoreToPlayerDuration
                 const lpi = 1-lp
                 ctx.translate(lpi*f.x + lp*(32+i*48), lpi*f.y + lp*(level.height-32))
                 ctx.scale(2.0*lpi + 1*lp, 2.0*lpi + 1*lp)
@@ -985,7 +985,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.stroke();
             ctx.restore()
 
-            if (f.playerId === lastFinalWinnerPlayerId && dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration) >= 0 && dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration) < showFinalWinnerDuration) {
+            if (f.playerId === lastFinalWinnerPlayerId && dt3 >= 0 && dt3 < showFinalWinnerDuration) {
                 ctx.save();
                 ctx.font = level.width*0.06+"px serif";
                 ctx.fillStyle = "rgba(178, 145, 70, 1.0)";
