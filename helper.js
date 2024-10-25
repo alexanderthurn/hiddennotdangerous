@@ -128,12 +128,12 @@ function adjustLevelToCanvas(level, canvas) {
 }
 
 function getRandomXY(level) {
-    return[level.padding+Math.random()*level.width-level.padding*2, level.padding+Math.random()*level.height-level.padding*3]
+    return[level.padding+Math.random()*(level.width-level.padding*2), level.padding+(Math.random()*level.height-level.padding*2)]
 }
 
 function cropXY(x,y,level) {
     if (x > level.width-level.padding) x = level.width-level.padding
-    if (y > level.height-level.padding) y = level.height-level.padding
+    if (y > level.height-2*level.padding) y = level.height-level.padding
     if (x < level.padding) x = level.padding
     if (y < level.padding) y = level.padding
     return [x,y]
