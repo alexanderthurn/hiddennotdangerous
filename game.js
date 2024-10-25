@@ -760,13 +760,13 @@ function draw(players, figures, dt, dtProcessed, layer) {
       var btnStartAttackDistance =  level.width*0.1
       var btnStartPercentageLoaded = 0.0
 
-      var players = figures.filter(f => f.playerId && f.type === 'fighter')
-      var playersNear = players.filter(f => distance(btnStartX, btnStartY, f.x,f.y) < btnStartAttackDistance)
+      var playersWithId = figures.filter(f => f.playerId && f.type === 'fighter')
+      var playersNear = playersWithId.filter(f => distance(btnStartX, btnStartY, f.x,f.y) < btnStartAttackDistance)
 
       if (playersNear.length > 0) {
-        btnStartPercentageLoaded = playersNear.length / players.length
+        btnStartPercentageLoaded = playersNear.length / playersWithId.length
 
-        if (players.length > 1 && playersNear.length === players.length) {
+        if (playersWithId.length > 1 && playersNear.length === playersWithId.length) {
           playPlaylist(music);
           restartGame = true;
         }
@@ -919,20 +919,34 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 let startAngle = f.angle + deg2rad(135)
                 let endAngle = startAngle + deg2rad(90)
   
-                ctx.scale(1.0*f.scale,1.0*f.scale)
-                ctx.beginPath();
-                ctx.fillStyle = "rgba(255,255,255,0.3)";
-                ctx.arc(0,0,f.attackDistance, 0, 2 * Math.PI)
-                ctx.closePath()
-                ctx.fill();
+                ctx.scale(1.0 + 0.1*Math.sin(dtProcessed*0.001), 1.0 + 0.1*Math.sin(dtProcessed*0.001))
+                ctx.save()
+        
 
-                ctx.beginPath();
-                ctx.fillStyle = "rgba(255,255,255,0.3)";
-                ctx.arc(0,0,f.attackDistance*0.8, 0, 2 * Math.PI)
-                ctx.closePath()
-                ctx.fill();
+                  ctx.scale(1.0*f.scale,1*f.scale)
+                 
+                 
+                  ctx.lineWidth = 2
+                  ctx.strokeStyle = 'black'
+                  //ctx.transform(1, 1, -0.7, 1, 0, 0);
+                  ctx.beginPath();
+                  ctx.fillStyle = "rgba(255,255,255,1)";
+                  ctx.arc(0,0,f.attackDistance, 0, 2 * Math.PI)
+                  ctx.closePath()
+                  ctx.fill();
+                  
+          
+          
+                  ctx.beginPath();
+                  ctx.fillStyle = "rgba(255,255,255,1)";
+                  ctx.arc(0,0,f.attackDistance*0.8, 0, 2 * Math.PI)
+                  ctx.closePath()
+                  ctx.fill();
+                  ctx.stroke()
 
-                ctx.scale(0.5+0.1*Math.sin(dtProcessed*0.001), 0.5+0.1*Math.sin(dtProcessed*0.001))
+                ctx.restore()
+
+                ctx.scale(0.6*f.scale, 0.6*f.scale)
                 ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
             } else if (!f.isDead) {
                 if (f.isAttacking) {
