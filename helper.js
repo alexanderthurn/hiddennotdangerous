@@ -133,7 +133,7 @@ function getRandomXY(level) {
 
 function cropXY(x,y,level) {
     if (x > level.width-level.padding) x = level.width-level.padding
-    if (y > level.height-2*level.padding) y = level.height-level.padding
+    if (y > level.height-level.padding) y = level.height-level.padding
     if (x < level.padding) x = level.padding
     if (y < level.padding) y = level.padding
     return [x,y]

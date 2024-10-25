@@ -679,18 +679,18 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
                     const direction = {x: Math.cos(discreteAngle), y: Math.sin(discreteAngle)};
                     let distanceToBorder;
                     if (direction.x !== 0) {
-                        const xBorder = direction.x > 0 ? level.width : 0;
+                        const xBorder = direction.x > 0 ? level.width-level.padding : level.padding;
                         let t = (xBorder - f.x)/direction.x;
                         let y = t*direction.y + f.y;
-                        if (y >= 0 && y < level.height) {
+                        if (y >= level.padding && y < level.height-level.padding) {
                             distanceToBorder = t;
                         }
                     }
                     if (direction.y !== 0) {
-                        const yBorder = direction.y > 0 ? level.height : 0;
+                        const yBorder = direction.y > 0 ? level.height-level.padding : level.padding;
                         let t = (yBorder - f.y)/direction.y;
                         let x = t*direction.x + f.x;
-                        if (x >= 0 && x < level.width) {
+                        if (x >= level.padding && x < level.width-level.padding) {
                             distanceToBorder = t;
                         }
                     }
