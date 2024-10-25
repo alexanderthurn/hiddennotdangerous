@@ -244,10 +244,9 @@ function gameInit(completeRestart) {
     var oldFigures = figures
     figures = []
     for (var i = 0; i < maxPlayerFigures; i++) {
-        const x = Math.random()*level.width;
-        const y = Math.random()*level.height;
-        const xTarget = Math.random()*level.width;
-        const yTarget = Math.random()*level.height;
+        const [x, y] = getRandomXY(level)
+        const [xTarget, yTarget] = getRandomXY(level)
+        
         var figure = {
             x,
             y,
@@ -255,7 +254,7 @@ function gameInit(completeRestart) {
             yTarget,
             maxBreakDuration: 5000,
             startWalkTime: Math.random() * 5000 + dtProcessed,
-            maxSpeed: 0.08,
+            maxSpeed: 0.28,
             speed: 0,
             isDead: false, 
             playerId: null,
@@ -562,15 +561,13 @@ function updateGame(figures, dt, dtProcessed) {
     let figuresAlive = figures.filter(f => !f.isDead);
     figuresAlive.forEach(f => {
         let xyNew = move(f.x, f.y, f.angle,f.speed, dt)
-        f.x = xyNew.x
-        f.y = xyNew.y
+        if (xyNew) {
+            [f.x, f.y] = cropXY(xyNew.x, xyNew.y, level)
+        }
         f.anim += f.speed + f.imageAnim?.animDefaultSpeed
        // f.anim += f.isAttacking ? 0.5 : 0
 
-        if (f.x > level.width) f.x = level.width
-        if (f.y > level.height) f.y = level.height
-        if (f.x < 0) f.x = 0
-        if (f.y < 0) f.y = 0
+       
         
     })
     
@@ -674,8 +671,7 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
         if (time >= f.startWalkTime) {
             if (f.speed === 0) {
                 if (!startKeyboardMovement) {
-                    f.xTarget = Math.random()*level.width
-                    f.yTarget = Math.random()*level.height
+                    [f.xTarget, f.Target] = getRandomXY(level)
                 }
 
                 if (numberJoinedKeyboardPlayers > 0) {
@@ -704,11 +700,7 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
                 }
             }
             
-            if (f.xTarget > level.width) f.xTarget = level.width
-            if (f.yTarget > level.height) f.yTarget = level.height
-            if (f.xTarget < 0) f.xTarget = 0
-            if (f.yTarget < 0) f.yTarget = 0
-
+            [f.xTarget, f.yTarget] = cropXY(f.xTarget, f.yTarget, level)
             f.angle = angle(f.x,f.y,f.xTarget,f.yTarget)
             f.speed = f.maxSpeed
         }
@@ -743,6 +735,10 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
 
 function draw(players, figures, dt, dtProcessed, layer) {
     ctx.save()
+
+    if (layer === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+    }
     ctx.transform(level.scale, 0, 0, level.scale, level.offsetX, level.offsetY)
 
     if (layer === 0) {
@@ -750,13 +746,11 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.drawImage(tileMap, 0, 0, level.width, level.height, 0, 0, level.width, level.height);
     }
 
-    ctx.save()
-    ctx.strokeStyle = "rgba(165,24,24,0.5)";
-    ctx.lineWidth = 7;
-    ctx.lineJoin = "bevel";
-    ctx.strokeRect(3, 3, level.width-6, level.height-6);
-    ctx.restore()
+    if (layer === 0) {
+        drawFence(0, ctx, level)
+    }
 
+    
     if (!isGameStarted) {
         ctx.save()
         ctx.font = level.width*0.06+"px serif";
@@ -1035,6 +1029,12 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.restore()
         }
     }
+
+    if (layer === 1) {
+        drawFence(1, ctx, level)
+    }
+  
+  
 
     ctx.restore()
 }

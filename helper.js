@@ -121,11 +121,23 @@ function resizeCanvasToDisplaySize(canvas) {
 function adjustLevelToCanvas(level, canvas) {
     level.width = 1920
     level.height = 1080
+    level.padding = 16
     level.scale = Math.min(canvas.width / level.width, canvas.height / level.height)
     level.offsetX = (canvas.width - level.scale * level.width) / 2
     level.offsetY = (canvas.height - level.scale * level.height) / 2
 }
 
+function getRandomXY(level) {
+    return[level.padding+Math.random()*level.width-level.padding*2, level.padding+Math.random()*level.height-level.padding*3]
+}
+
+function cropXY(x,y,level) {
+    if (x > level.width-level.padding) x = level.width-level.padding
+    if (y > level.height-level.padding) y = level.height-level.padding
+    if (x < level.padding) x = level.padding
+    if (y < level.padding) y = level.padding
+    return [x,y]
+}
 
 const colorize = (image, r, g, b) => {
     const imageSize = image.width;
@@ -243,3 +255,29 @@ const shadowrize = (image, anim) => {
 */
     return [offscreen,animOut];
 } 
+
+const drawFence = (layer, ctx, level) => {
+    ctx.save()
+    ctx.lineWidth = level.padding;
+    
+    ctx.fillStyle = "rgba(150,150,150,1.0)";
+    var y = 0
+    if (layer === 1) {
+        ctx.fillRect(0,0, level.padding*0.5, level.height)
+        ctx.fillRect(level.width-level.padding*0.5,0, level.padding*0.5, level.height)
+        y = level.height-level.padding-level.padding
+    } else {
+        y = 0
+    }
+
+    ctx.fillRect(0,y,level.width,level.padding*0.6)
+    ctx.fillStyle = "rgba(120,120,120,1.0)";
+    ctx.fillRect(level.padding*0.5,y+level.padding*0.8,level.width-level.padding,level.padding*0.6)
+    ctx.fillStyle = "rgba(90,90,90,1.0)";
+    ctx.fillRect(level.padding*0.5,y+level.padding*1.6,level.width-level.padding,level.padding*0.6)
+
+    
+
+    ctx.restore()
+
+}
