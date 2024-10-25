@@ -671,19 +671,19 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
         if (time >= f.startWalkTime) {
             if (f.speed === 0) {
                 if (!startKeyboardMovement) {
-                    [f.xTarget, f.Target] = getRandomXY(level)
+                    [f.xTarget, f.yTarget] = getRandomXY(level)
                 }
 
                 if (numberJoinedKeyboardPlayers > 0) {
                     discreteAngle = getNextDiscreteAngle(angle(f.x, f.y, f.xTarget, f.yTarget), 8);
                     const direction = {x: Math.cos(discreteAngle), y: Math.sin(discreteAngle)};
-                    let distanceToBorder;
                     if (direction.x !== 0) {
                         const xBorder = direction.x > 0 ? level.width-level.padding : level.padding;
                         let t = (xBorder - f.x)/direction.x;
                         let y = t*direction.y + f.y;
                         if (y >= level.padding && y < level.height-level.padding) {
-                            distanceToBorder = t;
+                            t = (f.xTarget - f.x)/direction.x;
+                            f.yTarget = t*direction.y + f.y;
                         }
                     }
                     if (direction.y !== 0) {
@@ -691,15 +691,12 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
                         let t = (yBorder - f.y)/direction.y;
                         let x = t*direction.x + f.x;
                         if (x >= level.padding && x < level.width-level.padding) {
-                            distanceToBorder = t;
+                            t = (f.yTarget - f.y)/direction.y;
+                            f.xTarget = t*direction.x + f.x;
                         }
                     }
-                    const tRandom = Math.random() * distanceToBorder;
-                    f.xTarget = tRandom * direction.x + f.x;
-                    f.yTarget = tRandom * direction.y + f.y;
                 }
             }
-            
             [f.xTarget, f.yTarget] = cropXY(f.xTarget, f.yTarget, level)
             f.angle = angle(f.x,f.y,f.xTarget,f.yTarget)
             f.speed = f.maxSpeed
