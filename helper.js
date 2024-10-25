@@ -271,7 +271,7 @@ const drawFence = (layer, ctx, level) => {
         y = level.height-level.padding-level.padding
     } else {
         ctx.fillRect(0,0, level.padding, level.padding*2)
-        ctx.fillRect(level.width-level.padding,0, level.padding*0.5, level.padding*2)
+        ctx.fillRect(level.width-level.padding*0.5,0, level.padding*0.5, level.padding*2)
         y = 0
     }
 
