@@ -25,4 +25,6 @@ vomit2 Sound Effect by <a href="https://pixabay.com/de/users/soundreality-310744
 
 vomit3 Sound Effect from <a href="https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=41207">Pixabay</a>
 
+cheer: Sound Effect from <a href="https://pixabay.com/sound-effects/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=99963">Pixabay</a>
+
 local dev: python3 -m http.server 3333

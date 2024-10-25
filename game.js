@@ -20,7 +20,7 @@ var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var isGameStarted = false, restartGame = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
 const moveNewScoreDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 3000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
-var figures = [], maxPlayerFigures = 32
+var figures = [], maxPlayerFigures = 32, pointsToWin = 1
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = {}
@@ -105,7 +105,7 @@ const audio = {
     death: {title: 'sfx/gag-reflex-41207.mp3', currentTime: 0.0},
     join: {title: 'sfx/sounddrum.mp3'},
     firstBlood: {title: 'sfx/first-blood.mp3', volume: 0.2},
-
+    win: {title: 'sfx/audience-clapping-03-99963.mp3', volume: 1.0},
     music: [
         {title: 'sfx/music1.mp3', currentTime: 20, volume: 0.5},
         {title: 'sfx/music2.mp3', volume: 0.5},
@@ -142,6 +142,7 @@ const audio = {
 var music = shuffle(audio.music.map(audio => getAudio(audio)));
 var soundJoin = getAudio(audio.join);
 var soundFirstBlood = getAudio(audio.firstBlood);
+var soundWin = getAudio(audio.win);
 
 var soundMultiKill = audio.multiKill.map(audio => getAudio(audio));
 var soundTotalKill = audio.totalKill.map(audio => getAudio(audio));
@@ -521,9 +522,12 @@ function gameLoop() {
         }
 
         const maxPoints = Math.max(...figuresWithPlayer.map(f => f.points));
-        if (maxPoints > 2) {
+        if (maxPoints >= pointsToWin) {
             const figuresWithMaxPoints = figuresWithPlayer.filter(f => f.points === maxPoints);
             if (figuresWithMaxPoints.length === 1) {
+                if (!lastFinalWinnerPlayerId) {
+                   playAudio(soundWin)
+                }
                 lastFinalWinnerPlayerId = figuresWithMaxPoints[0].playerId;
             }
         }
