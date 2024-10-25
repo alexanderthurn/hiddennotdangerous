@@ -259,30 +259,45 @@ const shadowrize = (image, anim) => {
     return [offscreen,animOut];
 } 
 
-const drawFence = (layer, ctx, level) => {
+const drawFence = (layer, ctx, level, shadow) => {
+
     ctx.save()
     ctx.lineWidth = level.padding;
-    
-    ctx.fillStyle = "rgba(150,150,150,1.0)";
     var y = 0
+    var x = 0
+    
+    if (!shadow) {
+        ctx.shadowColor = "rgba(0,0,0,0.5)"
+        ctx.shadowOffsetX = 12;
+        ctx.shadowOffsetY = -12;
+        ctx.shadowBlur = 8;
+    } else {
+
+        ctx.fillStyle = "rgba(150,150,150,1.0)";
+    }
+
     if (layer === 1) {
-        ctx.fillRect(0,level.padding*2, level.padding*0.5, level.height-level.padding)
-        ctx.fillRect(level.width-level.padding*0.5,level.padding*2, level.padding*0.5, level.height-level.padding)
+        ctx.fillRect(x,level.padding*2, level.padding*0.5, level.height-level.padding)
+        ctx.fillRect(x+level.width-level.padding*0.5,level.padding*2, level.padding*0.5, level.height-level.padding)
         y = level.height-level.padding-level.padding
     } else {
-        ctx.fillRect(0,0, level.padding, level.padding*2)
-        ctx.fillRect(level.width-level.padding*0.5,0, level.padding*0.5, level.padding*2)
+        ctx.fillRect(x,0, level.padding, level.padding*2)
+        ctx.fillRect(x+level.width-level.padding*0.5,0, level.padding*0.5, level.padding*2)
         y = 0
     }
 
-    ctx.fillRect(0,y,level.width,level.padding*0.6)
+    ctx.fillRect(x,y,level.width,level.padding*0.6)
     ctx.fillStyle = "rgba(120,120,120,1.0)";
-    ctx.fillRect(level.padding*0.5,y+level.padding*0.8,level.width-level.padding,level.padding*0.6)
+    ctx.fillRect(x+level.padding*0.5,y+level.padding*0.8,level.width-level.padding,level.padding*0.6)
     ctx.fillStyle = "rgba(90,90,90,1.0)";
-    ctx.fillRect(level.padding*0.5,y+level.padding*1.6,level.width-level.padding,level.padding*0.6)
+    ctx.fillRect(x+level.padding*0.5,y+level.padding*1.6,level.width-level.padding,level.padding*0.6)
 
     
 
     ctx.restore()
+
+    if (!shadow) {
+        drawFence(layer,ctx,level,true)
+    }
 
 }
