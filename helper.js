@@ -122,7 +122,7 @@ function adjustLevelToCanvas(level, canvas) {
     level.width = 1920
     level.height = 1080
     level.padding = 16
-    level.scale = Math.min(canvas.width / level.width, canvas.height / level.height)
+    level.scale = Math.min(canvas.width / level.width, canvas.height / level.height)*0.9
     level.offsetX = (canvas.width - level.scale * level.width) / 2
     level.offsetY = (canvas.height - level.scale * level.height) / 2
 }
@@ -161,6 +161,9 @@ const colorize = (image, r, g, b) => {
 }
 
 const tileMapFunc = (image) => {
+    if (!level.width) {
+        return
+    }
     const offscreen = new OffscreenCanvas(level.width, level.height);
     const ctx = offscreen.getContext("2d");
 
@@ -263,10 +266,12 @@ const drawFence = (layer, ctx, level) => {
     ctx.fillStyle = "rgba(150,150,150,1.0)";
     var y = 0
     if (layer === 1) {
-        ctx.fillRect(0,0, level.padding*0.5, level.height)
-        ctx.fillRect(level.width-level.padding*0.5,0, level.padding*0.5, level.height)
+        ctx.fillRect(0,level.padding, level.padding*0.5, level.height)
+        ctx.fillRect(level.width-level.padding*0.5,level.padding, level.padding*0.5, level.height)
         y = level.height-level.padding-level.padding
     } else {
+        ctx.fillRect(0,0, level.padding*0.5, level.padding)
+        ctx.fillRect(level.width-level.padding*0.5,0, level.padding*0.5, level.padding)
         y = 0
     }
 
