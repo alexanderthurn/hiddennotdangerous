@@ -1,4 +1,4 @@
-# hiddennotdangerous
+# stealthy stinkers
 
 [Github Page Live Preview](https://alexanderthurn.github.io/hiddennotdangerous/)
 

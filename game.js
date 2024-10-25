@@ -762,8 +762,8 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.textBaseline='middle'
         ctx.lineWidth = 2
         ctx.translate(0.5*level.width,level.height*0.3)
-        ctx.fillText('Hidden Not Dangerous',0,0)
-        ctx.strokeText('Hidden Not Dangerous',0,0)
+        ctx.fillText('Stealthy Stinkers',0,0)
+        ctx.strokeText('Stealthy Stinkers',0,0)
         ctx.font = level.width*level.scale*0.03+"px serif";
         ctx.fillStyle = "black";
         ctx.fillText('WASDT',0,96)
