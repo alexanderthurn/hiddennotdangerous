@@ -81,6 +81,10 @@ const playPlaylist = (playlist) => {
     playAudio(playlist[0]);
 }
 
+const stopPlaylist = (playlist) => {
+    playlist.forEach(track => track.file.load());
+}
+
 const playKillingSounds = (numberKilledFigures, killTime) => {
     if (numberKilledFigures > 0) {
         if (!lastKillTime || lastKillTime + multikillTimeWindow < dtProcessed) {

@@ -230,7 +230,6 @@ canvas.addEventListener('pointermove', event => {
 
 
 function gameInit(completeRestart) {
-    console.log('start game init')
     then = Date.now();
     startTime = then;
     //dtProcessed = 0
@@ -297,7 +296,6 @@ function gameInit(completeRestart) {
             mp.offsetCursorY = -level.height*0.1+Math.random()*level.height*0.2
         })*/
     }
-    console.log('HALF game init')
     figures.push({
         id: 1,
         type: 'bean',
@@ -369,8 +367,6 @@ function gameInit(completeRestart) {
         scale: 1,
         zIndex: -level.height
     });
-
-    console.log('FINISH game init')
 }
 
 
@@ -535,7 +531,12 @@ function gameLoop() {
     const gameBreakDuration = moveNewScoreDuration + (figuresWithPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
     if (restartGame && (!lastFinalWinnerPlayerId || dtProcessed - lastWinnerPlayerIdThen > gameBreakDuration)) {
         restartGame = false;
-        isGameStarted = true;
+        isGameStarted = !lastFinalWinnerPlayerId;
+        if (isGameStarted) {
+            playPlaylist(music);
+        } else {
+            stopPlaylist(music);
+        }
         gameInit(!!lastFinalWinnerPlayerId);
     }
 
@@ -615,7 +616,6 @@ function handleInput(players, figures, dtProcessed) {
 
             figures.forEach(f => f.isDead = false)
             if (figures.filter(f => f.playerId).length == 2) {
-                //playPlaylist(music);
                // restartGame = true;
             }  
         }
@@ -763,7 +763,6 @@ function draw(players, figures, dt, dtProcessed, layer) {
         btnStartPercentageLoaded = playersNear.length / playersWithId.length
 
         if (playersWithId.length > 1 && playersNear.length === playersWithId.length) {
-          playPlaylist(music);
           restartGame = true;
         }
 
