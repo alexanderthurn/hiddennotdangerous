@@ -2,7 +2,7 @@ var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
 
 var cloudImage = new Image()
-cloudImage.src = 'vapor_cloud.png'
+cloudImage.src = '../gfx/vapor_cloud.png'
 new Promise(resolve => {
     cloudImage.onload = () => {
         colorize(cloudImage, 139.0/256,69.0/256,19.0/256)
