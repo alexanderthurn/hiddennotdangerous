@@ -925,6 +925,13 @@ function draw(players, figures, dt, dtProcessed, layer) {
     })
 
     if (layer === 1) {
+        drawFence(1, ctx, level)
+    }
+  
+  
+
+
+    if (layer === 1) {
         const playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
         const playerFiguresSortedByPoints = playerFigures.toSorted((f1,f2) => f1.points - f2.points);
         playerFigures.forEach((f,i) => {
@@ -940,7 +947,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
             if (dt1 < moveNewScoreDuration) {
                 if (!lastWinnerPlayerIds.has(f.playerId)) {
-                    ctx.translate(32+i*48, level.height-32)
+                    ctx.translate(32+i*48, level.height+32)
                 } else {
                     var lp = dt1 / moveNewScoreDuration
                     var lpi = 1-lp
@@ -950,7 +957,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
             } else if (lastFinalWinnerPlayerId && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
                 const lp = dt2 / moveScoreToPlayerDuration
                 const lpi = 1-lp
-                ctx.translate(lpi*(32+i*48) + lp*f.x, lpi*(level.height-32) + lp*f.y)
+                ctx.translate(lpi*(32+i*48) + lp*f.x, lpi*(level.height+32) + lp*f.y)
                 ctx.scale(1*lpi + 2.0*lp, 1*lpi + 2.0*lp)
                 if (lastFinalWinnerPlayerId === f.playerId) {
                     fillStyle = 'rgba(178, 145, 70, 0.5)'
@@ -964,12 +971,13 @@ function draw(players, figures, dt, dtProcessed, layer) {
             } else if (lastFinalWinnerPlayerId && dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
                 const lp = dt4 / moveScoreToPlayerDuration
                 const lpi = 1-lp
-                ctx.translate(lpi*f.x + lp*(32+i*48), lpi*f.y + lp*(level.height-32))
+                ctx.translate(lpi*f.x + lp*(32+i*48), lpi*f.y + lp*(level.height+32))
                 ctx.scale(2.0*lpi + 1*lp, 2.0*lpi + 1*lp)
                 points = 0;
             } else {
-                ctx.translate(32+i*48, level.height-32)
+                ctx.translate(32+i*48, level.height+32)
             }
+
 
             ctx.arc(0,0,16,0, 2 * Math.PI);
             ctx.fillStyle = fillStyle;
@@ -998,43 +1006,50 @@ function draw(players, figures, dt, dtProcessed, layer) {
             }
         })
     
+  
+    }
+
+ 
+
+    ctx.restore()
+
+
+    ctx.save()
+    ctx.font = "16px serif";
+    ctx.fillStyle = "white";
+    ctx.textBaseline='top'
+    ctx.textAlign = "right";
+    ctx.fillText(fps + " FPS", canvas.width, 0);
+    ctx.restore()
+
+    if (layer === 1 && showDebug) {
+
+      ctx.save()
         ctx.font = "16px serif";
         ctx.fillStyle = "white";
         ctx.textAlign = "left";
         ctx.textBaseline='top'
-    
+        
         ctx.save()
-        ctx.textAlign = "right";
-        ctx.fillText(fps + " FPS", level.width, 0);
+
+        
+
+          ctx.fillText('Players',0,0)
+          players.forEach((g,i) => {
+              ctx.translate(0,16)
+              ctx.fillText("xAxis: " + g.xAxis.toFixed(2) + " yAxis: " + g.yAxis.toFixed(2) + " Attack?: " + g.isAttackButtonPressed,0,0) 
+          })
         ctx.restore()
     
-    
-        if (showDebug) {
-            ctx.save()
-            ctx.fillText('Players',0,0)
-            players.forEach((g,i) => {
-                ctx.translate(0,16)
-                ctx.fillText("xAxis: " + g.xAxis.toFixed(2) + " yAxis: " + g.yAxis.toFixed(2) + " Attack?: " + g.isAttackButtonPressed,0,0) 
-            })
-            ctx.restore()
-        
-            ctx.save()
-            ctx.textBaseline='bottom'
-            ctx.translate(0,canvas.height/level.scale)
-            figures.forEach((g,i) => {
-                ctx.fillText("playerId: " + g.playerId + " x: " + Math.floor(g.x) + " y: " + Math.floor(g.y) + " Beans: " + g.beans?.size,0,0) 
-                ctx.translate(0,-16)
-            })
-            ctx.fillText('Figures',0,0)
-            ctx.restore()
-        }
-    }
-
-    if (layer === 1) {
-        drawFence(1, ctx, level)
-    }
-  
-  
-
-    ctx.restore()
+        ctx.save()
+          ctx.textBaseline='bottom'
+          ctx.translate(0,canvas.height/level.scale)
+          figures.forEach((g,i) => {
+              ctx.fillText("playerId: " + g.playerId + " x: " + Math.floor(g.x) + " y: " + Math.floor(g.y) + " Beans: " + g.beans?.size,0,0) 
+              ctx.translate(0,-16)
+          })
+          ctx.fillText('Figures',0,0)
+        ctx.restore()
+      ctx.restore()
+  }
 }
