@@ -1039,21 +1039,23 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.textBaseline='middle'
             ctx.fillStyle = "white";
             ctx.font = "24px arial";
+            if (!isGameStarted && f.isAttacking) {
+              ctx.translate(-5+Math.random()*10,-Math.random()*10)
+            }
             ctx.fillText(points,0,0); // Punkte
             ctx.stroke();
             ctx.restore()
 
             if (f.playerId === lastFinalWinnerPlayerId && dt3 >= 0 && dt3 < showFinalWinnerDuration) {
                 ctx.save();
-                ctx.font = level.width*0.06+"px serif";
-                ctx.fillStyle = "rgba(178, 145, 70, 1.0)";
+                ctx.font = level.width*0.1+"px Arial";
+                ctx.fillStyle = "rgba(139,69,19,0.8)";
                 ctx.strokeStyle = "black";
                 ctx.textAlign = "center";
                 ctx.textBaseline='middle'
-                ctx.lineWidth = 2
+                ctx.lineWidth = 6
                 ctx.translate(0.5*level.width,level.height*0.3)
-                ctx.fillText(`Player ${i+1} wins`,0,0)
-                ctx.strokeText(`Player ${i+1} wins`,0,0)
+                fillTextWithStroke(ctx,`Player ${i+1} wins`,0,0)
                 ctx.restore()
             }
         })
