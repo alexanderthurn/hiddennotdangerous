@@ -266,12 +266,12 @@ const drawFence = (layer, ctx, level) => {
     ctx.fillStyle = "rgba(150,150,150,1.0)";
     var y = 0
     if (layer === 1) {
-        ctx.fillRect(0,level.padding, level.padding*0.5, level.height)
-        ctx.fillRect(level.width-level.padding*0.5,level.padding, level.padding*0.5, level.height)
+        ctx.fillRect(0,level.padding*2, level.padding*0.5, level.height-level.padding)
+        ctx.fillRect(level.width-level.padding*0.5,level.padding*2, level.padding*0.5, level.height-level.padding)
         y = level.height-level.padding-level.padding
     } else {
-        ctx.fillRect(0,0, level.padding*0.5, level.padding)
-        ctx.fillRect(level.width-level.padding*0.5,0, level.padding*0.5, level.padding)
+        ctx.fillRect(0,0, level.padding, level.padding*2)
+        ctx.fillRect(level.width-level.padding,0, level.padding*0.5, level.padding*2)
         y = 0
     }
 
