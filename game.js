@@ -254,7 +254,7 @@ function gameInit(completeRestart) {
             yTarget,
             maxBreakDuration: 5000,
             startWalkTime: Math.random() * 5000 + dtProcessed,
-            maxSpeed: 0.28,
+            maxSpeed: 0.08,
             speed: 0,
             isDead: false, 
             playerId: null,
@@ -615,8 +615,8 @@ function handleInput(players, figures, dtProcessed) {
 
             figures.forEach(f => f.isDead = false)
             if (figures.filter(f => f.playerId).length == 2) {
-                playPlaylist(music);
-                restartGame = true;
+                //playPlaylist(music);
+               // restartGame = true;
             }  
         }
     })
@@ -755,18 +755,37 @@ function draw(players, figures, dt, dtProcessed, layer) {
     if (!isGameStarted) {  
       ctx.save()
 
+      var btnStartX = level.width*0.75
+      var btnStartY = level.height*0.5
+      var btnStartAttackDistance =  level.width*0.1
+      var btnStartPercentageLoaded = 0.0
+
+      var players = figures.filter(f => f.playerId && f.type === 'fighter')
+      var playersNear = players.filter(f => distance(btnStartX, btnStartY, f.x,f.y) < btnStartAttackDistance)
+
+      if (playersNear.length > 0) {
+        btnStartPercentageLoaded = playersNear.length / players.length
+
+        if (players.length > 1 && playersNear.length === players.length) {
+          playPlaylist(music);
+          restartGame = true;
+        }
+
+      }
+
+   
       // start image
-      ctx.translate(level.width*0.75,level.height*0.5)
+      ctx.translate(btnStartX,btnStartY)
       ctx.scale(1.0,1.0)
       ctx.beginPath();
       ctx.fillStyle = "rgba(255,255,255,0.3)";
-      ctx.arc(0,0,level.width*0.1, 0, 2 * Math.PI)
+      ctx.arc(0,0,btnStartAttackDistance, 0, 2 * Math.PI)
       ctx.closePath()
       ctx.fill();
 
       ctx.beginPath();
       ctx.fillStyle = "rgba(255,255,255,0.3)";
-      ctx.arc(0,0,level.width*0.12, 0, 2 * Math.PI)
+      ctx.arc(0,0,btnStartAttackDistance*((1 +0.2* (1-btnStartPercentageLoaded) + Math.sin(dtProcessed*0.005)*0.02) ), 0, 2 * Math.PI)
       ctx.closePath()
       ctx.fill();
 
@@ -793,27 +812,27 @@ function draw(players, figures, dt, dtProcessed, layer) {
       ctx.save()
 
         ctx.save()
-          ctx.translate(level.width*0.025,level.height*0.3)
+          ctx.translate(level.width*0.04,level.height*0.3)
           ctx.scale(1.0,1.0)
           ctx.beginPath();
-          ctx.fillStyle = "rgba(255,255,255,0.3)";
-          ctx.fillRect(0,0, level.width*0.5, level.height*0.45)
+          ctx.fillStyle = "rgba(255,255,255,0.2)";
+          ctx.fillRect(0,0, level.width*0.4, level.height*0.42)
           ctx.closePath()
           ctx.fill();
         ctx.restore()
 
 
-        var fontHeight = level.width*0.02  
+        var fontHeight = level.width*0.017  
         ctx.font = fontHeight+"px Arial";
         ctx.fillStyle = "rgba(139,69,19,0.8)";
         ctx.strokeStyle = "black";
         ctx.textAlign = "center";
         ctx.textBaseline='top'
         ctx.lineWidth = 1
-        ctx.translate(level.width*0.25+fontHeight,level.height*0.35+fontHeight)
-        var txt = 'Join by pressing any key on your Gamepad' 
-                  + '\nor WASDT or ' + String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0 or by mouse or by touch' 
-                  + '\n\n1.) Find your player 2.) Don\'t get detected by others\n3.) Fart to kill 4.) Eat to get bigger farts' 
+        ctx.translate(level.width*0.22+fontHeight,level.height*0.35)
+        var txt = 'HOW TO PLAY\n\nJoin by pressing any key on your Gamepad' 
+                  + '\nor WASDT or ' + String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0 or mouse or touch' 
+                  + '\n\n1.) Find your player 2.) Don\'t get detected\n3.) Fart to kill 4.) Eat to get bigger farts' 
                   + '\n\nThe goal is to be the last survivor'
         
         fillTextWithStrokeMultiline(ctx, txt,0,0, fontHeight)
