@@ -789,6 +789,38 @@ function draw(players, figures, dt, dtProcessed, layer) {
     }
 
 
+    if (!isGameStarted) {  
+      ctx.save()
+
+        ctx.save()
+          ctx.translate(level.width*0.025,level.height*0.3)
+          ctx.scale(1.0,1.0)
+          ctx.beginPath();
+          ctx.fillStyle = "rgba(255,255,255,0.3)";
+          ctx.fillRect(0,0, level.width*0.5, level.height*0.45)
+          ctx.closePath()
+          ctx.fill();
+        ctx.restore()
+
+
+        var fontHeight = level.width*0.02  
+        ctx.font = fontHeight+"px Arial";
+        ctx.fillStyle = "rgba(139,69,19,0.8)";
+        ctx.strokeStyle = "black";
+        ctx.textAlign = "center";
+        ctx.textBaseline='top'
+        ctx.lineWidth = 1
+        ctx.translate(level.width*0.25+fontHeight,level.height*0.35+fontHeight)
+        var txt = 'Join by pressing any key on your Gamepad' 
+                  + '\nor WASDT or ' + String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0 or by mouse or by touch' 
+                  + '\n\n1.) Find your player 2.) Don\'t get detected by others\n3.) Fart to kill 4.) Eat to get bigger farts' 
+                  + '\n\nThe goal is to be the last survivor'
+        
+        fillTextWithStrokeMultiline(ctx, txt,0,0, fontHeight)
+      ctx.restore()
+    }
+
+
   
 
     //ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, 100, 100)
@@ -1042,28 +1074,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
       ctx.strokeText('STEALTHY STINKERS',0,0)
     ctx.restore()
 
-    if (!isGameStarted) {  
-      ctx.save()
-        var fontHeight = level.width*0.02  
-        ctx.font = fontHeight+"px Arial";
-        ctx.fillStyle = "rgba(139,69,19,0.8)";
-        ctx.strokeStyle = "black";
-        ctx.textAlign = "center";
-        ctx.textBaseline='top'
-        ctx.lineWidth = 1
-      ctx.shadowColor = "white"; // string
-      ctx.shadowOffsetX = 0; // integer
-      ctx.shadowOffsetY = 0; // integer
-      ctx.shadowBlur = 15; // integer
-        ctx.translate(level.width*0.5+fontHeight,fontHeight)
-        fillTextWithStroke(ctx,'Join by pressing any key on your Gamepad or WASDT or ' + String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0 or by mouse or by touch' ,0,0)
-        ctx.translate(0,fontHeight*1.1)
-        fillTextWithStroke(ctx,"1.) Find your player 2.) Don't get detected by others 3.) Fart to kill 4.) Eat to get bigger farts",0,0)
-        ctx.translate(0,fontHeight*1.1)
-        fillTextWithStroke(ctx,"The goal is to be the last survivor",0,0)
-        ctx.restore()
-
-    }
+    
     
 
     ctx.restore()
