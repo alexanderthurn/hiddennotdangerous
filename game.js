@@ -751,25 +751,45 @@ function draw(players, figures, dt, dtProcessed, layer) {
     }
 
     
-    if (!isGameStarted) {
-        ctx.save()
-        ctx.font = level.width*0.06+"px serif";
-        ctx.fillStyle = "rgba(139,69,19,1.0)";
-        ctx.strokeStyle = "black";
-        ctx.textAlign = "center";
-        ctx.textBaseline='middle'
-        ctx.lineWidth = 2
-        ctx.translate(0.5*level.width,level.height*0.3)
-        ctx.fillText('Stealthy Stinkers',0,0)
-        ctx.strokeText('Stealthy Stinkers',0,0)
-        ctx.font = level.width*level.scale*0.03+"px serif";
-        ctx.fillStyle = "black";
-        ctx.fillText('WASDT',0,96)
-        ctx.fillText(String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0',0,96*2)
-        ctx.fillText('Gamepad',0,96*3)
-        ctx.fillText('Mouse',0,96*4)
-        ctx.restore()
+  
+    if (!isGameStarted) {  
+      ctx.save()
+
+      // start image
+      ctx.translate(level.width*0.75,level.height*0.5)
+      ctx.scale(1.0,1.0)
+      ctx.beginPath();
+      ctx.fillStyle = "rgba(255,255,255,0.3)";
+      ctx.arc(0,0,level.width*0.1, 0, 2 * Math.PI)
+      ctx.closePath()
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.fillStyle = "rgba(255,255,255,0.3)";
+      ctx.arc(0,0,level.width*0.12, 0, 2 * Math.PI)
+      ctx.closePath()
+      ctx.fill();
+
+
+      ctx.font = level.width*0.04+"px Arial";
+      ctx.fillStyle = "rgba(139,69,19,0.4)";
+      ctx.strokeStyle = "black";
+      ctx.textAlign = "center";
+      ctx.textBaseline='middle'
+      ctx.lineWidth = 2
+      ctx.translate(0,level.width*0.02)
+      fillTextWithStroke(ctx,'START',0,0)
+
+      ctx.translate(0,-level.width*0.04)
+      ctx.font = level.width*0.02+"px Arial";
+      fillTextWithStroke(ctx,'Move here to',0,0)
+
+
+      ctx.restore()
     }
+
+    
+  
 
     //ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, 100, 100)
     ctx.save()
@@ -1009,17 +1029,53 @@ function draw(players, figures, dt, dtProcessed, layer) {
   
     }
 
- 
+
+    ctx.save()
+      ctx.font = level.width*0.02+"px Arial";
+      ctx.fillStyle = "rgba(139,69,19,0.4)";
+      ctx.strokeStyle = "black";
+      ctx.textAlign = "center";
+      ctx.textBaseline='top'
+      ctx.lineWidth = 2
+      ctx.translate(0.5*level.width,-level.offsetY/level.scale+8)
+      ctx.fillText('STEALTHY STINKERS',0,0)
+      ctx.strokeText('STEALTHY STINKERS',0,0)
+    ctx.restore()
+
+    if (!isGameStarted) {  
+      ctx.save()
+        var fontHeight = level.width*0.02  
+        ctx.font = fontHeight+"px Arial";
+        ctx.fillStyle = "rgba(139,69,19,0.4)";
+        ctx.strokeStyle = "black";
+        ctx.textAlign = "left";
+        ctx.textBaseline='top'
+        ctx.lineWidth = 1
+      ctx.shadowColor = "white"; // string
+      ctx.shadowOffsetX = 0; // integer
+      ctx.shadowOffsetY = 0; // integer
+      ctx.shadowBlur = 15; // integer
+        ctx.translate(fontHeight,fontHeight)
+        fillTextWithStroke(ctx,'Join by pressing any key on your Gamepad or WASDT or ' + String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0 or by mouse or by touch' ,0,0)
+        ctx.translate(0,fontHeight*1.1)
+        fillTextWithStroke(ctx,"1.) Find your player 2.) Don't get detected by others 3.) Fart to kill 4.) Eat to get bigger farts",0,0)
+        ctx.translate(0,fontHeight*1.1)
+        fillTextWithStroke(ctx, 'Start the game by walking to the start area', 0,0)
+        ctx.translate(0,fontHeight*1.1)
+        fillTextWithStroke(ctx, 'Have fun', 0,0)
+      ctx.restore()
+
+    }
+    
 
     ctx.restore()
 
-
     ctx.save()
-    ctx.font = "16px serif";
-    ctx.fillStyle = "white";
-    ctx.textBaseline='top'
-    ctx.textAlign = "right";
-    ctx.fillText(fps + " FPS", canvas.width, 0);
+      ctx.font = "16px serif";
+      ctx.fillStyle = "white";
+      ctx.textBaseline='top'
+      ctx.textAlign = "right";
+      ctx.fillText(fps + " FPS", canvas.width, 0);
     ctx.restore()
 
     if (layer === 1 && showDebug) {

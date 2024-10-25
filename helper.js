@@ -301,3 +301,9 @@ const drawFence = (layer, ctx, level, shadow) => {
     }
 
 }
+
+var fillTextWithStroke = (ctx, text,x,y) => {
+    
+    ctx.fillText(text,x,y)
+    ctx.strokeText(text,x,y)
+}
