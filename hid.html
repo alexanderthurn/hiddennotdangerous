@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDL2 Gamepad Example</title>
+</head>
+<body>
+    <h1>SDL2 Gamepad Example 2</h1>
+    <button id="btn">Connect New Device</button>
+    <textarea id="textarea" cols="256" rows="256"></textarea>
+
+    <script>
+
+        let textarea = document.getElementById('textarea')
+        let connectedDevices = [];
+
+        // Funktion, um bereits gepairte Geräte abzurufen
+        navigator.hid.getDevices().then(devices => {
+            devices.forEach(device => {
+                console.log(`Already paired device: ${device.productName} ${device.vendorId} ${device.productId}`);
+                if (!device.opened) {
+                    device.open().then(() => {
+                        console.log(`Opened device: ${device.productName}`);
+                        listenToDevice(device); // Jetzt auf inputreport-Ereignisse lauschen
+                    }).catch(error => {
+                        console.log(`Failed to open device: ${error}`);
+                    });
+                } else {
+                    listenToDevice(device);  // Falls das Gerät bereits geöffnet ist
+                }
+            });
+            console.log(`Devices: ${devices.length}`);
+                
+        });
+
+        document.getElementById('btn').onclick = () => {
+            navigator.hid.requestDevice({ filters: [] })
+            .then(devices => {
+                devices.forEach(device => {
+                    console.log(`Device: ${device.productName}`);
+                    console.log(`Vendor ID: ${device.vendorId}, Product ID: ${device.productId}`);
+       
+                    device.open().then(() => {
+                        console.log(`Opened device: ${device.productName}`);
+                        listenToDevice(device);
+                    });
+                });
+            });
+        }
+
+        // Funktion zum Anhören von HID-Daten vom verbundenen Gerät
+        function listenToDevice(device) {
+            device.addEventListener('inputreport', event => {
+                const { data, device, reportId } = event;
+               // console.log(`Received report ${reportId} from ${device.productName}`);
+                processHIDInput(device, data);
+            });
+            
+            connectedDevices.push(device);
+        }
+
+        // Funktion zur Verarbeitung von HID-Daten
+        function processHIDInput(device, data) {
+            const dataArray = new Uint8Array(data.buffer);
+            //console.log('Raw HID data:', dataArray); // Gib die rohen Daten aus
+            console.log(Array.apply([], dataArray).join(","));
+
+            /*console.log('HID data:', dataArray);
+
+            // Beispiel: Button 1
+            if (dataArray[0] === 1) {
+                console.log('Button 1 pressed');
+            } else {
+                console.log('Button 1 released');
+            }*/
+            const isButton0Pressed = (dataArray[0] & 0x01) !== 0;  // Button 0 ist meist das erste Bit
+           // console.log(`Button 0 pressed: ${isButton0Pressed}`);
+        
+            // Nehmen wir an, die Achsenwerte kommen ab Byte 1 und 2 (dies kann je nach Gerät variieren)
+            const xAxisRaw = dataArray[1];  // Rohwert für X-Achse (0-255)
+            const yAxisRaw = dataArray[2];  // Rohwert für Y-Achse (0-255)
+        
+            // Konvertiere Rohdaten in einen Wert zwischen -1 und +1
+            const xAxis = (xAxisRaw - 128) / 128;  // Normalisierung von 0-255 auf -1 bis +1
+            const yAxis = (yAxisRaw - 128) / 128;
+        
+           // console.log(`X-Achse: ${xAxis}, Y-Achse: ${yAxis}`);
+            
+            // Du kannst diese Werte jetzt auch im connectedDevices Array speichern
+            connectedDevices.forEach((d, index) => {
+                if (d === device) {
+                    connectedDevices[index].isButton0Pressed = isButton0Pressed;
+                    connectedDevices[index].xAxis = xAxis;
+                    connectedDevices[index].yAxis = yAxis;
+                }
+            });
+
+           // console.log(connectedDevices)
+            textarea.value = JSON.stringify(connectedDevices, 2)
+
+        }
+
+    </script>
+</body>
+</html>
