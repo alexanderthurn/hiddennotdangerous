@@ -697,7 +697,6 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
                     }
                 }
             }
-            [f.xTarget, f.yTarget] = cropXY(f.xTarget, f.yTarget, level)
             f.angle = angle(f.x,f.y,f.xTarget,f.yTarget)
             f.speed = f.maxSpeed
         }
