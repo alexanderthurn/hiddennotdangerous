@@ -570,12 +570,19 @@ function updateGame(figures, dt, dtProcessed) {
         btnStart.playerPercentage = 0.0
         var playersWithId = figures.filter(f => f.playerId && f.type === 'fighter')
         var playersNear = playersWithId.filter(f => distance(btnStart.x, btnStart.y, f.x,f.y) < btnStart.radius)
+        btnStart.playersNear = playersNear
+        btnStart.playersPossible = playersWithId
 
         if (playersNear.length > 0) {
             btnStart.playerPercentage = playersNear.length / playersWithId.length;
 
             if (playersWithId.length > 1 && playersNear.length === playersWithId.length) {
                 btnStart.loadingPercentage += btnStart.loadingSpeed * dt;
+            } else if (playersNear.length > 0) {
+                btnStart.loadingPercentage += btnStart.loadingSpeed * dt;
+                if ( btnStart.loadingPercentage > 0.5) {
+                    btnStart.loadingPercentage = 0.5
+                }
             } else {
                 btnStart.loadingPercentage -= btnStart.loadingSpeed * dt
             }
@@ -789,13 +796,13 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.translate(btnStart.x,btnStart.y)
                 ctx.beginPath();
                 ctx.fillStyle = "rgba(255,255,255,0.3)";
-                ctx.arc(0,0,btnStart.radius*Math.min(btnStart.loadingPercentage, 1), 0, 2 * Math.PI)
+                ctx.arc(0,0,btnStart.radius, 0, 2 * Math.PI)
                 ctx.closePath()
                 ctx.fill();
 
                 ctx.beginPath();
                 ctx.fillStyle = "rgba(255,255,255,0.3)";
-                ctx.arc(0,0,btnStart.radius*((1 +0.2* (1-btnStart.playerPercentage) + Math.sin(dtProcessed*0.005)*0.02) ), 0, 2 * Math.PI)
+                ctx.arc(0,0,btnStart.radius*btnStart.loadingPercentage, 0, 2 * Math.PI)
                 ctx.closePath()
                 ctx.fill();
 
@@ -806,11 +813,22 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.textBaseline='middle'
                 ctx.lineWidth = 2
                 ctx.translate(0,level.width*0.02)
-                fillTextWithStroke(ctx,'START',0,0)
-
+                if (btnStart.playersNear.length < 2) {
+                    fillTextWithStroke(ctx,'START',0,0)
+                }
+               
                 ctx.translate(0,-level.width*0.04)
                 ctx.font = level.width*0.02+"px Arial";
-                fillTextWithStroke(ctx,'Walk here to',0,0)
+
+                if (btnStart.playersNear.length === 1) {
+                    fillTextWithStroke(ctx,'2 players min',0,0)
+                } else if (btnStart.playersNear.length > 1) {
+                    fillTextWithStrokeMultiline(ctx,'Prepare your\nEngines',0,0,level.width*0.02)
+
+                } else {
+                    fillTextWithStroke(ctx,'Walk here to',0,0)
+                }
+                
                 
             ctx.restore()
 
