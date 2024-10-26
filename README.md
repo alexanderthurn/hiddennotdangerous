@@ -1,7 +1,17 @@
-# stealthy stinkers
+# STEALTHY STINKERS
+
+## Preview
 
 [Github Page Live Preview](https://alexanderthurn.github.io/hiddennotdangerous/)
 
+
+## Development
+
+Install python3
+Open a terminal and run `python3 -m http.server 3333`
+Open `http://localhost:3333` in your webbrowser. If it says it is insecure due to http, open it in another browser or in private mode
+
+## Resources used
 
 character: https://opengameart.org/content/simple-character-base-16x16
 Grass Tiles: https://www.vecteezy.com/vector-art/13998017-textures-of-green-grass-with-flowers-and-mushrooms
@@ -27,4 +37,7 @@ vomit3 Sound Effect from <a href="https://pixabay.com/?utm_source=link-attributi
 
 cheer: Sound Effect from <a href="https://pixabay.com/sound-effects/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=99963">Pixabay</a>
 
-local dev: python3 -m http.server 3333
+
+## License
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
