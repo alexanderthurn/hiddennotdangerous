@@ -68,6 +68,8 @@ loadPromises.push(new Promise((resolve, reject) => {
 
 var btnStart = {
     radius: level.width*0.1,
+    width: 0,
+    height: 0,
     loadingSpeed: 1/3000
 }
 
@@ -262,7 +264,7 @@ function gameInit(completeRestart) {
     multikillCounter = 0;
     lastTotalkillAudio = 0;
     totalkillCounter = 0;
-    btnStart = {...btnStart, x: level.width*0.75, y: level.height*0.5, loadingPercentage: 0.0, radius: level.width*0.1}
+    btnStart = {...btnStart, x: level.width*(0.04+0.52), y: level.height*0.3, width: level.width*0.4, height: level.height*0.42,loadingPercentage: 0.0, radius: level.width*0.1}
     var activePlayerIds = figures.filter(f => f.playerId && f.type === 'fighter').map(f => f.playerId)
     var oldFigures = figures
     figures = []
@@ -590,7 +592,7 @@ function updateGame(figures, dt, dtProcessed) {
     if (!isGameStarted) {
         btnStart.playerPercentage = 0.0
         var playersWithId = figures.filter(f => f.playerId && f.type === 'fighter')
-        var playersNear = playersWithId.filter(f => distance(btnStart.x, btnStart.y, f.x,f.y) < btnStart.radius)
+        var playersNear = playersWithId.filter(f => isInRect(f.x,f.y,btnStart.x,btnStart.y,btnStart.width,btnStart.height))
         btnStart.playersNear = playersNear
         btnStart.playersPossible = playersWithId
 
@@ -603,6 +605,9 @@ function updateGame(figures, dt, dtProcessed) {
                 btnStart.loadingPercentage += btnStart.loadingSpeed * dt;
                 if ( btnStart.loadingPercentage > btnStart.playersNear.length / btnStart.playersPossible.length) {
                     btnStart.loadingPercentage = btnStart.playersNear.length / btnStart.playersPossible.length
+                }
+                if (btnStart.playersPossible.length === 1) {
+                    btnStart.loadingPercentage = Math.min(0.5, btnStart.loadingPercentage)
                 }
             } else {
                 btnStart.loadingPercentage -= btnStart.loadingSpeed * dt
@@ -816,7 +821,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
             
             ctx.save()
                 // start image
-                ctx.translate(btnStart.x,btnStart.y)
+              /*  ctx.translate(btnStart.x,btnStart.y)
                 ctx.beginPath();
                 ctx.fillStyle = "rgba(255,255,255,0.3)";
                 ctx.arc(0,0,btnStart.radius, 0, 2 * Math.PI)
@@ -828,19 +833,27 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.arc(0,0,btnStart.radius*btnStart.loadingPercentage, 0, 2 * Math.PI)
                 ctx.closePath()
                 ctx.fill();
+            */
+             
+               ctx.translate(btnStart.x,btnStart.y)
 
-                ctx.font = level.width*0.04+"px Arial";
-                ctx.fillStyle = "rgba(139,69,19,0.4)";
-                ctx.strokeStyle = "black";
-                ctx.textAlign = "center";
-                ctx.textBaseline='middle'
-                ctx.lineWidth = 2
-                //ctx.translate(0,level.width*0.02)
-               // if (btnStart.playersNear.length < btnStart.playersPossible.length ) {
-               //     fillTextWithStroke(ctx,'START',0,0)
-               // }
-               
-                
+               ctx.save()
+              // ctx.translate(level.width*(0.04+0.52),level.height*0.3)
+               ctx.beginPath();
+               ctx.fillStyle = "rgba(255,255,255,0.2)";
+               ctx.fillRect(0,0, btnStart.width, btnStart.height)
+               ctx.fillStyle = "rgba(255,255,255,0.2)";
+               ctx.fillRect(0,0, btnStart.width*btnStart.loadingPercentage, btnStart.height)
+               ctx.closePath()
+               ctx.fill();
+               ctx.restore()
+               var fontHeight = level.width*0.017  
+                ctx.font = fontHeight+"px Arial";
+                ctx.fillStyle = "rgba(139,69,19,0.8)";
+               ctx.strokeStyle = "black";
+               ctx.textAlign = "center";
+               ctx.textBaseline='middle'
+               ctx.lineWidth = 1
                 ctx.font = level.width*0.02+"px Arial";
 
                 var text = 'Walk here to\n\nSTART'
@@ -852,8 +865,9 @@ function draw(players, figures, dt, dtProcessed, layer) {
                     text = btnStart.playersNear.length + '/' + btnStart.playersPossible.length + ' players'
                 } 
                 console.log(text.split('\n').length)
-                ctx.translate(0,-level.width*0.02*Math.max(0,text.split('\n').length-1)*0.5)
-                fillTextWithStrokeMultiline(ctx,text,0,0,level.width*0.02)
+                ctx.translate(btnStart.width*0.5,btnStart.height*0.5)
+                ctx.translate(0,-fontHeight*Math.max(0,text.split('\n').length-1)*0.5)
+                fillTextWithStrokeMultiline(ctx,text,0,0,fontHeight)
                 
             ctx.restore()
 
@@ -1128,20 +1142,20 @@ function draw(players, figures, dt, dtProcessed, layer) {
     if (layer === 1) {
         ctx.save()
         ctx.font = level.width*0.02+"px Arial";
-        ctx.fillStyle = "rgba(139,69,19,0.4)";
-        ctx.strokeStyle = "black";
+        ctx.fillStyle = "white"//rgba(139,69,19,0.4)";
+        //ctx.strokeStyle = "white";
         ctx.textAlign = "center";
         ctx.textBaseline='bottom'
-        ctx.lineWidth = 2
+        ctx.lineWidth = 0
         ctx.translate(0.5*level.width,-level.width*0.005)
-        fillTextWithStroke(ctx, 'STEALTHY STINKERS',0,0)
+        ctx.fillText('STEALTHY STINKERS',0,0)
         ctx.translate(0.5*level.width,0)
-        ctx.strokeStyle = "black";
-        ctx.fillStyle = "black";
+        //ctx.strokeStyle = "white";
+        ctx.fillStyle = "white";
         ctx.textAlign = "right";
-        ctx.lineWidth = 1
+        ctx.lineWidth = 0
         ctx.font = level.width*0.012+"px Arial";
-        fillTextWithStroke(ctx, 'made by TORSTEN STELLJES & ALEXANDER THURN',0,0)
+        ctx.fillText('made by TORSTEN STELLJES & ALEXANDER THURN',0,0)
         ctx.restore()
     }
     

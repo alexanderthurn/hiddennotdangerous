@@ -143,6 +143,11 @@ function cropXY(x,y,level) {
     return [x,y]
 }
 
+
+function isInRect(x,y,rx,ry,rw,rh) {
+    return x >= rx && x <= rx+rw && y >= ry && y < ry+rh
+}
+
 const colorize = (image, r, g, b) => {
     const imageSize = image.width;
   
