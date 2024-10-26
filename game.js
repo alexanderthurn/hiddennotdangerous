@@ -17,7 +17,6 @@ var keyboards = [{bindings: {
     'Numpad0': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var btnStartLoadingPercentage = 0;
 var isGameStarted = false, restartGame = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
 const moveNewScoreDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 3000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
@@ -50,8 +49,6 @@ loadPromises.push(new Promise((resolve, reject) => {
     }
 }))
 
-
-
 var cloudImage = new Image()
 cloudImage.src = 'gfx/fart.png'
 /*loadPromises.push(new Promise((resolve, reject) => {
@@ -69,6 +66,10 @@ loadPromises.push(new Promise((resolve, reject) => {
     }
 }))
 
+var btnStart = {
+    radius: level.width*0.1,
+    loadingSpeed: 1/3000
+}
 
 cloudImageAnim = {
     hasDirections: false,
@@ -106,7 +107,7 @@ const audio = {
     death: {title: 'sfx/gag-reflex-41207.mp3', currentTime: 0.0},
     join: {title: 'sfx/sounddrum.mp3'},
     firstBlood: {title: 'sfx/first-blood.mp3', volume: 0.2},
-    win: {title: 'sfx/audience-clapping-03-99963.mp3', volume: 1.0},
+    win: {title: 'sfx/audience-clapping-03-99963.mp3'},
     music: [
         {title: 'sfx/music1.mp3', currentTime: 20, volume: 0.5},
         {title: 'sfx/music2.mp3', volume: 0.5},
@@ -135,7 +136,7 @@ const audio = {
         {title: 'sfx/eatingsfxwav-14588.mp3'},
         {title: 'sfx/carrotnom-92106.mp3'},
         {title: 'sfx/eat-a-cracker-95783.mp3', volume: 0.5},
-        {title: 'sfx/game-eat-sound-83240.mp3', volume: 1.0},
+        {title: 'sfx/game-eat-sound-83240.mp3'},
         {title: 'sfx/game-eat-sound-83240.mp3'}
     ]
 }
@@ -240,6 +241,7 @@ function gameInit(completeRestart) {
     multikillCounter = 0;
     lastTotalkillAudio = 0;
     totalkillCounter = 0;
+    btnStart = {...btnStart, x: level.width*0.75, y: level.height*0.5, loadingPercentage: 0.0, radius: level.width*0.1}
     var activePlayerIds = figures.filter(f => f.playerId && f.type === 'fighter').map(f => f.playerId)
     var oldFigures = figures
     figures = []
@@ -560,6 +562,29 @@ function gameLoop() {
 }
 
 function updateGame(figures, dt, dtProcessed) {
+    if (!isGameStarted) {
+        btnStart.playerPercentage = 0.0
+        var playersWithId = figures.filter(f => f.playerId && f.type === 'fighter')
+        var playersNear = playersWithId.filter(f => distance(btnStart.x, btnStart.y, f.x,f.y) < btnStart.radius)
+
+        if (playersNear.length > 0) {
+            btnStart.playerPercentage = playersNear.length / playersWithId.length;
+
+            if (playersWithId.length > 1 && playersNear.length === playersWithId.length) {
+                btnStart.loadingPercentage += btnStart.loadingSpeed * dt;
+            } else {
+                btnStart.loadingPercentage -= btnStart.loadingSpeed * dt
+            }
+        } else {
+            btnStart.loadingPercentage -= btnStart.loadingSpeed * dt
+        }
+        btnStart.loadingPercentage = btnStart.loadingPercentage > 0 ? btnStart.loadingPercentage : 0;
+        if (btnStart.loadingPercentage > 1) {
+            restartGame = true;
+        }
+    }
+
+
     let figuresAlive = figures.filter(f => !f.isDead);
     figuresAlive.forEach(f => {
         let xyNew = move(f.x, f.y, f.angle,f.speed, dt)
@@ -568,9 +593,6 @@ function updateGame(figures, dt, dtProcessed) {
         }
         f.anim += f.speed + f.imageAnim?.animDefaultSpeed
        // f.anim += f.isAttacking ? 0.5 : 0
-
-       
-        
     })
     
     let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter');
@@ -751,46 +773,19 @@ function draw(players, figures, dt, dtProcessed, layer) {
     
     if (!isGameStarted) {
         ctx.save()
-
-        var btnStartX = level.width*0.75
-        var btnStartY = level.height*0.5
-        var btnStartAttackDistance =  level.width*0.1
-        var btnStartPlayerPercentage = 0.0
-        var btnStartLoadingSpeed = 1/2*3000
-
-        var playersWithId = figures.filter(f => f.playerId && f.type === 'fighter')
-        var playersNear = playersWithId.filter(f => distance(btnStartX, btnStartY, f.x,f.y) < btnStartAttackDistance)
-
-        if (playersNear.length > 0) {
-            btnStartPlayerPercentage = playersNear.length / playersWithId.length;
-
-            if (playersWithId.length > 1 && playersNear.length === playersWithId.length) {
-                btnStartLoadingPercentage += btnStartLoadingSpeed * dt;
-            } else {
-                btnStartLoadingPercentage -= btnStartLoadingSpeed * dt
-                btnStartLoadingPercentage = btnStartLoadingPercentage > 0 ? btnStartLoadingPercentage : 0;
-            }
-        }
-        if (btnStartLoadingPercentage > 1) {
-            restartGame = true;
-        }
-
-   
         // start image
-        ctx.translate(btnStartX,btnStartY)
-        ctx.scale(1.0,1.0)
+        ctx.translate(btnStart.x,btnStart.y)
         ctx.beginPath();
         ctx.fillStyle = "rgba(255,255,255,0.3)";
-        ctx.arc(0,0,btnStartAttackDistance*btnStartLoadingPercentage, 0, 2 * Math.PI)
+        ctx.arc(0,0,btnStart.radius*Math.min(btnStart.loadingPercentage, 1), 0, 2 * Math.PI)
         ctx.closePath()
         ctx.fill();
 
         ctx.beginPath();
         ctx.fillStyle = "rgba(255,255,255,0.3)";
-        ctx.arc(0,0,btnStartAttackDistance*((1 +0.2* (1-btnStartPlayerPercentage) + Math.sin(dtProcessed*0.005)*0.02) ), 0, 2 * Math.PI)
+        ctx.arc(0,0,btnStart.radius*((1 +0.2* (1-btnStart.playerPercentage) + Math.sin(dtProcessed*0.005)*0.02) ), 0, 2 * Math.PI)
         ctx.closePath()
         ctx.fill();
-
 
         ctx.font = level.width*0.04+"px Arial";
         ctx.fillStyle = "rgba(139,69,19,0.4)";
@@ -809,13 +804,12 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.save()
 
         ctx.save()
-          ctx.translate(level.width*0.04,level.height*0.3)
-          ctx.scale(1.0,1.0)
-          ctx.beginPath();
-          ctx.fillStyle = "rgba(255,255,255,0.2)";
-          ctx.fillRect(0,0, level.width*0.4, level.height*0.42)
-          ctx.closePath()
-          ctx.fill();
+        ctx.translate(level.width*0.04,level.height*0.3)
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(255,255,255,0.2)";
+        ctx.fillRect(0,0, level.width*0.4, level.height*0.42)
+        ctx.closePath()
+        ctx.fill();
         ctx.restore()
 
 
@@ -833,7 +827,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                   + '\n\nThe goal is to be the last survivor'
         
         fillTextWithStrokeMultiline(ctx, txt,0,0, fontHeight)
-      ctx.restore()
+        ctx.restore()
     }
 
     //ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, 100, 100)
@@ -904,7 +898,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.scale(0.5*f.scale,0.5*f.scale)
                 ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
             } else if (f.imageShadow) {
-                ctx.scale(1.0*f.scale,1.0*f.scale)
+                ctx.scale(f.scale, f.scale)
                 ctx.drawImage(f.imageShadow, spriteShadow[0], spriteShadow[1], spriteShadow[2], spriteShadow[3], 0 - f.imageShadowAnim.width*0.5, 0 - f.imageShadowAnim.height*0.5, f.imageShadowAnim.width, f.imageShadowAnim.height)
             }
         } else {
@@ -917,7 +911,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.save()
         
 
-                  ctx.scale(1.0*f.scale,1*f.scale)
+                  ctx.scale(f.scale, f.scale)
                  
                  
                   ctx.lineWidth = 2
@@ -958,7 +952,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                         ctx.globalCompositeOperation = "difference";
                     }
                 } 
-                ctx.scale(1.0*f.scale,1.0*f.scale)
+                ctx.scale( f.scale, f.scale)
                 ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
             }
         }
@@ -1031,13 +1025,13 @@ function draw(players, figures, dt, dtProcessed, layer) {
                     var lp = dt1 / moveNewScoreDuration
                     var lpi = 1-lp
                     ctx.translate(lpi * (level.width*0.5) + lp*(32+i*48), lpi*(level.height*0.5) + lp*(level.height-32))
-                    ctx.scale(12.0*lpi + 1*lp,12.0*lpi +1*lp)
+                    ctx.scale(12*lpi + lp, 12*lpi + lp)
                 }   
             } else if (lastFinalWinnerPlayerId && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
                 const lp = dt2 / moveScoreToPlayerDuration
                 const lpi = 1-lp
                 ctx.translate(lpi*(32+i*48) + lp*f.x, lpi*(level.height+32) + lp*f.y)
-                ctx.scale(1*lpi + 2.0*lp, 1*lpi + 2.0*lp)
+                ctx.scale(lpi + 2*lp, lpi + 2*lp)
                 if (lastFinalWinnerPlayerId === f.playerId) {
                     fillStyle = 'rgba(178, 145, 70, 0.5)'
                 }
@@ -1051,7 +1045,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 const lp = dt4 / moveScoreToPlayerDuration
                 const lpi = 1-lp
                 ctx.translate(lpi*f.x + lp*(32+i*48), lpi*f.y + lp*(level.height+32))
-                ctx.scale(2.0*lpi + 1*lp, 2.0*lpi + 1*lp)
+                ctx.scale(2*lpi + lp, 2*lpi + lp)
                 points = 0;
             } else {
                 ctx.translate(32+i*48, level.height+32)
