@@ -17,7 +17,7 @@ var keyboards = [{bindings: {
     'Numpad0': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var allPlayersOnButtonThen, notAllPlayersOnButtonThen, btnStartLastLoadingPercentage = 0;
+var btnStartLoadingPercentage = 0;
 var isGameStarted = false, restartGame = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
 const moveNewScoreDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 3000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
@@ -748,7 +748,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
     }
 
     
-  
+    
     if (!isGameStarted) {
         ctx.save()
 
@@ -756,33 +756,19 @@ function draw(players, figures, dt, dtProcessed, layer) {
         var btnStartY = level.height*0.5
         var btnStartAttackDistance =  level.width*0.1
         var btnStartPlayerPercentage = 0.0
-        var btnStartLoadingDuration = 3000
-        var btnStartLoadingPercentage
-
-        if (allPlayersOnButtonThen > notAllPlayersOnButtonThen) {
-            btnStartLoadingPercentage = btnStartLastLoadingPercentage + (dtProcessed - allPlayersOnButtonThen)/btnStartLoadingDuration;
-        } else {
-            btnStartLoadingPercentage = Math.max(btnStartLastLoadingPercentage - (dtProcessed - notAllPlayersOnButtonThen)/btnStartLoadingDuration, 0);
-        }
+        var btnStartLoadingSpeed = 1/2*3000
 
         var playersWithId = figures.filter(f => f.playerId && f.type === 'fighter')
         var playersNear = playersWithId.filter(f => distance(btnStartX, btnStartY, f.x,f.y) < btnStartAttackDistance)
 
         if (playersNear.length > 0) {
-            btnStartPlayerPercentage = playersNear.length / playersWithId.length
+            btnStartPlayerPercentage = playersNear.length / playersWithId.length;
 
             if (playersWithId.length > 1 && playersNear.length === playersWithId.length) {
-                allPlayersOnButtonThen = allPlayersOnButtonThen || dtProcessed;
-                if (allPlayersOnButtonThen < notAllPlayersOnButtonThen) {
-                    allPlayersOnButtonThen = dtProcessed;
-                    btnStartLastLoadingPercentage = btnStartLoadingPercentage;
-                }
+                btnStartLoadingPercentage += btnStartLoadingSpeed * dt;
             } else {
-                notAllPlayersOnButtonThen = notAllPlayersOnButtonThen || dtProcessed;
-                if (notAllPlayersOnButtonThen < allPlayersOnButtonThen) {
-                    notAllPlayersOnButtonThen = dtProcessed;
-                    btnStartLastLoadingPercentage = btnStartLoadingPercentage;
-                }
+                btnStartLoadingPercentage -= btnStartLoadingSpeed * dt
+                btnStartLoadingPercentage = btnStartLoadingPercentage > 0 ? btnStartLoadingPercentage : 0;
             }
         }
         if (btnStartLoadingPercentage > 1) {
@@ -790,42 +776,37 @@ function draw(players, figures, dt, dtProcessed, layer) {
         }
 
    
-      // start image
-      ctx.translate(btnStartX,btnStartY)
-      ctx.scale(1.0,1.0)
-      ctx.beginPath();
-      ctx.fillStyle = "rgba(255,255,255,0.3)";
-      ctx.arc(0,0,btnStartAttackDistance*btnStartLoadingPercentage, 0, 2 * Math.PI)
-      ctx.closePath()
-      ctx.fill();
+        // start image
+        ctx.translate(btnStartX,btnStartY)
+        ctx.scale(1.0,1.0)
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(255,255,255,0.3)";
+        ctx.arc(0,0,btnStartAttackDistance*btnStartLoadingPercentage, 0, 2 * Math.PI)
+        ctx.closePath()
+        ctx.fill();
 
-      ctx.beginPath();
-      ctx.fillStyle = "rgba(255,255,255,0.3)";
-      ctx.arc(0,0,btnStartAttackDistance*((1 +0.2* (1-btnStartPlayerPercentage) + Math.sin(dtProcessed*0.005)*0.02) ), 0, 2 * Math.PI)
-      ctx.closePath()
-      ctx.fill();
-
-
-      ctx.font = level.width*0.04+"px Arial";
-      ctx.fillStyle = "rgba(139,69,19,0.4)";
-      ctx.strokeStyle = "black";
-      ctx.textAlign = "center";
-      ctx.textBaseline='middle'
-      ctx.lineWidth = 2
-      ctx.translate(0,level.width*0.02)
-      fillTextWithStroke(ctx,'START',0,0)
-
-      ctx.translate(0,-level.width*0.04)
-      ctx.font = level.width*0.02+"px Arial";
-      fillTextWithStroke(ctx,'Move here to',0,0)
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(255,255,255,0.3)";
+        ctx.arc(0,0,btnStartAttackDistance*((1 +0.2* (1-btnStartPlayerPercentage) + Math.sin(dtProcessed*0.005)*0.02) ), 0, 2 * Math.PI)
+        ctx.closePath()
+        ctx.fill();
 
 
-      ctx.restore()
-    }
+        ctx.font = level.width*0.04+"px Arial";
+        ctx.fillStyle = "rgba(139,69,19,0.4)";
+        ctx.strokeStyle = "black";
+        ctx.textAlign = "center";
+        ctx.textBaseline='middle'
+        ctx.lineWidth = 2
+        ctx.translate(0,level.width*0.02)
+        fillTextWithStroke(ctx,'START',0,0)
 
+        ctx.translate(0,-level.width*0.04)
+        ctx.font = level.width*0.02+"px Arial";
+        fillTextWithStroke(ctx,'Move here to',0,0)
+        ctx.restore()
 
-    if (!isGameStarted) {  
-      ctx.save()
+        ctx.save()
 
         ctx.save()
           ctx.translate(level.width*0.04,level.height*0.3)
@@ -854,9 +835,6 @@ function draw(players, figures, dt, dtProcessed, layer) {
         fillTextWithStrokeMultiline(ctx, txt,0,0, fontHeight)
       ctx.restore()
     }
-
-
-  
 
     //ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, 100, 100)
     ctx.save()
