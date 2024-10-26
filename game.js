@@ -762,15 +762,8 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
     if (layer === 0) {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
-        ctx.drawImage(tileMap, 0, 0, level.width, level.height, 0, 0, level.width, level.height);
+        ctx.drawImage(tileMap,-level.padding, -level.padding) //, level.width+level.pading*2, level.height+level.pading*2, -level.pading, -level.pading, level.width+level.pading*2, level.height+level.pading*2);
     }
-
-    if (layer === 0) {
-        drawFence(0, ctx, level)
-    }
-
-    
-    
     if (!isGameStarted) {
         ctx.save()
         // start image
@@ -998,7 +991,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
     })
 
     if (layer === 1) {
-        drawFence(1, ctx, level)
+        drawFence(1, ctx, level, true)
     }
   
   

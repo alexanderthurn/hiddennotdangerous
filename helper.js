@@ -168,9 +168,12 @@ const tileMapFunc = (image) => {
     if (!level.width) {
         return
     }
-    const offscreen = new OffscreenCanvas(level.width, level.height);
+    const offscreen = new OffscreenCanvas(level.width+level.padding*2, level.height+level.padding*2);
     const ctx = offscreen.getContext("2d");
 
+    ctx.translate(level.padding, level.padding)
+    
+    ctx.save()
     const heightInTiles = getHeightInTiles();
     const widthInTiles = getWidthInTiles();
     for (let i = 0; i < tileArea.length; i++) {
@@ -208,6 +211,11 @@ const tileMapFunc = (image) => {
             }   
         }
     }
+    ctx.restore()
+
+    drawFence(0, ctx, level)
+    drawFence(1, ctx, level)
+
     return offscreen;
 }
 
