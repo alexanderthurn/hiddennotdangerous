@@ -20,7 +20,7 @@ var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var isGameStarted = false, restartGame = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
 const moveNewScoreDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 3000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
-var figures = [], maxPlayerFigures = 32, pointsToWin = 1
+var figures = [], maxPlayerFigures = 32, pointsToWin = 1, deadDuration = 5000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = {}
@@ -261,6 +261,7 @@ function gameInit(completeRestart) {
             isDead: false, 
             playerId: null,
             index: i,
+            killTime: 0,
             angle: angle(x,y,xTarget,yTarget),
             anim: 0,
             isAttacking: false,
@@ -562,6 +563,9 @@ function gameLoop() {
 }
 
 function updateGame(figures, dt, dtProcessed) {
+    let figuresAlive = figures.filter(f => !f.isDead);
+    let figuresDead = figures.filter(f => f.isDead);
+
     if (!isGameStarted) {
         btnStart.playerPercentage = 0.0
         var playersWithId = figures.filter(f => f.playerId && f.type === 'fighter')
@@ -582,10 +586,17 @@ function updateGame(figures, dt, dtProcessed) {
         if (btnStart.loadingPercentage > 1) {
             restartGame = true;
         }
+
+
+        figuresDead.forEach(f => {if (dtProcessed-f.killTime > deadDuration) {
+            f.isDead = false
+            f.y-=16
+            f.killTime = 0
+        }})
     }
 
 
-    let figuresAlive = figures.filter(f => !f.isDead);
+    
     figuresAlive.forEach(f => {
         let xyNew = move(f.x, f.y, f.angle,f.speed, dt)
         if (xyNew) {
@@ -617,6 +628,7 @@ function updateGame(figures, dt, dtProcessed) {
                 fig.y+=16
                 playAudio(fig.soundDeath);
                 numberKilledFigures++;
+                fig.killTime = dtProcessed
                 killTime = dtProcessed;
             }
         });
@@ -753,6 +765,9 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
 }
 
 function draw(players, figures, dt, dtProcessed, layer) {
+
+    const playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
+
     ctx.save()
 
     if (layer === 0) {
@@ -765,37 +780,43 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.drawImage(tileMap,-level.padding, -level.padding) //, level.width+level.pading*2, level.height+level.pading*2, -level.pading, -level.pading, level.width+level.pading*2, level.height+level.pading*2);
     }
     if (!isGameStarted) {
+
+
+        if (playerFigures.length > 0) {
+            
+            ctx.save()
+                // start image
+                ctx.translate(btnStart.x,btnStart.y)
+                ctx.beginPath();
+                ctx.fillStyle = "rgba(255,255,255,0.3)";
+                ctx.arc(0,0,btnStart.radius*Math.min(btnStart.loadingPercentage, 1), 0, 2 * Math.PI)
+                ctx.closePath()
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.fillStyle = "rgba(255,255,255,0.3)";
+                ctx.arc(0,0,btnStart.radius*((1 +0.2* (1-btnStart.playerPercentage) + Math.sin(dtProcessed*0.005)*0.02) ), 0, 2 * Math.PI)
+                ctx.closePath()
+                ctx.fill();
+
+                ctx.font = level.width*0.04+"px Arial";
+                ctx.fillStyle = "rgba(139,69,19,0.4)";
+                ctx.strokeStyle = "black";
+                ctx.textAlign = "center";
+                ctx.textBaseline='middle'
+                ctx.lineWidth = 2
+                ctx.translate(0,level.width*0.02)
+                fillTextWithStroke(ctx,'START',0,0)
+
+                ctx.translate(0,-level.width*0.04)
+                ctx.font = level.width*0.02+"px Arial";
+                fillTextWithStroke(ctx,'Walk here to',0,0)
+                
+            ctx.restore()
+
+        }
         ctx.save()
-        // start image
-        ctx.translate(btnStart.x,btnStart.y)
-        ctx.beginPath();
-        ctx.fillStyle = "rgba(255,255,255,0.3)";
-        ctx.arc(0,0,btnStart.radius*Math.min(btnStart.loadingPercentage, 1), 0, 2 * Math.PI)
-        ctx.closePath()
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.fillStyle = "rgba(255,255,255,0.3)";
-        ctx.arc(0,0,btnStart.radius*((1 +0.2* (1-btnStart.playerPercentage) + Math.sin(dtProcessed*0.005)*0.02) ), 0, 2 * Math.PI)
-        ctx.closePath()
-        ctx.fill();
-
-        ctx.font = level.width*0.04+"px Arial";
-        ctx.fillStyle = "rgba(139,69,19,0.4)";
-        ctx.strokeStyle = "black";
-        ctx.textAlign = "center";
-        ctx.textBaseline='middle'
-        ctx.lineWidth = 2
-        ctx.translate(0,level.width*0.02)
-        fillTextWithStroke(ctx,'START',0,0)
-
-        ctx.translate(0,-level.width*0.04)
-        ctx.font = level.width*0.02+"px Arial";
-        fillTextWithStroke(ctx,'Move here to',0,0)
-        ctx.restore()
-
-        ctx.save()
-
+        
         ctx.save()
         ctx.translate(level.width*0.04,level.height*0.3)
         ctx.beginPath();
@@ -804,7 +825,6 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.closePath()
         ctx.fill();
         ctx.restore()
-
 
         var fontHeight = level.width*0.017  
         ctx.font = fontHeight+"px Arial";
@@ -822,18 +842,8 @@ function draw(players, figures, dt, dtProcessed, layer) {
         fillTextWithStrokeMultiline(ctx, txt,0,0, fontHeight)
         ctx.restore()
     }
-
-    //ctx.drawImage(texture, tile[0], tile[1], tile[2], tile[3], 0, 0, 100, 100)
     ctx.save()
-    /*for (x = -2; x < 2;x ++) {
-        for (y = -2;y < 2;y++) {
-            ctx.beginPath();
-            ctx.arc(mousePlayers[0].x + mousePlayers[0].offsetCursorX + x*level.width*0.5, mousePlayers[0].y + mousePlayers[0].offsetCursorY + y*level.height*0.5, 5, 0, 2 * Math.PI);
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = "rgba(0,0,0,0.5)";
-            ctx.stroke();
-        }
-    }*/
+
     ctx.beginPath();
     ctx.arc(mousePlayers[0].x, mousePlayers[0].y, 5, 0, 2 * Math.PI);
     ctx.lineWidth = 1;
@@ -998,7 +1008,6 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
 
     if (layer === 1) {
-        const playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
         const playerFiguresSortedByPoints = playerFigures.toSorted((f1,f2) => f1.points - f2.points);
         playerFigures.forEach((f,i) => {
             ctx.save()
