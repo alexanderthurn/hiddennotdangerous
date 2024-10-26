@@ -835,24 +835,25 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.textAlign = "center";
                 ctx.textBaseline='middle'
                 ctx.lineWidth = 2
-                ctx.translate(0,level.width*0.02)
-                if (btnStart.playersNear.length < btnStart.playersPossible.length ) {
-                    fillTextWithStroke(ctx,'START',0,0)
-                }
+                //ctx.translate(0,level.width*0.02)
+               // if (btnStart.playersNear.length < btnStart.playersPossible.length ) {
+               //     fillTextWithStroke(ctx,'START',0,0)
+               // }
                
-                ctx.translate(0,-level.width*0.04)
+                
                 ctx.font = level.width*0.02+"px Arial";
 
-                
-                if (btnStart.playersNear.length >= btnStart.playersPossible.length ) {
-                    fillTextWithStrokeMultiline(ctx,'Prepare your\nengines',0,0,level.width*0.02)
-                }
-                else if (btnStart.playersNear.length > 0) {
-                    fillTextWithStroke(ctx,btnStart.playersNear.length + '/' + btnStart.playersPossible.length + ' players',0,0)
-                } else {
-                    fillTextWithStroke(ctx,'Walk here to',0,0)
-                }
-                
+                var text = 'Walk here to\n\nSTART'
+                if (btnStart.playersPossible.length === 1) {
+                    text = 'Minimum\n2 players'
+                } else if (btnStart.playersPossible.length > 1 && btnStart.playersNear.length === btnStart.playersPossible.length ) {
+                    text ='Prepare your\nengines'
+                } else if (btnStart.playersNear.length > 0) {
+                    text = btnStart.playersNear.length + '/' + btnStart.playersPossible.length + ' players'
+                } 
+                console.log(text.split('\n').length)
+                ctx.translate(0,-level.width*0.02*Math.max(0,text.split('\n').length-1)*0.5)
+                fillTextWithStrokeMultiline(ctx,text,0,0,level.width*0.02)
                 
             ctx.restore()
 
