@@ -234,7 +234,7 @@ window.addEventListener('keyup', event => {
 });
 
 window.addEventListener('pointerdown', event => {
-    if (event.pointerType === 'touch' && (event.clientX < canvas.width*0.7 || event.clientY < canvas.height * 0.5) ) {
+    if (event.pointerType === 'mouse' || (event.pointerType === 'touch' && (event.clientX < canvas.width*0.7 || event.clientY < canvas.height * 0.5)) ) {
         mousePlayers[0].pressed.add(0);
     } else {
         mousePlayers[0].pressed.add(1);
@@ -245,7 +245,7 @@ window.addEventListener('pointerdown', event => {
 
 
 window.addEventListener('pointerup', event => {
-    if (event.pointerType === 'touch' && (event.clientX < canvas.width*0.7 || event.clientY < canvas.height * 0.5) ) {
+    if (event.pointerType === 'mouse' || (event.pointerType === 'touch' && (event.clientX < canvas.width*0.7 || event.clientY < canvas.height * 0.5)) ) {
         mousePlayers[0].pressed.delete(0);
     } else {
         mousePlayers[0].pressed.delete(1);
