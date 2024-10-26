@@ -2,7 +2,7 @@ console.log('no need to hide')
 var loadPromises = []
 var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
-var mousePlayers = [{x: 0, y: 0, offsetCursorX: 0, offsetCursorY: 0,pressed: new Set(), pressedLastFrame: false}];
+var mousePlayers = [{pointerType: 'unknown', x: 0, y: 0, offsetCursorX: 0, offsetCursorY: 0,pressed: new Set(), pressedLastFrame: false}];
 var keyboardPlayers = [{}, {}];
 var keyboards = [{bindings: {
     'KeyA': {playerId: 'k0', action: 'left'},
@@ -70,6 +70,18 @@ var btnStart = {
     radius: level.width*0.1,
     loadingSpeed: 1/3000
 }
+
+var btnTouchController = {
+    radius: 0,
+}
+
+//btnTouchAction = {...btnTouchAction, x: canvas.width*0.85, y: canvas.height*0.5, loadingPercentage: 0.0, radius: canvas.width*0.02}
+
+
+var btnTouchAction = {
+    radius:0
+}
+
 
 cloudImageAnim = {
     hasDirections: false,
@@ -196,6 +208,7 @@ window.addEventListener('keydown', event => {
 
 
 window.addEventListener('touchstart', event => {
+    mousePlayers[0].pointerType = 'touch'
     event.preventDefault();
 }, { passive: false });
 window.addEventListener('touchend', event => {
@@ -221,6 +234,7 @@ window.addEventListener('pointerdown', event => {
     event.stopPropagation();
 });
 
+
 window.addEventListener('pointerup', event => {
     mousePlayers[0].pressed.delete(event.button);
     event.preventDefault();
@@ -233,6 +247,8 @@ canvas.addEventListener('pointermove', event => {
     event.preventDefault();
     event.stopPropagation();
 }, false);
+
+
 
 
 
@@ -261,7 +277,7 @@ function gameInit(completeRestart) {
             yTarget,
             maxBreakDuration: 5000,
             startWalkTime: Math.random() * 5000 + dtProcessed,
-            maxSpeed: 0.08,
+            maxSpeed: 0.28,
             speed: 0,
             isDead: false, 
             playerId: null,
@@ -585,8 +601,8 @@ function updateGame(figures, dt, dtProcessed) {
                 btnStart.loadingPercentage += btnStart.loadingSpeed * dt;
             } else if (playersNear.length > 0) {
                 btnStart.loadingPercentage += btnStart.loadingSpeed * dt;
-                if ( btnStart.loadingPercentage > 0.5) {
-                    btnStart.loadingPercentage = 0.5
+                if ( btnStart.loadingPercentage > btnStart.playersNear.length / btnStart.playersPossible.length) {
+                    btnStart.loadingPercentage = btnStart.playersNear.length / btnStart.playersPossible.length
                 }
             } else {
                 btnStart.loadingPercentage -= btnStart.loadingSpeed * dt
@@ -820,18 +836,19 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.textBaseline='middle'
                 ctx.lineWidth = 2
                 ctx.translate(0,level.width*0.02)
-                if (btnStart.playersNear.length < 2) {
+                if (btnStart.playersNear.length < btnStart.playersPossible.length ) {
                     fillTextWithStroke(ctx,'START',0,0)
                 }
                
                 ctx.translate(0,-level.width*0.04)
                 ctx.font = level.width*0.02+"px Arial";
 
-                if (btnStart.playersNear.length === 1) {
-                    fillTextWithStroke(ctx,'2 players min',0,0)
-                } else if (btnStart.playersNear.length > 1) {
-                    fillTextWithStrokeMultiline(ctx,'Prepare your\nEngines',0,0,level.width*0.02)
-
+                
+                if (btnStart.playersNear.length >= btnStart.playersPossible.length ) {
+                    fillTextWithStrokeMultiline(ctx,'Prepare your\nengines',0,0,level.width*0.02)
+                }
+                else if (btnStart.playersNear.length > 0) {
+                    fillTextWithStroke(ctx,btnStart.playersNear.length + '/' + btnStart.playersPossible.length + ' players',0,0)
                 } else {
                     fillTextWithStroke(ctx,'Walk here to',0,0)
                 }
@@ -867,14 +884,9 @@ function draw(players, figures, dt, dtProcessed, layer) {
         fillTextWithStrokeMultiline(ctx, txt,0,0, fontHeight)
         ctx.restore()
     }
-    ctx.save()
 
-    ctx.beginPath();
-    ctx.arc(mousePlayers[0].x, mousePlayers[0].y, 5, 0, 2 * Math.PI);
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "rgba(0,0,0,0.5)";
-    ctx.stroke();
-    ctx.restore()
+  
+    
 
     figures.toSorted((f1,f2) => (f1.y +f1.zIndex) - (f2.y +f2.zIndex) ).forEach(f => {
         
@@ -1112,36 +1124,40 @@ function draw(players, figures, dt, dtProcessed, layer) {
     }
 
 
-    ctx.save()
-      ctx.font = level.width*0.02+"px Arial";
-      ctx.fillStyle = "rgba(139,69,19,0.4)";
-      ctx.strokeStyle = "black";
-      ctx.textAlign = "center";
-      ctx.textBaseline='bottom'
-      ctx.lineWidth = 2
-      ctx.translate(0.5*level.width,-level.width*0.005)
-      fillTextWithStroke(ctx, 'STEALTHY STINKERS',0,0)
-      ctx.translate(0.5*level.width,0)
-      ctx.strokeStyle = "black";
-      ctx.fillStyle = "black";
-      ctx.textAlign = "right";
-      ctx.lineWidth = 1
-      ctx.font = level.width*0.012+"px Arial";
-      fillTextWithStroke(ctx, 'made by TORSTEN STELLJES & ALEXANDER THURN',0,0)
-    ctx.restore()
-
+    if (layer === 1) {
+        ctx.save()
+        ctx.font = level.width*0.02+"px Arial";
+        ctx.fillStyle = "rgba(139,69,19,0.4)";
+        ctx.strokeStyle = "black";
+        ctx.textAlign = "center";
+        ctx.textBaseline='bottom'
+        ctx.lineWidth = 2
+        ctx.translate(0.5*level.width,-level.width*0.005)
+        fillTextWithStroke(ctx, 'STEALTHY STINKERS',0,0)
+        ctx.translate(0.5*level.width,0)
+        ctx.strokeStyle = "black";
+        ctx.fillStyle = "black";
+        ctx.textAlign = "right";
+        ctx.lineWidth = 1
+        ctx.font = level.width*0.012+"px Arial";
+        fillTextWithStroke(ctx, 'made by TORSTEN STELLJES & ALEXANDER THURN',0,0)
+        ctx.restore()
+    }
     
     
 
     ctx.restore()
 
-    ctx.save()
-      ctx.font = "16px serif";
-      ctx.fillStyle = "white";
-      ctx.textBaseline='top'
-      ctx.textAlign = "right";
-      ctx.fillText(fps + " FPS " + canvas.clientWidth + '('+canvas.width+') ' + canvas.clientHeight+ '('+canvas.height+') ', canvas.width, 0);
-    ctx.restore()
+    if (layer === 1) {
+        ctx.save()
+        ctx.font = "16px serif";
+        ctx.fillStyle = "white";
+        ctx.textBaseline='top'
+        ctx.textAlign = "right";
+        ctx.fillText(fps + " FPS " + mousePlayers[0].pointerType + ' ' + canvas.clientWidth + '('+canvas.width+') ' + canvas.clientHeight+ '('+canvas.height+') ', canvas.width, 0);
+      ctx.restore()
+    }
+
 
     if (layer === 1 && showDebug) {
 
@@ -1172,5 +1188,43 @@ function draw(players, figures, dt, dtProcessed, layer) {
           ctx.fillText('Figures',0,0)
         ctx.restore()
       ctx.restore()
+  }
+
+
+  if (layer === 1) {
+
+    if (mousePlayers[0].pointerType === 'touch') {
+        ctx.save()
+        var maxHeightWidth = Math.max(canvas.width, canvas.height)
+        var minHeightWidth = Math.min(canvas.width, canvas.height)
+        btnTouchController = {...btnTouchController, x: minHeightWidth*0.3, y: canvas.height - minHeightWidth*0.3, loadingPercentage: 0.0, radius: minHeightWidth*0.18}
+
+        ctx.translate(btnTouchController.x,btnTouchController.y)
+        //ctx.translate(100,100)
+        //ctx.fillRect(0,0,100,100)
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(255,255,255,0.3)";
+        ctx.arc(0,0,btnTouchController.radius, 0, 2 * Math.PI)
+        ctx.closePath()
+        ctx.fill();
+        var xy = move(0,0,angle(0,0,mousePlayers[0].xAxis,mousePlayers[0].yAxis),btnTouchController.radius*0.5,mousePlayers[0].isMoving)
+
+        ctx.translate(xy.x,xy.y)
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(255,255,255,0.3)";
+        ctx.arc(0,0,btnTouchController.radius*0.5, 0, 2 * Math.PI)
+        ctx.closePath()
+        ctx.fill();
+
+        ctx.restore()
+    } else {
+        ctx.save()
+        ctx.beginPath();
+        ctx.arc(mousePlayers[0].x, mousePlayers[0].y, 5, 0, 2 * Math.PI);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "rgba(0,0,0,1.0)";
+        ctx.stroke();
+        ctx.restore()
+    }
   }
 }
