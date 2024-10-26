@@ -20,7 +20,7 @@ var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var isGameStarted = false, restartGame = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
 const moveNewScoreDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 3000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
-var figures = [], maxPlayerFigures = 32, pointsToWin = 1, deadDuration = 5000
+var figures = [], maxPlayerFigures = 32, pointsToWin = 1, deadDuration = 5000, beanAttackDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = {}
@@ -336,7 +336,10 @@ function gameInit(completeRestart) {
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: -level.height
+        zIndex: -level.height,
+        lastAttackTime: 0,
+        attackDuration: beanAttackDuration
+
     });
     figures.push({
         id: 2,
@@ -350,7 +353,9 @@ function gameInit(completeRestart) {
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: -level.height
+        zIndex: -level.height,
+        lastAttackTime: 0,
+        attackDuration: beanAttackDuration
     });
     figures.push({
         id: 3,
@@ -364,7 +369,9 @@ function gameInit(completeRestart) {
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: -level.height
+        zIndex: -level.height,
+        lastAttackTime: 0,
+        attackDuration: beanAttackDuration
     });
     figures.push({
         id: 4,
@@ -378,7 +385,9 @@ function gameInit(completeRestart) {
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: -level.height
+        zIndex: -level.height,
+        lastAttackTime: 0,
+        attackDuration: beanAttackDuration
     });
     figures.push({
         id: 5,
@@ -392,7 +401,9 @@ function gameInit(completeRestart) {
         speed: 0,
         angle: 0,
         scale: 1,
-        zIndex: -level.height
+        zIndex: -level.height,
+        lastAttackTime: 0,
+        attackDuration: beanAttackDuration
     });
 }
 
@@ -646,6 +657,7 @@ function updateGame(figures, dt, dtProcessed) {
                 if (!fig.beans.has(f.id)) {
                     playAudio(soundEat[fig.beans.size]);
                     fig.beans.add(f.id);
+                    f.lastAttackTime = dtProcessed
                 }
             }
         })
@@ -961,8 +973,14 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 // bean image
                 let startAngle = f.angle + deg2rad(135)
                 let endAngle = startAngle + deg2rad(90)
-  
-                ctx.scale(1.0 + 0.1*Math.sin(dtProcessed*0.001), 1.0 + 0.1*Math.sin(dtProcessed*0.001))
+                let durationLastAttack = dtProcessed-f.lastAttackTime
+                let perc = durationLastAttack/f.attackDuration
+                if (f.lastAttackTime > 0 && durationLastAttack < f.attackDuration) {
+                    ctx.scale(1.0 - 0.2*Math.sin(perc*Math.PI), 1.0 - 0.2*Math.sin(perc*Math.PI))
+                } else {
+                    ctx.scale(1.0, 1.0)
+                }
+
                 ctx.save()
         
 
