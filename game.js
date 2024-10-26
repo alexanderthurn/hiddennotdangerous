@@ -208,6 +208,9 @@ window.addEventListener('keydown', event => {
   
 });
 
+window.addEventListener('click', event => {
+    mousePlayers[0].pointerType = 'mouse'
+}, { passive: false })
 
 window.addEventListener('touchstart', event => {
     mousePlayers[0].pointerType = 'touch'
@@ -231,14 +234,23 @@ window.addEventListener('keyup', event => {
 });
 
 window.addEventListener('pointerdown', event => {
-    mousePlayers[0].pressed.add(event.button);
+    if (event.pointerType === 'touch' && (event.clientX < canvas.width*0.7 || event.clientY < canvas.height * 0.5) ) {
+        mousePlayers[0].pressed.add(0);
+    } else {
+        mousePlayers[0].pressed.add(1);
+    }
     event.preventDefault();
     event.stopPropagation();
 });
 
 
 window.addEventListener('pointerup', event => {
-    mousePlayers[0].pressed.delete(event.button);
+    if (event.pointerType === 'touch' && (event.clientX < canvas.width*0.7 || event.clientY < canvas.height * 0.5) ) {
+        mousePlayers[0].pressed.delete(0);
+    } else {
+        mousePlayers[0].pressed.delete(1);
+    }
+
     event.preventDefault();
     event.stopPropagation();
 });
@@ -279,7 +291,7 @@ function gameInit(completeRestart) {
             yTarget,
             maxBreakDuration: 5000,
             startWalkTime: Math.random() * 5000 + dtProcessed,
-            maxSpeed: 0.28,
+            maxSpeed: 0.08,
             speed: 0,
             isDead: false, 
             playerId: null,
@@ -497,7 +509,7 @@ function gameLoop() {
     mousePlayers.forEach((mp,i) => {
         mp.type = 'mouse'
         mp.playerId = 'm' + i
-        mp.isAttackButtonPressed = !mp.pressed.has(0) && mp.pressedLastFrame || false
+        mp.isAttackButtonPressed = mp.pressed.has(0)// && mp.pressedLastFrame || false
         mp.pressedLastFrame = mp.pressed.has(0)
         mp.xAxis = 0
         mp.yAxis = 0
@@ -505,20 +517,32 @@ function gameLoop() {
 
         var f = figures.find(f => f.playerId ===  mp.playerId && f.type === 'fighter')
         if (f) {
-            //let x = mp.x - f.x;
-            //let y = mp.y - f.y;
-            let x = mp.x - level.width / 2;
-            let y = mp.y - level.height / 2;
-            //[x, y] = setDeadzone(x, y,0.1);
-            //[x, y] = clampStick(x, y);
-            mp.xAxis = x
-            mp.yAxis = y
+           
 
-            if (!mp.pressed.has(0)) {
-                mp.xAxis = 0
-                mp.yAxis = 0
+            if (mousePlayers[0].pointerType === 'touch') {
+                let touchLocalX = (btnTouchController.x - canvas.offsetLeft - level.offsetX)/level.scale;
+                let touchLocalY = (btnTouchController.y - canvas.offsetTop - level.offsetY)/level.scale;
+                let x = mp.x - touchLocalX
+                let y = mp.y - touchLocalY
+                mp.xAxis = x
+                mp.yAxis = y   
+                if (!mp.pressed.has(0)) {
+                    mp.xAxis = 0
+                    mp.yAxis = 0
+                }
+                mp.isAttackButtonPressed = mp.pressed.has(1)
+
+                mp.isMoving = Math.abs(mp.xAxis) + Math.abs(mp.yAxis) > 4
+               
+
+            } else if (mousePlayers[0].pointerType === 'mouse') {
+                let x = mp.x- f.x;
+                let y = mp.y-f.y-playerImageAnim.height*0.5;
+                mp.xAxis = x
+                mp.yAxis = y   
+                mp.isMoving = Math.abs(mp.xAxis) + Math.abs(mp.yAxis) > 4
             }
-            mp.isMoving = Math.abs(mp.xAxis) > 0 || Math.abs(mp.yAxis) > 0
+        
         }
        
     })
@@ -876,7 +900,6 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 } else if (btnStart.playersNear.length > 0) {
                     text = btnStart.playersNear.length + '/' + btnStart.playersPossible.length + ' players'
                 } 
-                console.log(text.split('\n').length)
                 ctx.translate(btnStart.width*0.5,btnStart.height*0.5)
                 ctx.translate(0,-fontHeight*Math.max(0,text.split('\n').length-1)*0.5)
                 fillTextWithStrokeMultiline(ctx,text,0,0,fontHeight)
@@ -1187,7 +1210,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.fillStyle = "white";
         ctx.textBaseline='top'
         ctx.textAlign = "right";
-        ctx.fillText(fps + " FPS " + mousePlayers[0].pointerType + ' ' + canvas.clientWidth + '('+canvas.width+') ' + canvas.clientHeight+ '('+canvas.height+') ', canvas.width, 0);
+        ctx.fillText(fps + " FPS " + canvas.clientWidth + '('+canvas.width+')x' + canvas.clientHeight+ '('+canvas.height+') ', canvas.width, 0);
       ctx.restore()
     }
 
@@ -1231,31 +1254,47 @@ function draw(players, figures, dt, dtProcessed, layer) {
         var maxHeightWidth = Math.max(canvas.width, canvas.height)
         var minHeightWidth = Math.min(canvas.width, canvas.height)
         btnTouchController = {...btnTouchController, x: minHeightWidth*0.3, y: canvas.height - minHeightWidth*0.3, loadingPercentage: 0.0, radius: minHeightWidth*0.18}
+        btnTouchAction = {...btnTouchAction, x: canvas.width-minHeightWidth*0.3, y: canvas.height - minHeightWidth*0.3, loadingPercentage: 0.0, radius: minHeightWidth*0.18}
+        
+        ctx.save()
+            ctx.translate(btnTouchController.x,btnTouchController.y)
+            ctx.beginPath();
+            ctx.fillStyle = "rgba(255,255,255,0.3)";
+            ctx.arc(0,0,btnTouchController.radius, 0, 2 * Math.PI)
+            ctx.closePath()
+            ctx.fill();
+            var xy = move(0,0,angle(0,0,mousePlayers[0].xAxis,mousePlayers[0].yAxis),btnTouchController.radius*0.5,mousePlayers[0].isMoving)
+            ctx.translate(xy.x,xy.y)
+            ctx.beginPath();
+            ctx.fillStyle = "rgba(255,255,255,0.3)";
+            ctx.arc(0,0,btnTouchController.radius*0.5, 0, 2 * Math.PI)
+            ctx.closePath()
+            ctx.fill();
+        ctx.restore()
 
-        ctx.translate(btnTouchController.x,btnTouchController.y)
-        //ctx.translate(100,100)
-        //ctx.fillRect(0,0,100,100)
+        ctx.translate(btnTouchAction.x,btnTouchAction.y)
         ctx.beginPath();
-        ctx.fillStyle = "rgba(255,255,255,0.3)";
-        ctx.arc(0,0,btnTouchController.radius, 0, 2 * Math.PI)
+       
+        if (mousePlayers[0].isAttackButtonPressed) {
+            ctx.fillStyle = "rgba(255,255,255,0.4)";
+        } else {
+            ctx.fillStyle = "rgba(255,255,255,0.3)";
+       }
+        ctx.arc(0,0,btnTouchAction.radius, 0, 2 * Math.PI)
         ctx.closePath()
         ctx.fill();
-        var xy = move(0,0,angle(0,0,mousePlayers[0].xAxis,mousePlayers[0].yAxis),btnTouchController.radius*0.5,mousePlayers[0].isMoving)
 
-        ctx.translate(xy.x,xy.y)
-        ctx.beginPath();
-        ctx.fillStyle = "rgba(255,255,255,0.3)";
-        ctx.arc(0,0,btnTouchController.radius*0.5, 0, 2 * Math.PI)
-        ctx.closePath()
-        ctx.fill();
+      
 
         ctx.restore()
     } else {
         ctx.save()
         ctx.beginPath();
+        ctx.translate(level.offsetX, level.offsetY)
+        ctx.scale(level.scale, level.scale)
         ctx.arc(mousePlayers[0].x, mousePlayers[0].y, 5, 0, 2 * Math.PI);
         ctx.lineWidth = 1;
-        ctx.strokeStyle = "rgba(0,0,0,1.0)";
+        ctx.strokeStyle = "rgba(0,0,0,0.5)";
         ctx.stroke();
         ctx.restore()
     }
