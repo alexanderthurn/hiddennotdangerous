@@ -2,19 +2,17 @@
 
 __Blow your way to freedom, just don’t blow your cover!__
 
+## Game Description
 
 In this hilarious multiplayer game, you play as a sneaky baby trying to outlast the competition with one explosive advantage: your farts! Watch out, though – if you’re too loud, you risk revealing yourself to the other players, who can eliminate you. Hide among computer-controlled babies to stay under the radar and become the last baby standing!
 
+### Key Features
 
-Key Features:
+- **Multiplayer Action**: Compete with at least two players to see who can stay undetected the longest.
+- **Controls for Everyone**: Supports gamepad, mouse, keyboard, and touch controls.
+- **Stealth & Strategy**: Use your "toots" carefully – one wrong move and you're out!
 
-
-Multiplayer Action: Compete with at least two players to see who can stay undetected the longest.
-Controls for Everyone: Supports gamepad, mouse, keyboard, and touch controls.
-Stealth & Strategy: Use your "toots" carefully – one wrong move and you're out!
 Will you be the last baby standing... or the first one blown away?
-
-
 ## Preview
 
 [Github Page Live Preview](https://alexanderthurn.github.io/hiddennotdangerous/)
