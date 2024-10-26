@@ -1090,11 +1090,17 @@ function draw(players, figures, dt, dtProcessed, layer) {
       ctx.fillStyle = "rgba(139,69,19,0.4)";
       ctx.strokeStyle = "black";
       ctx.textAlign = "center";
-      ctx.textBaseline='top'
+      ctx.textBaseline='bottom'
       ctx.lineWidth = 2
-      ctx.translate(0.5*level.width,-level.offsetY/level.scale+8)
-      ctx.fillText('STEALTHY STINKERS',0,0)
-      ctx.strokeText('STEALTHY STINKERS',0,0)
+      ctx.translate(0.5*level.width,-level.width*0.005)
+      fillTextWithStroke(ctx, 'STEALTHY STINKERS',0,0)
+      ctx.translate(0.5*level.width,0)
+      ctx.strokeStyle = "black";
+      ctx.fillStyle = "black";
+      ctx.textAlign = "right";
+      ctx.lineWidth = 1
+      ctx.font = level.width*0.012+"px Arial";
+      fillTextWithStroke(ctx, 'made by TORSTEN STELLJES & ALEXANDER THURN',0,0)
     ctx.restore()
 
     
