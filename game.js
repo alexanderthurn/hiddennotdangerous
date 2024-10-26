@@ -17,6 +17,7 @@ var keyboards = [{bindings: {
     'Numpad0': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
+var allPlayersOnButtonThen, notAllPlayersOnButtonThen, btnStartLastLoadingPercentage = 0;
 var isGameStarted = false, restartGame = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
 const moveNewScoreDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 3000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
@@ -748,25 +749,45 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
     
   
-    if (!isGameStarted) {  
-      ctx.save()
+    if (!isGameStarted) {
+        ctx.save()
 
-      var btnStartX = level.width*0.75
-      var btnStartY = level.height*0.5
-      var btnStartAttackDistance =  level.width*0.1
-      var btnStartPercentageLoaded = 0.0
+        var btnStartX = level.width*0.75
+        var btnStartY = level.height*0.5
+        var btnStartAttackDistance =  level.width*0.1
+        var btnStartPlayerPercentage = 0.0
+        var btnStartLoadingDuration = 3000
+        var btnStartLoadingPercentage
 
-      var playersWithId = figures.filter(f => f.playerId && f.type === 'fighter')
-      var playersNear = playersWithId.filter(f => distance(btnStartX, btnStartY, f.x,f.y) < btnStartAttackDistance)
-
-      if (playersNear.length > 0) {
-        btnStartPercentageLoaded = playersNear.length / playersWithId.length
-
-        if (playersWithId.length > 1 && playersNear.length === playersWithId.length) {
-          restartGame = true;
+        if (allPlayersOnButtonThen > notAllPlayersOnButtonThen) {
+            btnStartLoadingPercentage = btnStartLastLoadingPercentage + (dtProcessed - allPlayersOnButtonThen)/btnStartLoadingDuration;
+        } else {
+            btnStartLoadingPercentage = Math.max(btnStartLastLoadingPercentage - (dtProcessed - notAllPlayersOnButtonThen)/btnStartLoadingDuration, 0);
         }
 
-      }
+        var playersWithId = figures.filter(f => f.playerId && f.type === 'fighter')
+        var playersNear = playersWithId.filter(f => distance(btnStartX, btnStartY, f.x,f.y) < btnStartAttackDistance)
+
+        if (playersNear.length > 0) {
+            btnStartPlayerPercentage = playersNear.length / playersWithId.length
+
+            if (playersWithId.length > 1 && playersNear.length === playersWithId.length) {
+                allPlayersOnButtonThen = allPlayersOnButtonThen || dtProcessed;
+                if (allPlayersOnButtonThen < notAllPlayersOnButtonThen) {
+                    allPlayersOnButtonThen = dtProcessed;
+                    btnStartLastLoadingPercentage = btnStartLoadingPercentage;
+                }
+            } else {
+                notAllPlayersOnButtonThen = notAllPlayersOnButtonThen || dtProcessed;
+                if (notAllPlayersOnButtonThen < allPlayersOnButtonThen) {
+                    notAllPlayersOnButtonThen = dtProcessed;
+                    btnStartLastLoadingPercentage = btnStartLoadingPercentage;
+                }
+            }
+        }
+        if (btnStartLoadingPercentage > 1) {
+            restartGame = true;
+        }
 
    
       // start image
@@ -774,13 +795,13 @@ function draw(players, figures, dt, dtProcessed, layer) {
       ctx.scale(1.0,1.0)
       ctx.beginPath();
       ctx.fillStyle = "rgba(255,255,255,0.3)";
-      ctx.arc(0,0,btnStartAttackDistance, 0, 2 * Math.PI)
+      ctx.arc(0,0,btnStartAttackDistance*btnStartLoadingPercentage, 0, 2 * Math.PI)
       ctx.closePath()
       ctx.fill();
 
       ctx.beginPath();
       ctx.fillStyle = "rgba(255,255,255,0.3)";
-      ctx.arc(0,0,btnStartAttackDistance*((1 +0.2* (1-btnStartPercentageLoaded) + Math.sin(dtProcessed*0.005)*0.02) ), 0, 2 * Math.PI)
+      ctx.arc(0,0,btnStartAttackDistance*((1 +0.2* (1-btnStartPlayerPercentage) + Math.sin(dtProcessed*0.005)*0.02) ), 0, 2 * Math.PI)
       ctx.closePath()
       ctx.fill();
 
