@@ -178,6 +178,11 @@ window.addEventListener("resize", function(event){
     adjustLevelToCanvas(level, canvas)
 });
 
+window.addEventListener("orientationchange", function(event){
+    resizeCanvasToDisplaySize(canvas)
+    adjustLevelToCanvas(level, canvas)
+});
+
 window.addEventListener('keydown', event => {
     keyboards.forEach(k => {
         k.pressed.add(event.code);
@@ -780,7 +785,9 @@ function draw(players, figures, dt, dtProcessed, layer) {
     if (layer === 0) {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
     }
-    ctx.transform(level.scale, 0, 0, level.scale, level.offsetX, level.offsetY)
+    ctx.translate(level.offsetX, level.offsetY)
+    ctx.scale(level.scale, level.scale)
+    //ctx.transform(level.scale, 0, 0, level.scale, level.offsetX, level.offsetY)
 
     if (layer === 0) {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -1133,7 +1140,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
       ctx.fillStyle = "white";
       ctx.textBaseline='top'
       ctx.textAlign = "right";
-      ctx.fillText(fps + " FPS", canvas.width, 0);
+      ctx.fillText(fps + " FPS " + canvas.clientWidth + '('+canvas.width+') ' + canvas.clientHeight+ '('+canvas.height+') ', canvas.width, 0);
     ctx.restore()
 
     if (layer === 1 && showDebug) {
