@@ -1,5 +1,20 @@
 # STEALTHY STINKERS
 
+__Blow your way to freedom, just don’t blow your cover!__
+
+
+In this hilarious multiplayer game, you play as a sneaky baby trying to outlast the competition with one explosive advantage: your farts! Watch out, though – if you’re too loud, you risk revealing yourself to the other players, who can eliminate you. Hide among computer-controlled babies to stay under the radar and become the last baby standing!
+
+
+Key Features:
+
+
+Multiplayer Action: Compete with at least two players to see who can stay undetected the longest.
+Controls for Everyone: Supports gamepad, mouse, keyboard, and touch controls.
+Stealth & Strategy: Use your "toots" carefully – one wrong move and you're out!
+Will you be the last baby standing... or the first one blown away?
+
+
 ## Preview
 
 [Github Page Live Preview](https://alexanderthurn.github.io/hiddennotdangerous/)
@@ -7,11 +22,11 @@
 
 ## Development
 
-Install python3
-Open a terminal and run `python3 -m http.server 3333`
-Open `http://localhost:3333` in your webbrowser. If it says it is insecure due to http, open it in another browser or in private mode
+- Install python3
+- Open a terminal and run `python3 -m http.server 3333`
+- Open `http://localhost:3333` in your webbrowser. If it says it is insecure due to http, open it in another browser or in private mode
 
-## Resources used
+## Resources
 
 - character: https://opengameart.org/content/simple-character-base-16x16
 - Grass Tiles: https://www.vecteezy.com/vector-art/13998017-textures-of-green-grass-with-flowers-and-mushrooms
@@ -35,6 +50,6 @@ Open `http://localhost:3333` in your webbrowser. If it says it is insecure due t
 
 ## Licenses
 
-- Code [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+- Code: [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 - Pixabay Resources: <a href="https://pixabay.com/service/license-summary/">pixabay.com</a>
 - OpenGameArt Resources: <a href="https://opengameart.org/content/faq">opengameart.org</a>
