@@ -166,7 +166,6 @@ const audio = {
         {title: 'sfx/game-eat-sound-83240.mp3'}
     ]
 }
-
 var musicGame = shuffle(audio.musicGame.map(audio => getAudio(audio)));
 var musicLobby = audio.musicLobby.map(audio => getAudio(audio));
 var soundJoin = getAudio(audio.join);
@@ -236,6 +235,23 @@ window.addEventListener('touchmove', event => {
 window.addEventListener('keyup', event => {
     if (event.code === 'Escape') {
         showDebug =!showDebug
+    }
+    if (event.code === 'KeyM') {
+        if (isMusicMuted()) {
+            unmuteAudio()
+            if (isGameStarted) {
+                playPlaylist(shuffle(musicGame))
+            } else {
+                playPlaylist(musicLobby)
+            }
+        } else {
+            muteAudio()
+            if (isGameStarted) {
+                stopPlaylist(musicGame)
+            } else {
+                stopPlaylist(musicLobby)
+            }
+        }
     }
     keyboards.forEach(k => {
         k.pressed.delete(event.code);
@@ -631,10 +647,15 @@ function gameLoop() {
         const wasGameStarted = isGameStarted;
         isGameStarted = !lastFinalWinnerPlayerId;
         if (isGameStarted && !wasGameStarted) {
-            stopPlaylist(musicLobby);
-            playPlaylist(musicGame);
+            if (!isMusicMuted()) {
+                stopPlaylist(musicLobby);
+                playPlaylist(musicGame);
+            }
+            
         } else if(!isGameStarted) {
-            stopPlaylist(musicGame);
+            if (!isMusicMuted()) {
+                stopPlaylist(musicGame);
+            }
         }
         gameInit(!!lastFinalWinnerPlayerId);
     }
@@ -756,7 +777,9 @@ function handleInput(players, figures, dtProcessed) {
             newPlayerIdThen = dtProcessed
 
             if (figures.filter(f => f.playerId).length == 1) {
-                playPlaylist(musicLobby);
+                if (!isMusicMuted()) {
+                    playPlaylist(musicLobby);
+                }
             }  
         }
     })
@@ -1265,7 +1288,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.fillStyle = "white";
         ctx.textBaseline='top'
         ctx.textAlign = "right";
-        ctx.fillText(fps + " FPS " + canvas.clientWidth + '('+canvas.width+')x' + canvas.clientHeight+ '('+canvas.height+') ', canvas.width, 0);
+        ctx.fillText(fps + " FPS", canvas.width, 0);
       ctx.restore()
     }
 

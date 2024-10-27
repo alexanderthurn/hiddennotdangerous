@@ -74,6 +74,16 @@ const playAudio = (audio) => {
     file.play().catch((err) => {console.log(err)});
 }
 
+const muteAudio = () => {
+    window.localStorage.setItem('mute','true')
+}
+const unmuteAudio = () => {
+    window.localStorage.removeItem('mute')
+}
+const isMusicMuted = () => {
+    return window.localStorage.getItem('mute') === 'true'
+}
+
 const getPlayAudio = (audio) => () => playAudio(audio)
 
 const playPlaylist = (playlist) => {
