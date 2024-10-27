@@ -481,9 +481,13 @@ function gameLoop() {
     }
     gamepadPlayers = navigator.getGamepads().filter(x => x && x.connected).map(g => {
         g.isAttackButtonPressed = false
+        g.isAnyButtonPressed = false
         if (g.buttons[0].pressed) {
             g.isAttackButtonPressed = true
         } 
+        if (g.buttons.some(b => b.pressed)) {
+            g.isAnyButtonPressed = true
+        }
         let x = g.axes[0];
         let y = g.axes[1];
         [x, y] = setDeadzone(x, y,0.2);
@@ -740,7 +744,7 @@ function updateGame(figures, dt, dtProcessed) {
 
 function handleInput(players, figures, dtProcessed) {
     // join by doing anything
-    players.filter(p => p.isAttackButtonPressed || p.isMoving).forEach(p => {
+    players.filter(p => p.isAnyButtonPressed || p.isAttackButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
         var figure = figures.find(f => f.playerId === p.playerId && f.type === 'fighter')
         if (!figure) {
             var figure = figures.find(f => !f.playerId && f.type === 'fighter')
@@ -1153,20 +1157,21 @@ function draw(players, figures, dt, dtProcessed, layer) {
             const dt4 = dtProcessed - (lastWinnerPlayerIdThen + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
             let fillStyle = 'rgba(0, 0, 0, 0.5)';
             let points = f.points;
+            let offx = 48*1.2
 
             if (dt1 < moveNewPlayerDuration) {
                 if (!newPlayerIds.has(f.playerId)) {
-                    ctx.translate(32+i*48, level.height+32)
+                    ctx.translate(32+i*offx, level.height+32)
                 } else {
                     var lp = dt1 / moveNewPlayerDuration
                     var lpi = 1-lp
-                    ctx.translate(lpi * (level.width*0.5) + lp*(32+i*48), lpi*(level.height*0.5) + lp*(level.height+32))
+                    ctx.translate(lpi * (level.width*0.5) + lp*(32+i*offx), lpi*(level.height*0.5) + lp*(level.height+32))
                     ctx.scale(12*lpi + lp, 12*lpi + lp)
                 }   
             } else if (lastWinnerPlayerIdThen && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
                 const lp = dt2 / moveScoreToPlayerDuration
                 const lpi = 1-lp
-                ctx.translate(lpi*(32+i*48) + lp*f.x, lpi*(level.height+32) + lp*f.y)
+                ctx.translate(lpi*(32+i*offx) + lp*f.x, lpi*(level.height+32) + lp*f.y)
                 ctx.scale(lpi + 2*lp, lpi + 2*lp)
                 if (lastWinnerPlayerIds.has(f.playerId)) {
                     fillStyle = 'rgba(178, 145, 70, 0.5)'
@@ -1187,28 +1192,28 @@ function draw(players, figures, dt, dtProcessed, layer) {
             } else if (lastWinnerPlayerIdThen && dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
                 const lp = dt4 / moveScoreToPlayerDuration
                 const lpi = 1-lp
-                ctx.translate(lpi*f.x + lp*(32+i*48), lpi*f.y + lp*(level.height+32))
+                ctx.translate(lpi*f.x + lp*(32+i*offx), lpi*f.y + lp*(level.height+32))
                 ctx.scale(2*lpi + lp, 2*lpi + lp)
                 if (lastFinalWinnerPlayerId) {
                     points = 0;
                 }
             } else {
-                ctx.translate(32+i*48, level.height+32)
+                ctx.translate(32+i*offx, level.height+32)
             }
 
 
-            ctx.arc(0,0,16,0, 2 * Math.PI);
+            ctx.arc(0,0,24,0, 2 * Math.PI);
             ctx.fillStyle = fillStyle;
             ctx.fill();
             ctx.closePath()
             ctx.textAlign = "center";
             ctx.textBaseline='middle'
             ctx.fillStyle = "white";
-            ctx.font = "24px arial";
+            ctx.font = "36px arial";
             if (f.isAttacking && !restartGame) {
-              ctx.translate(-5+Math.random()*10,-Math.random()*10)
+              ctx.translate(-5+Math.random()*10,-5+Math.random()*10)
             }
-            ctx.fillText(points,0,0); // Punkte
+            ctx.fillText(points,0,2); // Punkte
             ctx.stroke();
             ctx.restore()
 
