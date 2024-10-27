@@ -82,6 +82,12 @@ var btnStart = {
     loadingSpeed: 1/3000
 }
 
+var btnMute = {
+    width: 0,
+    height: 0,
+    loadingSpeed: 1/3000
+}
+
 var btnTouchController = {
     radius: 0,
 }
@@ -231,27 +237,30 @@ window.addEventListener('touchmove', event => {
     event.preventDefault();
 }, { passive: false });
 
+function toggleMusic() {
+    if (isMusicMuted()) {
+        unmuteAudio()
+        if (isGameStarted) {
+            playPlaylist(shuffle(musicGame))
+        } else {
+            playPlaylist(musicLobby)
+        }
+    } else {
+        muteAudio()
+        if (isGameStarted) {
+            stopPlaylist(musicGame)
+        } else {
+            stopPlaylist(musicLobby)
+        }
+    }
+}
 
 window.addEventListener('keyup', event => {
     if (event.code === 'Escape') {
         showDebug =!showDebug
     }
     if (event.code === 'KeyM') {
-        if (isMusicMuted()) {
-            unmuteAudio()
-            if (isGameStarted) {
-                playPlaylist(shuffle(musicGame))
-            } else {
-                playPlaylist(musicLobby)
-            }
-        } else {
-            muteAudio()
-            if (isGameStarted) {
-                stopPlaylist(musicGame)
-            } else {
-                stopPlaylist(musicLobby)
-            }
-        }
+        toggleMusic()
     }
     keyboards.forEach(k => {
         k.pressed.delete(event.code);
@@ -321,7 +330,8 @@ function gameInit(completeRestart) {
     multikillCounter = 0;
     lastTotalkillAudio = 0;
     totalkillCounter = 0;
-    btnStart = {...btnStart, x: level.width*(0.04+0.52), y: level.height*0.3, width: level.width*0.4, height: level.height*0.42,loadingPercentage: 0.0, radius: level.width*0.1}
+    btnStart = {...btnStart, x: level.width*(0.04+0.52), y: level.height*0.3, width: level.width*0.4, height: level.height*0.42,loadingPercentage: 0.0}
+    btnMute = {...btnMute, x: btnStart.x + btnStart.width - level.width*0.12, y: level.height*0.1, width: level.width*0.12, height: level.height*0.1,loadingPercentage: 0.0}
     var activePlayerIds = figures.filter(f => f.playerId && f.type === 'fighter').map(f => f.playerId)
     var oldFigures = figures
     figures = []
@@ -713,6 +723,26 @@ function updateGame(figures, dt, dtProcessed) {
             restartGame = true;
         }
 
+        var playersNearMute = playersWithId.filter(f => isInRect(f.x,f.y,btnMute.x,btnMute.y,btnMute.width,btnMute.height))
+        btnMute.playersNearMute = playersNearMute
+        btnMute.playersPossible = playersWithId
+        if (playersNearMute.length > 0) {
+            btnMute.playerPercentage = 1
+            btnMute.loadingPercentage += btnMute.loadingSpeed * dt;
+        } else {
+            btnMute.playerPercentage = 0
+            btnMute.loadingPercentage -= btnMute.loadingSpeed * dt
+        }
+
+        
+        btnMute.loadingPercentage = btnMute.loadingPercentage > 0 ? btnMute.loadingPercentage : 0;
+
+        if (btnMute.loadingPercentage > 1) {
+            btnMute.loadingPercentage = 0
+            toggleMusic()
+            // TODO
+        }
+
 
         figuresDead.forEach(f => {if (dtProcessed-f.killTime > deadDuration) {
             f.isDead = false
@@ -926,24 +956,42 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
         if (playerFigures.length > 0) {
             
+
             ctx.save()
-                // start image
-              /*  ctx.translate(btnStart.x,btnStart.y)
-                ctx.beginPath();
-                ctx.fillStyle = "rgba(255,255,255,0.3)";
-                ctx.arc(0,0,btnStart.radius, 0, 2 * Math.PI)
-                ctx.closePath()
-                ctx.fill();
+                ctx.translate(btnMute.x,btnMute.y)
+                ctx.save()
+                    // ctx.translate(level.width*(0.04+0.52),level.height*0.3)
+                    ctx.beginPath();
+                    ctx.fillStyle = "rgba(255,255,255,0.2)";
+                    ctx.fillRect(0,0, btnMute.width, btnMute.height)
+                    ctx.fillStyle = "rgba(255,255,255,0.2)";
+                    ctx.fillRect(0,0, btnMute.width*btnMute.loadingPercentage, btnMute.height)
+                    ctx.closePath()
+                    ctx.fill();
+                ctx.restore()
 
-                ctx.beginPath();
-                ctx.fillStyle = "rgba(255,255,255,0.3)";
-                ctx.arc(0,0,btnStart.radius*btnStart.loadingPercentage, 0, 2 * Math.PI)
-                ctx.closePath()
-                ctx.fill();
-            */
-             
+                var fontHeight = level.width*0.017  
+                ctx.font = fontHeight+"px Arial";
+                ctx.fillStyle = "rgba(139,69,19,0.8)";
+                ctx.strokeStyle = "black";
+                ctx.textAlign = "center";
+                ctx.textBaseline='middle'
+                ctx.lineWidth = 1
+                ctx.font = level.width*0.02+"px Arial";
+                var text
+                if (isMusicMuted()) {
+                    text = 'Music OFF'
+                } else {
+                    text = 'Music ON'
+                } 
+                ctx.translate(btnMute.width*0.5,btnMute.height*0.5)
+                ctx.translate(0,-fontHeight*Math.max(0,text.split('\n').length-1)*0.5)
+                fillTextWithStrokeMultiline(ctx,text,0,0,fontHeight) 
+            ctx.restore()
+
+
+            ctx.save()
                ctx.translate(btnStart.x,btnStart.y)
-
                ctx.save()
               // ctx.translate(level.width*(0.04+0.52),level.height*0.3)
                ctx.beginPath();
@@ -1005,7 +1053,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
         fillTextWithStrokeMultiline(ctx, txt,0,0, fontHeight)
         ctx.restore()
     }
-
+    
   
     
 
