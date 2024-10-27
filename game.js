@@ -28,12 +28,13 @@ var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAud
 var level = {}
 var tileMap;
 var playerImage = new Image()
-playerImage.src = 'gfx/character_base_16x16.png'
+playerImage.src = 'gfx/character_base_16x16.png' // 'gfx/character_base_topview_32x32.png' beuelerjong
+var playerImageScale = 1 // 2 beuelerjong
 var playerImageAnim = {
     width: 64,
     height: 64,
-    tileWidth: 16,
-    tileHeight: 16,
+    tileWidth: 16*playerImageScale,
+    tileHeight: 16*playerImageScale,
     hasDirections: true,
     animDefaultSpeed: 0,
     down: {a: [[0,0,16,16], [16,0,16,16], [32,0,16,16], [48,0,16,16]]},
@@ -42,6 +43,13 @@ var playerImageAnim = {
     right: {a: [[0,32,16,16], [16,32,16,16], [32,32,16,16], [48,32,16,16]]},
     default: {a: [[0,0,16,16]]}
 }
+playerImageAnim.down.a = playerImageAnim.down.a.map(array => array.map(a => a*playerImageScale))
+playerImageAnim.up.a = playerImageAnim.up.a.map(array => array.map(a => a*playerImageScale))
+playerImageAnim.left.a = playerImageAnim.left.a.map(array => array.map(a => a*playerImageScale))
+playerImageAnim.right.a = playerImageAnim.right.a.map(array => array.map(a => a*playerImageScale))
+playerImageAnim.default.a = playerImageAnim.default.a.map(array => array.map(a => a*playerImageScale))
+
+
 var playerShadowImage
 var playerImageShadowAnim
 loadPromises.push(new Promise((resolve, reject) => {
