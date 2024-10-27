@@ -967,9 +967,9 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.lineWidth = 1
         ctx.translate(level.width*0.22+fontHeight,level.height*0.35)
         var txt = 'HOW TO PLAY\n\nJoin by pressing any key on your Gamepad' 
-                  + '\nor WASDT or ' + String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0 or mouse or touch' 
-                  + '\n\n1.) Find your player 2.) Don\'t get detected\n3.) Fart to kill 4.) Eat to get bigger farts' 
-                  + '\n\nThe goal is to be the last survivor'
+                  + '\nor WASDT(Key1) or ' + String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0(RSHIFT)\nor mouse or touch' 
+                  + '\n\n1.) Find your player 2.) Fart to knock out others\n3.) Stay hidden 4.) Eat to power up your farts' 
+                  + '\n\nBe the last baby standing!'
         
         fillTextWithStrokeMultiline(ctx, txt,0,0, fontHeight)
         ctx.restore()
