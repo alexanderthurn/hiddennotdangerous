@@ -20,7 +20,7 @@ var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var isGameStarted = false, restartGame = false, newPlayerIds = new Set(), newPlayerIdThen, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
 const moveNewScoreDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 3000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
-var figures = [], maxPlayerFigures = 32, pointsToWin = 1, deadDuration = 5000, beanAttackDuration = 2000
+var figures = [], maxPlayerFigures = 32, pointsToWin = 2, deadDuration = 5000, beanAttackDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = {}
@@ -587,13 +587,14 @@ function gameLoop() {
         }
     }
 
-    const gameBreakDuration = moveNewScoreDuration + (figuresWithPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
-    if (restartGame && (!lastFinalWinnerPlayerId || dtProcessed - lastWinnerPlayerIdThen > gameBreakDuration)) {
+    const gameBreakDuration = (figuresWithPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
+    if (restartGame && (!lastWinnerPlayerIdThen || dtProcessed - lastWinnerPlayerIdThen > gameBreakDuration)) {
         restartGame = false;
+        const wasGameStarted = isGameStarted;
         isGameStarted = !lastFinalWinnerPlayerId;
-        if (isGameStarted) {
+        if (isGameStarted && !wasGameStarted) {
             playPlaylist(music);
-        } else {
+        } else if(!isGameStarted) {
             stopPlaylist(music);
         }
         gameInit(!!lastFinalWinnerPlayerId);
@@ -1104,9 +1105,9 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.beginPath();
             const sortIndex = playerFiguresSortedByPoints.findIndex(fig => fig.playerId === f.playerId);
             const dt1 = dtProcessed - newPlayerIdThen;
-            const dt2 = dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + sortIndex*moveScoreToPlayerDuration);
-            const dt3 = dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration);
-            const dt4 = dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
+            const dt2 = dtProcessed - (lastWinnerPlayerIdThen + sortIndex*moveScoreToPlayerDuration);
+            const dt3 = dtProcessed - (lastWinnerPlayerIdThen + playerFigures.length*moveScoreToPlayerDuration);
+            const dt4 = dtProcessed - (lastWinnerPlayerIdThen + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
             let fillStyle = 'rgba(0, 0, 0, 0.5)';
             let points = f.points;
 
@@ -1119,7 +1120,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                     ctx.translate(lpi * (level.width*0.5) + lp*(32+i*48), lpi*(level.height*0.5) + lp*(level.height+32))
                     ctx.scale(12*lpi + lp, 12*lpi + lp)
                 }   
-            } else if (lastFinalWinnerPlayerId && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
+            } else if (lastWinnerPlayerIdThen && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
                 const lp = dt2 / moveScoreToPlayerDuration
                 const lpi = 1-lp
                 ctx.translate(lpi*(32+i*48) + lp*f.x, lpi*(level.height+32) + lp*f.y)
@@ -1127,13 +1128,13 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 if (lastFinalWinnerPlayerId === f.playerId) {
                     fillStyle = 'rgba(178, 145, 70, 0.5)'
                 }
-            } else if (lastFinalWinnerPlayerId && dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
+            } else if (lastWinnerPlayerIdThen && dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
                 ctx.translate(f.x, f.y)
                 ctx.scale(2.0, 2.0)
                 if (lastFinalWinnerPlayerId === f.playerId) {
                     fillStyle = 'rgba(178, 145, 70, 0.5)'
                 }
-            } else if (lastFinalWinnerPlayerId && dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
+            } else if (lastWinnerPlayerIdThen && dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
                 const lp = dt4 / moveScoreToPlayerDuration
                 const lpi = 1-lp
                 ctx.translate(lpi*f.x + lp*(32+i*48), lpi*f.y + lp*(level.height+32))
