@@ -61,7 +61,6 @@ var texture = new Image()
 texture.src = 'gfx/texture_grass.jpg'
 loadPromises.push(new Promise((resolve, reject) => {
     texture.onload = () => {
-        tileMap = tileMapFunc(texture);
         resolve();
     }
 }))
@@ -167,7 +166,6 @@ var soundEat = audio.eat.map(audio => getAudio(audio));
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
     adjustLevelToCanvas(level, canvas)
-    tileMap = tileMapFunc(texture);
 
     // loading images
     ctx.save()
@@ -179,8 +177,7 @@ document.addEventListener("DOMContentLoaded", function(event){
     ctx.restore()
 
     Promise.all(loadPromises).then(() => { 
-        ctx.clearRect(0,0, canvas.width, canvas.height)
-      
+        tileMap = tileMapFunc(texture);
         gameInit()
         window.requestAnimationFrame(gameLoop);
     })
