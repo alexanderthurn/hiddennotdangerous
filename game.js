@@ -18,9 +18,9 @@ var keyboards = [{bindings: {
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var isGameStarted = false, restartGame = false, newPlayerIds = new Set(), newPlayerIdThen, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
-const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 3000;
+const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
-var figures = [], maxPlayerFigures = 32, pointsToWin = 2, deadDuration = 5000, beanAttackDuration = 2000
+var figures = [], maxPlayerFigures = 32, pointsToWin = 3, deadDuration = 5000, beanAttackDuration = 1000, fartGrowDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = {}
@@ -86,8 +86,8 @@ var btnTouchAction = {
 
 cloudImageAnim = {
     hasDirections: false,
-    width: 128,
-    height: 128,
+    width: 192,
+    height: 192,
     animDefaultSpeed: 0.1,
     default: {a: [[0,0,64,64],[64,0,64,64],[128,0,64,64],[0,64,64,64],[64,64,64,64],[128,64,64,64],[0,128,64,64],[64,128,64,64],[128,128,64,64]]}
 }
@@ -319,11 +319,9 @@ function gameInit(completeRestart) {
             frame: null
         }
 
-        if (activePlayerIds.length > i) {
+        if (!completeRestart && activePlayerIds.length > i) {
             figure.playerId = activePlayerIds[i]
-            if (!completeRestart) {
-                figure.points = oldFigures.find(f => f.playerId == figure.playerId).points
-            } 
+            figure.points = oldFigures.find(f => f.playerId == figure.playerId).points
         }
 
         figures.push(figure)
@@ -808,10 +806,17 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
 
     figures.filter(f => f.type === 'cloud').forEach(f => {
         f.lifetime+=dt
-        if (f.lifetime > 2000) {
+        if (f.lifetime > fartGrowDuration) {
             if (!f.isAttacking) {
                 f.isAttacking = true
-                f.scale = 3.0*f.size
+                if (f.size === 5) {
+                    f.scale = 3*f.size
+                } else if (f.size === 1) {
+                    f.scale = 2*f.size
+                } else {
+                    f.scale = 1.5*f.size
+                }
+                
             }
             f.scale*=Math.pow(0.999,dt)
             if (f.scale < 0.1) {
@@ -820,10 +825,15 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
             }
 
         } else {
-            if (f.scale <0.1) {
-                f.scale = 0.1*f.size
+           
+            if (f.size === 5) {
+                f.scale= f.lifetime/fartGrowDuration * 3*f.size
+            } else if (f.size === 1) {
+                f.scale= f.lifetime/fartGrowDuration * 2*f.size
+            } else {
+                f.scale= f.lifetime/fartGrowDuration * 1.5*f.size
             }
-            f.scale*=Math.pow(1.0008,dt)
+
         }
         
         
@@ -985,7 +995,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
         if (layer === 0) {
             if (f.isDead) {
                 ctx.rotate(deg2rad(90))
-                ctx.scale(0.5*f.scale,0.5*f.scale)
+                ctx.scale(f.scale,f.scale)
                 ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
             } else if (f.imageShadow) {
                 ctx.scale(f.scale, f.scale)
@@ -1127,15 +1137,21 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 const lpi = 1-lp
                 ctx.translate(lpi*(32+i*48) + lp*f.x, lpi*(level.height+32) + lp*f.y)
                 ctx.scale(lpi + 2*lp, lpi + 2*lp)
-                if (lastFinalWinnerPlayerId === f.playerId) {
+                if (lastWinnerPlayerIds.has(f.playerId)) {
                     fillStyle = 'rgba(178, 145, 70, 0.5)'
+                }
+                if (lastFinalWinnerPlayerId === f.playerId) {
+                    ctx.scale(lpi + 2*lp, lpi + 2*lp)
                 }
                 points = f.oldPoints;
             } else if (lastWinnerPlayerIdThen && dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
                 ctx.translate(f.x, f.y)
                 ctx.scale(2.0, 2.0)
-                if (lastFinalWinnerPlayerId === f.playerId) {
+                if (lastWinnerPlayerIds.has(f.playerId)) {
                     fillStyle = 'rgba(178, 145, 70, 0.5)'
+                }
+                if (lastFinalWinnerPlayerId === f.playerId) {
+                    ctx.scale(2.0, 2.0)
                 }
             } else if (lastWinnerPlayerIdThen && dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
                 const lp = dt4 / moveScoreToPlayerDuration
@@ -1158,7 +1174,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.textBaseline='middle'
             ctx.fillStyle = "white";
             ctx.font = "24px arial";
-            if (!isGameStarted && f.isAttacking) {
+            if (f.isAttacking && !restartGame) {
               ctx.translate(-5+Math.random()*10,-Math.random()*10)
             }
             ctx.fillText(points,0,0); // Punkte
