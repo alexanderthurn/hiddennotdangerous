@@ -107,6 +107,13 @@ const playKillingSounds = (numberKilledFigures, killTime) => {
     }
 }
 
+
+function addjustAfterResizeIfNeeded(level, canvas) {
+    if (resizeCanvasToDisplaySize(canvas)) {
+        adjustLevelToCanvas(level, canvas)
+    }
+}
+
 function resizeCanvasToDisplaySize(canvas) {
     // look up the size the canvas is being displayed
     const width = canvas.clientWidth;

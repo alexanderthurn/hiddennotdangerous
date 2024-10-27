@@ -164,8 +164,7 @@ var soundTotalKill = audio.totalKill.map(audio => getAudio(audio));
 var soundEat = audio.eat.map(audio => getAudio(audio));
 
 document.addEventListener("DOMContentLoaded", function(event){
-    resizeCanvasToDisplaySize(canvas)
-    adjustLevelToCanvas(level, canvas)
+    addjustAfterResizeIfNeeded(level, canvas)
 
     // loading images
     ctx.save()
@@ -185,13 +184,11 @@ document.addEventListener("DOMContentLoaded", function(event){
 })
 
 window.addEventListener("resize", function(event){
-    resizeCanvasToDisplaySize(canvas)
-    adjustLevelToCanvas(level, canvas)
+    addjustAfterResizeIfNeeded(level, canvas)
 });
 
 window.addEventListener("orientationchange", function(event){
-    resizeCanvasToDisplaySize(canvas)
-    adjustLevelToCanvas(level, canvas)
+    addjustAfterResizeIfNeeded(level, canvas)
 });
 
 window.addEventListener('keydown', event => {
@@ -439,6 +436,8 @@ function addFartCloud(x,y,playerId, size=1) {
 }
 
 function gameLoop() {
+    addjustAfterResizeIfNeeded(level, canvas)
+    
     now = Date.now();
     dt = now - then;
     if (fpsTime < now - 1000) {
