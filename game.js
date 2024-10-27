@@ -14,7 +14,8 @@ var keyboards = [{bindings: {
     'ArrowRight': {playerId: 'k1', action: 'right'},
     'ArrowUp': {playerId: 'k1', action: 'up'},
     'ArrowDown': {playerId: 'k1', action: 'down'},
-    'Numpad0': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
+    'Numpad0': {playerId: 'k1', action: 'attack'},
+    'ControlRight': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var isGameStarted = false, restartGame = false, newPlayerIds = new Set(), newPlayerIdThen, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
