@@ -131,10 +131,13 @@ const audio = {
     join: {title: 'sfx/sounddrum.mp3'},
     firstBlood: {title: 'sfx/first-blood.mp3', volume: 0.2},
     win: {title: 'sfx/audience-clapping-03-99963.mp3'},
-    music: [
+    musicGame: [
         {title: 'sfx/music1.mp3', currentTime: 20, volume: 0.5},
         {title: 'sfx/music2.mp3', volume: 0.5},
         {title: 'sfx/music3.mp3', volume: 0.5}
+    ],
+    musicLobby: [
+        {title: 'sfx/stealthy-stinkers.mp3', volume: 0.5}
     ],
     multiKill: [
         {title: 'sfx/double-kill.mp3', volume: 0.3},
@@ -164,7 +167,8 @@ const audio = {
     ]
 }
 
-var music = shuffle(audio.music.map(audio => getAudio(audio)));
+var musicGame = shuffle(audio.musicGame.map(audio => getAudio(audio)));
+var musicLobby = audio.musicLobby.map(audio => getAudio(audio));
 var soundJoin = getAudio(audio.join);
 var soundFirstBlood = getAudio(audio.firstBlood);
 var soundWin = getAudio(audio.win);
@@ -623,9 +627,10 @@ function gameLoop() {
         const wasGameStarted = isGameStarted;
         isGameStarted = !lastFinalWinnerPlayerId;
         if (isGameStarted && !wasGameStarted) {
-            playPlaylist(music);
+            stopPlaylist(musicLobby);
+            playPlaylist(musicGame);
         } else if(!isGameStarted) {
-            stopPlaylist(music);
+            stopPlaylist(musicGame);
         }
         gameInit(!!lastFinalWinnerPlayerId);
     }
@@ -746,9 +751,8 @@ function handleInput(players, figures, dtProcessed) {
             newPlayerIds.add(figure.playerId);
             newPlayerIdThen = dtProcessed
 
-            figures.forEach(f => f.isDead = false)
-            if (figures.filter(f => f.playerId).length == 2) {
-               // restartGame = true;
+            if (figures.filter(f => f.playerId).length == 1) {
+                playPlaylist(musicLobby);
             }  
         }
     })
