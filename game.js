@@ -20,7 +20,7 @@ var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var isGameStarted = false, restartGame = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
 const moveNewScoreDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 3000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
-var figures = [], maxPlayerFigures = 32, pointsToWin = 1, deadDuration = 5000, beanAttackDuration = 2000
+var figures = [], maxPlayerFigures = 32, pointsToWin = 3, deadDuration = 5000, beanAttackDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = {}
