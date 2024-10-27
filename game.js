@@ -10,6 +10,7 @@ var keyboards = [{bindings: {
     'KeyW': {playerId: 'k0', action: 'up'},
     'KeyS': {playerId: 'k0', action: 'down'},
     'KeyT': {playerId: 'k0', action: 'attack'},
+    'Tab': {playerId: 'k0', action: 'attack'},
     'ArrowLeft': {playerId: 'k1', action: 'left'},
     'ArrowRight': {playerId: 'k1', action: 'right'},
     'ArrowUp': {playerId: 'k1', action: 'up'},
