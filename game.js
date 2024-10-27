@@ -68,7 +68,7 @@ cloudImage.src = 'gfx/fart.png'
     }
 }))*/
 var texture = new Image()
-texture.src = 'gfx/texture_grass.jpg'
+texture.src = 'gfx/kacheln.png'
 loadPromises.push(new Promise((resolve, reject) => {
     texture.onload = () => {
         resolve();
@@ -118,9 +118,9 @@ foodImageAnim = {
 
 let tileArea = []
 const textureTiles = {
-    flowers: [1288, 23, 609, 609],
-    grass: [655, 23, 609, 609],
-    mushrooms: [23, 23, 609, 609]
+    flowers: [120*2, 0, 120, 120],
+    grass: [120*1, 0, 120, 120],
+    mushrooms: [120*0, 0, 120, 120]
 }
 const tileWidth = 120;
 const textureTilesList = Object.values(textureTiles);
