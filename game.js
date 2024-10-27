@@ -26,7 +26,7 @@ var figures = [], maxPlayerFigures = 32, pointsToWin = 3, deadDuration = 5000, b
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = {}
-var tileMap;
+var tileMap, tileMap2;
 var playerImage = new Image()
 playerImage.src = 'gfx/character_base_16x16.png' // 'gfx/character_base_topview_32x32.png' beuelerjong
 var playerImageScale = 1 // 2 beuelerjong
@@ -186,7 +186,8 @@ document.addEventListener("DOMContentLoaded", function(event){
     ctx.restore()
 
     Promise.all(loadPromises).then(() => { 
-        tileMap = tileMapFunc(texture);
+        tileMap = tileMapFunc(texture,0);
+        tileMap2 = tileMapFunc(texture,1)
         gameInit()
         window.requestAnimationFrame(gameLoop);
     })
@@ -886,9 +887,9 @@ function draw(players, figures, dt, dtProcessed, layer) {
     //ctx.transform(level.scale, 0, 0, level.scale, level.offsetX, level.offsetY)
 
     if (layer === 0) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
         ctx.drawImage(tileMap,-level.padding, -level.padding) //, level.width+level.pading*2, level.height+level.pading*2, -level.pading, -level.pading, level.width+level.pading*2, level.height+level.pading*2);
     }
+
     if (!isGameStarted) {
 
 
@@ -1133,11 +1134,8 @@ function draw(players, figures, dt, dtProcessed, layer) {
     })
 
     if (layer === 1) {
-        drawFence(1, ctx, level, true)
+        ctx.drawImage(tileMap2,-level.padding, -level.padding) //, level.width+level.pading*2, level.height+level.pading*2, -level.pading, -level.pading, level.width+level.pading*2, level.height+level.pading*2);
     }
-  
-  
-
 
     if (layer === 1) {
         const playerFiguresSortedByPoints = playerFigures.toSorted((f1,f2) => f1.points - f2.points);

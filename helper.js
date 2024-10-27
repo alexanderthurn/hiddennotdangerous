@@ -176,54 +176,59 @@ const colorize = (image, r, g, b) => {
     return offscreen;
 }
 
-const tileMapFunc = (image) => {
+const tileMapFunc = (image, layer) => {
     const offscreen = new OffscreenCanvas(level.width+level.padding*2, level.height+level.padding*2);
     const ctx = offscreen.getContext("2d");
 
     ctx.translate(level.padding, level.padding)
     
-    ctx.save()
-    const heightInTiles = getHeightInTiles();
-    const widthInTiles = getWidthInTiles();
-    for (let i = 0; i < tileArea.length; i++) {
-        for (let j = tileArea[i].length; j < heightInTiles; j++) {
-            tileArea[i][j] = getRandomInt(3);
-        }
-    }
-    for (let i = tileArea.length; i < widthInTiles; i++) {
-        tileArea[i] = [];
-        for (let j = 0; j < heightInTiles; j++) {
-            tileArea[i][j] = getRandomInt(3);
-        }
-    }
-
-    maxI = Math.min(tileArea.length, widthInTiles);
-    for (let i = 0; i < maxI; i++) {
-        maxJ = Math.min(tileArea[i].length, heightInTiles);
-        for (let j = 0; j < Math.min(tileArea[i].length, heightInTiles); j++) {
-            const tile = textureTilesList[tileArea[i][j]];
-            let relTileWidth = 1;
-            let relTileHeight = 1;
-            if (i === maxI-1) {
-                relTileWidth = (level.width % tileWidth) / tileWidth;
-                relTileWidth = relTileWidth > 0 ? relTileWidth : 1;
+    if (layer < 1) {
+        ctx.save()
+        const heightInTiles = getHeightInTiles();
+        const widthInTiles = getWidthInTiles();
+        for (let i = 0; i < tileArea.length; i++) {
+            for (let j = tileArea[i].length; j < heightInTiles; j++) {
+                tileArea[i][j] = getRandomInt(3);
             }
-            if (j === maxJ-1) {
-                relTileHeight = (level.height % tileWidth) / tileWidth;
-                relTileHeight = relTileHeight > 0 ? relTileHeight : 1;
-            }
-            ctx.drawImage(image, tile[0], tile[1], relTileWidth * tile[2], relTileHeight * tile[3], 0, 0, relTileWidth * tileWidth, relTileHeight * tileWidth)
-            if(j < Math.min(tileArea[i].length, heightInTiles)-1) {
-                ctx.translate(0, tileWidth);
-            } else {
-                ctx.translate(tileWidth, -tileWidth * j);
-            }   
         }
-    }
-    ctx.restore()
+        for (let i = tileArea.length; i < widthInTiles; i++) {
+            tileArea[i] = [];
+            for (let j = 0; j < heightInTiles; j++) {
+                tileArea[i][j] = getRandomInt(3);
+            }
+        }
 
-    drawFence(0, ctx, level)
-    drawFence(1, ctx, level)
+        maxI = Math.min(tileArea.length, widthInTiles);
+        for (let i = 0; i < maxI; i++) {
+            maxJ = Math.min(tileArea[i].length, heightInTiles);
+            for (let j = 0; j < Math.min(tileArea[i].length, heightInTiles); j++) {
+                const tile = textureTilesList[tileArea[i][j]];
+                let relTileWidth = 1;
+                let relTileHeight = 1;
+                if (i === maxI-1) {
+                    relTileWidth = (level.width % tileWidth) / tileWidth;
+                    relTileWidth = relTileWidth > 0 ? relTileWidth : 1;
+                }
+                if (j === maxJ-1) {
+                    relTileHeight = (level.height % tileWidth) / tileWidth;
+                    relTileHeight = relTileHeight > 0 ? relTileHeight : 1;
+                }
+                ctx.drawImage(image, tile[0], tile[1], relTileWidth * tile[2], relTileHeight * tile[3], 0, 0, relTileWidth * tileWidth, relTileHeight * tileWidth)
+                if(j < Math.min(tileArea[i].length, heightInTiles)-1) {
+                    ctx.translate(0, tileWidth);
+                } else {
+                    ctx.translate(tileWidth, -tileWidth * j);
+                }   
+            }
+        }
+        ctx.restore()
+
+        drawFence(0, ctx, level)
+        drawFence(1, ctx, level)
+
+    } else {
+        drawFence(1, ctx, level, true)
+    }
 
     return offscreen;
 }
