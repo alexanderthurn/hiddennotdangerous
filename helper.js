@@ -170,9 +170,6 @@ const colorize = (image, r, g, b) => {
 }
 
 const tileMapFunc = (image) => {
-    if (!level.width) {
-        return
-    }
     const offscreen = new OffscreenCanvas(level.width+level.padding*2, level.height+level.padding*2);
     const ctx = offscreen.getContext("2d");
 

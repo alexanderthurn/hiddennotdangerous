@@ -17,10 +17,10 @@ var keyboards = [{bindings: {
     'Numpad0': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var isGameStarted = false, restartGame = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
-const moveNewScoreDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 3000;
+var isGameStarted = false, restartGame = false, newPlayerIds = new Set(), newPlayerIdThen, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
+const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 3000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
-var figures = [], maxPlayerFigures = 32, pointsToWin = 3, deadDuration = 5000, beanAttackDuration = 2000
+var figures = [], maxPlayerFigures = 32, pointsToWin = 2, deadDuration = 5000, beanAttackDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = {}
@@ -61,7 +61,6 @@ var texture = new Image()
 texture.src = 'gfx/texture_grass.jpg'
 loadPromises.push(new Promise((resolve, reject) => {
     texture.onload = () => {
-        tileMap = tileMapFunc(texture);
         resolve();
     }
 }))
@@ -167,7 +166,6 @@ var soundEat = audio.eat.map(audio => getAudio(audio));
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
     adjustLevelToCanvas(level, canvas)
-    tileMap = tileMapFunc(texture);
 
     // loading images
     ctx.save()
@@ -179,8 +177,7 @@ document.addEventListener("DOMContentLoaded", function(event){
     ctx.restore()
 
     Promise.all(loadPromises).then(() => { 
-        ctx.clearRect(0,0, canvas.width, canvas.height)
-      
+        tileMap = tileMapFunc(texture);
         gameInit()
         window.requestAnimationFrame(gameLoop);
     })
@@ -303,6 +300,7 @@ function gameInit(completeRestart) {
             attackDuration: 500,
             attackBreakDuration: 2000,
             lastAttackTime: 0,
+            oldPoints: 0,
             points: 0,
             attackDistance: 80,
             attackAngle: 90,
@@ -570,12 +568,13 @@ function gameLoop() {
         var survivors = figuresWithPlayer.filter(f => !f.isDead)
         if (survivors.length < 2 && figuresWithPlayer.length > survivors.length) {
             if (isGameStarted && survivors.length == 1) {
+                figuresWithPlayer.forEach(f => f.oldPoints = f.points);
                 survivors[0].points++
                 lastWinnerPlayerIds.clear();
                 lastWinnerPlayerIds.add(survivors[0].playerId);
                 lastWinnerPlayerIdThen = dtProcessed
+                restartGame = true;
             }
-            restartGame = true;
         }
 
         const maxPoints = Math.max(...figuresWithPlayer.map(f => f.points));
@@ -590,13 +589,14 @@ function gameLoop() {
         }
     }
 
-    const gameBreakDuration = moveNewScoreDuration + (figuresWithPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
-    if (restartGame && (!lastFinalWinnerPlayerId || dtProcessed - lastWinnerPlayerIdThen > gameBreakDuration)) {
+    const gameBreakDuration = (figuresWithPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
+    if (restartGame && (!lastWinnerPlayerIdThen || dtProcessed - lastWinnerPlayerIdThen > gameBreakDuration)) {
         restartGame = false;
+        const wasGameStarted = isGameStarted;
         isGameStarted = !lastFinalWinnerPlayerId;
-        if (isGameStarted) {
+        if (isGameStarted && !wasGameStarted) {
             playPlaylist(music);
-        } else {
+        } else if(!isGameStarted) {
             stopPlaylist(music);
         }
         gameInit(!!lastFinalWinnerPlayerId);
@@ -714,9 +714,9 @@ function handleInput(players, figures, dtProcessed) {
             figure.isDead = false
             figure.playerId = p.playerId
             playAudio(soundJoin);
-            lastWinnerPlayerIds.clear();
-            lastWinnerPlayerIds.add(figure.playerId);
-            lastWinnerPlayerIdThen = dtProcessed
+            newPlayerIds.clear();
+            newPlayerIds.add(figure.playerId);
+            newPlayerIdThen = dtProcessed
 
             figures.forEach(f => f.isDead = false)
             if (figures.filter(f => f.playerId).length == 2) {
@@ -1106,23 +1106,23 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.save()
             ctx.beginPath();
             const sortIndex = playerFiguresSortedByPoints.findIndex(fig => fig.playerId === f.playerId);
-            const dt1 = dtProcessed - lastWinnerPlayerIdThen;
-            const dt2 = dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + sortIndex*moveScoreToPlayerDuration);
-            const dt3 = dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration);
-            const dt4 = dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
+            const dt1 = dtProcessed - newPlayerIdThen;
+            const dt2 = dtProcessed - (lastWinnerPlayerIdThen + sortIndex*moveScoreToPlayerDuration);
+            const dt3 = dtProcessed - (lastWinnerPlayerIdThen + playerFigures.length*moveScoreToPlayerDuration);
+            const dt4 = dtProcessed - (lastWinnerPlayerIdThen + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
             let fillStyle = 'rgba(0, 0, 0, 0.5)';
             let points = f.points;
 
-            if (dt1 < moveNewScoreDuration) {
-                if (!lastWinnerPlayerIds.has(f.playerId)) {
+            if (dt1 < moveNewPlayerDuration) {
+                if (!newPlayerIds.has(f.playerId)) {
                     ctx.translate(32+i*48, level.height+32)
                 } else {
-                    var lp = dt1 / moveNewScoreDuration
+                    var lp = dt1 / moveNewPlayerDuration
                     var lpi = 1-lp
-                    ctx.translate(lpi * (level.width*0.5) + lp*(32+i*48), lpi*(level.height*0.5) + lp*(level.height-32))
+                    ctx.translate(lpi * (level.width*0.5) + lp*(32+i*48), lpi*(level.height*0.5) + lp*(level.height+32))
                     ctx.scale(12*lpi + lp, 12*lpi + lp)
                 }   
-            } else if (lastFinalWinnerPlayerId && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
+            } else if (lastWinnerPlayerIdThen && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
                 const lp = dt2 / moveScoreToPlayerDuration
                 const lpi = 1-lp
                 ctx.translate(lpi*(32+i*48) + lp*f.x, lpi*(level.height+32) + lp*f.y)
@@ -1130,18 +1130,21 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 if (lastFinalWinnerPlayerId === f.playerId) {
                     fillStyle = 'rgba(178, 145, 70, 0.5)'
                 }
-            } else if (lastFinalWinnerPlayerId && dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
+                points = f.oldPoints;
+            } else if (lastWinnerPlayerIdThen && dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
                 ctx.translate(f.x, f.y)
                 ctx.scale(2.0, 2.0)
                 if (lastFinalWinnerPlayerId === f.playerId) {
                     fillStyle = 'rgba(178, 145, 70, 0.5)'
                 }
-            } else if (lastFinalWinnerPlayerId && dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
+            } else if (lastWinnerPlayerIdThen && dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
                 const lp = dt4 / moveScoreToPlayerDuration
                 const lpi = 1-lp
                 ctx.translate(lpi*f.x + lp*(32+i*48), lpi*f.y + lp*(level.height+32))
                 ctx.scale(2*lpi + lp, 2*lpi + lp)
-                points = 0;
+                if (lastFinalWinnerPlayerId) {
+                    points = 0;
+                }
             } else {
                 ctx.translate(32+i*48, level.height+32)
             }
