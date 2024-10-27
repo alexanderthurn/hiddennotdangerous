@@ -22,7 +22,7 @@ var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var isGameStarted = false, restartGame = false, newPlayerIds = new Set(), newPlayerIdThen, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
-var figures = [], maxPlayerFigures = 32, pointsToWin = 3, deadDuration = 5000, beanAttackDuration = 1000, fartGrowDuration = 2000
+var figures = [], maxPlayerFigures = 32, pointsToWin = 3, deadDuration = 5000, beanAttackDuration = 800, fartGrowDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = {}
@@ -695,7 +695,7 @@ function updateGame(figures, dt, dtProcessed) {
     if (!isGameStarted) {
         btnStart.playerPercentage = 0.0
         var playersWithId = figures.filter(f => f.playerId && f.type === 'fighter')
-        var playersNear = playersWithId.filter(f => isInRect(f.x,f.y,btnStart.x,btnStart.y,btnStart.width,btnStart.height))
+        var playersNear = playersWithId.filter(f => isInRect(f.x,f.y+f.imageAnim.height*0.5,btnStart.x,btnStart.y,btnStart.width,btnStart.height))
         btnStart.playersNear = playersNear
         btnStart.playersPossible = playersWithId
 
@@ -723,7 +723,7 @@ function updateGame(figures, dt, dtProcessed) {
             restartGame = true;
         }
 
-        var playersNearMute = playersWithId.filter(f => isInRect(f.x,f.y,btnMute.x,btnMute.y,btnMute.width,btnMute.height))
+        var playersNearMute = playersWithId.filter(f => isInRect(f.x,f.y+f.imageAnim.height*0.5,btnMute.x,btnMute.y,btnMute.width,btnMute.height))
         btnMute.playersNearMute = playersNearMute
         btnMute.playersPossible = playersWithId
         if (playersNearMute.length > 0) {
@@ -746,7 +746,7 @@ function updateGame(figures, dt, dtProcessed) {
 
         figuresDead.forEach(f => {if (dtProcessed-f.killTime > deadDuration) {
             f.isDead = false
-            f.y-=16
+            f.y-=f.imageAnim.height*0.25
             f.killTime = 0
         }})
     }
@@ -782,7 +782,7 @@ function updateGame(figures, dt, dtProcessed) {
             let distAngles = distanceAngles(rad2deg(f.angle), rad2deg(angle(f.x,f.y,fig.x,fig.y)+180));
             if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance*f.scale && distAngles <= f.attackAngle) {
                 fig.isDead = true;
-                fig.y+=16
+                fig.y+=f.imageAnim.height*0.25
                 playAudio(fig.soundDeath);
                 numberKilledFigures++;
                 fig.killTime = dtProcessed
