@@ -18,7 +18,7 @@ var keyboards = [{bindings: {
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var isGameStarted = false, restartGame = false, newPlayerIds = new Set(), newPlayerIdThen, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
-const moveNewScoreDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 3000;
+const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 3000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figures = [], maxPlayerFigures = 32, pointsToWin = 2, deadDuration = 5000, beanAttackDuration = 2000
 var showDebug = false
@@ -300,6 +300,7 @@ function gameInit(completeRestart) {
             attackDuration: 500,
             attackBreakDuration: 2000,
             lastAttackTime: 0,
+            oldPoints: 0,
             points: 0,
             attackDistance: 80,
             attackAngle: 90,
@@ -567,12 +568,13 @@ function gameLoop() {
         var survivors = figuresWithPlayer.filter(f => !f.isDead)
         if (survivors.length < 2 && figuresWithPlayer.length > survivors.length) {
             if (isGameStarted && survivors.length == 1) {
+                figuresWithPlayer.forEach(f => f.oldPoints = f.points);
                 survivors[0].points++
                 lastWinnerPlayerIds.clear();
                 lastWinnerPlayerIds.add(survivors[0].playerId);
                 lastWinnerPlayerIdThen = dtProcessed
+                restartGame = true;
             }
-            restartGame = true;
         }
 
         const maxPoints = Math.max(...figuresWithPlayer.map(f => f.points));
@@ -1111,11 +1113,11 @@ function draw(players, figures, dt, dtProcessed, layer) {
             let fillStyle = 'rgba(0, 0, 0, 0.5)';
             let points = f.points;
 
-            if (dt1 < moveNewScoreDuration) {
+            if (dt1 < moveNewPlayerDuration) {
                 if (!newPlayerIds.has(f.playerId)) {
                     ctx.translate(32+i*48, level.height+32)
                 } else {
-                    var lp = dt1 / moveNewScoreDuration
+                    var lp = dt1 / moveNewPlayerDuration
                     var lpi = 1-lp
                     ctx.translate(lpi * (level.width*0.5) + lp*(32+i*48), lpi*(level.height*0.5) + lp*(level.height+32))
                     ctx.scale(12*lpi + lp, 12*lpi + lp)
@@ -1128,6 +1130,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 if (lastFinalWinnerPlayerId === f.playerId) {
                     fillStyle = 'rgba(178, 145, 70, 0.5)'
                 }
+                points = f.oldPoints;
             } else if (lastWinnerPlayerIdThen && dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
                 ctx.translate(f.x, f.y)
                 ctx.scale(2.0, 2.0)
@@ -1139,7 +1142,9 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 const lpi = 1-lp
                 ctx.translate(lpi*f.x + lp*(32+i*48), lpi*f.y + lp*(level.height+32))
                 ctx.scale(2*lpi + lp, 2*lpi + lp)
-                points = 0;
+                if (lastFinalWinnerPlayerId) {
+                    points = 0;
+                }
             } else {
                 ctx.translate(32+i*48, level.height+32)
             }
