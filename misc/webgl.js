@@ -2,13 +2,13 @@ var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime=0, dtFix = 10,
 
 
 var canvas = document.getElementById('canvas')
-const ctx = canvas.getContext("webgl");
+const gl = canvas.getContext("webgl");
 
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
 
-    ctx.clearColor(1,0,0,1.0)
-    //ctx.enable(ctx.DEPTH_TEST)
+    gl.clearColor(1,0,0,1.0)
+    //gl.enable(gl.DEPTH_TEST)
 
     window.requestAnimationFrame(gameLoop);
 })
@@ -35,38 +35,73 @@ function gameLoop() {
     window.requestAnimationFrame(gameLoop);
 }
 
-function drawShape() {
-    var vertexPositionArray = [
-        -0.5, -0.5, 0, //bottom left
-         0.5, -0.5, 0, //bottom right 
-         0.5,  0.5, 0  //top right
-    ];
 
-    numberOfVertices = 3;
-    window.vertexBufferPositionID = GL.createBuffer ();
-    ctx.bindBuffer(ctx.ARRAY_BUFFER, vertexBufferPositionID);
-    ctx.bufferData(ctx.ARRAY_BUFFER,
-        new Float32Array(vertexPositionArray),
-        ctx.STATIC_DRAW);
-}
+var vertices = [
+    -1.0,1.0,0.0,
+    0.0,-1.0,0.0,
+    1.0,-0.5,0.0, 
+ ];
+ 
+ var indices = [0,1,2];
 
+ var vertexBuffer = gl.createBuffer();
+ gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+ gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+ gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+ var indexBuffer = gl.createBuffer();
+ gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+ gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+ gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+ var vertCode =
+ 'attribute vec3 coordinates;' +
+     
+ 'void main(void) {' +
+    ' gl_Position = vec4(coordinates, 1.0);' +
+ '}';
+ var vertShader = gl.createShader(gl.VERTEX_SHADER);
+ gl.shaderSource(vertShader, vertCode);
+ gl.compileShader(vertShader);
+
+
+ var fragCode =
+ 'void main(void) {' +
+    ' gl_FragColor = vec4(0.0, 0.0, 0.0, 0.1);' +
+ '}';
+ var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+ gl.shaderSource(fragShader, fragCode);
+ gl.compileShader(fragShader);
+
+ var shaderProgram = gl.createProgram();
+ gl.attachShader(shaderProgram, vertShader);
+ gl.attachShader(shaderProgram, fragShader);
+ gl.linkProgram(shaderProgram);
+ gl.useProgram(shaderProgram);
+
+ gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+ gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+ var coord = gl.getAttribLocation(shaderProgram, "coordinates");
+ gl.vertexAttribPointer(coord, 3, gl.FLOAT, false, 0, 0); 
+ gl.enableVertexAttribArray(coord);
 
 function draw(dt, dtProcessed) {
 
-    ctx.viewport(0,0, canvas.width, canvas.height)
-    ctx.clear(ctx.COLOR_BUFFER_BIT)// | ctx.DEPTH_BUFFER_BIT)
-
+    gl.viewport(0,0, canvas.width, canvas.height)
+    gl.clear(gl.COLOR_BUFFER_BIT)// | gl.DEPTH_BUFFER_BIT)
+    gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT,0);
+    
     /*
-    ctx.save()
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        ctx.save()
-            ctx.font = "16px serif";
-            ctx.fillStyle = "white";
-            ctx.textBaseline='top'
-            ctx.textAlign = "left";
-            ctx.fillText(fps + " FPS ",0,0)
-        ctx.restore()
+    gl.save()
+        gl.clearRect(0, 0, canvas.width, canvas.height)
+        gl.save()
+            gl.font = "16px serif";
+            gl.fillStyle = "white";
+            gl.textBaseline='top'
+            gl.textAlign = "left";
+            gl.fillText(fps + " FPS ",0,0)
+        gl.restore()
 
-    ctx.restore()
+    gl.restore()
     */
 }
