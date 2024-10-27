@@ -339,7 +339,6 @@ const drawFence = (layer, ctx, level, shadow) => {
 }
 
 var fillTextWithStroke = (ctx, text,x,y) => {
-    
     ctx.fillText(text,x,y)
     ctx.strokeText(text,x,y)
 }
@@ -347,6 +346,13 @@ var fillTextWithStroke = (ctx, text,x,y) => {
 var fillTextWithStrokeMultiline = (ctx, text, x,y, fontHeight) => {
     text.split("\n").forEach(t => {
         fillTextWithStroke(ctx, t, x,y)
+        ctx.translate(0,fontHeight*1.1)
+    })
+}
+
+var fillTextMultiline = (ctx, text, x,y, fontHeight) => {
+    text.split("\n").forEach(t => {
+        ctx.fillText(t,x,y)
         ctx.translate(0,fontHeight*1.1)
     })
 }

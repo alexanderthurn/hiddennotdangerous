@@ -962,9 +962,13 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.save()
                     // ctx.translate(level.width*(0.04+0.52),level.height*0.3)
                     ctx.beginPath();
-                    ctx.fillStyle = "rgba(255,255,255,0.2)";
+    
+                    ctx.fillStyle = "rgba(255,255,255,0.1)";
                     ctx.fillRect(0,0, btnMute.width, btnMute.height)
-                    ctx.fillStyle = "rgba(255,255,255,0.2)";
+
+                    ctx.fillStyle = "rgba(120,120,120,0.5)";
+                    ctx.globalCompositeOperation = "color-burn";
+                   // ctx.fillStyle = "rgba(255,255,255,0.2)";
                     ctx.fillRect(0,0, btnMute.width*btnMute.loadingPercentage, btnMute.height)
                     ctx.closePath()
                     ctx.fill();
@@ -972,11 +976,11 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
                 var fontHeight = level.width*0.017  
                 ctx.font = fontHeight+"px Arial";
-                ctx.fillStyle = "rgba(139,69,19,0.8)";
-                ctx.strokeStyle = "black";
+                ctx.fillStyle = "white";
+                ctx.strokeStyle = "white";
                 ctx.textAlign = "center";
                 ctx.textBaseline='middle'
-                ctx.lineWidth = 1
+                ctx.lineWidth = 0
                 ctx.font = level.width*0.02+"px Arial";
                 var text
                 if (isMusicMuted()) {
@@ -986,7 +990,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 } 
                 ctx.translate(btnMute.width*0.5,btnMute.height*0.5)
                 ctx.translate(0,-fontHeight*Math.max(0,text.split('\n').length-1)*0.5)
-                fillTextWithStrokeMultiline(ctx,text,0,0,fontHeight) 
+                fillTextMultiline(ctx,text,0,0,fontHeight) 
             ctx.restore()
 
 
@@ -995,17 +999,21 @@ function draw(players, figures, dt, dtProcessed, layer) {
                ctx.save()
               // ctx.translate(level.width*(0.04+0.52),level.height*0.3)
                ctx.beginPath();
-               ctx.fillStyle = "rgba(255,255,255,0.2)";
+               ctx.fillStyle = "rgba(255,255,255,0.1)";
+               
                ctx.fillRect(0,0, btnStart.width, btnStart.height)
                ctx.fillStyle = "rgba(255,255,255,0.2)";
+               
+        ctx.fillStyle = "rgba(120,120,120,0.5)";
+        ctx.globalCompositeOperation = "color-burn";
                ctx.fillRect(0,0, btnStart.width*btnStart.loadingPercentage, btnStart.height)
                ctx.closePath()
                ctx.fill();
                ctx.restore()
                var fontHeight = level.width*0.017  
                 ctx.font = fontHeight+"px Arial";
-                ctx.fillStyle = "rgba(139,69,19,0.8)";
-               ctx.strokeStyle = "black";
+                ctx.fillStyle = "white";
+               ctx.strokeStyle = "white";
                ctx.textAlign = "center";
                ctx.textBaseline='middle'
                ctx.lineWidth = 1
@@ -1021,7 +1029,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 } 
                 ctx.translate(btnStart.width*0.5,btnStart.height*0.5)
                 ctx.translate(0,-fontHeight*Math.max(0,text.split('\n').length-1)*0.5)
-                fillTextWithStrokeMultiline(ctx,text,0,0,fontHeight)
+                fillTextMultiline(ctx,text,0,0,fontHeight)
                 
             ctx.restore()
 
@@ -1031,7 +1039,8 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.save()
         ctx.translate(level.width*0.04,level.height*0.3)
         ctx.beginPath();
-        ctx.fillStyle = "rgba(255,255,255,0.2)";
+        ctx.fillStyle = "rgba(120,120,120,0.5)";
+        ctx.globalCompositeOperation = "destination-out";
         ctx.fillRect(0,0, level.width*0.4, level.height*0.42)
         ctx.closePath()
         ctx.fill();
@@ -1039,18 +1048,18 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
         var fontHeight = level.width*0.017  
         ctx.font = fontHeight+"px Arial";
-        ctx.fillStyle = "rgba(139,69,19,0.8)";
-        ctx.strokeStyle = "black";
+        ctx.fillStyle = "white";
+        ctx.strokeStyle = "white";
         ctx.textAlign = "center";
         ctx.textBaseline='top'
-        ctx.lineWidth = 1
+        ctx.lineWidth = 0
         ctx.translate(level.width*0.22+fontHeight,level.height*0.35)
         var txt = 'HOW TO PLAY\n\nJoin by pressing any key on your Gamepad' 
                   + '\nor WASDT(Key1) or ' + String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0(RSHIFT)\nor mouse or touch' 
                   + '\n\n1.) Find your player 2.) Fart to knock out others\n3.) Stay hidden 4.) Eat to power up your farts' 
                   + '\n\nBe the last baby standing!'
         
-        fillTextWithStrokeMultiline(ctx, txt,0,0, fontHeight)
+        fillTextMultiline(ctx, txt,0,0, fontHeight)
         ctx.restore()
     }
     
