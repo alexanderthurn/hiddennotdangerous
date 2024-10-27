@@ -7,7 +7,9 @@ const gl = canvas.getContext("webgl");
 document.addEventListener("DOMContentLoaded", function(event){
     resizeCanvasToDisplaySize(canvas)
 
-    gl.clearColor(1,0,0,1.0)
+    gl.clearColor(0,0,0,1.0)
+   // gl.enable(gl.CULL_FACE);
+   // gl.cullFace(gl.FRONT)
     //gl.enable(gl.DEPTH_TEST)
 
     window.requestAnimationFrame(gameLoop);
@@ -37,12 +39,14 @@ function gameLoop() {
 
 
 var vertices = [
-    -1.0,1.0,0.0,
-    0.0,-1.0,0.0,
-    1.0,-0.5,0.0, 
+    -0.75,0.75,0.0,
+    -0.75,-0.75,0.0,
+    0.75,0.75,0.0, 
+
+    0.75,-0.75,0.0, 
  ];
  
- var indices = [0,1,2];
+ var indices = [3,2,1, 2,1,0];
 
  var vertexBuffer = gl.createBuffer();
  gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
@@ -67,7 +71,7 @@ var vertices = [
 
  var fragCode =
  'void main(void) {' +
-    ' gl_FragColor = vec4(0.0, 0.0, 0.0, 0.1);' +
+    ' gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);' +
  '}';
  var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
  gl.shaderSource(fragShader, fragCode);
@@ -89,7 +93,7 @@ function draw(dt, dtProcessed) {
 
     gl.viewport(0,0, canvas.width, canvas.height)
     gl.clear(gl.COLOR_BUFFER_BIT)// | gl.DEPTH_BUFFER_BIT)
-    gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT,0);
+    gl.drawElements(gl.LINE_STRIP, 3, gl.UNSIGNED_SHORT,0);
     
     /*
     gl.save()
