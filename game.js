@@ -17,7 +17,7 @@ var keyboards = [{bindings: {
     'Numpad0': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var isGameStarted = false, restartGame = false, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
+var isGameStarted = false, restartGame = false, newPlayerIds = new Set(), newPlayerIdThen, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
 const moveNewScoreDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 3000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figures = [], maxPlayerFigures = 32, pointsToWin = 1, deadDuration = 5000, beanAttackDuration = 2000
@@ -711,9 +711,9 @@ function handleInput(players, figures, dtProcessed) {
             figure.isDead = false
             figure.playerId = p.playerId
             playAudio(soundJoin);
-            lastWinnerPlayerIds.clear();
-            lastWinnerPlayerIds.add(figure.playerId);
-            lastWinnerPlayerIdThen = dtProcessed
+            newPlayerIds.clear();
+            newPlayerIds.add(figure.playerId);
+            newPlayerIdThen = dtProcessed
 
             figures.forEach(f => f.isDead = false)
             if (figures.filter(f => f.playerId).length == 2) {
@@ -1103,7 +1103,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.save()
             ctx.beginPath();
             const sortIndex = playerFiguresSortedByPoints.findIndex(fig => fig.playerId === f.playerId);
-            const dt1 = dtProcessed - lastWinnerPlayerIdThen;
+            const dt1 = dtProcessed - newPlayerIdThen;
             const dt2 = dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + sortIndex*moveScoreToPlayerDuration);
             const dt3 = dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration);
             const dt4 = dtProcessed - (lastWinnerPlayerIdThen + moveNewScoreDuration + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
@@ -1111,12 +1111,12 @@ function draw(players, figures, dt, dtProcessed, layer) {
             let points = f.points;
 
             if (dt1 < moveNewScoreDuration) {
-                if (!lastWinnerPlayerIds.has(f.playerId)) {
+                if (!newPlayerIds.has(f.playerId)) {
                     ctx.translate(32+i*48, level.height+32)
                 } else {
                     var lp = dt1 / moveNewScoreDuration
                     var lpi = 1-lp
-                    ctx.translate(lpi * (level.width*0.5) + lp*(32+i*48), lpi*(level.height*0.5) + lp*(level.height-32))
+                    ctx.translate(lpi * (level.width*0.5) + lp*(32+i*48), lpi*(level.height*0.5) + lp*(level.height+32))
                     ctx.scale(12*lpi + lp, 12*lpi + lp)
                 }   
             } else if (lastFinalWinnerPlayerId && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
