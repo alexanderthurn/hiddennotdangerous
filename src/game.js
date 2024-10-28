@@ -217,8 +217,18 @@ window.addEventListener('keydown', event => {
   
 });
 
+window.addEventListener('blur', () => {
+    console.log('blur')
+    windowHasFocus = false
+}, { passive: false })
+
+window.addEventListener('focus', () => {
+    console.log('focus')
+    //windowHasFocus = true
+}, { passive: false })
+
 window.addEventListener('click', event => {
-    mousePlayers[0].pointerType = 'touch'
+    mousePlayers[0].pointerType = 'mouse'
 }, { passive: false })
 
 window.addEventListener('touchstart', event => {
@@ -247,8 +257,14 @@ window.addEventListener('keyup', event => {
 window.addEventListener("contextmenu", e => e.preventDefault());
 
 var pointerEvents = {}
+var windowHasFocus = false
 
 window.addEventListener('pointerdown', event => {
+    if (!windowHasFocus) {
+        windowHasFocus = true
+        return
+    }
+
     if (event.pointerType === 'mouse') {
         mousePlayers[0].pressed.add(0);
     }
@@ -269,6 +285,11 @@ window.addEventListener('pointerdown', event => {
 
 
 window.addEventListener('pointerup', event => {
+    if (!windowHasFocus) {
+        windowHasFocus = true
+        return
+    }
+    
     if (event.pointerType === 'mouse') {
         mousePlayers[0].pressed.delete(0);
     } 
