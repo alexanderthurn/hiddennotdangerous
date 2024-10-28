@@ -530,9 +530,7 @@ function gameLoop() {
                 xTarget = btnStart.x + btnStart.width*0.5
                 yTarget = btnStart.y + btnStart.height*0.5
             } else {
-
                 var beans = figures.filter(b => b.type === 'bean')
-                
                 if (f.beans.size === beans.length) {
                     xTarget = level.width * 0.5
                     yTarget = level.height * 0.5
@@ -540,10 +538,17 @@ function gameLoop() {
                         bot.isAttackButtonPressed = true
                     }
                 } else {
-                    beans.forEach(b => {
-                        if (!f.beans.has(b.id)) {
+                    beans.forEach((b, i, beans) => {
+                        console.log(f.beans.size, i, beans.length-1);
+                        if (!f.beans.has(b.id) && (i < beans.length-1 || f.beans.size != 1)) {
                             const beanTarget = {x: b.x, y: b.y-f.imageAnim.height*0.5}
-                            if (distance(f.x,f.y,beanTarget.x,beanTarget.y) < distance(f.x,f.y,xTarget,yTarget)) {
+                            let d1 = distance(f.x,f.y,beanTarget.x,beanTarget.y);
+                            let d2 = distance(f.x,f.y,xTarget,yTarget);
+                            if (f.beans.size === 0 && i === beans.length-1) {
+                                d1 += level.shortestPathBean5;
+                                d2 += level.shortestPathNotBean5;
+                            }
+                            if (d1 < d2) {
                                 xTarget = beanTarget.x;
                                 yTarget = beanTarget.y;
                             }
@@ -551,9 +556,9 @@ function gameLoop() {
                     });
                 }
             }
+
             bot.xAxis = xTarget - f.x
             bot.yAxis = yTarget - f.y
-    
         }
 
         bot.isMoving = Math.abs(bot.xAxis) + Math.abs(bot.yAxis) > 4;
