@@ -21,42 +21,19 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
         if (playerFigures.length > 0) {
             
+            if (isMusicMuted()) {
+                btnMute.text = 'Music: OFF'
+            } else {
+                btnMute.text = 'Music: ON'
+            } 
 
-            ctx.save()
-                ctx.translate(btnMute.x,btnMute.y)
-                ctx.save()
-                    // ctx.translate(level.width*(0.04+0.52),level.height*0.3)
-                    ctx.beginPath();
-    
-                    ctx.fillStyle = "rgba(255,255,255,0.1)";
-                    ctx.fillRect(0,0, btnMute.width, btnMute.height)
+            btnBots.text = 'Bots: ' + getBotCount()
 
-                    ctx.fillStyle = "rgba(120,120,120,0.5)";
-                    ctx.globalCompositeOperation = "color-burn";
-                   // ctx.fillStyle = "rgba(255,255,255,0.2)";
-                    ctx.fillRect(0,0, btnMute.width*btnMute.loadingPercentage, btnMute.height)
-                    ctx.closePath()
-                    ctx.fill();
-                ctx.restore()
-
-                var fontHeight = level.width*0.017  
-                ctx.font = fontHeight+"px Arial";
-                ctx.fillStyle = "white";
-                ctx.strokeStyle = "white";
-                ctx.textAlign = "center";
-                ctx.textBaseline='middle'
-                ctx.lineWidth = 0
-                ctx.font = level.width*0.02+"px Arial";
-                var text
-                if (isMusicMuted()) {
-                    text = 'Music OFF'
-                } else {
-                    text = 'Music ON'
-                } 
-                ctx.translate(btnMute.width*0.5,btnMute.height*0.5)
-                ctx.translate(0,-fontHeight*Math.max(0,text.split('\n').length-1)*0.5)
-                fillTextMultiline(ctx,text,0,0,fontHeight) 
-            ctx.restore()
+            btnsLobby.forEach(btn => {
+                drawButton(btn)
+            })
+            
+           
 
 
             ctx.save()
@@ -83,7 +60,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                ctx.textBaseline='middle'
                ctx.lineWidth = 1
                 ctx.font = level.width*0.02+"px Arial";
-
+                //var playersPossibleNotBot = btnStart.playersPossible.filter()
                 var text = 'Walk here to\n\nSTART'
                 if (btnStart.playersPossible.length === 1) {
                     text = 'Minimum\n2 players'
@@ -124,6 +101,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                   + '\n\n1.) Find your player 2.) Fart to knock out others\n3.) Stay hidden 4.) Eat to power up your farts' 
                   + '\n\nBe the last baby standing!'
         
+                 
         fillTextMultiline(ctx, txt,0,0, fontHeight)
         ctx.restore()
     }
@@ -198,11 +176,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 }
 
                 ctx.save()
-        
-
                   ctx.scale(f.scale, f.scale)
-                 
-                 
                   ctx.lineWidth = 2
                   ctx.strokeStyle = 'black'
                   //ctx.transform(1, 1, -0.7, 1, 0, 0);
@@ -211,18 +185,13 @@ function draw(players, figures, dt, dtProcessed, layer) {
                   ctx.arc(0,0,f.attackDistance, 0, 2 * Math.PI)
                   ctx.closePath()
                   ctx.fill();
-                  
-          
-          
                   ctx.beginPath();
                   ctx.fillStyle = "rgba(255,255,255,1)";
                   ctx.arc(0,0,f.attackDistance*0.8, 0, 2 * Math.PI)
                   ctx.closePath()
                   ctx.fill();
                   ctx.stroke()
-
                 ctx.restore()
-
                 ctx.scale(0.6*f.scale, 0.6*f.scale)
                 ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
             } else if (!f.isDead) {
@@ -410,6 +379,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.fillStyle = "white";
         ctx.textBaseline='top'
         ctx.textAlign = "right";
+        if (windowHasFocus)
         ctx.fillText(fps + " FPS", canvas.width, 0);
       ctx.restore()
     }
@@ -430,7 +400,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
           ctx.fillText('Players',0,0)
           players.forEach((g,i) => {
               ctx.translate(0,16)
-              ctx.fillText("xAxis: " + g.xAxis.toFixed(2) + " yAxis: " + g.yAxis.toFixed(2) + " Attack?: " + g.isAttackButtonPressed,0,0) 
+              ctx.fillText(g.playerId + " xAxis: " + g.xAxis.toFixed(2) + " yAxis: " + g.yAxis.toFixed(2) + " Attack?: " + g.isAttackButtonPressed,0,0) 
           })
         ctx.restore()
     
@@ -447,7 +417,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
   }
 
 
-  if (layer === 1) {
+  if (layer === 1 && mousePlayers.length > 0) {
     var mp = mousePlayers[0]
 
     if (mp.pointerType === 'touch') {

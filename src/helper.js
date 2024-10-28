@@ -84,6 +84,25 @@ const isMusicMuted = () => {
     return window.localStorage.getItem('mute') === 'true'
 }
 
+const getBotCount = () => {
+    var bots = parseInt(window.localStorage.getItem('bots'))
+    return isNaN(bots) ? 0 : bots
+}
+
+const setBotCount = (bots) => {
+    window.localStorage.setItem('bots', bots)
+}
+
+const toggleBots = () => {
+    var count = getBotCount()
+    count++
+    if (count > 3) {
+        count = 0
+    }
+    setBotCount(count)
+    return count
+}
+
 const getPlayAudio = (audio) => () => playAudio(audio)
 
 const playPlaylist = (playlist) => {
@@ -344,14 +363,14 @@ var fillTextWithStroke = (ctx, text,x,y) => {
 }
 
 var fillTextWithStrokeMultiline = (ctx, text, x,y, fontHeight) => {
-    text.split("\n").forEach(t => {
+    text?.split("\n").forEach(t => {
         fillTextWithStroke(ctx, t, x,y)
         ctx.translate(0,fontHeight*1.1)
     })
 }
 
 var fillTextMultiline = (ctx, text, x,y, fontHeight) => {
-    text.split("\n").forEach(t => {
+    text?.split("\n").forEach(t => {
         ctx.fillText(t,x,y)
         ctx.translate(0,fontHeight*1.1)
     })
@@ -395,4 +414,40 @@ function addFartCloud(x,y,playerId, size=1) {
         attackDistance: 64,
         lifetime: 0
     })
+}
+
+
+function drawButton(btn) {
+
+    ctx.save()
+    ctx.translate(btn.x,btn.y)
+    ctx.save()
+        // ctx.translate(level.width*(0.04+0.52),level.height*0.3)
+        ctx.beginPath();
+
+        ctx.fillStyle = "rgba(255,255,255,0.1)";
+        ctx.fillRect(0,0, btn.width, btn.height)
+
+        ctx.fillStyle = "rgba(120,120,120,0.5)";
+        ctx.globalCompositeOperation = "color-burn";
+       // ctx.fillStyle = "rgba(255,255,255,0.2)";
+        ctx.fillRect(0,0, btn.width*btn.loadingPercentage, btn.height)
+        ctx.closePath()
+        ctx.fill();
+    ctx.restore()
+
+    if (btn.text) {
+        var fontHeight = level.width*0.017  
+        ctx.font = fontHeight+"px Arial";
+        ctx.fillStyle = "white";
+        ctx.strokeStyle = "white";
+        ctx.textAlign = "center";
+        ctx.textBaseline='middle'
+        ctx.lineWidth = 0
+        ctx.font = level.width*0.02+"px Arial";
+        ctx.translate(btn.width*0.5,btn.height*0.5)
+        ctx.translate(0,-fontHeight*Math.max(0,btn.text.split('\n').length-1)*0.5)
+        fillTextMultiline(ctx,btn.text,0,0,fontHeight) 
+    }
+    ctx.restore()
 }

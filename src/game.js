@@ -2,8 +2,10 @@ console.log('no need to hide')
 var loadPromises = []
 var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
-var mousePlayers = [{pointerType: 'unknown', x: 0, y: 0, offsetCursorX: 0, offsetCursorY: 0,pressed: new Set(), pressedLastFrame: false}];
-var keyboardPlayers = [{}, {}];
+var mousePlayers = [];
+var mouses = [{pointerType: 'unknown', x: 0, y: 0, pressed: new Set()}]
+var keyboardPlayers = [];
+var botPlayers = []
 var keyboards = [{bindings: {
     'KeyA': {playerId: 'k0', action: 'left'},
     'KeyD': {playerId: 'k0', action: 'right'},
@@ -87,8 +89,18 @@ var btnStart = {
 var btnMute = {
     width: 0,
     height: 0,
-    loadingSpeed: 1/3000
+    loadingSpeed: 1/3000,
+    execute: toggleMusic
 }
+
+var btnBots = {
+    width: 0,
+    height: 0,
+    loadingSpeed: 1/1500,
+    execute: toggleBots
+}
+
+var btnsLobby = [btnMute, btnBots]
 
 var btnTouchController = {
     radius: 0,
@@ -235,11 +247,16 @@ window.addEventListener('focus', () => {
 }, { passive: false })
 
 window.addEventListener('click', event => {
-    mousePlayers[0].pointerType = 'mouse'
+    
+    if (mousePlayers.length > 0) {mousePlayers[0].pointerType = 'mouse'}
+    mouses[0].pointerType = 'mouse'
+    
 }, { passive: false })
 
 window.addEventListener('touchstart', event => {
-    mousePlayers[0].pointerType = 'touch'
+    if (mousePlayers.length > 0) {mousePlayers[0].pointerType = 'touch'}
+    mouses[0].pointerType = 'touch'
+
     event.preventDefault();
 }, { passive: false });
 window.addEventListener('touchend', event => {
@@ -268,10 +285,13 @@ var windowHasFocus = false
 
 window.addEventListener('pointerdown', event => {
     if (!windowHasFocus) {
-        windowHasFocus = true
         return
     }
 
+    if (mousePlayers.length === 0) {mousePlayers.push(mouses[0])}
+
+  
+  
     if (event.pointerType === 'mouse') {
         mousePlayers[0].pressed.add(0);
     }
@@ -292,11 +312,14 @@ window.addEventListener('pointerdown', event => {
 
 
 window.addEventListener('pointerup', event => {
+    if (mousePlayers.length === 0 && windowHasFocus) {mousePlayers.push(mouses[0])}
+
     if (!windowHasFocus) {
         windowHasFocus = true
         return
     }
     
+   
     if (event.pointerType === 'mouse') {
         mousePlayers[0].pressed.delete(0);
     } 
@@ -311,6 +334,9 @@ window.addEventListener('pointerup', event => {
 });
 
 canvas.addEventListener('pointermove', event => {
+    if (!windowHasFocus) {
+        return
+    }
     mousePlayers[0].x = (event.clientX - canvas.offsetLeft - level.offsetX)/level.scale;
     mousePlayers[0].y = (event.clientY -  canvas.offsetTop - level.offsetY)/level.scale;
     event.preventDefault();
@@ -328,8 +354,9 @@ function gameInit(completeRestart) {
     multikillCounter = 0;
     lastTotalkillAudio = 0;
     totalkillCounter = 0;
-    btnStart = {...btnStart, x: level.width*(0.04+0.52), y: level.height*0.3, width: level.width*0.4, height: level.height*0.42,loadingPercentage: 0.0}
-    btnMute = {...btnMute, x: btnStart.x + btnStart.width - level.width*0.12, y: level.height*0.1, width: level.width*0.12, height: level.height*0.1,loadingPercentage: 0.0}
+    Object.assign(btnStart, {x: level.width*(0.04+0.52), y: level.height*0.3, width: level.width*0.4, height: level.height*0.42,loadingPercentage: 0.0})
+    Object.assign(btnMute,{x: btnStart.x + btnStart.width - level.width*0.12, y: level.height*0.1, width: level.width*0.12, height: level.height*0.1,loadingPercentage: 0.0})
+    Object.assign(btnBots,{x: btnStart.x + btnStart.width - level.width*0.12, y: level.height*0.8, width: level.width*0.12, height: level.height*0.1,loadingPercentage: 0.0})
     var activePlayerIds = figures.filter(f => f.playerId && f.type === 'fighter').map(f => f.playerId)
     var oldFigures = figures
     figures = []
@@ -381,11 +408,6 @@ function gameInit(completeRestart) {
         }
 
         figures.push(figure)
-
-        /*mousePlayers.forEach(mp => {
-            mp.offsetCursorX = -level.width*0.1+Math.random()*level.width*0.2
-            mp.offsetCursorY = -level.height*0.1+Math.random()*level.height*0.2
-        })*/
     }
     figures.push({
         id: 1,
@@ -480,6 +502,61 @@ function gameLoop() {
         fpsTime = now
         fps = Math.floor(1000/dt)
     }
+    botPlayers = []
+
+    for (var b = 0; b < getBotCount(); b++) {
+
+        var bot = {
+            type: 'bot',
+            isAttackButtonPressed: true,
+            isAnyButtonPressed: true,
+            xAxis: 0,
+            yAxis: 0,
+            isMoving: true,
+            playerId: 'b' + b
+        }
+
+        var f = figures.find(f => f.playerId ===  bot.playerId && f.type === 'fighter')
+        
+        if (f && !f.isDead) {
+            var xTarget = -1000
+            var yTarget = -1000
+    
+            if (!isGameStarted) {
+                xTarget = btnStart.x + btnStart.width*0.5 - f.x
+                yTarget = btnStart.y + btnStart.height*0.5 - f.y
+            } else {
+
+                var beans = figures.filter(b => b.type === 'bean')
+                
+                if (f.beans.length === beans.length) {
+                    xTarget = level.width * 0.5
+                    yTarget = leve.height * 0.5
+                    if (distance(f.x,f.y,xTarget, yTarget)) {
+                        bot.isAttackButtonPressed = true
+                    }
+                } else {
+                    beans.forEach(b => {
+                        if (!f.beans.has(b.id)) {
+                            if (distance(f.x,f.y,b.x,b.y) < distance(f.x,f.y,xTarget,yTarget)) {
+                                xTarget = b.x
+                                yTarget = b.y
+                            }
+                        }
+                    });
+                }
+            }
+    
+            bot.xAxis = xTarget
+            bot.yAxis = yTarget
+    
+        }
+
+        bot.isMoving = bot.xAxis + bot.yAxis > 4;
+       
+        botPlayers.push(bot)
+    }
+
     gamepadPlayers = navigator.getGamepads().filter(x => x && x.connected).map(g => {
         g.isAttackButtonPressed = false
         g.isAnyButtonPressed = false
@@ -516,21 +593,31 @@ function gameLoop() {
             if (binding) {
                 const action = binding.action;
                 let p = keyboardPlayers.find(kp => binding.playerId ===  kp.playerId);
+                let isNew = false
+                if (!p) {
+                    isNew = true
+                    p = {}
+                }
                 switch (action) {
                     case 'left':
                         p.xAxis--;
+                        isNew && keyboardPlayers.push(p)
                         break;
                     case 'right':
                         p.xAxis++;
+                        isNew && keyboardPlayers.push(p)
                         break;
                     case 'up':
                         p.yAxis--;
+                        isNew && keyboardPlayers.push(p)
                         break;
                     case 'down':
                         p.yAxis++;
+                        isNew && keyboardPlayers.push(p)
                         break;
                     case 'attack':
                         p.isAttackButtonPressed = true
+                        isNew && keyboardPlayers.push(p)
                         break;
                     default:
                         break;
@@ -544,17 +631,14 @@ function gameLoop() {
     mousePlayers.forEach((mp,i) => {
         mp.type = 'mouse'
         mp.playerId = 'm' + i
-        mp.isAttackButtonPressed = mp.pressed.has(0)// && mp.pressedLastFrame || false
-        mp.pressedLastFrame = mp.pressed.has(0)
+        mp.isAttackButtonPressed = mp.pressed.has(0)
         mp.xAxis = 0
         mp.yAxis = 0
         mp.isMoving = 0
 
         var f = figures.find(f => f.playerId ===  mp.playerId && f.type === 'fighter')
         if (f) {
-           
-
-            if (mousePlayers[0].pointerType === 'touch') {
+            if (mp.pointerType === 'touch') {
                 let touchLocalX = (btnTouchController.x - canvas.offsetLeft - level.offsetX)/level.scale;
                 let touchLocalY = (btnTouchController.y - canvas.offsetTop - level.offsetY)/level.scale;
                 let x = mp.x - touchLocalX
@@ -570,7 +654,7 @@ function gameLoop() {
                 mp.isMoving = Math.abs(mp.xAxis) + Math.abs(mp.yAxis) > 4
                
 
-            } else if (mousePlayers[0].pointerType === 'mouse') {
+            } else if (mp.pointerType === 'mouse') {
                 let x = mp.x- (canvas.width*0.5-canvas.offsetLeft-level.offsetX)/level.scale;
                 let y = mp.y- (canvas.height*0.5-canvas.offsetTop-level.offsetY)/level.scale
                 mp.xAxis = x
@@ -581,8 +665,8 @@ function gameLoop() {
         }
        
     })
-   
-    let players = [...gamepadPlayers, ...keyboardPlayers, ...mousePlayers];
+
+    let players = [...gamepadPlayers, ...keyboardPlayers, ...mousePlayers, ...botPlayers];
     const oldNumberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.map(f => f.type === 'fighter' && f.playerId).includes(k.playerId)).length;
 
     dtToProcess += dt
@@ -672,20 +756,22 @@ function updateGame(figures, dt, dtProcessed) {
             restartGame = true;
         }
 
-        var playersNearMute = playersWithId.filter(f => isInRect(f.x,f.y+f.imageAnim.height*0.5,btnMute.x,btnMute.y,btnMute.width,btnMute.height))
-        btnMute.playersNearMute = playersNearMute
-        if (playersNearMute.length > 0) {
-            btnMute.loadingPercentage += btnMute.loadingSpeed * dt;
-        } else {
-            btnMute.loadingPercentage -= btnMute.loadingSpeed * dt
-        }
-        btnMute.loadingPercentage = btnMute.loadingPercentage > 0 ? btnMute.loadingPercentage : 0;
-
-        if (btnMute.loadingPercentage > 1) {
-            btnMute.loadingPercentage = 0
-            toggleMusic()
-            // TODO
-        }
+  
+        btnsLobby.forEach(btn => {
+            btn.playersNear = playersWithId.filter(f => isInRect(f.x,f.y+f.imageAnim.height*0.5,btn.x,btn.y,btn.width,btn.height))
+            if (btn.playersNear.length > 0) {
+                btn.loadingPercentage += btn.loadingSpeed * dt;
+            } else {
+                btn.loadingPercentage -= btn.loadingSpeed * dt
+            }
+            btn.loadingPercentage = btn.loadingPercentage > 0 ? btn.loadingPercentage : 0;
+    
+            if (btn.loadingPercentage > 1) {
+                btn.loadingPercentage = 0
+                btn.execute()
+            }
+        })
+       
 
 
         figuresDead.forEach(f => {if (dtProcessed-f.killTime > deadDuration) {
@@ -707,13 +793,13 @@ function updateGame(figures, dt, dtProcessed) {
     })
     
     let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter');
-    figures.filter(f => f.type === 'bean').forEach(f => {
+    figures.filter(b => b.type === 'bean').forEach(b => {
         playerFigures.forEach(fig => {
-            if (distance(f.x,f.y,fig.x,fig.y + f.imageAnim.height*0.5) < f.attackDistance) {
-                if (!fig.beans.has(f.id)) {
+            if (distance(b.x,b.y,fig.x,fig.y + b.imageAnim.height*0.5) < b.attackDistance) {
+                if (!fig.beans.has(b.id)) {
                     playAudio(soundEat[fig.beans.size]);
-                    fig.beans.add(f.id);
-                    f.lastAttackTime = dtProcessed
+                    fig.beans.add(b.id);
+                    b.lastAttackTime = dtProcessed
                 }
             }
         })
@@ -738,13 +824,20 @@ function updateGame(figures, dt, dtProcessed) {
 }
 
 function handleInput(players, figures, dtProcessed) {
+    
+    // player join first
+    var joinedPlayersNotBot = players.filter(p => p.type !== 'bot')
     // join by doing anything
     players.filter(p => p.isAnyButtonPressed || p.isAttackButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
+        if (p.type === 'bot' && joinedPlayersNotBot.length === 0) {
+            return
+        }
         var figure = figures.find(f => f.playerId === p.playerId && f.type === 'fighter')
         if (!figure) {
             var figure = figures.find(f => !f.playerId && f.type === 'fighter')
             figure.isDead = false
             figure.playerId = p.playerId
+            figure.x = level.width * 0.5
             playAudio(soundJoin);
             newPlayerIds.clear();
             newPlayerIds.add(figure.playerId);
