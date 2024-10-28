@@ -53,14 +53,21 @@ loadPromises.push(new Promise((resolve, reject) => {
     }
 }))
 
-var cloudImage = new Image()
-cloudImage.src = 'gfx/fart.png'
-/*loadPromises.push(new Promise((resolve, reject) => {
-    cloudImage.onload = () => {
-        cloudImage = colorize(cloudImage, 139.0/256,69.0/256,19.0/256)
+var imageArrow = new Image()
+imageArrow.src = 'gfx/arrow.png'
+loadPromises.push(new Promise((resolve, reject) => {
+    imageArrow.onload = () => {
         resolve()
     }
-}))*/
+}))
+
+var cloudImage = new Image()
+cloudImage.src = 'gfx/fart.png'
+loadPromises.push(new Promise((resolve, reject) => {
+    cloudImage.onload = () => {
+        resolve()
+    }
+}))
 var texture = new Image()
 texture.src = 'gfx/kacheln.png'
 loadPromises.push(new Promise((resolve, reject) => {
@@ -564,11 +571,11 @@ function gameLoop() {
                
 
             } else if (mousePlayers[0].pointerType === 'mouse') {
-                let x = mp.x- f.x;
-                let y = mp.y-f.y-playerImageAnim.height*0.5;
+                let x = mp.x- (canvas.width*0.5-canvas.offsetLeft-level.offsetX)/level.scale;
+                let y = mp.y- (canvas.height*0.5-canvas.offsetTop-level.offsetY)/level.scale
                 mp.xAxis = x
                 mp.yAxis = y   
-                mp.isMoving = Math.abs(mp.xAxis) + Math.abs(mp.yAxis) > 4
+                mp.isMoving = Math.abs(mp.xAxis) + Math.abs(mp.yAxis) > level.width*0.05
             }
         
         }

@@ -448,8 +448,9 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
 
   if (layer === 1) {
+    var mp = mousePlayers[0]
 
-    if (mousePlayers[0].pointerType === 'touch') {
+    if (mp.pointerType === 'touch') {
         ctx.save()
         var maxHeightWidth = Math.max(canvas.width, canvas.height)
         var minHeightWidth = Math.min(canvas.width, canvas.height)
@@ -463,7 +464,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.arc(0,0,btnTouchController.radius, 0, 2 * Math.PI)
             ctx.closePath()
             ctx.fill();
-            var xy = move(0,0,angle(0,0,mousePlayers[0].xAxis,mousePlayers[0].yAxis),btnTouchController.radius*0.5,mousePlayers[0].isMoving)
+            var xy = move(0,0,angle(0,0,mp.xAxis,mp.yAxis),btnTouchController.radius*0.5,mp.isMoving)
             ctx.translate(xy.x,xy.y)
             ctx.beginPath();
             ctx.fillStyle = "rgba(255,255,255,0.3)";
@@ -475,7 +476,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.translate(btnTouchAction.x,btnTouchAction.y)
         ctx.beginPath();
        
-        if (mousePlayers[0].isAttackButtonPressed) {
+        if (mp.isAttackButtonPressed) {
             ctx.fillStyle = "rgba(255,255,255,0.4)";
         } else {
             ctx.fillStyle = "rgba(255,255,255,0.3)";
@@ -489,13 +490,30 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.restore()
     } else {
         ctx.save()
-        ctx.beginPath();
-        ctx.translate(level.offsetX, level.offsetY)
-        ctx.scale(level.scale, level.scale)
-        ctx.arc(mousePlayers[0].x, mousePlayers[0].y, 5, 0, 2 * Math.PI);
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "rgba(0,0,0,0.5)";
-        ctx.stroke();
+       // ctx.beginPath();
+       var f = figures.find(f => f.playerId ===  mp.playerId && f.type === 'fighter')
+       const w = imageArrow.width*0.5
+       const h = imageArrow.height
+       const x  = -w*0.5
+       const y = -h*0.5
+
+       
+            ctx.translate(level.offsetX + level.scale*mp.x, level.offsetY + level.scale*mp.y)
+            ctx.scale(level.scale, level.scale)
+            //ctx.translate(-w*0.5,-h*0.5)
+            ctx.rotate(angle(0,0,mp.xAxis,mp.yAxis))
+            if (mp.isMoving) {
+                ctx.drawImage(imageArrow, 0,0, w, h,x, y, w,h)
+            } else {
+                //ctx.drawImage(imageArrow,0,0)
+                ctx.drawImage(imageArrow, w,0, w, h,x, y, w,h)
+            }
+     
+       
+       // ctx.arc(mp.x, mp.y, 5, 0, 2 * Math.PI);
+       // ctx.lineWidth = 1;
+       // ctx.strokeStyle = "rgba(0,0,0,0.5)";
+        //ctx.stroke();
         ctx.restore()
     }
   }
