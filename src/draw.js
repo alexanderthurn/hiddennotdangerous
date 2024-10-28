@@ -262,6 +262,9 @@ function draw(players, figures, dt, dtProcessed, layer) {
     if (layer === 1) {
         const playerFiguresSortedByPoints = playerFigures.toSorted((f1,f2) => f1.points - f2.points);
         playerFigures.forEach((f,i) => {
+            
+            var player = players.find(p => p.playerId === f.playerId)
+
             ctx.save()
             ctx.beginPath();
             const sortIndex = playerFiguresSortedByPoints.findIndex(fig => fig.playerId === f.playerId);
@@ -315,7 +318,13 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.translate(32+i*offx, level.height+32)
             }
 
-
+            if (player.type === 'bot') {
+                ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)'
+                ctx.lineWidth = 2
+            } else {
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)'
+                ctx.lineWidth = 1
+            }
             ctx.arc(0,0,24,0, 2 * Math.PI);
             ctx.fillStyle = fillStyle;
             ctx.fill();
@@ -340,7 +349,12 @@ function draw(players, figures, dt, dtProcessed, layer) {
                 ctx.textBaseline='middle'
                 ctx.lineWidth = 6
                 ctx.translate(0.5*level.width,level.height*0.3)
-                fillTextWithStroke(ctx,`Player ${i+1} wins`,0,0)
+                if (player.type === 'bot') {
+                    fillTextWithStroke(ctx,`Player ${i+1} (Bot) wins`,0,0)
+                } else {
+                    fillTextWithStroke(ctx,`Player ${i+1} wins`,0,0)
+                }
+
                 ctx.restore()
             }
         })
@@ -375,12 +389,23 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
     if (layer === 1) {
         ctx.save()
-        ctx.font = "16px serif";
+        ctx.font = "16px Arial";
         ctx.fillStyle = "white";
         ctx.textBaseline='top'
         ctx.textAlign = "right";
-        if (windowHasFocus)
-        ctx.fillText(fps + " FPS", canvas.width, 0);
+        if (windowHasFocus) {
+            ctx.fillText(fps + " FPS", canvas.width, 0);
+        } else {
+            
+        ctx.fillStyle = "black";
+            ctx.fillRect(canvas.width*0.0, canvas.height*0.25, canvas.width*1, canvas.height*0.5)
+            ctx.fillStyle = "white";
+            ctx.textBaseline='middle'
+            ctx.textAlign = "center";
+            ctx.font = canvas.width*0.05 + "px Arial";
+            ctx.fillText(isGameStarted ? 'Pause' : 'Welcome to Stealthy Stinkers', canvas.width*0.5, canvas.height*0.5);
+        }
+        
       ctx.restore()
     }
 

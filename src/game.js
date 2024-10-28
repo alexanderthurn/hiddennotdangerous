@@ -2,6 +2,7 @@ console.log('no need to hide')
 var loadPromises = []
 var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
+var gamepadPlayers = []
 var mousePlayers = [];
 var mouses = [{pointerType: 'unknown', x: 0, y: 0, pressed: new Set()}]
 var keyboardPlayers = [];
@@ -89,7 +90,7 @@ var btnStart = {
 var btnMute = {
     width: 0,
     height: 0,
-    loadingSpeed: 1/3000,
+    loadingSpeed: 1/2500,
     execute: toggleMusic
 }
 
@@ -407,6 +408,12 @@ function gameInit(completeRestart) {
             figure.points = oldFigures.find(f => f.playerId == figure.playerId).points
         }
 
+        if (completeRestart) {
+            gamepadPlayers = []
+            mousePlayers = []
+            keyboardPlayers = []
+        }
+
         figures.push(figure)
     }
     figures.push({
@@ -503,7 +510,6 @@ function gameLoop() {
         fps = Math.floor(1000/dt)
     }
     botPlayers = []
-
     for (var b = 0; b < getBotCount(); b++) {
 
         var bot = {
@@ -532,7 +538,7 @@ function gameLoop() {
                 if (f.beans.size === beans.length) {
                     xTarget = level.width * 0.5
                     yTarget = level.height * 0.5
-                    if (distance(f.x,f.y,xTarget, yTarget) < level.width*0.05) {
+                    if (distance(f.x,f.y,xTarget, yTarget) < 50) {
                         bot.isAttackButtonPressed = true
                     }
                 } else {
@@ -556,7 +562,20 @@ function gameLoop() {
         botPlayers.push(bot)
     }
 
-    gamepadPlayers = navigator.getGamepads().filter(x => x && x.connected).map(g => {
+    navigator.getGamepads().filter(x => x && x.connected).map(x => {
+        var gamepadPlayerIndex = gamepadPlayers.findIndex(g => g.id === x.id && g.index === x.index)
+        if (gamepadPlayerIndex < 0) {
+            if (x.buttons.some(b => b.pressed)) {
+                gamepadPlayers.push(x)
+            }
+        } else {
+            gamepadPlayers[gamepadPlayerIndex] = x
+            //gamepadPlayers[gamepadPlayerIndex].buttons = x.buttons
+            //gamepadPlayers[gamepadPlayerIndex].axes = x.axes
+        }
+    })
+
+    gamepadPlayers.forEach(g => {
         g.isAttackButtonPressed = false
         g.isAnyButtonPressed = false
         if (g.buttons[0].pressed) {
@@ -668,17 +687,27 @@ function gameLoop() {
     let players = [...gamepadPlayers, ...keyboardPlayers, ...mousePlayers, ...botPlayers];
     const oldNumberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.map(f => f.type === 'fighter' && f.playerId).includes(k.playerId)).length;
 
-    dtToProcess += dt
-    while(dtToProcess > dtFix) {
-        if (!restartGame) {
-            handleInput(players, figures, dtProcessed)
-            handleAi(figures, dtProcessed, oldNumberJoinedKeyboardPlayers, dtFix)
-            updateGame(figures, dtFix,dtProcessed)
+    // remove figures without valid playerId
+    figures.filter(f => f.playerId).forEach((f) => {
+        if (!players.some(p => p.playerId === f.playerId)) {
+            f.playerId = null
         }
-        dtToProcess-=dtFix
-        dtProcessed+=dtFix
+    })
+
+    if (windowHasFocus) {
+        dtToProcess += dt
+        while(dtToProcess > dtFix) {
+            if (!restartGame) {
+                handleInput(players, figures, dtProcessed)
+                handleAi(figures, dtProcessed, oldNumberJoinedKeyboardPlayers, dtFix)
+                updateGame(figures, dtFix,dtProcessed)
+            }
+            dtToProcess-=dtFix
+            dtProcessed+=dtFix
+        }
+        
     }
-    
+   
     draw(players, figures, dt, dtProcessed, 0);
     draw(players, figures, dt, dtProcessed, 1);
     then = now
@@ -825,14 +854,15 @@ function updateGame(figures, dt, dtProcessed) {
 function handleInput(players, figures, dtProcessed) {
     
     // player join first
-    var joinedPlayersNotBot = players.filter(p => p.type !== 'bot')
+    var joinedFighters = figures.filter(f => f.playerId)
     // join by doing anything
     players.filter(p => p.isAnyButtonPressed || p.isAttackButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
-        if (p.type === 'bot' && joinedPlayersNotBot.length === 0) {
-            return
-        }
+
         var figure = figures.find(f => f.playerId === p.playerId && f.type === 'fighter')
         if (!figure) {
+            if (p.type === 'bot' && joinedFighters.length === 0) {
+                return
+            }
             var figure = figures.find(f => !f.playerId && f.type === 'fighter')
             figure.isDead = false
             figure.playerId = p.playerId
