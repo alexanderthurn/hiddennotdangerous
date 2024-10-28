@@ -79,7 +79,8 @@ var btnStart = {
     radius: level.width*0.1,
     width: 0,
     height: 0,
-    loadingSpeed: 1/3000
+    loadingSpeed: 1/3000,
+    loadingPercentage: 0
 }
 
 var btnMute = {
@@ -698,43 +699,27 @@ function updateGame(figures, dt, dtProcessed) {
         var playersNear = playersWithId.filter(f => isInRect(f.x,f.y+f.imageAnim.height*0.5,btnStart.x,btnStart.y,btnStart.width,btnStart.height))
         btnStart.playersNear = playersNear
         btnStart.playersPossible = playersWithId
+        const maxLoadingPercentage = playersWithId.length > 1 ? playersNear.length / playersWithId.length : playersNear.length*0.5;
+        const minLoadingPercentage = Math.max(playersNear.length-1, 0) / Math.max(playersWithId.length, 1);
 
-        if (playersNear.length > 0) {
-            btnStart.playerPercentage = playersNear.length / playersWithId.length;
-
-            if (playersWithId.length > 1 && playersNear.length === playersWithId.length) {
-                btnStart.loadingPercentage += btnStart.loadingSpeed * dt;
-            } else if (playersNear.length > 0) {
-                btnStart.loadingPercentage += btnStart.loadingSpeed * dt;
-                if ( btnStart.loadingPercentage > btnStart.playersNear.length / btnStart.playersPossible.length) {
-                    btnStart.loadingPercentage = btnStart.playersNear.length / btnStart.playersPossible.length
-                }
-                if (btnStart.playersPossible.length === 1) {
-                    btnStart.loadingPercentage = Math.min(0.5, btnStart.loadingPercentage)
-                }
-            } else {
-                btnStart.loadingPercentage -= btnStart.loadingSpeed * dt
-            }
+        if (btnStart.loadingPercentage <= maxLoadingPercentage) {
+            btnStart.loadingPercentage += btnStart.loadingSpeed * dt;
+            btnStart.loadingPercentage = Math.min(btnStart.loadingPercentage, maxLoadingPercentage);
         } else {
-            btnStart.loadingPercentage -= btnStart.loadingSpeed * dt
+            btnStart.loadingPercentage -= btnStart.loadingSpeed * dt;
+            btnStart.loadingPercentage = Math.max(btnStart.loadingPercentage, minLoadingPercentage);
         }
-        btnStart.loadingPercentage = btnStart.loadingPercentage > 0 ? btnStart.loadingPercentage : 0;
-        if (btnStart.loadingPercentage > 1) {
+        if (btnStart.loadingPercentage >= 1) {
             restartGame = true;
         }
 
         var playersNearMute = playersWithId.filter(f => isInRect(f.x,f.y+f.imageAnim.height*0.5,btnMute.x,btnMute.y,btnMute.width,btnMute.height))
         btnMute.playersNearMute = playersNearMute
-        btnMute.playersPossible = playersWithId
         if (playersNearMute.length > 0) {
-            btnMute.playerPercentage = 1
             btnMute.loadingPercentage += btnMute.loadingSpeed * dt;
         } else {
-            btnMute.playerPercentage = 0
             btnMute.loadingPercentage -= btnMute.loadingSpeed * dt
         }
-
-        
         btnMute.loadingPercentage = btnMute.loadingPercentage > 0 ? btnMute.loadingPercentage : 0;
 
         if (btnMute.loadingPercentage > 1) {
