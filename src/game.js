@@ -334,7 +334,7 @@ window.addEventListener('pointerup', event => {
 });
 
 canvas.addEventListener('pointermove', event => {
-    if (!windowHasFocus) {
+    if (!windowHasFocus || mousePlayers.length < 1) {
         return
     }
     mousePlayers[0].x = (event.clientX - canvas.offsetLeft - level.offsetX)/level.scale;
@@ -371,7 +371,7 @@ function gameInit(completeRestart) {
             yTarget,
             maxBreakDuration: 5000,
             startWalkTime: Math.random() * 5000 + dtProcessed,
-            maxSpeed: 0.08,
+            maxSpeed: 0.28,
             speed: 0,
             isDead: false, 
             playerId: null,
@@ -508,8 +508,8 @@ function gameLoop() {
 
         var bot = {
             type: 'bot',
-            isAttackButtonPressed: true,
-            isAnyButtonPressed: true,
+            isAttackButtonPressed: false,
+            isAnyButtonPressed: !isGameStarted,
             xAxis: 0,
             yAxis: 0,
             isMoving: true,
@@ -523,16 +523,16 @@ function gameLoop() {
             var yTarget = -1000
     
             if (!isGameStarted) {
-                xTarget = btnStart.x + btnStart.width*0.5 - f.x
-                yTarget = btnStart.y + btnStart.height*0.5 - f.y
+                xTarget = btnStart.x + btnStart.width*0.5
+                yTarget = btnStart.y + btnStart.height*0.5
             } else {
 
                 var beans = figures.filter(b => b.type === 'bean')
                 
-                if (f.beans.length === beans.length) {
+                if (f.beans.size === beans.length) {
                     xTarget = level.width * 0.5
-                    yTarget = leve.height * 0.5
-                    if (distance(f.x,f.y,xTarget, yTarget)) {
+                    yTarget = level.height * 0.5
+                    if (distance(f.x,f.y,xTarget, yTarget) < level.width*0.05) {
                         bot.isAttackButtonPressed = true
                     }
                 } else {
@@ -546,13 +546,12 @@ function gameLoop() {
                     });
                 }
             }
-    
-            bot.xAxis = xTarget
-            bot.yAxis = yTarget
+            bot.xAxis = xTarget - f.x
+            bot.yAxis = yTarget - f.y- f.imageAnim.height*0.5
     
         }
 
-        bot.isMoving = bot.xAxis + bot.yAxis > 4;
+        bot.isMoving = Math.abs(bot.xAxis) + Math.abs(bot.yAxis) > 4;
        
         botPlayers.push(bot)
     }
