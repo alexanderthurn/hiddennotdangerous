@@ -520,7 +520,7 @@ function gameLoop() {
             playerId: 'b' + b
         }
 
-        var f = figures.find(f => f.playerId ===  bot.playerId && f.type === 'fighter')
+        var f = figures.find(f => f.playerId === bot.playerId && f.type === 'fighter')
         
         if (f && !f.isDead) {
             var xTarget = -1000
@@ -532,15 +532,16 @@ function gameLoop() {
             } else {
                 var beans = figures.filter(b => b.type === 'bean')
                 if (f.beans.size === beans.length) {
-                    xTarget = level.width * 0.5
-                    yTarget = level.height * 0.5
+                    const otherPlayerFigures = figures.filter(fig => fig.playerId && fig.playerId !== f.playerId && f.type === 'fighter');
+                    xTarget = otherPlayerFigures.reduce((prevValue, fig) => prevValue+fig.x, 0)/otherPlayerFigures.length;
+                    yTarget = otherPlayerFigures.reduce((prevValue, fig) => prevValue+fig.y, 0)/otherPlayerFigures.length;
                     if (distance(f.x,f.y,xTarget, yTarget) < 50) {
                         bot.isAttackButtonPressed = true
                     }
                 } else {
                     beans.forEach((b, i, beans) => {
                         console.log(f.beans.size, i, beans.length-1);
-                        if (!f.beans.has(b.id) && (i < beans.length-1 || f.beans.size != 1)) {
+                        if (!f.beans.has(b.id) && (i < beans.length-1 || f.beans.size !== 1)) {
                             const beanTarget = {x: b.x, y: b.y-f.imageAnim.height*0.5}
                             let d1 = distance(f.x,f.y,beanTarget.x,beanTarget.y);
                             let d2 = distance(f.x,f.y,xTarget,yTarget);
