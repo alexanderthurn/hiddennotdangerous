@@ -268,19 +268,20 @@ window.addEventListener('keyup', event => {
 });
 window.addEventListener("contextmenu", e => e.preventDefault());
 
+var pointerEvents = {}
+
 window.addEventListener('pointerdown', event => {
-   
-    if (event.pointerType === 'mouse' && event.button === 0) {
+    if (event.pointerType === 'mouse') {
         mousePlayers[0].pressed.add(0);
-    } else {
-        mousePlayers[0].pressed.add(1);
     }
 
     if (event.pointerType === 'touch') {
-        if (event.clientX < canvas.width*0.7 || event.clientY < canvas.height * 0.5) {
+        if (event.clientX < (btnTouchAction.radius > 0 ?  btnTouchAction.x - btnTouchAction.radius : canvas.width*0.7) || event.clientY < canvas.height * 0.5) {
             mousePlayers[0].pressed.add(0);
+            pointerEvents[event.pointerId] = 0
         } else {
             mousePlayers[0].pressed.add(1);
+            pointerEvents[event.pointerId] = 1
         }
     } 
 
@@ -290,19 +291,13 @@ window.addEventListener('pointerdown', event => {
 
 
 window.addEventListener('pointerup', event => {
-
-    if (event.pointerType === 'mouse' && event.button === 0) {
+    if (event.pointerType === 'mouse') {
         mousePlayers[0].pressed.delete(0);
-    } else {
-        mousePlayers[0].pressed.delete(1);
-    }
+    } 
 
     if (event.pointerType === 'touch') {
-        if (event.clientX < canvas.width*0.7 || event.clientY < canvas.height * 0.5) {
-            mousePlayers[0].pressed.delete(0);
-        } else {
-            mousePlayers[0].pressed.delete(1);
-        }
+        mousePlayers[0].pressed.delete( pointerEvents[event.pointerId]);
+        delete pointerEvents[event.pointerId]
     } 
 
     event.preventDefault();
