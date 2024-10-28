@@ -542,16 +542,17 @@ function gameLoop() {
                 } else {
                     beans.forEach(b => {
                         if (!f.beans.has(b.id)) {
-                            if (distance(f.x,f.y,b.x,b.y) < distance(f.x,f.y,xTarget,yTarget)) {
-                                xTarget = b.x
-                                yTarget = b.y
+                            const beanTarget = {x: b.x, y: b.y-f.imageAnim.height*0.5}
+                            if (distance(f.x,f.y,beanTarget.x,beanTarget.y) < distance(f.x,f.y,xTarget,yTarget)) {
+                                xTarget = beanTarget.x;
+                                yTarget = beanTarget.y;
                             }
                         }
                     });
                 }
             }
             bot.xAxis = xTarget - f.x
-            bot.yAxis = yTarget - f.y- f.imageAnim.height*0.5
+            bot.yAxis = yTarget - f.y
     
         }
 
