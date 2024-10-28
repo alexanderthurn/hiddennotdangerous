@@ -238,12 +238,10 @@ window.addEventListener('keydown', event => {
 });
 
 window.addEventListener('blur', () => {
-    console.log('blur')
     windowHasFocus = false
 }, { passive: false })
 
 window.addEventListener('focus', () => {
-    console.log('focus')
     //windowHasFocus = true
 }, { passive: false })
 
@@ -857,7 +855,6 @@ function handleInput(players, figures, dtProcessed) {
     var joinedFighters = figures.filter(f => f.playerId)
     // join by doing anything
     players.filter(p => p.isAnyButtonPressed || p.isAttackButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
-
         var figure = figures.find(f => f.playerId === p.playerId && f.type === 'fighter')
         if (!figure) {
             if (p.type === 'bot' && joinedFighters.length === 0) {
@@ -872,7 +869,7 @@ function handleInput(players, figures, dtProcessed) {
             newPlayerIds.add(figure.playerId);
             newPlayerIdThen = dtProcessed
 
-            if (figures.filter(f => f.playerId).length == 1) {
+            if (joinedFighters.length === 0) {
                 if (!isMusicMuted()) {
                     playPlaylist(musicLobby);
                 }
