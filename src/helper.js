@@ -244,8 +244,8 @@ const tileMapFunc = (image, layer) => {
 }
 
 const shadowrize = (image, anim) => {
-    const tileWidth = anim.tileWidth
-    const tileHeight = anim.tileHeight
+    const tileWidth = anim.tileSpace
+    const tileHeight = anim.tileSpace
     const scale = 2
     const w = image.width / tileWidth
     const h = image.height / tileHeight
@@ -253,7 +253,7 @@ const shadowrize = (image, anim) => {
     const ctx = offscreen.getContext("2d");
     ctx.shadowColor = "rgba(0,0,0,0.5)"
     ctx.shadowOffsetX = -image.width*10;
-    ctx.shadowOffsetY = -8;
+    ctx.shadowOffsetY = -anim.tileWidth*0.5;
     ctx.shadowBlur = 2;
     
     for (var x = 0; x < w;x++) {
@@ -354,5 +354,45 @@ var fillTextMultiline = (ctx, text, x,y, fontHeight) => {
     text.split("\n").forEach(t => {
         ctx.fillText(t,x,y)
         ctx.translate(0,fontHeight*1.1)
+    })
+}
+
+function toggleMusic() {
+    if (isMusicMuted()) {
+        unmuteAudio()
+        if (isGameStarted) {
+            playPlaylist(shuffle(musicGame))
+        } else {
+            playPlaylist(musicLobby)
+        }
+    } else {
+        muteAudio()
+        if (isGameStarted) {
+            stopPlaylist(musicGame)
+        } else {
+            stopPlaylist(musicLobby)
+        }
+    }
+}
+
+function addFartCloud(x,y,playerId, size=1) {
+    figures.push({
+        type: 'cloud',
+        x,
+        y,
+        playerId, playerId,
+        image: cloudImage,
+        imageAnim: cloudImageAnim,    
+        speed: 0,
+        angle: 0,
+        anim: 0,
+        size: size,
+        scale: 0,
+        zIndex: 1000,
+        attackAngle: 360,
+        isAttacking: false,
+        attackDuration: 10000000,
+        attackDistance: 64,
+        lifetime: 0
     })
 }

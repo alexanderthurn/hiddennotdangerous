@@ -28,27 +28,21 @@ var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAud
 var level = {}
 var tileMap, tileMap2;
 var playerImage = new Image()
-playerImage.src = 'gfx/character_base_16x16.png' // 'gfx/character_base_topview_32x32.png' beuelerjong
-var playerImageScale = 1 // 2 beuelerjong
+playerImage.src = 'gfx/character_base_32x32.png' // 'gfx/character_base_topview_32x32.png' beuelerjong
 var playerImageAnim = {
-    width: 64,
-    height: 64,
-    tileWidth: 16*playerImageScale,
-    tileHeight: 16*playerImageScale,
+    width: 62,
+    height: 62,
+    tileWidth: 31,
+    tileHeight: 31,
+    tileSpace: 32,
     hasDirections: true,
     animDefaultSpeed: 0,
-    down: {a: [[0,0,16,16], [16,0,16,16], [32,0,16,16], [48,0,16,16]]},
-    up: {a: [[0,16,16,16], [16,16,16,16], [32,16,16,16], [48,16,16,16]]},
-    left: {a: [[0,48,16,16], [16,48,16,16], [32,48,16,16], [48,48,16,16]]},
-    right: {a: [[0,32,16,16], [16,32,16,16], [32,32,16,16], [48,32,16,16]]},
-    default: {a: [[0,0,16,16]]}
+    down: {a: [[0,0,31,31], [32*1,0,31,31], [32*2,0,31,31], [32*3,0,31,31]]},
+    up: {a: [[0,32*1,31,31], [32*1,32*1,31,31], [32*2,32*1,31,31], [32*3,32*1,31,31]]},
+    right: {a: [[0,32*2,31,31], [32*1,32*2,31,31], [32*2,32*2,31,31], [32*3,32*2,31,31]]},
+    left: {a: [[0,32*3,31,31], [32*1,32*3,31,31], [32*2,32*3,31,31], [32*3,32*3,31,31]]},
+    default: {a: [[0,0,31,31]]}
 }
-playerImageAnim.down.a = playerImageAnim.down.a.map(array => array.map(a => a*playerImageScale))
-playerImageAnim.up.a = playerImageAnim.up.a.map(array => array.map(a => a*playerImageScale))
-playerImageAnim.left.a = playerImageAnim.left.a.map(array => array.map(a => a*playerImageScale))
-playerImageAnim.right.a = playerImageAnim.right.a.map(array => array.map(a => a*playerImageScale))
-playerImageAnim.default.a = playerImageAnim.default.a.map(array => array.map(a => a*playerImageScale))
-
 
 var playerShadowImage
 var playerImageShadowAnim
@@ -238,23 +232,6 @@ window.addEventListener('touchmove', event => {
     event.preventDefault();
 }, { passive: false });
 
-function toggleMusic() {
-    if (isMusicMuted()) {
-        unmuteAudio()
-        if (isGameStarted) {
-            playPlaylist(shuffle(musicGame))
-        } else {
-            playPlaylist(musicLobby)
-        }
-    } else {
-        muteAudio()
-        if (isGameStarted) {
-            stopPlaylist(musicGame)
-        } else {
-            stopPlaylist(musicLobby)
-        }
-    }
-}
 
 window.addEventListener('keyup', event => {
     if (event.code === 'Escape') {
@@ -311,9 +288,6 @@ canvas.addEventListener('pointermove', event => {
     event.preventDefault();
     event.stopPropagation();
 }, false);
-
-
-
 
 
 function gameInit(completeRestart) {
@@ -467,29 +441,6 @@ function gameInit(completeRestart) {
         lastAttackTime: 0,
         attackDuration: beanAttackDuration
     });
-}
-
-
-function addFartCloud(x,y,playerId, size=1) {
-    figures.push({
-        type: 'cloud',
-        x,
-        y,
-        playerId, playerId,
-        image: cloudImage,
-        imageAnim: cloudImageAnim,    
-        speed: 0,
-        angle: 0,
-        anim: 0,
-        size: size,
-        scale: 0,
-        zIndex: 1000,
-        attackAngle: 360,
-        isAttacking: false,
-        attackDuration: 10000000,
-        attackDistance: 64,
-        lifetime: 0
-    })
 }
 
 function gameLoop() {
