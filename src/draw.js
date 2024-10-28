@@ -436,12 +436,12 @@ function draw(players, figures, dt, dtProcessed, layer) {
     
         ctx.save()
           ctx.textBaseline='bottom'
-          ctx.translate(0,canvas.height/level.scale)
-          figures.forEach((g,i) => {
+          ctx.translate(0,canvas.height)
+          figures.filter(f => f.playerId).forEach((g,i) => {
               ctx.fillText("playerId: " + g.playerId + " x: " + Math.floor(g.x) + " y: " + Math.floor(g.y) + " Beans: " + g.beans?.size,0,0) 
               ctx.translate(0,-16)
           })
-          ctx.fillText('Figures',0,0)
+          ctx.fillText('Figures with player',0,0)
         ctx.restore()
       ctx.restore()
   }
