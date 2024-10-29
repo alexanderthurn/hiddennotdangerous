@@ -1,10 +1,9 @@
 var networkIdLocal = localStorage.getItem('networkId') 
 if (!networkIdLocal) {
   networkIdLocal = crypto.randomUUID()
-  localStorage.set(networkIdLocal)
+  localStorage.setItem('networkId', networkIdLocal)
 }
 var networkIndexLocal = -1
-
 
 const MAX_NETWORK_INDEX = 255
 var networkIndexes = {}
@@ -17,6 +16,7 @@ var dataReceivedMethod = undefined
 
 const PEERMESSAGEID_TELL_NETWORKINDEXES = 0
 const PEERMESSAGEID_WANT_NETWORKINDEXES = 1
+const PEERMESSAGEID_TEXT = 2
 
 const iceServers = [
     {
@@ -124,6 +124,54 @@ function readAngleAsInt16(buffer, offset) {
 }
 
 
+// Funktion zum Schreiben eines Strings in den Buffer
+function writeTextToBuffer(buffer, offset, str) {
+  const encoder = new TextEncoder();
+  const stringBytes = encoder.encode(str);
+  const view = new DataView(buffer);
+
+  // Schreibe die Länge des Strings an den Offset
+  view.setUint16(offset, stringBytes.length);
+  offset += 2;
+
+  // Schreibe die String-Bytes in den Buffer
+  new Uint8Array(buffer, offset, stringBytes.length).set(stringBytes);
+
+  // Erhöhe den Offset um die Länge des Strings
+  offset += stringBytes.length;
+
+  // Rückgabe des neuen Offsets
+  return offset;
+}
+
+function getTextBufferLength(str) {
+  const encoder = new TextEncoder();
+  const stringBytes = encoder.encode(str);
+  return 2 + stringBytes.length; // 2 Bytes für die Länge des Strings + String-Bytes
+}
+
+function readTextFromBuffer(buffer, offset) {
+  const view = new DataView(buffer);
+
+  // Lese die Länge des Strings (2 Bytes)
+  const length = view.getUint16(offset);
+  offset += 2;
+
+  // Lese die String-Bytes
+  const stringBytes = new Uint8Array(buffer, offset, length);
+  const decoder = new TextDecoder();
+  const resultString = decoder.decode(stringBytes);
+
+  // Erhöhe den Offset um die gelesene Länge
+  offset += length;
+
+  // Rückgabe des Strings und des neuen Offsets
+  return { text: resultString, newOffset: offset };
+}
+
+
+
+
 function writeTwoBooleans(buffer, offset, bool1, bool2) {
   const view = new DataView(buffer);
   let byte = 0;
@@ -143,17 +191,17 @@ function readTwoBooleans(buffer, offset) {
 
 
 function getConnectedPeers(peer) {
-  return Object.entries(peer.connections)
+  return !peer ? [] : Object.entries(peer.connections)
   .map((k) => k[1][0]).filter(p => p && p.peerConnection.connectionState !== 'failed')
 }
 
-function sendJsonToPeers(jsonObject, peers) {
-  tlog('sending msg to ' + peers.length + ' peer(s): ' + JSON.stringify(jsonObject));
-  peers.forEach((k) => {k.send(jsonObject)});
+function sendMessageBufferToPeers(messageBuffer, peers) {
+  tlog('sending msg('+getMessageType(messageBuffer)+') to ' + peers.length + ' peer(s)');
+  peers.forEach((k) => {k.send(messageBuffer)});
 }
 
-function sendJsonToAllPeers(jsonObject) {
-  sendJsonToPeers(jsonObject, getConnectedPeers(peer))
+function sendMessageBufferToAllPeers(messageBuffer) {
+  sendMessageBufferToPeers(messageBuffer, getConnectedPeers(peer))
 }
 
 function assignNetworkIndexAndSend(peerId, peer, conn) {
@@ -164,42 +212,69 @@ function assignNetworkIndexAndSend(peerId, peer, conn) {
 
   let buffer = new ArrayBuffer(2)
   let view = new DataView(buffer)
-  view.setUint8(0, PEERMESSAGEID_ASSIGN_NETWORKID)
+  view.setUint8(0, PEERMESSAGEID_TELL_NETWORKINDEXES)
   view.setUint8(1, id)
   conn.send(buffer)
 }
 
-function handleMessageTellNetworkIndexes(buffer, peer, conn) {
-  let view = new DataView(buffer)
+function handleMessageBufferTellNetworkIndexes(messageBuffer, peer, conn) {
+  let view = new DataView(messageBuffer)
   let networkId = view.getUint8(2)
   networkIdLocal = networkId
 }
 
-function handleMessageWantNetworkIndexes(buffer, peer, conn) {
+function handleMessageBufferWantNetworkIndexes(messageBuffer, peer, conn) {
   assignNetworkIndexAndSend(conn.peer, peer, conn)
 }
 
-function internalDataReceivedMethod(buffer, peer, conn) {
-  const view = new DataView(buffer);
+function handleMessageBufferText(messageBuffer, peer, conn) {
+  var textAndOffset = readTextFromBuffer(messageBuffer, 1)
+  var text = textAndOffset.text
+  return text
+}
+
+function getMessageBufferText(text) {
+    let payloadLength = 1 + getTextBufferLength(text)
+    let buffer = new ArrayBuffer(payloadLength)
+    let view = new DataView(buffer)
+    let offset = 0
+    view.setUint8(0, PEERMESSAGEID_TEXT)
+    offset += 1
+    writeTextToBuffer(buffer,offset, text)
+  return buffer
+}
+
+function getMessageType(messageBuffer) {
+  const view = new DataView(messageBuffer);
   const messageType = view.getUint8(0);
+  return messageType
+}
+function internalDataReceivedMethod(messageBuffer, peer, conn) {
+  const messageType = getMessageType(messageBuffer)
   var result = 'unknown'
   try {
     switch (messageType) {
       case PEERMESSAGEID_TELL_NETWORKINDEXES:
-        result = handleMessageAssignNetworkId(buffer, peer, conn)
+        result = handleMessageBufferAssignNetworkId(messageBuffer, peer, conn)
+        break
       case PEERMESSAGEID_WANT_NETWORKINDEXES:
-        result = handleMessageWantNetworkId(buffer, peer, conn)
+        result = handleMessageBufferWantNetworkId(messageBuffer, peer, conn)
+        break
+      case PEERMESSAGEID_TEXT:
+        result = handleMessageBufferText(messageBuffer, peer, conn)
+        break
       default:
         if (dataReceivedMethod) {
-          result =  dataReceivedMethod(buffer, peer, conn)
+          result = dataReceivedMethod(messageBuffer, peer, conn)
         }
+        break
     }
   } catch(e) {
-    tlog('error', e)
+    tlog('error: ' + e.message + ' ' + messageType)
   }
- 
-  tlog('message received', messageType, result)
+ // tlog('received message('+messageType+'): '+ result)
 
+  return result
 }
 
 function initNetwork(roomName, options) {
@@ -218,7 +293,7 @@ function initNetwork(roomName, options) {
     conn.on('close', () => tlog('conn('+conn.peer+') closed'))
     conn.on('open', () => tlog('conn('+conn.peer+') opened'))
     conn.on('error', (err) => tlog('conn('+conn.peer+') error:' + err))
-    conn.on('data', (data) => {tlog('conn('+conn.peer+') data: ' + JSON.stringify(data)); internalDataReceivedMethod(data, peer, conn); /* sendJsonToPeers(data, getConnectedPeers(peer).filter(p => p.peer !== conn.peer))*/})
+    conn.on('data', (data) => {tlog('conn('+conn.peer+') data type('+getMessageType(data)+'): ' + internalDataReceivedMethod(data, peer, conn)) /* sendJsonToPeers(data, getConnectedPeers(peer).filter(p => p.peer !== conn.peer))*/})
   });
 
   peer.on('error', function (err) {
@@ -232,10 +307,10 @@ function initNetwork(roomName, options) {
         tlog('new peer: ' + id);
         tlog(`connecting to peer ${peerIdDefault} `);
         conn = peer.connect(peerIdDefault, {serialization: 'binary', reliable:false});
-        conn.on('close', () => {tlog('conn('+conn.peer+') closed'); initNetwork(options)})
+        conn.on('close', () => {tlog('conn('+conn.peer+') closed'); initNetwork(roomName, options)})
         conn.on('open', () => tlog('conn('+conn.peer+') opened'))
         conn.on('error', () => tlog('conn('+conn.peer+') error' + data))
-        conn.on('data', (data) => {tlog('conn('+conn.peer+') data: ' + JSON.stringify(data)); dataReceivedMethod(data, peer, conn)})
+        conn.on('data', (data) => {tlog('conn('+conn.peer+') data type('+getMessageType(data)+'): ' + internalDataReceivedMethod(data, peer, conn)) })
       });
 
     } else {

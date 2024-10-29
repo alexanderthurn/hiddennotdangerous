@@ -7,7 +7,7 @@ var PEERMESSAGEID_PLAYERSANDFIGURES = 17
 
 
 function sendMessagePlayersAndFigures(peerId, peer, conn) {
-    const dataToSend = getDataToSend()
+    const dataToSend = getPlayersAndFiguresDataToSend()
     const figuresToSend = dataToSend.figures
     const playersToSend = dataToSend.players
     const playerPayloadBytes = 4+1+1+1 // 2* floatUnitCircle aka 2 Byte (2*2 Bytes) + 1 * boolean (isActionButtonPressed, 1 Byte) + 1* int8 (playerIndex) + 1*int8 (networkIndex)
@@ -17,35 +17,42 @@ function sendMessagePlayersAndFigures(peerId, peer, conn) {
     let buffer = new ArrayBuffer(payloadLength)
     let view = new DataView(buffer)
     var offset = 0
+
+    // message id
     view.setUint8(0, PEERMESSAGEID_PLAYERSANDFIGURES)
     offset+=1
-    view.setUint8(1, players.length)
+
+    // number of players
+    view.setUint8(1, playersToSend.length)
     offset+=1
+
     playersToSend.forEach((p) => {
         writeUnitCircleFloatAsInt16(buffer, offset + 0, p.xAxis)
         writeUnitCircleFloatAsInt16(buffer, offset + 2, p.yAxis)
-        view.setUint8(buffer, offset + 4, p.isActionButtonPressed)
-        view.setUint8(buffer, offset + 5, p.networkIndex)
-        view.setUint8(buffer, offset + 6, p.playerIndex)
+        view.setUint8(offset + 4, p.isActionButtonPressed ? 1 : 0)
+        view.setUint8(offset + 5, p.networkIndex)
+        view.setUint8(offset + 6, p.playerIndex)
         offset += playerPayloadBytes
     })
 
-    view.setUint8(1, figures.length)
+    // number of figures
+    view.setUint8(2, figuresToSend.length)
     offset+=1
+
     figuresToSend.forEach((f) => {
-        view.setUint8(buffer, offset + 0, f.networkIndex)
-        view.setUint8(buffer, offset + 1, f.playerIndex)
+        view.setUint8(offset + 0, f.networkIndex)
+        view.setUint8(offset + 1, f.playerIndex)
         write3000erFloatAsInt16(buffer, offset + 2, f.x)
         write3000erFloatAsInt16(buffer, offset + 4, f.y)
         writeAngleAsInt16(buffer, offset + 6, f.angle)
+        offset+=figurePayloadBytes
     })
     conn.send(buffer)
-  }
+}
 
 
 const ctx = canvas.getContext("2d");
 var now, then
-var networkIdLocal = 0
 
 var keyboards = [{left: 65, up: 87, right: 68, down: 83, action: 69, peerId: '', index: 1}, {left: 37, up: 38, right: 39, down: 40, action: 96, peerId: '', index: 2}]
 var pressedKeys = {}; /* https://www.toptal.com/developers/keycode */
@@ -129,31 +136,24 @@ function render() {
         ctx.fillText(f.networkId + ':' + f.playerId,f.x,f.y); // Punkte
     })
 
-    var dataToSend = getDataToSend()
+    var dataToSend = getPlayersAndFiguresDataToSend()
     textareaCanvas1.value = JSON.stringify(players, null, 2)
     textareaCanvas2.value = JSON.stringify(figures,null, 2)
     textAreaCanvas3.value = JSON.stringify(dataToSend,null, 2)
+    textAreaCanvas4.value = JSON.stringify({peers: getConnectedPeers(), networkIndexes:networkIndexes},null, 2)
     document.getElementById('txtNetworkId').innerText = networkIdLocal
+    document.getElementById('txtNetworkIndex').innerText = networkIndexLocal
     document.getElementById('txtPeerId').innerText = peer?.id
 
 }
 
 document.addEventListener('DOMContentLoaded', function (event) {
-    networkIdLocal = Math.floor(Math.random() * 256)
-
 
     document
     .getElementById('btnSend')
     .addEventListener('click', function (event) {
       var message = document.getElementById('inputSend').value
-      var jsonObject = null
-      try {
-        jsonObject = JSON.parse(message)
-      } catch(e) {
-        jsonObject = {error: message}
-      }
-      
-      sendJsonToAllPeers(jsonObject)
+      sendMessageBufferToAllPeers(getMessageBufferText(message))
     });
   
     initNetwork('hiddennotdangerous', {logMethod: textareaLog, dataReceivedMethod: dataReceived})
@@ -174,6 +174,7 @@ function textareaLog(d) {
     } 
 
     document.getElementsByTagName('body')[0].style.backgroundColor = color
+    console.log(d)
 }
 
 function joinLocalPlayer() {
@@ -216,7 +217,7 @@ function dataReceived(d, peer, conn) {
     }
 }
 
-function getDataToSend() {
+function getPlayersAndFiguresDataToSend() {
     var jsonObject = {
 
     }
@@ -231,6 +232,7 @@ function getDataToSend() {
 
     return jsonObject
 }
+
 function sendData() {
    
 }
