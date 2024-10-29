@@ -5,6 +5,13 @@ const ctx = canvas.getContext("2d");
 var gamepadPlayers = []
 var mousePlayers = [];
 var mouses = [{pointerType: 'unknown', x: 0, y: 0, pressed: new Set()}]
+const defaultkeyboardPlayer = {
+    xAxis: 0,
+    yAxis: 0,
+    isMoving: false,
+    type: 'keyboard',
+    isAttackButtonPressed: false
+};
 var keyboardPlayers = [];
 var botPlayers = []
 var keyboards = [{bindings: {
@@ -540,7 +547,6 @@ function gameLoop() {
                     }
                 } else {
                     beans.forEach((b, i, beans) => {
-                        console.log(f.beans.size, i, beans.length-1);
                         if (!f.beans.has(b.id) && (i < beans.length-1 || f.beans.size !== 1)) {
                             const beanTarget = {x: b.x, y: b.y-f.imageAnim.height*0.5}
                             let d1 = distance(f.x,f.y,beanTarget.x,beanTarget.y);
@@ -601,15 +607,7 @@ function gameLoop() {
         return g
     });
 
-    keyboardPlayers.forEach((kp,i) => {
-        kp.xAxis = 0;
-        kp.yAxis = 0;
-        kp.isMoving = false;
-        kp.type = 'keyboard'
-        kp.playerId = 'k' + i
-        kp.isAttackButtonPressed = false
-    });
-
+    keyboardPlayers = keyboardPlayers.map((kp,i) => ({...defaultkeyboardPlayer, playerId: 'k' + i}));
     keyboards.forEach(k => {
         Array.from(k.pressed.values()).forEach(pressedButton => {
             const binding = k.bindings[pressedButton];
@@ -619,32 +617,28 @@ function gameLoop() {
                 let isNew = false
                 if (!p) {
                     isNew = true
-                    p = {}
+                    p = {...defaultkeyboardPlayer, playerId: keyboardPlayers.length};
                 }
                 switch (action) {
                     case 'left':
                         p.xAxis--;
-                        isNew && keyboardPlayers.push(p)
                         break;
                     case 'right':
                         p.xAxis++;
-                        isNew && keyboardPlayers.push(p)
                         break;
                     case 'up':
                         p.yAxis--;
-                        isNew && keyboardPlayers.push(p)
                         break;
                     case 'down':
                         p.yAxis++;
-                        isNew && keyboardPlayers.push(p)
                         break;
                     case 'attack':
                         p.isAttackButtonPressed = true
-                        isNew && keyboardPlayers.push(p)
                         break;
                     default:
                         break;
                 }
+                isNew && keyboardPlayers.push(p)
                 p.isMoving = p.xAxis !== 0 || p.yAxis !== 0;
             }
         })
@@ -870,7 +864,6 @@ function handleInput(players, figures, dtProcessed) {
             var figure = figures.find(f => !f.playerId && f.type === 'fighter')
             figure.isDead = false
             figure.playerId = p.playerId
-            figure.x = level.width * 0.5
             playAudio(soundJoin);
             newPlayerIds.clear();
             newPlayerIds.add(figure.playerId);
