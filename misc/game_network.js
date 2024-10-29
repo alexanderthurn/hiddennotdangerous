@@ -95,7 +95,7 @@ function render() {
     var dataToSend = getDataToSend()
     textareaCanvas1.value = JSON.stringify(players, null, 2)
     textareaCanvas2.value = JSON.stringify(figures,null, 2)
-    textAreaCanvas3.value = JSON.stringify(dataToSend)
+    textAreaCanvas3.value = JSON.stringify(dataToSend,null, 2)
     document.getElementById('txtNetworkId').innerText = networkIdLocal
     document.getElementById('txtPeerId').innerText = peer?.id
 
@@ -186,6 +186,7 @@ function getDataToSend() {
         jsonObject.players = players
     } else {
         jsonObject.players = players.filter(p => p.networkId === networkIdLocal)
+        jsonObject.figures = figures.filter(p => p.networkId === networkIdLocal)
     }
 
     return jsonObject
