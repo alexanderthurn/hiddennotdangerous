@@ -3,7 +3,44 @@ var textareaCanvas1 = document.getElementById('textAreaCanvas1')
 var textareaCanvas2 = document.getElementById('textAreaCanvas2')
 var textareaCanvas3 = document.getElementById('textAreaCanvas3')
 
+var PEERMESSAGEID_PLAYERSANDFIGURES = 17
 
+
+function sendMessagePlayersAndFigures(peerId, peer, conn) {
+    const dataToSend = getDataToSend()
+    const figuresToSend = dataToSend.figures
+    const playersToSend = dataToSend.players
+    const playerPayloadBytes = 4+1+1+1 // 2* floatUnitCircle aka 2 Byte (2*2 Bytes) + 1 * boolean (isActionButtonPressed, 1 Byte) + 1* int8 (playerIndex) + 1*int8 (networkIndex)
+    const figurePayloadBytes = 1+1+4+2 // 1*int8 (networkIndex) + 1* int8 (playerIndex) + 4  float3000 aka int16 (x/y) + 2 floatAngle aka int16 (angle)
+    const payloadLength = 1+(1+figuresToSend.length*figurePayloadBytes) + (1+playersToSend.length*playerPayloadBytes)
+
+    let buffer = new ArrayBuffer(payloadLength)
+    let view = new DataView(buffer)
+    var offset = 0
+    view.setUint8(0, PEERMESSAGEID_PLAYERSANDFIGURES)
+    offset+=1
+    view.setUint8(1, players.length)
+    offset+=1
+    playersToSend.forEach((p) => {
+        writeUnitCircleFloatAsInt16(buffer, offset + 0, p.xAxis)
+        writeUnitCircleFloatAsInt16(buffer, offset + 2, p.yAxis)
+        view.setUint8(buffer, offset + 4, p.isActionButtonPressed)
+        view.setUint8(buffer, offset + 5, p.networkIndex)
+        view.setUint8(buffer, offset + 6, p.playerIndex)
+        offset += playerPayloadBytes
+    })
+
+    view.setUint8(1, figures.length)
+    offset+=1
+    figuresToSend.forEach((f) => {
+        view.setUint8(buffer, offset + 0, f.networkIndex)
+        view.setUint8(buffer, offset + 1, f.playerIndex)
+        write3000erFloatAsInt16(buffer, offset + 2, f.x)
+        write3000erFloatAsInt16(buffer, offset + 4, f.y)
+        writeAngleAsInt16(buffer, offset + 6, f.angle)
+    })
+    conn.send(buffer)
+  }
 
 
 const ctx = canvas.getContext("2d");
@@ -140,9 +177,12 @@ function textareaLog(d) {
 }
 
 function joinLocalPlayer() {
-    var playerId = players.length
-    var player = {networkId: networkIdLocal, playerId: playerId, type: 'keyboard', xAxis: 0, yAxis: 0 }
-    var figure = {networkId: networkIdLocal, playerId: playerId, x: Math.random()*320, y:Math.random()*320}
+    if (!networkIndexLocal) {
+        return
+    }
+    var playerIndex = players.length
+    var player = {networkIndex: networkIndexLocal, playerIndex: playerIndex, type: 'keyboard', xAxis: 0, yAxis: 0 }
+    var figure = {networkIndex: networkIndexLocal, playerIndex: playerIndex, x: Math.random()*320, y:Math.random()*320, angle: 0}
 
     players.push(player)
     figures.push(figure)
@@ -154,8 +194,8 @@ function dataReceived(d, peer, conn) {
     var jsonObject = d
  
     if (jsonObject.players) {
-        jsonObject.players.filter(p => p.networkId !== networkIdLocal).forEach(p => {
-            var indexInArray = players.findIndex(pp => pp.networkId === p.networkId && pp.index === p.index)
+        jsonObject.players.filter(p => p.networkIndex !== networkIndexLocal).forEach(p => {
+            var indexInArray = players.findIndex(pp => pp.networkIndex === p.networkIndex && pp.playerIndex === p.playerIndex)
             if (indexInArray >= 0) {
                 players[indexInArray] = k
             } else {
@@ -165,8 +205,8 @@ function dataReceived(d, peer, conn) {
     }
 
     if (jsonObject.figures) {
-        jsonObject.figures.filter(p => p.networkId !== networkIdLocal).forEach(p => {
-            var indexInArray = figures.findIndex(pp => pp.networkId === p.networkId && pp.index === p.index)
+        jsonObject.figures.filter(p => p.networkIndex !== networkIndexLocal).forEach(p => {
+            var indexInArray = figures.findIndex(pp => pp.networkIndex === p.networkIndex && pp.playerIndex === p.playerIndex)
             if (indexInArray >= 0) {
                 figures[indexInArray] = k
             } else {
@@ -185,8 +225,8 @@ function getDataToSend() {
         jsonObject.figures = figures
         jsonObject.players = players
     } else {
-        jsonObject.players = players.filter(p => p.networkId === networkIdLocal)
-        jsonObject.figures = figures.filter(p => p.networkId === networkIdLocal)
+        jsonObject.players = players.filter(p => p.networkIndex === networkIndexLocal)
+        jsonObject.figures = figures.filter(p => p.networkIndex === networkIndexLocal)
     }
 
     return jsonObject
