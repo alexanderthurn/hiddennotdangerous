@@ -1,13 +1,24 @@
 var canvas = document.getElementById('canvas')
+var textareaCanvas1 = document.getElementById('textAreaCanvas1')
+var textareaCanvas2 = document.getElementById('textAreaCanvas2')
+var textareaCanvas3 = document.getElementById('textAreaCanvas3')
+
+
+
+
 const ctx = canvas.getContext("2d");
 var now, then
+var networkIdLocal = 0
+
 var keyboards = [{left: 65, up: 87, right: 68, down: 83, action: 69, peerId: '', index: 1}, {left: 37, up: 38, right: 39, down: 40, action: 96, peerId: '', index: 2}]
 var pressedKeys = {}; /* https://www.toptal.com/developers/keycode */
 window.onkeyup = function(e) { pressedKeys[e.keyCode] = false; }
-window.onkeydown = function(e) { pressedKeys[e.keyCode] =true; }
+window.onkeydown = function(e) { pressedKeys[e.keyCode] =true;  if (e.code === 'ArrowDown' || e.code === 'ArrowUp' || e.code === 'ArrowRight' || e.code === 'ArrowLeft') { /* prevent scrolling of website */
+    e.preventDefault();
+}}
 
-var players = [{playerIndex: 1, peerId: '', type: 'keyboard', keyboardIndex:1, xAxis: 0, yAxis: 0 }, {playerIndex: 2, peerId: '', type: 'keyboard', keyboardIndex:2, xAxis: 0, yAxis: 0}]
-var figures = [{playerIndex: 1, x: Math.random()*320, y:Math.random()*320}, {playerIndex: 2, x: Math.random()*320, y:Math.random()*320}]
+var players = []
+var figures = []
 
 document.addEventListener('DOMContentLoaded', function (event) {
     now = Date.now();
@@ -29,8 +40,8 @@ function gameLoop() {
 }
   
 function handleInput(dt) {
-    players.filter(p => p.peerId === 'local').forEach(p => {
-        var keyboard = keyboards[p.keyboardIndex]
+    players.filter(p => p.networkId === networkIdLocal).forEach((p,i) => {
+        var keyboard = keyboards[i % 2]
         p.xAxis = 0
         p.yAxis = 0
         p.isActionButtonPressed = pressedKeys[keyboard.action]
@@ -52,8 +63,8 @@ function handleInput(dt) {
 
 function update(dt) {
     figures.forEach(f => {
-        if (f.playerIndex) {
-            var p = players.find(p => f.playerIndex === p.playerIndex)
+        if (f.playerId !== undefined) {
+            var p = players.find(p => f.playerId === p.playerId)
             f.x += p.xAxis*0.1*dt
             f.y += p.yAxis*0.1*dt
         }
@@ -78,11 +89,22 @@ function render() {
     ctx.fillStyle = "white";
 
     figures.forEach(f => {
-        ctx.fillText(f.playerIndex,f.x,f.y); // Punkte
+        ctx.fillText(f.networkId + ':' + f.playerId,f.x,f.y); // Punkte
     })
+
+    var dataToSend = getDataToSend()
+    textareaCanvas1.value = JSON.stringify(players, null, 2)
+    textareaCanvas2.value = JSON.stringify(figures,null, 2)
+    textAreaCanvas3.value = JSON.stringify(dataToSend)
+    document.getElementById('txtNetworkId').innerText = networkIdLocal
+    document.getElementById('txtPeerId').innerText = peer?.id
+
 }
 
 document.addEventListener('DOMContentLoaded', function (event) {
+    networkIdLocal = Math.floor(Math.random() * 256)
+
+
     document
     .getElementById('btnSend')
     .addEventListener('click', function (event) {
@@ -117,53 +139,57 @@ function textareaLog(d) {
     document.getElementsByTagName('body')[0].style.backgroundColor = color
 }
 
-function findFreePlayerIndex(players) {
-    return players.map(p => p.playerIndex).sort().slice(-1)[0]
+function joinLocalPlayer() {
+    var playerId = players.length
+    var player = {networkId: networkIdLocal, playerId: playerId, type: 'keyboard', xAxis: 0, yAxis: 0 }
+    var figure = {networkId: networkIdLocal, playerId: playerId, x: Math.random()*320, y:Math.random()*320}
+
+    players.push(player)
+    figures.push(figure)
 }
+
+btnJoin.addEventListener('click', joinLocalPlayer)
+
 function dataReceived(d, peer, conn) {
     var jsonObject = d
-    var fromPeerId = conn.peer
-
-    if (jsonObject.keyboards) {
-        jsonObject.keyboards.forEach(k => {
-            var indexInArray = keyboards.findIndex(kk => fromPeerId === k.peerId && kk.index === k.index)
+ 
+    if (jsonObject.players) {
+        jsonObject.players.filter(p => p.networkId !== networkIdLocal).forEach(p => {
+            var indexInArray = players.findIndex(pp => pp.networkId === p.networkId && pp.index === p.index)
             if (indexInArray >= 0) {
-                keyboards[indexInArray] = k
+                players[indexInArray] = k
             } else {
-                k.peerId = fromPeerId
-                keyboards.push(k)
-                players.push({playerIndex: findFreePlayerIndex(), peerId: fromPeerId, type: 'keyboard', keyboardIndex:k.keyboardIndex, xAxis: 0, yAxis: 0 })
-                figures.push({playerIndex: player.playerIndex, peerId: fromPeerId, x: Math.random()*320, y:Math.random()*320})
+                players.push(p)
             }
         })
     }
 
-    if (jsonObject.players) {
-        players = jsonObject.players.map(p => {
-            if (isMaster()) { p.peerId = fromPeerId }
-            return p
-        })
-    }
     if (jsonObject.figures) {
-        figures = jsonObject.figures.map(f => {
-            if (isMaster()) { f.peerId = fromPeerId }
-            return f
+        jsonObject.figures.filter(p => p.networkId !== networkIdLocal).forEach(p => {
+            var indexInArray = figures.findIndex(pp => pp.networkId === p.networkId && pp.index === p.index)
+            if (indexInArray >= 0) {
+                figures[indexInArray] = k
+            } else {
+                figures.push(p)
+            }
         })
     }
-
 }
 
-function sendData() {
+function getDataToSend() {
     var jsonObject = {
 
     }
 
-    if (isMaster()) {
+    if (isMaster(peer)) {
         jsonObject.figures = figures
         jsonObject.players = players
     } else {
-        jsonObject.keyboards = keyboards
+        jsonObject.players = players.filter(p => p.networkId === networkIdLocal)
     }
 
-    document.getElementById('inputSend').value = JSON.stringify(jsonObject)
+    return jsonObject
+}
+function sendData() {
+   
 }

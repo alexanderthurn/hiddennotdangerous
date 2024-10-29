@@ -5,8 +5,21 @@
 </head>
 
 <body>
-    <canvas id="canvas" width="320" height="320"></canvas><br />
-
+    
+    <h2>Peer ID: <span id="txtPeerId"></span><br />Network ID: <span id="txtNetworkId"></span></h2>
+    <button id="btnJoin">Join local keyboard player</button>
+    <table>
+        <tr>
+            <th>canvas</th><th>players</th><th>figures</th><th>message</th>
+        </tr>
+        <tr>
+            <td><canvas id="canvas" width="320" height="480"></canvas></td>
+            <td><textarea id="textAreaCanvas1" rows="30" cols="40"></textarea></td>
+            <td><textarea id="textAreaCanvas2" rows="30" cols="40"></textarea></td>
+            <td><textarea id="textAreaCanvas3" rows="30" cols="40"></textarea></td>
+        </tr>
+    </table>
+      
     Message:<input size="256" type="text" id="inputSend" value="Welt" />
     <button id="btnSend">Send</button>
 
