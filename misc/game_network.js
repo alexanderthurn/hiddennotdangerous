@@ -2,6 +2,9 @@ var canvas = document.getElementById('canvas')
 var textareaCanvas1 = document.getElementById('textAreaCanvas1')
 var textareaCanvas2 = document.getElementById('textAreaCanvas2')
 var textareaCanvas3 = document.getElementById('textAreaCanvas3')
+var btnWantNetworkIndex = document.getElementById('btnWantNetworkIndex')
+var btnTellNetworkIndex = document.getElementById('btnTellNetworkIndex')
+var btnSend = document.getElementById('btnSend')
 
 var PEERMESSAGEID_PLAYERSANDFIGURES = 17
 
@@ -133,7 +136,7 @@ function render() {
     ctx.fillStyle = "white";
 
     figures.forEach(f => {
-        ctx.fillText(f.networkId + ':' + f.playerId,f.x,f.y); // Punkte
+        ctx.fillText(f.networkIndex + ':' + f.playerIndex,f.x,f.y); // Punkte
     })
 
     var dataToSend = getPlayersAndFiguresDataToSend()
@@ -149,13 +152,23 @@ function render() {
 
 document.addEventListener('DOMContentLoaded', function (event) {
 
-    document
-    .getElementById('btnSend')
+    btnSend
     .addEventListener('click', function (event) {
       var message = document.getElementById('inputSend').value
       sendMessageBufferToAllPeers(getMessageBufferText(message))
     });
   
+    btnWantNetworkIndex.addEventListener('click', function (event) {
+      var messageBuffer = getMessageBufferWantNetworkIndexes()
+      sendMessageBufferToAllPeers(messageBuffer)
+    });
+
+    btnTellNetworkIndex.addEventListener('click', function (event) {
+        var messageBuffer = getMessageBufferTellNetworkIndexes()
+        sendMessageBufferToAllPeers(messageBuffer)
+      });
+  
+
     initNetwork('hiddennotdangerous', {logMethod: textareaLog, dataReceivedMethod: dataReceived})
   
   })
@@ -178,7 +191,8 @@ function textareaLog(d) {
 }
 
 function joinLocalPlayer() {
-    if (!networkIndexLocal) {
+    if (networkIndexLocal < 0) {
+        sendMessageBufferToAllPeers(getMessageBufferWantNetworkIndexes())
         return
     }
     var playerIndex = players.length

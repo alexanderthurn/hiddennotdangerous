@@ -1,7 +1,7 @@
-var networkIdLocal = localStorage.getItem('networkId') 
+var networkIdLocal = sessionStorage.getItem('networkId') 
 if (!networkIdLocal) {
   networkIdLocal = crypto.randomUUID()
-  localStorage.setItem('networkId', networkIdLocal)
+  sessionStorage.setItem('networkId', networkIdLocal)
 }
 var networkIndexLocal = -1
 
@@ -12,7 +12,6 @@ var peer = undefined
 var tlog = undefined
 var peerIdDefault = undefined
 var dataReceivedMethod = undefined
-
 
 const PEERMESSAGEID_TELL_NETWORKINDEXES = 0
 const PEERMESSAGEID_WANT_NETWORKINDEXES = 1
@@ -59,13 +58,13 @@ function getNetworkIndex(networkId) {
 }
 
 function getNetworkIdForNetworkIndex(networkIndex) {
-  return Object.keys().find( key => networkIndexes[key] === networkIndex)
+  return Object.keys(networkIndexes).find( key => networkIndexes[key] === networkIndex)
 }
 
 function getFreeNetworkIndex() {
   var found = -1
   for (var i=0;i<=MAX_NETWORK_INDEX;i++) {
-     if (!getPeerIdForNetworkId()) {
+     if (!getNetworkIdForNetworkIndex(i)) {
       found = i
       break
      }
@@ -73,8 +72,9 @@ function getFreeNetworkIndex() {
   return found
 }
 
-function setNetworkId(networkId, networkIndex) {
+function setNetworkIndex(networkId, networkIndex) {
   networkIndexes[networkId] = networkIndex
+  return networkIndex
 }
 
 function isMaster(peer) {
@@ -166,10 +166,8 @@ function readTextFromBuffer(buffer, offset) {
   offset += length;
 
   // Rückgabe des Strings und des neuen Offsets
-  return { text: resultString, newOffset: offset };
+  return { text: resultString, offset: offset };
 }
-
-
 
 
 function writeTwoBooleans(buffer, offset, bool1, bool2) {
@@ -188,8 +186,6 @@ function readTwoBooleans(buffer, offset) {
   return { bool1, bool2 };
 }
 
-
-
 function getConnectedPeers(peer) {
   return !peer ? [] : Object.entries(peer.connections)
   .map((k) => k[1][0]).filter(p => p && p.peerConnection.connectionState !== 'failed')
@@ -204,6 +200,7 @@ function sendMessageBufferToAllPeers(messageBuffer) {
   sendMessageBufferToPeers(messageBuffer, getConnectedPeers(peer))
 }
 
+/*
 function assignNetworkIndexAndSend(peerId, peer, conn) {
   var index = getNetworkIndex(peerIndex)
   if (!index) {
@@ -216,15 +213,97 @@ function assignNetworkIndexAndSend(peerId, peer, conn) {
   view.setUint8(1, id)
   conn.send(buffer)
 }
+  */
 
 function handleMessageBufferTellNetworkIndexes(messageBuffer, peer, conn) {
-  let view = new DataView(messageBuffer)
-  let networkId = view.getUint8(2)
-  networkIdLocal = networkId
+   const view = new DataView(messageBuffer);
+   var offset = 1
+   var length = view.getUint8(offset);
+   offset+=1
+   for (var i = 0;i<length;i++) {
+      var textAndOffset = readTextFromBuffer(messageBuffer, offset)
+      var networkId = textAndOffset.text
+      offset=textAndOffset.offset
+      var networkIndex = view.getUint8(offset);
+      offset+=1
+      setNetworkIndex(networkId, networkIndex)
+   }
 }
 
+function getMessageBufferTellNetworkIndexes() {
+  let payloadLength = 1 + 1 // message type and length of keys
+  var keys = Object.keys(networkIndexes)
+  keys.forEach( key => {
+    payloadLength += getTextBufferLength(key)
+    payloadLength += 1 // networkIndex
+  })
+
+  let buffer = new ArrayBuffer(payloadLength)
+  let view = new DataView(buffer)
+  var offset = 0
+
+  // message id
+  view.setUint8(0, PEERMESSAGEID_TELL_NETWORKINDEXES)
+  offset+=1
+
+  // length of keys
+  view.setUint8(1, keys.length)
+  offset+=1
+
+  // add string and index
+  keys.forEach( key => {
+    offset = writeTextToBuffer(buffer, offset, key)
+    view.setUint8(offset, networkIndexes[key])
+    offset+=1
+  })
+
+  return buffer
+}
+
+//TODO: only keys work not values/entries?
+
 function handleMessageBufferWantNetworkIndexes(messageBuffer, peer, conn) {
-  assignNetworkIndexAndSend(conn.peer, peer, conn)
+  // assignNetworkIndexAndSend(conn.peer, peer, conn)
+  const view = new DataView(messageBuffer);
+  var offset = 1
+  var textAndOffset = readTextFromBuffer(messageBuffer, offset)
+  var networkId = textAndOffset.text
+  offset = textAndOffset.offset
+  const networkIndex = view.getUint8(offset);
+
+  var reply = getMessageBufferTellNetworkIndexes()
+
+  // check if user is already known and if not, add it
+  var index = getNetworkIndex(networkId)
+  if (index < 0) {
+    setNetworkIndex(networkId, getFreeNetworkIndex())
+    sendMessageBufferToAllPeers(reply)
+  } else {
+    sendMessageBufferToPeers(reply, [conn])
+  }
+
+  return 'todo'
+
+}
+
+function getMessageBufferWantNetworkIndexes() {
+  var networkId = networkIdLocal
+  var networkIndex = networkIndexLocal
+
+  let payloadLength = 1 + getTextBufferLength(networkId) + 1
+  let buffer = new ArrayBuffer(payloadLength)
+  let view = new DataView(buffer)
+  let offset = 0
+
+  view.setUint8(0, PEERMESSAGEID_WANT_NETWORKINDEXES)
+  offset += 1
+
+  offset = writeTextToBuffer(buffer,offset, networkId)
+
+  view.setUint8(offset, networkIndex)
+  offset += 1
+ 
+  return buffer
 }
 
 function handleMessageBufferText(messageBuffer, peer, conn) {
@@ -240,7 +319,7 @@ function getMessageBufferText(text) {
     let offset = 0
     view.setUint8(0, PEERMESSAGEID_TEXT)
     offset += 1
-    writeTextToBuffer(buffer,offset, text)
+    offset = writeTextToBuffer(buffer,offset, text)
   return buffer
 }
 
@@ -255,10 +334,10 @@ function internalDataReceivedMethod(messageBuffer, peer, conn) {
   try {
     switch (messageType) {
       case PEERMESSAGEID_TELL_NETWORKINDEXES:
-        result = handleMessageBufferAssignNetworkId(messageBuffer, peer, conn)
+        result = handleMessageBufferTellNetworkIndexes(messageBuffer, peer, conn)
         break
       case PEERMESSAGEID_WANT_NETWORKINDEXES:
-        result = handleMessageBufferWantNetworkId(messageBuffer, peer, conn)
+        result = handleMessageBufferWantNetworkIndexes(messageBuffer, peer, conn)
         break
       case PEERMESSAGEID_TEXT:
         result = handleMessageBufferText(messageBuffer, peer, conn)
@@ -287,7 +366,7 @@ function initNetwork(roomName, options) {
   peer = new Peer(peerIdDefault, {debug: 3, config: {iceServers: iceServers,}});
   peer.on('close', () => tlog('peer closed'))
   peer.on('disconnected', () => tlog('peer disconnected'))
-  peer.on('open', function (id) { tlog('peer open: ' + id); });
+  peer.on('open', function (id) { tlog('peer open: ' + id); networkIndexLocal = setNetworkIndex(networkIdLocal, getFreeNetworkIndex()) });
   peer.on('connection', function (conn) {
     tlog('peer connection: ' + conn.peer);
     conn.on('close', () => tlog('conn('+conn.peer+') closed'))
@@ -308,7 +387,7 @@ function initNetwork(roomName, options) {
         tlog(`connecting to peer ${peerIdDefault} `);
         conn = peer.connect(peerIdDefault, {serialization: 'binary', reliable:false});
         conn.on('close', () => {tlog('conn('+conn.peer+') closed'); initNetwork(roomName, options)})
-        conn.on('open', () => tlog('conn('+conn.peer+') opened'))
+        conn.on('open', () => {tlog('conn('+conn.peer+') opened'); sendMessageBufferToPeers(getMessageBufferWantNetworkIndexes(), [conn])})
         conn.on('error', () => tlog('conn('+conn.peer+') error' + data))
         conn.on('data', (data) => {tlog('conn('+conn.peer+') data type('+getMessageType(data)+'): ' + internalDataReceivedMethod(data, peer, conn)) })
       });
