@@ -165,6 +165,8 @@ function adjustLevelToCanvas(level, canvas) {
     level.scale = Math.min(canvas.width / level.width, canvas.height / level.height)*0.9
     level.offsetX = (canvas.width - level.scale * level.width) / 2
     level.offsetY = (canvas.height - level.scale * level.height) / 2
+    level.shortestPathNotBean5 = 2*0.6*level.height+2*0.3*Math.hypot(level.height, level.width);
+    level.shortestPathBean5 = 2*0.6*level.height+0.6*level.width+0.3*Math.hypot(level.height, level.width);
 }
 
 function getRandomXY(level) {

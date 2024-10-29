@@ -5,6 +5,13 @@ const ctx = canvas.getContext("2d");
 var gamepadPlayers = []
 var mousePlayers = [];
 var mouses = [{pointerType: 'unknown', x: 0, y: 0, pressed: new Set()}]
+const defaultkeyboardPlayer = {
+    xAxis: 0,
+    yAxis: 0,
+    isMoving: false,
+    type: 'keyboard',
+    isAttackButtonPressed: false
+};
 var keyboardPlayers = [];
 var botPlayers = []
 var keyboards = [{bindings: {
@@ -238,12 +245,10 @@ window.addEventListener('keydown', event => {
 });
 
 window.addEventListener('blur', () => {
-    console.log('blur')
     windowHasFocus = false
 }, { passive: false })
 
 window.addEventListener('focus', () => {
-    console.log('focus')
     //windowHasFocus = true
 }, { passive: false })
 
@@ -522,7 +527,7 @@ function gameLoop() {
             playerId: 'b' + b
         }
 
-        var f = figures.find(f => f.playerId ===  bot.playerId && f.type === 'fighter')
+        var f = figures.find(f => f.playerId === bot.playerId && f.type === 'fighter')
         
         if (f && !f.isDead) {
             var xTarget = -1000
@@ -532,29 +537,35 @@ function gameLoop() {
                 xTarget = btnStart.x + btnStart.width*0.5
                 yTarget = btnStart.y + btnStart.height*0.5
             } else {
-
                 var beans = figures.filter(b => b.type === 'bean')
-                
                 if (f.beans.size === beans.length) {
-                    xTarget = level.width * 0.5
-                    yTarget = level.height * 0.5
+                    const otherPlayerFigures = figures.filter(fig => fig.playerId && fig.playerId !== f.playerId && f.type === 'fighter');
+                    xTarget = otherPlayerFigures.reduce((prevValue, fig) => prevValue+fig.x, 0)/otherPlayerFigures.length;
+                    yTarget = otherPlayerFigures.reduce((prevValue, fig) => prevValue+fig.y, 0)/otherPlayerFigures.length;
                     if (distance(f.x,f.y,xTarget, yTarget) < 50) {
                         bot.isAttackButtonPressed = true
                     }
                 } else {
-                    beans.forEach(b => {
-                        if (!f.beans.has(b.id)) {
-                            if (distance(f.x,f.y,b.x,b.y) < distance(f.x,f.y,xTarget,yTarget)) {
-                                xTarget = b.x
-                                yTarget = b.y
+                    beans.forEach((b, i, beans) => {
+                        if (!f.beans.has(b.id) && (i < beans.length-1 || f.beans.size !== 1)) {
+                            const beanTarget = {x: b.x, y: b.y-f.imageAnim.height*0.5}
+                            let d1 = distance(f.x,f.y,beanTarget.x,beanTarget.y);
+                            let d2 = distance(f.x,f.y,xTarget,yTarget);
+                            if (f.beans.size === 0 && i === beans.length-1) {
+                                d1 += level.shortestPathBean5;
+                                d2 += level.shortestPathNotBean5;
+                            }
+                            if (d1 < d2) {
+                                xTarget = beanTarget.x;
+                                yTarget = beanTarget.y;
                             }
                         }
                     });
                 }
             }
+
             bot.xAxis = xTarget - f.x
-            bot.yAxis = yTarget - f.y- f.imageAnim.height*0.5
-    
+            bot.yAxis = yTarget - f.y
         }
 
         bot.isMoving = Math.abs(bot.xAxis) + Math.abs(bot.yAxis) > 4;
@@ -596,15 +607,7 @@ function gameLoop() {
         return g
     });
 
-    keyboardPlayers.forEach((kp,i) => {
-        kp.xAxis = 0;
-        kp.yAxis = 0;
-        kp.isMoving = false;
-        kp.type = 'keyboard'
-        kp.playerId = 'k' + i
-        kp.isAttackButtonPressed = false
-    });
-
+    keyboardPlayers = keyboardPlayers.map((kp,i) => ({...defaultkeyboardPlayer, playerId: 'k' + i}));
     keyboards.forEach(k => {
         Array.from(k.pressed.values()).forEach(pressedButton => {
             const binding = k.bindings[pressedButton];
@@ -614,32 +617,28 @@ function gameLoop() {
                 let isNew = false
                 if (!p) {
                     isNew = true
-                    p = {}
+                    p = {...defaultkeyboardPlayer, playerId: keyboardPlayers.length};
                 }
                 switch (action) {
                     case 'left':
                         p.xAxis--;
-                        isNew && keyboardPlayers.push(p)
                         break;
                     case 'right':
                         p.xAxis++;
-                        isNew && keyboardPlayers.push(p)
                         break;
                     case 'up':
                         p.yAxis--;
-                        isNew && keyboardPlayers.push(p)
                         break;
                     case 'down':
                         p.yAxis++;
-                        isNew && keyboardPlayers.push(p)
                         break;
                     case 'attack':
                         p.isAttackButtonPressed = true
-                        isNew && keyboardPlayers.push(p)
                         break;
                     default:
                         break;
                 }
+                isNew && keyboardPlayers.push(p)
                 p.isMoving = p.xAxis !== 0 || p.yAxis !== 0;
             }
         })
@@ -857,7 +856,6 @@ function handleInput(players, figures, dtProcessed) {
     var joinedFighters = figures.filter(f => f.playerId)
     // join by doing anything
     players.filter(p => p.isAnyButtonPressed || p.isAttackButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
-
         var figure = figures.find(f => f.playerId === p.playerId && f.type === 'fighter')
         if (!figure) {
             if (p.type === 'bot' && joinedFighters.length === 0) {
@@ -866,13 +864,12 @@ function handleInput(players, figures, dtProcessed) {
             var figure = figures.find(f => !f.playerId && f.type === 'fighter')
             figure.isDead = false
             figure.playerId = p.playerId
-            figure.x = level.width * 0.5
             playAudio(soundJoin);
             newPlayerIds.clear();
             newPlayerIds.add(figure.playerId);
             newPlayerIdThen = dtProcessed
 
-            if (figures.filter(f => f.playerId).length == 1) {
+            if (joinedFighters.length === 0) {
                 if (!isMusicMuted()) {
                     playPlaylist(musicLobby);
                 }
