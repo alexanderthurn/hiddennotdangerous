@@ -617,7 +617,7 @@ function gameLoop() {
                 let isNew = false
                 if (!p) {
                     isNew = true
-                    p = {...defaultkeyboardPlayer, playerId: keyboardPlayers.length};
+                    p = {...defaultkeyboardPlayer, playerId: 'k' + keyboardPlayers.length};
                 }
                 switch (action) {
                     case 'left':
