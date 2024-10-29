@@ -17,6 +17,20 @@ const PEERMESSAGEID_TELL_NETWORKINDEXES = 0
 const PEERMESSAGEID_WANT_NETWORKINDEXES = 1
 const PEERMESSAGEID_TEXT = 2
 
+const MessageTitles = {
+}
+MessageTitles[PEERMESSAGEID_TELL_NETWORKINDEXES] = 'TellIndexes'
+MessageTitles[PEERMESSAGEID_WANT_NETWORKINDEXES] = 'WantIndexes'
+MessageTitles[PEERMESSAGEID_TEXT] = 'Text'
+
+function getMessageTitleByType(messageId) {
+  if (MessageTitles[messageId]) {
+    return MessageTitles[messageId]
+  } else {
+    return messageId
+  }
+}
+
 const iceServers = [
     {
       urls: 'stun:stun.relay.metered.ca:80',
@@ -54,7 +68,12 @@ function getPeerId() {
 }
 
 function getNetworkIndex(networkId) {
-  return networkIndexes[networkId]
+  var index = networkIndexes[networkId]
+  if (index && index >= 0) {
+    return index
+  } else {
+    return -1
+  }
 }
 
 function getNetworkIdForNetworkIndex(networkIndex) {
@@ -200,21 +219,6 @@ function sendMessageBufferToAllPeers(messageBuffer) {
   sendMessageBufferToPeers(messageBuffer, getConnectedPeers(peer))
 }
 
-/*
-function assignNetworkIndexAndSend(peerId, peer, conn) {
-  var index = getNetworkIndex(peerIndex)
-  if (!index) {
-    index = getFreeNetworkIndex()
-  }
-
-  let buffer = new ArrayBuffer(2)
-  let view = new DataView(buffer)
-  view.setUint8(0, PEERMESSAGEID_TELL_NETWORKINDEXES)
-  view.setUint8(1, id)
-  conn.send(buffer)
-}
-  */
-
 function handleMessageBufferTellNetworkIndexes(messageBuffer, peer, conn) {
    const view = new DataView(messageBuffer);
    var offset = 1
@@ -227,7 +231,13 @@ function handleMessageBufferTellNetworkIndexes(messageBuffer, peer, conn) {
       var networkIndex = view.getUint8(offset);
       offset+=1
       setNetworkIndex(networkId, networkIndex)
-   }
+      if (networkId === networkIdLocal) {
+        networkIndexLocal = networkIndex
+      }
+    }
+
+
+   return 'received index: ' + networkIndexLocal
 }
 
 function getMessageBufferTellNetworkIndexes() {
@@ -277,6 +287,7 @@ function handleMessageBufferWantNetworkIndexes(messageBuffer, peer, conn) {
   var index = getNetworkIndex(networkId)
   if (index < 0) {
     setNetworkIndex(networkId, getFreeNetworkIndex())
+    reply = getMessageBufferTellNetworkIndexes()
     sendMessageBufferToAllPeers(reply)
   } else {
     sendMessageBufferToPeers(reply, [conn])
@@ -328,6 +339,10 @@ function getMessageType(messageBuffer) {
   const messageType = view.getUint8(0);
   return messageType
 }
+
+function getMessageTypeTitle(messageBuffer) {
+  return getMessageTitleByType(getMessageType(messageBuffer))
+}
 function internalDataReceivedMethod(messageBuffer, peer, conn) {
   const messageType = getMessageType(messageBuffer)
   var result = 'unknown'
@@ -349,7 +364,7 @@ function internalDataReceivedMethod(messageBuffer, peer, conn) {
         break
     }
   } catch(e) {
-    tlog('error: ' + e.message + ' ' + messageType)
+    tlog('error: ' + e.message + ' ' + getMessageTypeTitle(messageBuffer))
   }
  // tlog('received message('+messageType+'): '+ result)
 
@@ -372,7 +387,7 @@ function initNetwork(roomName, options) {
     conn.on('close', () => tlog('conn('+conn.peer+') closed'))
     conn.on('open', () => tlog('conn('+conn.peer+') opened'))
     conn.on('error', (err) => tlog('conn('+conn.peer+') error:' + err))
-    conn.on('data', (data) => {tlog('conn('+conn.peer+') data type('+getMessageType(data)+'): ' + internalDataReceivedMethod(data, peer, conn)) /* sendJsonToPeers(data, getConnectedPeers(peer).filter(p => p.peer !== conn.peer))*/})
+    conn.on('data', (data) => {tlog('conn('+conn.peer+') data type('+getMessageTypeTitle(data)+'): ' + internalDataReceivedMethod(data, peer, conn)) /* sendJsonToPeers(data, getConnectedPeers(peer).filter(p => p.peer !== conn.peer))*/})
   });
 
   peer.on('error', function (err) {
@@ -389,7 +404,7 @@ function initNetwork(roomName, options) {
         conn.on('close', () => {tlog('conn('+conn.peer+') closed'); initNetwork(roomName, options)})
         conn.on('open', () => {tlog('conn('+conn.peer+') opened'); sendMessageBufferToPeers(getMessageBufferWantNetworkIndexes(), [conn])})
         conn.on('error', () => tlog('conn('+conn.peer+') error' + data))
-        conn.on('data', (data) => {tlog('conn('+conn.peer+') data type('+getMessageType(data)+'): ' + internalDataReceivedMethod(data, peer, conn)) })
+        conn.on('data', (data) => {tlog('conn('+conn.peer+') data type('+getMessageTypeTitle(data)+'): ' + internalDataReceivedMethod(data, peer, conn)) })
       });
 
     } else {
