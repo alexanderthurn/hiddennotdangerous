@@ -65,7 +65,8 @@ const getAudio = (audio) => {
 
 const playAudio = (audio) => {
     const {file, ...props} = audio;
-    file.currentTime = 0;
+    file.load()
+    //file.currentTime = 0;
     Object.entries(props).forEach(([key, value]) => {
         if (value) {
             file[key] = value;
@@ -73,6 +74,23 @@ const playAudio = (audio) => {
     });
     file.play().catch((err) => {console.log(err)});
 }
+
+const playAudioPool = (audioPool, volume) => {
+    const freeAudioEntry = audioPool.find(entry => entry.audio.file.ended || !entry.played);
+    if (freeAudioEntry) {
+        freeAudioEntry.played = true;
+        if (volume) {
+            freeAudioEntry.audio.file.volume = volume;
+        }
+        playAudio(freeAudioEntry.audio);
+    }
+}
+
+const canPlayThroughCallback = (resolve, audio, callback) => {
+    audio.file.removeEventListener('canplaythrough', callback);
+    console.log('ohoh');
+    resolve();
+};
 
 const muteAudio = () => {
     window.localStorage.setItem('mute','true')
@@ -82,25 +100,6 @@ const unmuteAudio = () => {
 }
 const isMusicMuted = () => {
     return window.localStorage.getItem('mute') === 'true'
-}
-
-const getBotCount = () => {
-    var bots = parseInt(window.localStorage.getItem('bots'))
-    return isNaN(bots) ? 0 : bots
-}
-
-const setBotCount = (bots) => {
-    window.localStorage.setItem('bots', bots)
-}
-
-const toggleBots = () => {
-    var count = getBotCount()
-    count++
-    if (count > 3) {
-        count = 0
-    }
-    setBotCount(count)
-    return count
 }
 
 const getPlayAudio = (audio) => () => playAudio(audio)
@@ -136,6 +135,24 @@ const playKillingSounds = (numberKilledFigures, killTime) => {
     }
 }
 
+const getBotCount = () => {
+    var bots = parseInt(window.localStorage.getItem('bots'))
+    return isNaN(bots) ? 0 : bots
+}
+
+const setBotCount = (bots) => {
+    window.localStorage.setItem('bots', bots)
+}
+
+const toggleBots = () => {
+    var count = getBotCount()
+    count++
+    if (count > 3) {
+        count = 0
+    }
+    setBotCount(count)
+    return count
+}
 
 function addjustAfterResizeIfNeeded(level, canvas) {
     if (resizeCanvasToDisplaySize(canvas)) {

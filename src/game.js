@@ -86,6 +86,8 @@ loadPromises.push(new Promise((resolve, reject) => {
     }
 }))
 
+
+
 var btnStart = {
     radius: level.width*0.1,
     width: 0,
@@ -194,6 +196,19 @@ const audio = {
         {title: 'sfx/game-eat-sound-83240.mp3'}
     ]
 }
+
+var soundAttackPool = [];
+for (let i = 0; i < 10; i++) {
+    soundAttackPool.push({audio: getAudio(audio.attack), canPlayThroughCallback});
+}
+soundAttackPool.forEach(poolEntry => loadPromises.push(new Promise((resolve, reject) => poolEntry.audio.file.addEventListener('canplaythrough', poolEntry.canPlayThroughCallback(resolve, poolEntry.audio, poolEntry.canPlayThroughCallback)))));
+
+var soundDeathPool = [];
+for (let i = 0; i < 10; i++) {
+    soundDeathPool.push({audio: getAudio(audio.death), canPlayThroughCallback});
+}
+soundDeathPool.forEach(poolEntry => loadPromises.push(new Promise((resolve, reject) => poolEntry.audio.file.addEventListener('canplaythrough', poolEntry.canPlayThroughCallback(resolve, poolEntry.audio, poolEntry.canPlayThroughCallback)))));
+
 var musicGame = shuffle(audio.musicGame.map(audio => getAudio(audio)));
 var musicLobby = audio.musicLobby.map(audio => getAudio(audio));
 var soundJoin = getAudio(audio.join);
@@ -216,7 +231,8 @@ document.addEventListener("DOMContentLoaded", function(event){
     ctx.fillText('Loading...',0,0)
     ctx.restore()
 
-    Promise.all(loadPromises).then(() => { 
+    Promise.all(loadPromises).then(() => {
+        //playAudioPool(soundAttackPool, 0);
         tileMap = tileMapFunc(texture,0);
         tileMap2 = tileMapFunc(texture,1)
         gameInit()
@@ -393,9 +409,7 @@ function gameInit(completeRestart) {
             points: 0,
             attackDistance: 80,
             attackAngle: 90,
-            soundAttack: getAudio(audio.attack),
             soundAttack2: getAudio(audio.attack2),
-            soundDeath: getAudio(audio.death),
             beans: new Set(),
             beansFarted: new Set(),
             image: playerImage,
@@ -840,7 +854,7 @@ function updateGame(figures, dt, dtProcessed) {
             if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance*f.scale && distAngles <= f.attackAngle) {
                 fig.isDead = true;
                 fig.y+=f.imageAnim.height*0.25
-                playAudio(fig.soundDeath);
+                playAudioPool(soundDeathPool);
                 numberKilledFigures++;
                 fig.killTime = dtProcessed
                 killTime = dtProcessed;
@@ -897,7 +911,7 @@ function handleInput(players, figures, dtProcessed) {
                         playAudio(f.soundAttack2);
                         addFartCloud(xyNew.x,xyNew.y,f.playerId,f.beans.size)
                     } else {
-                        playAudio(f.soundAttack);
+                        playAudioPool(soundAttackPool);
                     }
                     f.beans.forEach(b => f.beansFarted.add(b))
                     f.beans.clear()
