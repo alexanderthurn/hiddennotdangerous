@@ -199,15 +199,15 @@ const audio = {
 
 var soundAttackPool = [];
 for (let i = 0; i < 10; i++) {
-    soundAttackPool.push({audio: getAudio(audio.attack), canPlayThroughCallback});
+    soundAttackPool.push({audio: getAudio(audio.attack)});
 }
-soundAttackPool.forEach(poolEntry => loadPromises.push(new Promise((resolve, reject) => poolEntry.audio.file.addEventListener('canplaythrough', poolEntry.canPlayThroughCallback(resolve, poolEntry.audio, poolEntry.canPlayThroughCallback)))));
+soundAttackPool.forEach(poolEntry => loadPromises.push(new Promise((resolve, reject) => poolEntry.audio.file.addEventListener('canplaythrough', canPlayThroughCallback(resolve, poolEntry.audio, canPlayThroughCallback)))));
 
 var soundDeathPool = [];
 for (let i = 0; i < 10; i++) {
-    soundDeathPool.push({audio: getAudio(audio.death), canPlayThroughCallback});
+    soundDeathPool.push({audio: getAudio(audio.death)});
 }
-soundDeathPool.forEach(poolEntry => loadPromises.push(new Promise((resolve, reject) => poolEntry.audio.file.addEventListener('canplaythrough', poolEntry.canPlayThroughCallback(resolve, poolEntry.audio, poolEntry.canPlayThroughCallback)))));
+soundDeathPool.forEach(poolEntry => loadPromises.push(new Promise((resolve, reject) => poolEntry.audio.file.addEventListener('canplaythrough', canPlayThroughCallback(resolve, poolEntry.audio, canPlayThroughCallback)))));
 
 var musicGame = shuffle(audio.musicGame.map(audio => getAudio(audio)));
 var musicLobby = audio.musicLobby.map(audio => getAudio(audio));
