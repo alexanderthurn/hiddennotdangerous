@@ -197,17 +197,9 @@ const audio = {
     ]
 }
 
-var soundAttackPool = [];
-for (let i = 0; i < 10; i++) {
-    soundAttackPool.push({audio: getAudio(audio.attack)});
-}
-soundAttackPool.forEach(poolEntry => loadPromises.push(new Promise((resolve, reject) => poolEntry.audio.file.addEventListener('canplaythrough', canPlayThroughCallback(resolve, poolEntry.audio, canPlayThroughCallback)))));
-
-var soundDeathPool = [];
-for (let i = 0; i < 10; i++) {
-    soundDeathPool.push({audio: getAudio(audio.death)});
-}
-soundDeathPool.forEach(poolEntry => loadPromises.push(new Promise((resolve, reject) => poolEntry.audio.file.addEventListener('canplaythrough', canPlayThroughCallback(resolve, poolEntry.audio, canPlayThroughCallback)))));
+var soundAttackPool = loadAudioPool(audio.attack, 10);
+var soundAttack2Pool = loadAudioPool(audio.attack2, 10);
+var soundDeathPool = loadAudioPool(audio.death, 10);
 
 var musicGame = shuffle(audio.musicGame.map(audio => getAudio(audio)));
 var musicLobby = audio.musicLobby.map(audio => getAudio(audio));
@@ -409,7 +401,6 @@ function gameInit(completeRestart) {
             points: 0,
             attackDistance: 80,
             attackAngle: 90,
-            soundAttack2: getAudio(audio.attack2),
             beans: new Set(),
             beansFarted: new Set(),
             image: playerImage,
@@ -908,7 +899,7 @@ function handleInput(players, figures, dtProcessed) {
                     let xyNew = move(f.x, f.y, f.angle+deg2rad(180),f.attackDistance*0.5, 1)
 
                     if (f.beans.size > 0) {
-                        playAudio(f.soundAttack2);
+                        playAudioPool(soundAttack2Pool);
                         addFartCloud(xyNew.x,xyNew.y,f.playerId,f.beans.size)
                     } else {
                         playAudioPool(soundAttackPool);

@@ -92,6 +92,15 @@ const canPlayThroughCallback = (resolve, audio, callback) => {
     resolve();
 };
 
+const loadAudioPool = (audio, length) => {
+    var audioPool = [];
+    for (let i = 0; i < length; i++) {
+        audioPool.push({audio: getAudio(audio)});
+    }
+    audioPool.forEach(poolEntry => loadPromises.push(new Promise((resolve, reject) => poolEntry.audio.file.addEventListener('canplaythrough', canPlayThroughCallback(resolve, poolEntry.audio, canPlayThroughCallback)))));
+    return audioPool;
+}
+
 const muteAudio = () => {
     window.localStorage.setItem('mute','true')
 }
