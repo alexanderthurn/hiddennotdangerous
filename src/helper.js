@@ -65,7 +65,7 @@ const getAudio = (audio) => {
 
 const playAudio = (audio) => {
     const {file, ...props} = audio;
-    file.load();
+    file.currentTime = 0;
     Object.entries(props).forEach(([key, value]) => {
         if (value) {
             file[key] = value;
