@@ -200,16 +200,15 @@ const audio = {
 var soundAttackPool = loadAudioPool(audio.attack, 10);
 var soundAttack2Pool = loadAudioPool(audio.attack2, 10);
 var soundDeathPool = loadAudioPool(audio.death, 10);
+var soundEatPool = audio.eat.map(audio => loadAudioPool(audio, 4));
 
 var musicGame = shuffle(audio.musicGame.map(audio => getAudio(audio)));
 var musicLobby = audio.musicLobby.map(audio => getAudio(audio));
 var soundJoin = getAudio(audio.join);
 var soundFirstBlood = getAudio(audio.firstBlood);
-var soundWin = getAudio(audio.win);
-
 var soundMultiKill = audio.multiKill.map(audio => getAudio(audio));
 var soundTotalKill = audio.totalKill.map(audio => getAudio(audio));
-var soundEat = audio.eat.map(audio => getAudio(audio));
+var soundWin = getAudio(audio.win);
 
 document.addEventListener("DOMContentLoaded", function(event){
     addjustAfterResizeIfNeeded(level, canvas)
@@ -828,8 +827,8 @@ function updateGame(figures, dt, dtProcessed) {
     figures.filter(b => b.type === 'bean').forEach(b => {
         playerFigures.forEach(fig => {
             if (distance(b.x,b.y,fig.x,fig.y + b.imageAnim.height*0.5) < b.attackDistance) {
-                if (!fig.beans.has(b.id)) {
-                    playAudio(soundEat[fig.beans.size]);
+                if (!fig.beans.has(b.id)) {                    
+                    playAudioPool(soundEatPool[fig.beans.size]);
                     fig.beans.add(b.id);
                     b.lastAttackTime = dtProcessed
                 }
