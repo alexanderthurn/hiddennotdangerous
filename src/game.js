@@ -840,15 +840,18 @@ function updateGame(figures, dt, dtProcessed) {
     let killTime;
     figuresAlive.filter(f => f.isAttacking).forEach(f => {
         figures.filter(fig => fig !== f && fig.playerId !== f.playerId && !fig.isDead && fig.type === 'fighter').forEach(fig => {
-            let distAngles = distanceAngles(rad2deg(f.angle), rad2deg(angle(f.x,f.y,fig.x,fig.y)+180));
-            if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance*f.scale && distAngles <= f.attackAngle) {
-                fig.isDead = true;
-                fig.y+=f.imageAnim.height*0.25
-                playAudioPool(soundDeathPool);
-                numberKilledFigures++;
-                fig.killTime = dtProcessed
-                killTime = dtProcessed;
+            if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance*f.scale) {
+                if (distanceAngles(rad2deg(f.angle), rad2deg(angle(f.x,f.y,fig.x,fig.y)+180)) <= f.attackAngle) {
+                    fig.isDead = true;
+                    fig.y+=f.imageAnim.height*0.25
+                    playAudioPool(soundDeathPool);
+                    numberKilledFigures++;
+                    fig.killTime = dtProcessed
+                    killTime = dtProcessed;
+                }
+                
             }
+            
         });
     })
     playKillingSounds(numberKilledFigures, killTime);
