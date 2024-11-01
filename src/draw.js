@@ -48,13 +48,13 @@ function draw(players, figures, dt, dtProcessed, layer) {
 
 
         if (playerFigures.length > 0) {
-            var text = 'Walk here to\n\nSTART'
+            var text = 'Walk here to\nSTART\n\n'+btnStart.playersNear.length + '/' + btnStart.playersPossible.length + ' players'
             if (btnStart.playersPossible.length === 1) {
-                text = 'Minimum\n2 players'
+                text = 'Walk here to\nSTART\n\nmin 2 players'
             } else if (btnStart.playersPossible.length > 1 && btnStart.playersNear.length === btnStart.playersPossible.length ) {
-                text ='Prepare your\nengines'
+                text ='Prepare your\nbellies'
             } else if (btnStart.playersNear.length > 0) {
-                text = btnStart.playersNear.length + '/' + btnStart.playersPossible.length + ' players'
+                text = 'Walk here to\nSTART\n\n' + btnStart.playersNear.length + '/' + btnStart.playersPossible.length + ' players'
             } 
             btnStart.text = text
 
@@ -361,7 +361,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.fillText(fps + " FPS", canvas.width, 0);
         } else {
             
-        ctx.fillStyle = "black";
+        ctx.fillStyle = "rgba(87,65,47,0.9)";
             ctx.fillRect(canvas.width*0.0, canvas.height*0.25, canvas.width*1, canvas.height*0.5)
             ctx.fillStyle = "white";
             ctx.textBaseline='middle'
