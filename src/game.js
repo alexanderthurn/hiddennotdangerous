@@ -4,7 +4,7 @@ var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
 var gamepadPlayers = []
 var mousePlayers = [];
-var mouses = [{pointerType: 'unknown', x: 0, y: 0, pressed: new Set()}]
+var mouses = [{pointerType: 'unknown', x: 0, y: 0, xCenter: -1, yCenter: -1, pressed: new Set()}]
 const defaultkeyboardPlayer = {
     xAxis: 0,
     yAxis: 0,
@@ -306,7 +306,7 @@ window.addEventListener('pointerdown', event => {
   
   
     if (event.pointerType === 'mouse') {
-        mousePlayers[0].pressed.add(0);
+        mousePlayers[0].pressed.add(event.button);
     }
 
     if (event.pointerType === 'touch') {
@@ -334,7 +334,7 @@ window.addEventListener('pointerup', event => {
     
    
     if (event.pointerType === 'mouse') {
-        mousePlayers[0].pressed.delete(0);
+        mousePlayers[0].pressed.delete(event.button);
     } 
 
     if (event.pointerType === 'touch') {
@@ -684,10 +684,19 @@ function gameLoop() {
                
 
             } else if (mp.pointerType === 'mouse') {
-                let x = mp.x- (canvas.width*0.5-canvas.offsetLeft-level.offsetX)/level.scale;
-                let y = mp.y- (canvas.height*0.5-canvas.offsetTop-level.offsetY)/level.scale
+                if (mp.xCenter < 0) mp.xCenter = (canvas.width*0.5-canvas.offsetLeft-level.offsetX)/level.scale
+                if (mp.yCenter < 0) mp.yCenter = (canvas.height*0.5-canvas.offsetTop-level.offsetY)/level.scale
+                
+                let x = mp.x- mp.xCenter;
+                let y = mp.y- mp.yCenter
                 mp.xAxis = x
                 mp.yAxis = y   
+                if (mp.pressed.has(2)) {
+                    mp.xAxis = 0
+                    mp.yAxis = 0 
+                    mp.xCenter = mp.x
+                    mp.yCenter = mp.y
+                }
                 mp.isMoving = Math.abs(mp.xAxis) + Math.abs(mp.yAxis) > level.width*0.05
             }
         

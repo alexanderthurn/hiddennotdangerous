@@ -457,16 +457,16 @@ function draw(players, figures, dt, dtProcessed, layer) {
        const y = -h*0.5
 
        
-            ctx.translate(level.offsetX + level.scale*mp.x, level.offsetY + level.scale*mp.y)
-            ctx.scale(level.scale, level.scale)
-            //ctx.translate(-w*0.5,-h*0.5)
-            ctx.rotate(angle(0,0,mp.xAxis,mp.yAxis))
-            if (mp.isMoving) {
-                ctx.drawImage(imageArrow, 0,0, w, h,x, y, w,h)
-            } else {
-                //ctx.drawImage(imageArrow,0,0)
-                ctx.drawImage(imageArrow, w,0, w, h,x, y, w,h)
-            }
+        ctx.translate(level.offsetX + level.scale*mp.x, level.offsetY + level.scale*mp.y)
+        ctx.scale(level.scale, level.scale)
+        //ctx.translate(-w*0.5,-h*0.5)
+        ctx.rotate(angle(0,0,mp.xAxis,mp.yAxis))
+        if (mp.isMoving) {
+            ctx.drawImage(imageArrow, 0,0, w, h,x, y, w,h)
+        } else {
+            //ctx.drawImage(imageArrow,0,0)
+            ctx.drawImage(imageArrow, w,0, w, h,x, y, w,h)
+        }
      
        
        // ctx.arc(mp.x, mp.y, 5, 0, 2 * Math.PI);
