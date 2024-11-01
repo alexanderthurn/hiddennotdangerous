@@ -88,7 +88,6 @@ const playAudioPool = (audioPool, volume) => {
 
 const canPlayThroughCallback = (resolve, audio, callback) => {
     audio.file.removeEventListener('canplaythrough', callback);
-    console.log('ohoh');
     resolve();
 };
 

@@ -1,4 +1,5 @@
 console.log('no need to hide')
+var laststep = 0, logit;
 var loadPromises = []
 var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
@@ -519,6 +520,19 @@ function gameInit(completeRestart) {
 
 function gameLoop() {
     addjustAfterResizeIfNeeded(level, canvas)
+
+    logit = false;
+    //console.log(dtProcessed);
+    if (dtProcessed >= laststep*5000) {
+        logit = true;
+        laststep++;
+    }
+
+    if (logit) {
+        console.clear();
+        console.time('gameLoop');
+        console.time('fps');
+    }    
     
     now = Date.now();
     dt = now - then;
@@ -526,6 +540,12 @@ function gameLoop() {
         fpsTime = now
         fps = Math.floor(1000/dt)
     }
+
+    if (logit) {
+        console.timeEnd('fps');
+        console.time('players');
+    }
+
     botPlayers = []
     for (var b = 0; b < getBotCount(); b++) {
 
@@ -714,23 +734,52 @@ function gameLoop() {
         }
     })
 
+    if (logit) {
+        console.timeEnd('players');
+        console.time('update');
+    }
+
     if (windowHasFocus) {
         dtToProcess += dt
+        let counter = 0;
         while(dtToProcess > dtFix) {
             if (!restartGame) {
+                if (logit && counter==0) {
+                    console.time('handleInput');
+                }    
                 handleInput(players, figures, dtProcessed)
+                if (logit && counter==0) {
+                    console.timeEnd('handleInput');
+                    console.time('handleAi');
+                }    
                 handleAi(figures, dtProcessed, oldNumberJoinedKeyboardPlayers, dtFix)
+                if (logit && counter==0) {
+                    console.timeEnd('handleAi');
+                    console.time('updateGame');
+                }    
                 updateGame(figures, dtFix,dtProcessed)
+                if (logit && counter==0) {
+                    console.timeEnd('updateGame');
+                }    
             }
             dtToProcess-=dtFix
             dtProcessed+=dtFix
+            counter++
         }
         
     }
-   
+
+    if (logit) {
+        console.timeEnd('update');
+        console.time('draw');
+    }
     draw(players, figures, dt, dtProcessed, 0);
     draw(players, figures, dt, dtProcessed, 1);
     then = now
+    if (logit) {
+        console.timeEnd('draw');
+        console.time('winning');
+    } 
 
     const figuresWithPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
     if (!restartGame) {
@@ -777,6 +826,10 @@ function gameLoop() {
         gameInit(!!lastFinalWinnerPlayerId);
     }
 
+    if (logit) {
+        console.timeEnd('winning');
+        console.timeEnd('gameLoop');
+    }
     window.requestAnimationFrame(gameLoop);
 }
 
@@ -785,9 +838,6 @@ function updateGame(figures, dt, dtProcessed) {
     let figuresDead = figures.filter(f => f.isDead);
 
     if (!isGameStarted) {
-       
-       
-
         btnsLobby.forEach(btn => {
             btn.playerPercentage = 0.0
             btn.playersPossible = figures.filter(f => f.playerId && f.type === 'fighter')
@@ -830,8 +880,6 @@ function updateGame(figures, dt, dtProcessed) {
         }})
     }
 
-
-    
     figuresAlive.forEach(f => {
         let xyNew = move(f.x, f.y, f.angle,f.speed, dt)
         if (xyNew) {
