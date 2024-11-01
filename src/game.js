@@ -89,11 +89,11 @@ loadPromises.push(new Promise((resolve, reject) => {
 
 
 var btnStart = {
-    radius: level.width*0.1,
     width: 0,
     height: 0,
     loadingSpeed: 1/3000,
-    loadingPercentage: 0
+    loadingPercentage: 0,
+    execute: () => {restartGame = true}
 }
 
 var btnMute = {
@@ -110,7 +110,7 @@ var btnBots = {
     execute: toggleBots
 }
 
-var btnsLobby = [btnMute, btnBots]
+var btnsLobby = [btnMute, btnBots, btnStart]
 
 var btnTouchController = {
     radius: 0,
@@ -226,7 +226,7 @@ document.addEventListener("DOMContentLoaded", function(event){
         //playAudioPool(soundAttackPool, 0);
         tileMap = tileMapFunc(texture,0);
         tileMap2 = tileMapFunc(texture,1)
-        gameInit()
+        gameInit(true)
         window.requestAnimationFrame(gameLoop);
     })
    
@@ -367,13 +367,14 @@ function gameInit(completeRestart) {
     multikillCounter = 0;
     lastTotalkillAudio = 0;
     totalkillCounter = 0;
-    Object.assign(btnStart, {x: level.width*(0.04+0.52), y: level.height*0.3, width: level.width*0.4, height: level.height*0.42,loadingPercentage: 0.0})
-    Object.assign(btnMute,{x: btnStart.x + btnStart.width - level.width*0.12, y: level.height*0.1, width: level.width*0.12, height: level.height*0.1,loadingPercentage: 0.0})
-    Object.assign(btnBots,{x: btnStart.x + btnStart.width - level.width*0.12, y: level.height*0.8, width: level.width*0.12, height: level.height*0.1,loadingPercentage: 0.0})
+    Object.assign(btnStart, {x: level.width*(0.5-0.1), y: level.height*0.55, width: level.width*0.2, height: level.width*0.2,loadingPercentage: 0.0})
+    Object.assign(btnMute,{x: level.width*(1.0 - 0.05 -0.15), y: level.height*0.12, width: level.width*0.15, height: level.height*0.1,loadingPercentage: 0.0})
+    Object.assign(btnBots,{x: btnMute.x, y: btnMute.y + btnMute.height + 20, width: btnMute.width, height: btnMute.height,loadingPercentage: 0.0})
     var activePlayerIds = figures.filter(f => f.playerId && f.type === 'fighter').map(f => f.playerId)
     var oldFigures = figures
     figures = []
-    for (var i = 0; i < maxPlayerFigures; i++) {
+    var count = completeRestart ? 12 : maxPlayerFigures
+    for (var i = 0; i < count; i++) {
         const [x, y] = getRandomXY(level)
         const [xTarget, yTarget] = getRandomXY(level)
         
@@ -430,6 +431,8 @@ function gameInit(completeRestart) {
         type: 'bean',
         x: level.width/5,
         y: level.height/5,
+        x: completeRestart ? level.width*3.4/5 : level.width*1/5,
+        y: completeRestart ? level.height*0.8/5 : level.height*1/5,
         image: foodImage,
         imageAnim: foodImageAnim,
         frame: foodImageAnim.left.a,
@@ -448,6 +451,8 @@ function gameInit(completeRestart) {
         type: 'bean',
         x: level.width*4/5,
         y: level.height/5,
+        x: completeRestart ? level.width*2.6/5 : level.width*4/5,
+        y: completeRestart ? level.height*0.8/5 : level.height*1/5,
         image: foodImage,
         attackDistance: 32,
         imageAnim: foodImageAnim,
@@ -462,8 +467,8 @@ function gameInit(completeRestart) {
     figures.push({
         id: 3,
         type: 'bean',
-        x: level.width/5,
-        y: level.height*4/5,
+        x: completeRestart ? level.width*2.6/5 : level.width*1/5,
+        y: completeRestart ? level.height*1.6/5 : level.height*4/5,
         image: foodImage,
         attackDistance: 32,
         imageAnim: foodImageAnim,
@@ -478,8 +483,8 @@ function gameInit(completeRestart) {
     figures.push({
         id: 4,
         type: 'bean',
-        x: level.width*4/5,
-        y: level.height*4/5,
+        x: completeRestart ? level.width*3.4/5 : level.width*4/5,
+        y: completeRestart ? level.height*1.6/5 : level.height*4/5,
         image: foodImage,
         attackDistance: 32,
         imageAnim: foodImageAnim,
@@ -496,6 +501,8 @@ function gameInit(completeRestart) {
         type: 'bean',
         x: level.width/2,
         y: level.height/2,
+        x: completeRestart ? level.width*3.0/5 : level.width*2.5/5,
+        y: completeRestart ? level.height*1.2/5 : level.height*2.5/5,
         image: foodImage,
         attackDistance: 32,
         imageAnim: foodImageAnim,
@@ -507,6 +514,7 @@ function gameInit(completeRestart) {
         lastAttackTime: 0,
         attackDuration: beanAttackDuration
     });
+
 }
 
 function gameLoop() {
@@ -768,36 +776,37 @@ function updateGame(figures, dt, dtProcessed) {
     let figuresDead = figures.filter(f => f.isDead);
 
     if (!isGameStarted) {
-        btnStart.playerPercentage = 0.0
-        var playersWithId = figures.filter(f => f.playerId && f.type === 'fighter')
-        var playersNear = playersWithId.filter(f => isInRect(f.x,f.y+f.imageAnim.height*0.5,btnStart.x,btnStart.y,btnStart.width,btnStart.height))
-        btnStart.playersNear = playersNear
-        btnStart.playersPossible = playersWithId
-        const maxLoadingPercentage = playersWithId.length > 1 ? playersNear.length / playersWithId.length : playersNear.length*0.5;
-        const minLoadingPercentage = Math.max(playersNear.length-1, 0) / Math.max(playersWithId.length, 1);
+       
+       
 
-        if (btnStart.loadingPercentage <= maxLoadingPercentage) {
-            btnStart.loadingPercentage += btnStart.loadingSpeed * dt;
-            btnStart.loadingPercentage = Math.min(btnStart.loadingPercentage, maxLoadingPercentage);
-        } else {
-            btnStart.loadingPercentage -= btnStart.loadingSpeed * dt;
-            btnStart.loadingPercentage = Math.max(btnStart.loadingPercentage, minLoadingPercentage);
-        }
-        if (btnStart.loadingPercentage >= 1) {
-            restartGame = true;
-        }
-
-  
         btnsLobby.forEach(btn => {
-            btn.playersNear = playersWithId.filter(f => isInRect(f.x,f.y+f.imageAnim.height*0.5,btn.x,btn.y,btn.width,btn.height))
-            if (btn.playersNear.length > 0) {
-                btn.loadingPercentage += btn.loadingSpeed * dt;
+            btn.playerPercentage = 0.0
+            btn.playersPossible = figures.filter(f => f.playerId && f.type === 'fighter')
+            btn.playersNear = btn.playersPossible.filter(f => isInRect(f.x,f.y+f.imageAnim.height*0.5,btn.x,btn.y,btn.width,btn.height))
+            
+            if (btn === btnStart) {
+                const maxLoadingPercentage = btn.playersPossible.length > 1 ? btn.playersNear.length / btn.playersPossible.length : btn.playersNear.length*0.5;
+                const minLoadingPercentage = Math.max(btn.playersNear.length-1, 0) / Math.max(btn.playersPossible.length, 1);
+                
+                if (btn.loadingPercentage <= maxLoadingPercentage) {
+                    btn.loadingPercentage += btn.loadingSpeed * dt;
+                    btn.loadingPercentage = Math.min(btn.loadingPercentage, maxLoadingPercentage);
+                } else {
+                    btn.loadingPercentage -= btn.loadingSpeed * dt;
+                    btn.loadingPercentage = Math.max(btn.loadingPercentage, minLoadingPercentage);
+                }
+
             } else {
-                btn.loadingPercentage -= btn.loadingSpeed * dt
+                
+                 if (btn.playersNear.length > 0) {
+                    btn.loadingPercentage += btn.loadingSpeed * dt;
+                } else {
+                    btn.loadingPercentage -= btn.loadingSpeed * dt
+                }
+                btn.loadingPercentage = btn.loadingPercentage > 0 ? btn.loadingPercentage : 0;
             }
-            btn.loadingPercentage = btn.loadingPercentage > 0 ? btn.loadingPercentage : 0;
-    
-            if (btn.loadingPercentage > 1) {
+
+            if (btn.loadingPercentage >= 1) {
                 btn.loadingPercentage = 0
                 btn.execute()
             }
@@ -871,6 +880,10 @@ function handleInput(players, figures, dtProcessed) {
             var figure = figures.find(f => !f.playerId && f.type === 'fighter')
             figure.isDead = false
             figure.playerId = p.playerId
+            if (!isGameStarted) {
+                figure.x = level.width*0.04+ Math.random() * level.width*0.4
+                figure.y = level.height*0.05+Math.random()*level.height*0.42
+            }
             playAudio(soundJoin);
             newPlayerIds.clear();
             newPlayerIds.add(figure.playerId);

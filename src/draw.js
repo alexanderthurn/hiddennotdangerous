@@ -17,69 +17,10 @@ function draw(players, figures, dt, dtProcessed, layer) {
     }
 
     if (!isGameStarted) {
-
-
-        if (playerFigures.length > 0) {
-            
-            if (isMusicMuted()) {
-                btnMute.text = 'Music: OFF'
-            } else {
-                btnMute.text = 'Music: ON'
-            } 
-
-            btnBots.text = 'Bots: ' + getBotCount()
-
-            btnsLobby.forEach(btn => {
-                drawButton(btn)
-            })
-            
-           
-
-
-            ctx.save()
-               ctx.translate(btnStart.x,btnStart.y)
-               ctx.save()
-              // ctx.translate(level.width*(0.04+0.52),level.height*0.3)
-               ctx.beginPath();
-               ctx.fillStyle = "rgba(255,255,255,0.1)";
-               
-               ctx.fillRect(0,0, btnStart.width, btnStart.height)
-               ctx.fillStyle = "rgba(255,255,255,0.2)";
-               
-        ctx.fillStyle = "rgba(120,120,120,0.5)";
-        ctx.globalCompositeOperation = "color-burn";
-               ctx.fillRect(0,0, btnStart.width*btnStart.loadingPercentage, btnStart.height)
-               ctx.closePath()
-               ctx.fill();
-               ctx.restore()
-               var fontHeight = level.width*0.017  
-                ctx.font = fontHeight+"px Arial";
-                ctx.fillStyle = "white";
-               ctx.strokeStyle = "white";
-               ctx.textAlign = "center";
-               ctx.textBaseline='middle'
-               ctx.lineWidth = 1
-                ctx.font = level.width*0.02+"px Arial";
-                //var playersPossibleNotBot = btnStart.playersPossible.filter()
-                var text = 'Walk here to\n\nSTART'
-                if (btnStart.playersPossible.length === 1) {
-                    text = 'Minimum\n2 players'
-                } else if (btnStart.playersPossible.length > 1 && btnStart.playersNear.length === btnStart.playersPossible.length ) {
-                    text ='Prepare your\nengines'
-                } else if (btnStart.playersNear.length > 0) {
-                    text = btnStart.playersNear.length + '/' + btnStart.playersPossible.length + ' players'
-                } 
-                ctx.translate(btnStart.width*0.5,btnStart.height*0.5)
-                ctx.translate(0,-fontHeight*Math.max(0,text.split('\n').length-1)*0.5)
-                fillTextMultiline(ctx,text,0,0,fontHeight)
-                
-            ctx.restore()
-
-        }
         ctx.save()
         
         ctx.save()
-        ctx.translate(level.width*0.04,level.height*0.3)
+        ctx.translate(level.width*0.05,level.height*0.05)
         ctx.beginPath();
         ctx.fillStyle = "rgba(120,120,120,0.5)";
         ctx.globalCompositeOperation = "destination-out";
@@ -95,7 +36,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.textAlign = "center";
         ctx.textBaseline='top'
         ctx.lineWidth = 0
-        ctx.translate(level.width*0.22+fontHeight,level.height*0.35)
+        ctx.translate(level.width*0.22+fontHeight,level.height*0.1)
         var txt = 'HOW TO PLAY\n\nJoin by pressing any key on your Gamepad' 
                   + '\nor WASDT(Key1) or ' + String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0(RSHIFT)\nor mouse or touch' 
                   + '\n\n1.) Find your player 2.) Fart to knock out others\n3.) Stay hidden 4.) Eat to power up your farts' 
@@ -104,6 +45,29 @@ function draw(players, figures, dt, dtProcessed, layer) {
                  
         fillTextMultiline(ctx, txt,0,0, fontHeight)
         ctx.restore()
+
+
+        if (playerFigures.length > 0) {
+            var text = 'Walk here to\n\nSTART'
+            if (btnStart.playersPossible.length === 1) {
+                text = 'Minimum\n2 players'
+            } else if (btnStart.playersPossible.length > 1 && btnStart.playersNear.length === btnStart.playersPossible.length ) {
+                text ='Prepare your\nengines'
+            } else if (btnStart.playersNear.length > 0) {
+                text = btnStart.playersNear.length + '/' + btnStart.playersPossible.length + ' players'
+            } 
+            btnStart.text = text
+
+            if (isMusicMuted()) {
+                btnMute.text = 'Music: OFF'
+            } else {
+                btnMute.text = 'Music: ON'
+            } 
+            btnBots.text = 'Bots: ' + getBotCount()
+            btnsLobby.forEach(btn => {
+                drawButton(btn)
+            })
+        }
     }
     
   

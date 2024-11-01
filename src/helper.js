@@ -322,23 +322,6 @@ const shadowrize = (image, anim) => {
     animOut.right.a = animOut.right.a.map(array => array.map(a => a*scale))
     animOut.default.a = animOut.default.a.map(array => array.map(a => a*scale))
 
-       /* test for game.js draw
-    ctx.save()
-    ctx.scale(3.0,3.0)
-    ctx.fillStyle = "white";
-    ctx.fillRect(100,100,playerShadowImage.width, playerShadowImage.height)
-    ctx.drawImage(playerShadowImage, 100,100)
-    ctx.restore()
-
-    ctx.save()
-    ctx.translate(300,100)
-    ctx.fillRect(-playerShadowImage.width*0.5,-playerShadowImage.height*0.5,playerShadowImage.width, playerShadowImage.height)
-    var sprite = playerImageAnim.right.a[0]
-    var spriteShadow = playerImageShadowAnim.right.a[0]
-    ctx.drawImage(playerShadowImage, spriteShadow[0], spriteShadow[1], spriteShadow[2], spriteShadow[3], 0 - playerImageShadowAnim.width*0.5, 0 - playerImageShadowAnim.height*0.5, playerImageShadowAnim.width, playerImageShadowAnim.height)
-    ctx.drawImage(playerImage, sprite[0], sprite[1], sprite[2], sprite[3], 0 - playerImageAnim.width*0.5, 0 - playerImageAnim.height*0.5, playerImageAnim.width, playerImageAnim.height)
-    ctx.restore()        
-*/
     return [offscreen,animOut];
 } 
 
@@ -446,14 +429,13 @@ function addFartCloud(x,y,playerId, size=1) {
 
 
 function drawButton(btn) {
-
     ctx.save()
     ctx.translate(btn.x,btn.y)
     ctx.save()
         // ctx.translate(level.width*(0.04+0.52),level.height*0.3)
         ctx.beginPath();
 
-        ctx.fillStyle = "rgba(255,255,255,0.1)";
+        ctx.fillStyle = "rgba(87,65,47,0.5)";
         ctx.fillRect(0,0, btn.width, btn.height)
 
         ctx.fillStyle = "rgba(120,120,120,0.5)";
