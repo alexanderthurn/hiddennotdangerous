@@ -109,9 +109,8 @@ canvas.addEventListener('pointermove', event => {
         return
     }
 
-    mouses[0].x = (event.clientX - canvas.offsetLeft - level.offsetX)/level.scale;
-    mouses[0].y = (event.clientY -  canvas.offsetTop - level.offsetY)/level.scale; 
-
+    mouses[0].x = ((event.clientX - level.offsetX)/level.scale)
+    mouses[0].y = ((event.clientY - level.offsetY)/level.scale) 
 
     if (mousePlayers.length > 0) {
         mousePlayers[0].x = mouses[0].x

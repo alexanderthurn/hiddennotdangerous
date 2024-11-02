@@ -2,6 +2,7 @@ console.log('no need to hide')
 var laststep = 0, logit;
 var loadPromises = []
 var canvas = document.getElementById('canvas')
+var canvasRatio
 const ctx = canvas.getContext("2d");
 var gamepadPlayers = []
 var mousePlayers = [];

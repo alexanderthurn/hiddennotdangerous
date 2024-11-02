@@ -172,11 +172,11 @@ function resizeCanvasToDisplaySize(canvas) {
     // look up the size the canvas is being displayed
     var width = canvas.clientWidth;
     var height = canvas.clientHeight;
-    const ratio = height / width
-    if (canvas.clientWidth > 1920) {
+    canvasRatio = height / width
+    /*if (canvas.clientWidth > 1920) {
         width = 1920
-        height = 1920*ratio
-    }
+        height = 1920*canvasRatio
+    }*/
     // If it's resolution does not match change it
     if (canvas.width !== width || canvas.height !== height) {
       canvas.width = width;
