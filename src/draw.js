@@ -224,14 +224,14 @@ function draw(players, figures, dt, dtProcessed, layer) {
     }
 
     if (layer === 1) {
-        const playerFiguresSortedByPoints = playerFigures.toSorted((f1,f2) => f1.points - f2.points);
+        const playerFiguresSortedByNewPoints = playerFigures.toSorted((f1,f2) => (f1.points-f1.oldPoints) - (f2.points-f2.oldPoints));
         playerFigures.forEach((f,i) => {
             
             var player = players.find(p => p.playerId === f.playerId)
 
             ctx.save()
             ctx.beginPath();
-            const sortIndex = playerFiguresSortedByPoints.findIndex(fig => fig.playerId === f.playerId);
+            const sortIndex = playerFiguresSortedByNewPoints.findIndex(fig => fig.playerId === f.playerId);
             const dt1 = dtProcessed - newPlayerIdThen;
             const dt2 = dtProcessed - (lastWinnerPlayerIdThen + sortIndex*moveScoreToPlayerDuration);
             const dt3 = dtProcessed - (lastWinnerPlayerIdThen + playerFigures.length*moveScoreToPlayerDuration);
