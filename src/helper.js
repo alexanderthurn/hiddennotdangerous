@@ -184,8 +184,6 @@ function resizeCanvasToDisplaySize(canvas) {
       return true;
     }
 
-    console.log(canvas.width, canvas.clientWidth)
- 
     return false;
 }
 
