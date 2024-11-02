@@ -170,15 +170,21 @@ function addjustAfterResizeIfNeeded(level, canvas) {
 
 function resizeCanvasToDisplaySize(canvas) {
     // look up the size the canvas is being displayed
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
- 
+    var width = canvas.clientWidth;
+    var height = canvas.clientHeight;
+    const ratio = height / width
+    if (canvas.clientWidth > 1920) {
+        width = 1920
+        height = 1920*ratio
+    }
     // If it's resolution does not match change it
     if (canvas.width !== width || canvas.height !== height) {
       canvas.width = width;
       canvas.height = height;
       return true;
     }
+
+    console.log(canvas.width, canvas.clientWidth)
  
     return false;
 }
