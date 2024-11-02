@@ -87,7 +87,7 @@ function gameLoop() {
 }
   
 function handleInput(dt) {
-    players.filter(p => p.networkId === networkIdLocal).forEach((p,i) => {
+    players.filter(p => p.networkIndex === networkIndexLocal).forEach((p,i) => {
         var keyboard = keyboards[i % 2]
         p.xAxis = 0
         p.yAxis = 0
@@ -110,8 +110,8 @@ function handleInput(dt) {
 
 function update(dt) {
     figures.forEach(f => {
-        if (f.playerId !== undefined) {
-            var p = players.find(p => f.playerId === p.playerId)
+        if (f.playerIndex !== undefined) {
+            var p = players.find(p => f.playerIndex === p.playerIndex)
             f.x += p.xAxis*0.1*dt
             f.y += p.yAxis*0.1*dt
         }
