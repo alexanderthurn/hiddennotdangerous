@@ -245,6 +245,9 @@ function draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, layer) {
                     ctx.translate(lpi * (level.width*0.5) + lp*(32+i*offx), lpi*(level.height*0.5) + lp*(level.height+32))
                     ctx.scale(12*lpi + lp, 12*lpi + lp)
                 }   
+            } else if (lastWinnerPlayerIdThen && dt2 < 0) {
+                ctx.translate(32+i*offx, level.height+32)
+                points = f.oldPoints;
             } else if (lastWinnerPlayerIdThen && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
                 const lp = dt2 / moveScoreToPlayerDuration
                 const lpi = 1-lp

@@ -481,7 +481,7 @@ function gameLoop() {
     }
 
     const figuresSorted = figures.toSorted((f1,f2) => (f1.y +f1.zIndex) - (f2.y +f2.zIndex) )
-    const figuresPlayer = figuresSorted.filter(f => f.playerId && f.type === 'fighter')
+    const figuresPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
 
     draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, 0);
     draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, 1);
