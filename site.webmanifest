@@ -1,8 +1,9 @@
 {
   "name": "Stealthy Stinkers",
-  "short_name": "SS",
+  "short_name": "Stealthy Stinkers",
+  "description":"In this hilarious multiplayer game, you play as a sneaky baby trying to outlast the competition with one explosive advantage: your farts! Watch out, though – if you’re too loud, you risk revealing yourself to the other players, who can eliminate you.",
   "display":      "standalone", 
-  "orientation":  "landscape",
+  "orientation":  "landscape-primary",
   "icons": [
     {
       "src": "/gfx/android-chrome-192x192.png",
@@ -15,6 +16,6 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff"
+  "theme_color": "#57412f",
+  "background_color": "#57412f"
 }
