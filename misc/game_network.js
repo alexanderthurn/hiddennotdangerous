@@ -1,91 +1,84 @@
-var canvas = document.getElementById('canvas')
+var app
+var canvas
+
+var now, then
+var keyboards = [{left: 65, up: 87, right: 68, down: 83, action: 69, peerId: '', index: 1}, {left: 37, up: 38, right: 39, down: 40, action: 96, peerId: '', index: 2}]
+var pressedKeys = {}; /* https://www.toptal.com/developers/keycode */
+var players = []
+var figures = []
+
 var textareaCanvas1 = document.getElementById('textAreaCanvas1')
 var textareaCanvas2 = document.getElementById('textAreaCanvas2')
 var textareaCanvas3 = document.getElementById('textAreaCanvas3')
 var btnWantNetworkIndex = document.getElementById('btnWantNetworkIndex')
 var btnTellNetworkIndex = document.getElementById('btnTellNetworkIndex')
 var btnSend = document.getElementById('btnSend')
-
 var PEERMESSAGEID_PLAYERSANDFIGURES = 17
 
 
-function sendMessagePlayersAndFigures(peerId, peer, conn) {
-    const dataToSend = getPlayersAndFiguresDataToSend()
-    const figuresToSend = dataToSend.figures
-    const playersToSend = dataToSend.players
-    const playerPayloadBytes = 4+1+1+1 // 2* floatUnitCircle aka 2 Byte (2*2 Bytes) + 1 * boolean (isActionButtonPressed, 1 Byte) + 1* int8 (playerIndex) + 1*int8 (networkIndex)
-    const figurePayloadBytes = 1+1+4+2 // 1*int8 (networkIndex) + 1* int8 (playerIndex) + 4  float3000 aka int16 (x/y) + 2 floatAngle aka int16 (angle)
-    const payloadLength = 1+(1+figuresToSend.length*figurePayloadBytes) + (1+playersToSend.length*playerPayloadBytes)
+async function initApp() {
+    app = new PIXI.Application();
+    await app.init({ background: '#1099bb', width: 320, height: 480 });
+    canvas = app.canvas
+    document.getElementById('divCanvas').appendChild(app.canvas);
+    await PIXI.Assets.load('../gfx/plain_grass.jpg');
+    await PIXI.Assets.load('../gfx/character_base_topview_32x32.png');
+    await PIXI.Assets.load('https://pixijs.com/assets/bitmap-font/desyrel.xml');
 
-    let buffer = new ArrayBuffer(payloadLength)
-    let view = new DataView(buffer)
-    var offset = 0
+    let container = new PIXI.Container()
+    container.x = 0
+    container.y = 0
+    app.stage.addChild(container)
 
-    // message id
-    view.setUint8(0, PEERMESSAGEID_PLAYERSANDFIGURES)
-    offset+=1
+    let sprite = PIXI.Sprite.from('../gfx/plain_grass.jpg');
+    sprite.anchor.set(0.0,0.0)
+    sprite.x = 0
+    sprite.y = 0
+    sprite.width = canvas.width
+    sprite.height = canvas.height/5
+    container.addChild(sprite)
+    
+    const bitmapFontText = new PIXI.BitmapText({
+        text: 'Knirps und Knall',
+        style: {
+            fontFamily: 'Desyrel',
+            fontSize: 32,
+            align: 'left',
+        }
+    });
 
-    // number of players
-    view.setUint8(1, playersToSend.length)
-    offset+=1
+    bitmapFontText.anchor.set(0.5,0.5)
+    bitmapFontText.x = canvas.width/2
+    bitmapFontText.y =  sprite.height/2
+    container.addChild(bitmapFontText);
 
-    playersToSend.forEach((p) => {
-        writeUnitCircleFloatAsInt16(buffer, offset + 0, p.xAxis)
-        writeUnitCircleFloatAsInt16(buffer, offset + 2, p.yAxis)
-        view.setUint8(offset + 4, p.isActionButtonPressed ? 1 : 0)
-        view.setUint8(offset + 5, p.networkIndex)
-        view.setUint8(offset + 6, p.playerIndex)
-        offset += playerPayloadBytes
+
+
+    now = Date.now();
+    then = Date.now()
+
+    app.ticker.add((time) => {
+        now = Date.now();
+        var dt = now - then
+        //handleInput(dt)
+        update(dt)
+        render()
+        //sendData()
+        then = now
     })
 
-    // number of figures
-    view.setUint8(2, figuresToSend.length)
-    offset+=1
 
-    figuresToSend.forEach((f) => {
-        view.setUint8(offset + 0, f.networkIndex)
-        view.setUint8(offset + 1, f.playerIndex)
-        write3000erFloatAsInt16(buffer, offset + 2, f.x)
-        write3000erFloatAsInt16(buffer, offset + 4, f.y)
-        writeAngleAsInt16(buffer, offset + 6, f.angle)
-        offset+=figurePayloadBytes
-    })
-    conn.send(buffer)
+
 }
 
-
-const ctx = canvas.getContext("2d");
-var now, then
-
-var keyboards = [{left: 65, up: 87, right: 68, down: 83, action: 69, peerId: '', index: 1}, {left: 37, up: 38, right: 39, down: 40, action: 96, peerId: '', index: 2}]
-var pressedKeys = {}; /* https://www.toptal.com/developers/keycode */
 window.onkeyup = function(e) { pressedKeys[e.keyCode] = false; }
 window.onkeydown = function(e) { pressedKeys[e.keyCode] =true;  if (e.code === 'ArrowDown' || e.code === 'ArrowUp' || e.code === 'ArrowRight' || e.code === 'ArrowLeft') { /* prevent scrolling of website */
     e.preventDefault();
 }}
 
-var players = []
-var figures = []
+initApp()
 
-document.addEventListener('DOMContentLoaded', function (event) {
-    now = Date.now();
-    then = Date.now()
 
-    window.requestAnimationFrame(gameLoop);
-});
-
-function gameLoop() {
-    now = Date.now();
-    var dt = now - then
-    handleInput(dt)
-    update(dt)
-    render()
-    then = now
-    sendData()
-
-    window.requestAnimationFrame(gameLoop);
-}
-  
 function handleInput(dt) {
     players.filter(p => p.networkIndex === networkIndexLocal).forEach((p,i) => {
         var keyboard = keyboards[i % 2]
@@ -124,21 +117,6 @@ function update(dt) {
 }
 
 function render() {
-
-    ctx.textAlign = "center";
-    ctx.textBaseline='middle'
-    ctx.fillStyle = "white";
-    ctx.font = "24px arial";
-
-
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "white";
-
-    figures.forEach(f => {
-        ctx.fillText(f.networkIndex + ':' + f.playerIndex,f.x,f.y); // Punkte
-    })
-
     var dataToSend = getPlayersAndFiguresDataToSend()
     textareaCanvas1.value = JSON.stringify(players, null, 2)
     textareaCanvas2.value = JSON.stringify(figures,null, 2)
@@ -147,7 +125,6 @@ function render() {
     document.getElementById('txtNetworkId').innerText = networkIdLocal
     document.getElementById('txtNetworkIndex').innerText = networkIndexLocal
     document.getElementById('txtPeerId').innerText = peer?.id
-
 }
 
 document.addEventListener('DOMContentLoaded', function (event) {
@@ -201,6 +178,33 @@ function joinLocalPlayer() {
 
     players.push(player)
     figures.push(figure)
+
+
+    let container = new PIXI.Container()
+    container.x = figure.x
+    container.y = figure.y
+    app.stage.addChild(container)
+
+    let sprite = PIXI.Sprite.from('../gfx/character_base_topview_32x32.png');
+    sprite.anchor.set(0.5)
+    sprite.x = 0
+    sprite.y = 0
+    sprite.scale = 0.25
+    container.addChild(sprite)
+
+    const bitmapFontText = new PIXI.BitmapText({
+        text: figure.networkIndex + ':' + figure.playerIndex,
+        style: {
+            fontFamily: 'Desyrel',
+            fontSize: 24,
+            align: 'center',
+        }
+    });
+
+    bitmapFontText.anchor.set(0.5)
+    bitmapFontText.x = 0//app.screen.width/2
+    bitmapFontText.y = 0//app.screen.height/2
+    container.addChild(bitmapFontText);
 }
 
 btnJoin.addEventListener('click', joinLocalPlayer)
@@ -249,4 +253,49 @@ function getPlayersAndFiguresDataToSend() {
 
 function sendData() {
    
+}
+
+
+function sendMessagePlayersAndFigures(peerId, peer, conn) {
+    const dataToSend = getPlayersAndFiguresDataToSend()
+    const figuresToSend = dataToSend.figures
+    const playersToSend = dataToSend.players
+    const playerPayloadBytes = 4+1+1+1 // 2* floatUnitCircle aka 2 Byte (2*2 Bytes) + 1 * boolean (isActionButtonPressed, 1 Byte) + 1* int8 (playerIndex) + 1*int8 (networkIndex)
+    const figurePayloadBytes = 1+1+4+2 // 1*int8 (networkIndex) + 1* int8 (playerIndex) + 4  float3000 aka int16 (x/y) + 2 floatAngle aka int16 (angle)
+    const payloadLength = 1+(1+figuresToSend.length*figurePayloadBytes) + (1+playersToSend.length*playerPayloadBytes)
+
+    let buffer = new ArrayBuffer(payloadLength)
+    let view = new DataView(buffer)
+    var offset = 0
+
+    // message id
+    view.setUint8(0, PEERMESSAGEID_PLAYERSANDFIGURES)
+    offset+=1
+
+    // number of players
+    view.setUint8(1, playersToSend.length)
+    offset+=1
+
+    playersToSend.forEach((p) => {
+        writeUnitCircleFloatAsInt16(buffer, offset + 0, p.xAxis)
+        writeUnitCircleFloatAsInt16(buffer, offset + 2, p.yAxis)
+        view.setUint8(offset + 4, p.isActionButtonPressed ? 1 : 0)
+        view.setUint8(offset + 5, p.networkIndex)
+        view.setUint8(offset + 6, p.playerIndex)
+        offset += playerPayloadBytes
+    })
+
+    // number of figures
+    view.setUint8(2, figuresToSend.length)
+    offset+=1
+
+    figuresToSend.forEach((f) => {
+        view.setUint8(offset + 0, f.networkIndex)
+        view.setUint8(offset + 1, f.playerIndex)
+        write3000erFloatAsInt16(buffer, offset + 2, f.x)
+        write3000erFloatAsInt16(buffer, offset + 4, f.y)
+        writeAngleAsInt16(buffer, offset + 6, f.angle)
+        offset+=figurePayloadBytes
+    })
+    conn.send(buffer)
 }
