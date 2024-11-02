@@ -50,7 +50,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
         if (playerFigures.length > 0) {
             var text = 'Walk here to\nSTART\n\n'+btnStart.playersNear.length + '/' + btnStart.playersPossible.length + ' players'
             if (btnStart.playersPossible.length === 1) {
-                text = 'Walk here to\nSTART\n\nmin 2 players'
+                text = 'Walk here to\nSTART\n\nmin 2 players\nor 1 player +1 bot'
             } else if (btnStart.playersPossible.length > 1 && btnStart.playersNear.length === btnStart.playersPossible.length ) {
                 text ='Prepare your\nbellies'
             } else if (btnStart.playersNear.length > 0) {
@@ -467,11 +467,14 @@ function draw(players, figures, dt, dtProcessed, layer) {
             ctx.strokeStyle = "rgba(255,255,255,0.5)";
             ctx.lineWidth = 8
 
-            ctx.beginPath()
-            ctx.moveTo(0,0);
-            ctx.lineTo(mp.xCenter-mp.x,mp.yCenter-mp.y);
-            ctx.stroke();
-            ctx.closePath()
+            if (mp.isMoving) {
+                ctx.beginPath()
+                ctx.moveTo(0,0);
+                ctx.lineTo(mp.xCenter-mp.x,mp.yCenter-mp.y);
+                ctx.stroke();
+                ctx.closePath()
+            }
+           
 
             ctx.beginPath()
             ctx.arc(mp.xCenter-mp.x,mp.yCenter-mp.y,level.width*0.03,0, Math.PI * 2)
