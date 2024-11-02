@@ -405,29 +405,11 @@ function gameInit(completeRestart) {
 }
 function gameLoop() {
     addjustAfterResizeIfNeeded(level, canvas)
-
-    logit = false;
-    if (dtProcessed >= laststep*5000) {
-        logit = true;
-        laststep++;
-    }
-
-    if (logit) {
-        console.clear();
-        console.time('gameLoop');
-        console.time('fps');
-    }    
-    
     now = Date.now();
     dt = now - then;
     if (fpsTime < now - 1000) {
         fpsTime = now
         fps = Math.floor(1000/dt)
-    }
-
-    if (logit) {
-        console.timeEnd('fps');
-        console.time('players');
     }
 
     var players = collectInputs()
@@ -440,44 +422,20 @@ function gameLoop() {
         }
     })
 
-    if (logit) {
-        console.timeEnd('players');
-        console.time('update');
-    }
-
     if (windowHasFocus) {
         dtToProcess += dt
         let counter = 0;
         while(dtToProcess > dtFix) {
             if (!restartGame) {
-                if (logit && counter==0) {
-                    console.time('handleInput');
-                }    
-                handleInput(players, figures, dtProcessed)
-                if (logit && counter==0) {
-                    console.timeEnd('handleInput');
-                    console.time('handleAi');
-                }    
+                handleInput(players, figures, dtProcessed) 
                 handleAi(figures, dtProcessed, oldNumberJoinedKeyboardPlayers, dtFix)
-                if (logit && counter==0) {
-                    console.timeEnd('handleAi');
-                    console.time('updateGame');
-                }    
                 updateGame(figures, dtFix,dtProcessed)
-                if (logit && counter==0) {
-                    console.timeEnd('updateGame');
-                }    
             }
             dtToProcess-=dtFix
             dtProcessed+=dtFix
             counter++
         }
         
-    }
-
-    if (logit) {
-        console.timeEnd('update');
-        console.time('draw');
     }
 
     const figuresSorted = figures.toSorted((f1,f2) => (f1.y +f1.zIndex) - (f2.y +f2.zIndex) )
@@ -487,10 +445,6 @@ function gameLoop() {
     draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, 1);
 
     then = now
-    if (logit) {
-        console.timeEnd('draw');
-        console.time('winning');
-    } 
 
     const figuresWithPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
     if (!restartGame) {
@@ -536,11 +490,7 @@ function gameLoop() {
         }
         gameInit(!!lastFinalWinnerPlayerId);
     }
-
-    if (logit) {
-        console.timeEnd('winning');
-        console.timeEnd('gameLoop');
-    }
+    
     window.requestAnimationFrame(gameLoop);
 }
 
@@ -618,7 +568,7 @@ function updateGame(figures, dt, dtProcessed) {
     figuresAlive.filter(f => f.isAttacking).forEach(f => {
         figures.filter(fig => fig !== f && fig.playerId !== f.playerId && !fig.isDead && fig.type === 'fighter').forEach(fig => {
             if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance*f.scale) {
-                if (distanceAngles(rad2deg(f.angle), rad2deg(angle(f.x,f.y,fig.x,fig.y)+180)) <= f.attackAngle) {
+                if (distanceAngles(rad2deg(f.angle), rad2deg(angle(f.x,f.y,fig.x,fig.y))+180) <= f.attackAngle) {
                     fig.isDead = true;
                     fig.y+=f.imageAnim.height*0.25
                     playAudioPool(soundDeathPool);
