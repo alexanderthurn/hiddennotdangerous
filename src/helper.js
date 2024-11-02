@@ -440,7 +440,6 @@ function drawButton(btn) {
 
         ctx.fillStyle = "rgba(87,65,47,0.5)";
         ctx.fillRect(0,0, btn.width, btn.height)
-
         ctx.fillStyle = "rgba(120,120,120,0.5)";
         ctx.globalCompositeOperation = "color-burn";
        // ctx.fillStyle = "rgba(255,255,255,0.2)";

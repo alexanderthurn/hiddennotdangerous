@@ -347,7 +347,7 @@ function draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, layer) {
 
     ctx.restore()
 
-    if (layer === 1) {
+    if (layer === 1 && showDebug) {
         ctx.save()
         ctx.font = "16px Arial";
         ctx.fillStyle = "white";

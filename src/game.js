@@ -169,7 +169,7 @@ const audio = {
         {title: 'sfx/music3.mp3', volume: 0.5}
     ],
     musicLobby: [
-        {title: 'sfx/lobby.mp3', volume: 0.5}
+        {title: 'sfx/lobby.mp3', volume: 0.2}
     ],
     multiKill: [
         {title: 'sfx/double-kill.mp3', volume: 0.3},
