@@ -406,8 +406,8 @@ function draw(players, figures, dt, dtProcessed, layer) {
   }
 
 
-  if (layer === 1 && mousePlayers.length > 0) {
-    var mp = mousePlayers[0]
+  if (layer === 1) {
+    var mp = mousePlayers.length > 0 ? mousePlayers[0] : mouses[0]
 
     if (mp.pointerType === 'touch') {
         ctx.save()
@@ -450,15 +450,38 @@ function draw(players, figures, dt, dtProcessed, layer) {
     } else {
         ctx.save()
        // ctx.beginPath();
-       var f = figures.find(f => f.playerId ===  mp.playerId && f.type === 'fighter')
+       //var f = figures.find(f => f.playerId ===  mp.playerId && f.type === 'fighter')
        const w = imageArrow.width*0.5
        const h = imageArrow.height
        const x  = -w*0.5
        const y = -h*0.5
 
-       
+
+
+
         ctx.translate(level.offsetX + level.scale*mp.x, level.offsetY + level.scale*mp.y)
         ctx.scale(level.scale, level.scale)
+
+        if (mp.xCenter !== undefined && mp.yCenter !== undefined) {
+            ctx.save()
+            ctx.strokeStyle = "rgba(255,255,255,0.5)";
+            ctx.lineWidth = 8
+
+            ctx.beginPath()
+            ctx.moveTo(0,0);
+            ctx.lineTo(mp.xCenter-mp.x,mp.yCenter-mp.y);
+            ctx.stroke();
+            ctx.closePath()
+
+            ctx.beginPath()
+            ctx.arc(mp.xCenter-mp.x,mp.yCenter-mp.y,level.width*0.03,0, Math.PI * 2)
+            ctx.stroke();
+            ctx.closePath()
+             ctx.restore()
+        }
+        
+
+        ctx.globalAlpha = 0.5;
         //ctx.translate(-w*0.5,-h*0.5)
         ctx.rotate(angle(0,0,mp.xAxis,mp.yAxis))
         if (mp.isMoving) {
@@ -467,6 +490,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
             //ctx.drawImage(imageArrow,0,0)
             ctx.drawImage(imageArrow, w,0, w, h,x, y, w,h)
         }
+        console.log(level.offsetX + level.scale*mp.x, level.offsetY + level.scale*mp.y)
      
        
        // ctx.arc(mp.x, mp.y, 5, 0, 2 * Math.PI);

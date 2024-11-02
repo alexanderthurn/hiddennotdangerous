@@ -5,7 +5,7 @@ var canvas = document.getElementById('canvas')
 const ctx = canvas.getContext("2d");
 var gamepadPlayers = []
 var mousePlayers = [];
-var mouses = [{pointerType: 'unknown', x: 0, y: 0, xCenter: -1, yCenter: -1, pressed: new Set()}]
+var mouses = [{pointerType: 'unknown', x: 0, y: 0, xCenter: undefined, yCenter: undefined, pressed: new Set()}]
 const defaultkeyboardPlayer = {
     xAxis: 0,
     yAxis: 0,
@@ -302,7 +302,7 @@ window.addEventListener('pointerdown', event => {
         return
     }
 
-    if (mousePlayers.length === 0) {mousePlayers.push(mouses[0])}
+    if (mousePlayers.length === 0) {mousePlayers.push(mouses[0]);}
 
   
   
@@ -348,11 +348,22 @@ window.addEventListener('pointerup', event => {
 });
 
 canvas.addEventListener('pointermove', event => {
-    if (!windowHasFocus || mousePlayers.length < 1) {
+    if (!windowHasFocus) {
         return
     }
-    mousePlayers[0].x = (event.clientX - canvas.offsetLeft - level.offsetX)/level.scale;
-    mousePlayers[0].y = (event.clientY -  canvas.offsetTop - level.offsetY)/level.scale;
+
+    mouses[0].x = (event.clientX - canvas.offsetLeft - level.offsetX)/level.scale;
+    mouses[0].y = (event.clientY -  canvas.offsetTop - level.offsetY)/level.scale; 
+
+
+    if (mousePlayers.length > 0) {
+        mousePlayers[0].x = mouses[0].x
+        mousePlayers[0].y =  mouses[0].y
+    } else {
+        mouses[0].xCenter = mouses[0].x
+        mouses[0].yCenter = mouses[0].y
+    }
+
     event.preventDefault();
     event.stopPropagation();
 }, false);
@@ -704,8 +715,8 @@ function gameLoop() {
                
 
             } else if (mp.pointerType === 'mouse') {
-                if (mp.xCenter < 0) mp.xCenter = (canvas.width*0.5-canvas.offsetLeft-level.offsetX)/level.scale
-                if (mp.yCenter < 0) mp.yCenter = (canvas.height*0.5-canvas.offsetTop-level.offsetY)/level.scale
+                if (mp.xCenter === undefined) mp.xCenter = (canvas.width*0.5-canvas.offsetLeft-level.offsetX)/level.scale
+                if (mp.yCenter === undefined) mp.yCenter = (canvas.height*0.5-canvas.offsetTop-level.offsetY)/level.scale
                 
                 let x = mp.x- mp.xCenter;
                 let y = mp.y- mp.yCenter
