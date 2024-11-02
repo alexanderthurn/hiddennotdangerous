@@ -57,10 +57,31 @@ async function initApp() {
     now = Date.now();
     then = Date.now()
 
+
+
+    btnSend
+    .addEventListener('click', function (event) {
+      var message = document.getElementById('inputSend').value
+      sendMessageBufferToAllPeers(getMessageBufferText(message))
+    });
+  
+    btnWantNetworkIndex.addEventListener('click', function (event) {
+      var messageBuffer = getMessageBufferWantNetworkIndexes()
+      sendMessageBufferToAllPeers(messageBuffer)
+    });
+
+    btnTellNetworkIndex.addEventListener('click', function (event) {
+        var messageBuffer = getMessageBufferTellNetworkIndexes()
+        sendMessageBufferToAllPeers(messageBuffer)
+      });
+    
+
+
+
     app.ticker.add((time) => {
         now = Date.now();
         var dt = now - then
-        //handleInput(dt)
+        handleInput(dt)
         update(dt)
         render()
         //sendData()
@@ -68,15 +89,21 @@ async function initApp() {
     })
 
 
-
+    initNetwork('hiddennotdangerous', {logMethod: textareaLog, dataReceivedMethod: dataReceived})
+    document.addEventListener('keyup', function(e) { pressedKeys[e.keyCode] = false; })
+    document.addEventListener('keydown',function(e) { pressedKeys[e.keyCode] =true;  if (e.code === 'ArrowDown' || e.code === 'ArrowUp' || e.code === 'ArrowRight' || e.code === 'ArrowLeft') { /* prevent scrolling of website */
+        e.preventDefault();
+    }})
+    
+    btnJoin.addEventListener('click', joinLocalPlayer)
 }
 
-window.onkeyup = function(e) { pressedKeys[e.keyCode] = false; }
-window.onkeydown = function(e) { pressedKeys[e.keyCode] =true;  if (e.code === 'ArrowDown' || e.code === 'ArrowUp' || e.code === 'ArrowRight' || e.code === 'ArrowLeft') { /* prevent scrolling of website */
-    e.preventDefault();
-}}
-
 initApp()
+
+
+
+
+
 
 
 function handleInput(dt) {
@@ -113,42 +140,22 @@ function update(dt) {
         if (f.y > canvas.height) f.y = canvas.height
         if (f.x < 0) f.x = 0
         if (f.y < 0) f.y = 0
+
+        f.container.x = f.x
+        f.container.y = f.y
     })
 }
 
 function render() {
     var dataToSend = getPlayersAndFiguresDataToSend()
     textareaCanvas1.value = JSON.stringify(players, null, 2)
-    textareaCanvas2.value = JSON.stringify(figures,null, 2)
-    textAreaCanvas3.value = JSON.stringify(dataToSend,null, 2)
+   // textareaCanvas2.value = JSON.stringify(figures,null, 2)
+   // textAreaCanvas3.value = JSON.stringify(dataToSend,null, 2)
     textAreaCanvas4.value = JSON.stringify({peers: getConnectedPeers(), networkIndexes:networkIndexes},null, 2)
     document.getElementById('txtNetworkId').innerText = networkIdLocal
     document.getElementById('txtNetworkIndex').innerText = networkIndexLocal
     document.getElementById('txtPeerId').innerText = peer?.id
 }
-
-document.addEventListener('DOMContentLoaded', function (event) {
-
-    btnSend
-    .addEventListener('click', function (event) {
-      var message = document.getElementById('inputSend').value
-      sendMessageBufferToAllPeers(getMessageBufferText(message))
-    });
-  
-    btnWantNetworkIndex.addEventListener('click', function (event) {
-      var messageBuffer = getMessageBufferWantNetworkIndexes()
-      sendMessageBufferToAllPeers(messageBuffer)
-    });
-
-    btnTellNetworkIndex.addEventListener('click', function (event) {
-        var messageBuffer = getMessageBufferTellNetworkIndexes()
-        sendMessageBufferToAllPeers(messageBuffer)
-      });
-  
-
-    initNetwork('hiddennotdangerous', {logMethod: textareaLog, dataReceivedMethod: dataReceived})
-  
-  })
 
 function textareaLog(d) {
     var textArea = document.getElementById('textAreaLog')
@@ -205,9 +212,10 @@ function joinLocalPlayer() {
     bitmapFontText.x = 0//app.screen.width/2
     bitmapFontText.y = 0//app.screen.height/2
     container.addChild(bitmapFontText);
+
+    figure.container = container
 }
 
-btnJoin.addEventListener('click', joinLocalPlayer)
 
 function dataReceived(d, peer, conn) {
     var jsonObject = d
