@@ -1,8 +1,7 @@
 
-function draw(players, figures, dt, dtProcessed, layer) {
+function draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, layer) {
 
-    const playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
-
+    
     ctx.save()
 
     if (layer === 0) {
@@ -47,7 +46,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
         ctx.restore()
 
 
-        if (playerFigures.length > 0) {
+        if (figuresPlayer.length > 0) {
             var text = 'Walk here to\nSTART\n\n'+btnStart.playersNear.length + '/' + btnStart.playersPossible.length + ' players'
             if (btnStart.playersPossible.length === 1) {
                 text = 'Walk here to\nSTART\n\nmin 2 players\nor 1 player +1 bot'
@@ -70,10 +69,7 @@ function draw(players, figures, dt, dtProcessed, layer) {
         }
     }
     
-  
-    
-
-    figures.toSorted((f1,f2) => (f1.y +f1.zIndex) - (f2.y +f2.zIndex) ).forEach(f => {
+    figuresSorted.forEach(f => {
         
         let deg = rad2limiteddeg(f.angle)
         let sprite = null
@@ -224,8 +220,8 @@ function draw(players, figures, dt, dtProcessed, layer) {
     }
 
     if (layer === 1) {
-        const playerFiguresSortedByNewPoints = playerFigures.toSorted((f1,f2) => (f1.points-f1.oldPoints) - (f2.points-f2.oldPoints));
-        playerFigures.forEach((f,i) => {
+        const playerFiguresSortedByNewPoints = figuresPlayer.toSorted((f1,f2) => (f1.points-f1.oldPoints) - (f2.points-f2.oldPoints));
+        figuresPlayer.forEach((f,i) => {
             
             var player = players.find(p => p.playerId === f.playerId)
 
@@ -234,8 +230,8 @@ function draw(players, figures, dt, dtProcessed, layer) {
             const sortIndex = playerFiguresSortedByNewPoints.findIndex(fig => fig.playerId === f.playerId);
             const dt1 = dtProcessed - newPlayerIdThen;
             const dt2 = dtProcessed - (lastWinnerPlayerIdThen + sortIndex*moveScoreToPlayerDuration);
-            const dt3 = dtProcessed - (lastWinnerPlayerIdThen + playerFigures.length*moveScoreToPlayerDuration);
-            const dt4 = dtProcessed - (lastWinnerPlayerIdThen + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
+            const dt3 = dtProcessed - (lastWinnerPlayerIdThen + figuresPlayer.length*moveScoreToPlayerDuration);
+            const dt4 = dtProcessed - (lastWinnerPlayerIdThen + figuresPlayer.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
             let fillStyle = 'rgba(0, 0, 0, 0.5)';
             let points = f.points;
             let offx = 48*1.2
