@@ -533,7 +533,6 @@ function gameLoop() {
     addjustAfterResizeIfNeeded(level, canvas)
 
     logit = false;
-    //console.log(dtProcessed);
     if (dtProcessed >= laststep*5000) {
         logit = true;
         laststep++;

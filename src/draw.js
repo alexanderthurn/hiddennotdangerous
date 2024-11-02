@@ -493,7 +493,6 @@ function draw(players, figures, dt, dtProcessed, layer) {
             //ctx.drawImage(imageArrow,0,0)
             ctx.drawImage(imageArrow, w,0, w, h,x, y, w,h)
         }
-        console.log(level.offsetX + level.scale*mp.x, level.offsetY + level.scale*mp.y)
      
        
        // ctx.arc(mp.x, mp.y, 5, 0, 2 * Math.PI);
