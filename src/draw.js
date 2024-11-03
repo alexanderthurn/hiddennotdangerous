@@ -227,9 +227,9 @@ function draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, layer) {
             ctx.beginPath();
             const sortIndex = playerFiguresSortedByNewPoints.findIndex(fig => fig.playerId === f.playerId);
             const dt1 = dtProcessed - newPlayerIdThen;
-            const dt2 = dtProcessed - (lastWinnerPlayerIdThen + sortIndex*moveScoreToPlayerDuration);
-            const dt3 = dtProcessed - (lastWinnerPlayerIdThen + figuresPlayer.length*moveScoreToPlayerDuration);
-            const dt4 = dtProcessed - (lastWinnerPlayerIdThen + figuresPlayer.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
+            const dt2 = dtProcessed - (lastRoundEndThen + sortIndex*moveScoreToPlayerDuration);
+            const dt3 = dtProcessed - (lastRoundEndThen + figuresPlayer.length*moveScoreToPlayerDuration);
+            const dt4 = dtProcessed - (lastRoundEndThen + figuresPlayer.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
             let fillStyle = 'rgba(0, 0, 0, 0.5)';
             let points = f.points;
             let offx = 48*1.2
@@ -243,10 +243,10 @@ function draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, layer) {
                     ctx.translate(lpi * (level.width*0.5) + lp*(32+i*offx), lpi*(level.height*0.5) + lp*(level.height+32))
                     ctx.scale(12*lpi + lp, 12*lpi + lp)
                 }   
-            } else if (lastWinnerPlayerIdThen && dt2 < 0) {
+            } else if (lastRoundEndThen && dt2 < 0) {
                 ctx.translate(32+i*offx, level.height+32)
                 points = f.oldPoints;
-            } else if (lastWinnerPlayerIdThen && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
+            } else if (lastRoundEndThen && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
                 const lp = dt2 / moveScoreToPlayerDuration
                 const lpi = 1-lp
                 ctx.translate(lpi*(32+i*offx) + lp*f.x, lpi*(level.height+32) + lp*f.y)
@@ -258,7 +258,7 @@ function draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, layer) {
                     ctx.scale(lpi + 2*lp, lpi + 2*lp)
                 }
                 points = f.oldPoints;
-            } else if (lastWinnerPlayerIdThen && dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
+            } else if (lastRoundEndThen && dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
                 ctx.translate(f.x, f.y)
                 ctx.scale(2.0, 2.0)
                 if (lastWinnerPlayerIds.has(f.playerId)) {
@@ -267,7 +267,7 @@ function draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, layer) {
                 if (lastFinalWinnerPlayerId === f.playerId) {
                     ctx.scale(2.0, 2.0)
                 }
-            } else if (lastWinnerPlayerIdThen && dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
+            } else if (lastRoundEndThen && dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
                 const lp = dt4 / moveScoreToPlayerDuration
                 const lpi = 1-lp
                 ctx.translate(lpi*f.x + lp*(32+i*offx), lpi*f.y + lp*(level.height+32))

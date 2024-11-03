@@ -31,7 +31,7 @@ var keyboards = [{bindings: {
     'ShiftRight': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var isGameStarted = false, restartGame = false, newPlayerIds = new Set(), newPlayerIdThen, lastWinnerPlayerIds = new Set(), lastWinnerPlayerIdThen, lastFinalWinnerPlayerId;
+var isGameStarted = false, restartGame = false, newPlayerIds = new Set(), newPlayerIdThen, lastWinnerPlayerIds = new Set(), lastRoundEndThen, lastFinalWinnerPlayerId;
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figures = [], maxPlayerFigures = 32, pointsToWin = 3, deadDuration = 5000, beanAttackDuration = 800, fartGrowDuration = 2000
@@ -446,23 +446,22 @@ function gameLoop() {
 
     then = now
 
-    const figuresWithPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
     if (!restartGame) {
-        var survivors = figuresWithPlayer.filter(f => !f.isDead)
-        if (survivors.length < 2 && figuresWithPlayer.length > survivors.length) {
-            if (isGameStarted && survivors.length == 1) {
-                figuresWithPlayer.forEach(f => f.oldPoints = f.points);
+        var survivors = figuresPlayer.filter(f => !f.isDead)
+        if (isGameStarted && survivors.length < 2) {
+            lastWinnerPlayerIds.clear();
+            if (survivors.length == 1) {
+                figuresPlayer.forEach(f => f.oldPoints = f.points);
                 survivors[0].points++
-                lastWinnerPlayerIds.clear();
                 lastWinnerPlayerIds.add(survivors[0].playerId);
-                lastWinnerPlayerIdThen = dtProcessed
-                restartGame = true;
+                lastRoundEndThen = dtProcessed
             }
+            restartGame = true;
         }
 
-        const maxPoints = Math.max(...figuresWithPlayer.map(f => f.points));
+        const maxPoints = Math.max(...figuresPlayer.map(f => f.points));
         if (maxPoints >= pointsToWin) {
-            const figuresWithMaxPoints = figuresWithPlayer.filter(f => f.points === maxPoints);
+            const figuresWithMaxPoints = figuresPlayer.filter(f => f.points === maxPoints);
             if (figuresWithMaxPoints.length === 1) {
                 if (!lastFinalWinnerPlayerId) {
                    playAudio(soundWin)
@@ -472,8 +471,8 @@ function gameLoop() {
         }
     }
 
-    const gameBreakDuration = (figuresWithPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
-    if (restartGame && (!lastWinnerPlayerIdThen || dtProcessed - lastWinnerPlayerIdThen > gameBreakDuration)) {
+    const gameBreakDuration = (figuresPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
+    if (restartGame && (!lastRoundEndThen || dtProcessed - lastRoundEndThen > gameBreakDuration)) {
         restartGame = false;
         const wasGameStarted = isGameStarted;
         isGameStarted = !lastFinalWinnerPlayerId;
