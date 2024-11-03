@@ -125,11 +125,9 @@ function draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, layer) {
         } else {
             if (f.type === 'bean') {
                 // bean image
-                let startAngle = f.angle + deg2rad(135)
-                let endAngle = startAngle + deg2rad(90)
                 let durationLastAttack = dtProcessed-f.lastAttackTime
-                let perc = durationLastAttack/f.attackDuration
-                if (f.lastAttackTime > 0 && durationLastAttack < f.attackDuration) {
+                if (f.lastAttackTime && durationLastAttack < f.attackDuration) {
+                    const perc = durationLastAttack/f.attackDuration
                     ctx.scale(1.0 - 0.2*Math.sin(perc*Math.PI), 1.0 - 0.2*Math.sin(perc*Math.PI))
                 } else {
                     ctx.scale(1.0, 1.0)

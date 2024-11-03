@@ -283,7 +283,7 @@ function gameInit(completeRestart) {
             isAttacking: false,
             attackDuration: 500,
             attackBreakDuration: 2000,
-            lastAttackTime: 0,
+            lastAttackTime: undefined,
             oldPoints: 0,
             points: 0,
             attackDistance: 80,
@@ -329,7 +329,7 @@ function gameInit(completeRestart) {
         angle: 0,
         scale: 1,
         zIndex: -level.height,
-        lastAttackTime: 0,
+        lastAttackTime: undefined,
         attackDuration: beanAttackDuration
 
     });
@@ -348,7 +348,7 @@ function gameInit(completeRestart) {
         angle: 0,
         scale: 1,
         zIndex: -level.height,
-        lastAttackTime: 0,
+        lastAttackTime: undefined,
         attackDuration: beanAttackDuration
     });
     figures.push({
@@ -364,7 +364,7 @@ function gameInit(completeRestart) {
         angle: 0,
         scale: 1,
         zIndex: -level.height,
-        lastAttackTime: 0,
+        lastAttackTime: undefined,
         attackDuration: beanAttackDuration
     });
     figures.push({
@@ -380,7 +380,7 @@ function gameInit(completeRestart) {
         angle: 0,
         scale: 1,
         zIndex: -level.height,
-        lastAttackTime: 0,
+        lastAttackTime: undefined,
         attackDuration: beanAttackDuration
     });
     figures.push({
@@ -398,7 +398,7 @@ function gameInit(completeRestart) {
         angle: 0,
         scale: 1,
         zIndex: -level.height,
-        lastAttackTime: 0,
+        lastAttackTime: undefined,
         attackDuration: beanAttackDuration
     });
 
@@ -625,9 +625,7 @@ function handleInput(players, figures, dtProcessed) {
                 f.speed = f.maxSpeed
             }
             if (p.isAttackButtonPressed && !f.isAttacking) {
-
-
-                if (dtProcessed-f.lastAttackTime > f.attackBreakDuration) {
+                if (!f.lastAttackTime || dtProcessed-f.lastAttackTime > f.attackBreakDuration) {
 
                     let xyNew = move(f.x, f.y, f.angle+deg2rad(180),f.attackDistance*0.5, 1)
 
@@ -640,10 +638,9 @@ function handleInput(players, figures, dtProcessed) {
                     f.beans.forEach(b => f.beansFarted.add(b))
                     f.beans.clear()
                     f.lastAttackTime = dtProcessed
-
                 }
             }
-            f.isAttacking = dtProcessed-f.lastAttackTime < f.attackDuration ? true : false;
+            f.isAttacking = f.lastAttackTime && dtProcessed-f.lastAttackTime < f.attackDuration ? true : false;
         }
     })
 }
