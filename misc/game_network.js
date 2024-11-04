@@ -138,7 +138,23 @@ function update(dt) {
         if (f.y > canvas.height) f.y = canvas.height
         if (f.x < 0) f.x = 0
         if (f.y < 0) f.y = 0
+
+        f.sprite.animate(dt)
     })
+}
+
+let HDND = {}
+HDND.AnimatedSprite = class AnimatedSprite extends PIXI.AnimatedSprite{
+    constructor(textures) {
+        super(textures, false)
+        this.frame = 0
+    }
+    animate(dt) {
+        this.frame = (this.frame + 0.001*dt/this.animationSpeed) % this.totalFrames
+        if (this.frame > this.totalFrames -1)
+            this.frame = 0
+        this.currentFrame= Math.floor(this.frame)
+    }
 }
 
 function render() {
@@ -181,10 +197,10 @@ function createFigure(props) {
     var f = new PIXI.Container()
     Object_assign(f, props)
 
-    let sprite = new PIXI.AnimatedSprite(figuresTexture.animations.down);
+    let sprite = new HDND.AnimatedSprite(figuresTexture.animations.down);
     sprite.anchor.set(0.5)
     sprite.animationSpeed = 0.1
-    sprite.play()
+    sprite.frame = 0
 
     const bitmapFontText =createBitmapText({
         text: f.networkIndex + ':' + f.playerIndex,
