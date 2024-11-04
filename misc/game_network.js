@@ -168,24 +168,31 @@ function createFigure(props) {
         style: {
             fontSize: 24,
             align: 'center',
-        }
+        },
+        anchor:0.5
     });
-    
-    bitmapFontText.anchor.set(0.5)
-    bitmapFontText.x = 0//app.screen.width/2
-    bitmapFontText.y = 0//app.screen.height/2
-
     
     f.addChild(sprite)
     f.addChild(bitmapFontText);
+    f.addChild(createBean({x:0, y: 50}))
 
     return f
 }
 
-function createBean() {
-    var f = new PIXI.Container()
-    f.addChild(createBitmapText('B'))
-    return f
+function createBean(props) {
+    var b = new PIXI.Container()
+    Object_assign(b, props)
+
+    let c = new PIXI.Graphics()
+        .circle(0,0, 50)
+        .fill('white')
+        .circle(0,0, 40)
+        .stroke('black')
+
+    b.addChild(c)
+
+    b.addChild(createBitmapText({text: 'B'}))
+    return b
 }
 
 function createBitmapText(props) {
