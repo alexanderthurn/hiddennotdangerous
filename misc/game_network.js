@@ -85,6 +85,7 @@ async function initApp() {
     }})
     
     btnJoin.addEventListener('click', joinLocalPlayer)
+    btnRemove.addEventListener('click', removeRandomLocalPlayer)
 }
 
 initApp()
@@ -127,14 +128,22 @@ function update(dt) {
 }
 
 function render() {
-    var dataToSend = getPlayersAndFiguresDataToSend()
     textareaCanvas1.value = JSON.stringify(players, null, 2)
-   // textareaCanvas2.value = JSON.stringify(figures,null, 2)
-   // textAreaCanvas3.value = JSON.stringify(dataToSend,null, 2)
-    textAreaCanvas4.value = JSON.stringify({peers: getConnectedPeers(), networkIndexes:networkIndexes},null, 2)
+    textareaCanvas2.value = JSON.stringify(figures.map(f => ({x: f.x, y: f.y, networkIndex: f.networkIndex, playerIndex: f.playerIndex})),null, 2)
+    textAreaCanvas3.value = JSON.stringify({peers: getConnectedPeers(), networkIndexes:networkIndexes},null, 2)
     document.getElementById('txtNetworkId').innerText = networkIdLocal
     document.getElementById('txtNetworkIndex').innerText = networkIndexLocal
     document.getElementById('txtPeerId').innerText = peer?.id
+}
+
+function removeRandomLocalPlayer() {
+    var playersLocal = players.filter(p => p.networkIndex === networkIndexLocal)
+    var pIndex = Math.floor(Math.random() * playersLocal.length)
+    var fIndex = figures.findIndex(f => f.playerIndex === players[pIndex].playerIndex)
+
+    app.stage.removeChild(figures[fIndex])
+    players.splice(pIndex,1)
+    figures.splice(fIndex,1)
 }
 
 function joinLocalPlayer() {
