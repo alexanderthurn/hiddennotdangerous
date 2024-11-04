@@ -164,7 +164,7 @@ function update(dt) {
 function render() {
     textareaCanvas1.value = JSON.stringify(players, null, 2)
     textareaCanvas2.value = JSON.stringify(figures.map(f => ({x: f.x, y: f.y, networkIndex: f.networkIndex, playerIndex: f.playerIndex})),null, 2)
-    textAreaCanvas3.value = JSON.stringify({peers: getConnectedPeers(), networkIndexes:networkIndexes},null, 2)
+    textAreaCanvas3.value = JSON.stringify({peers: getConnectedPeers().map(p => p.peer), networkIndexes:networkIndexes},null, 2)
     document.getElementById('txtNetworkId').innerText = networkIdLocal
     document.getElementById('txtNetworkIndex').innerText = networkIndexLocal
     document.getElementById('txtPeerId').innerText = peer?.id

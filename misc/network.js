@@ -205,9 +205,8 @@ function readTwoBooleans(buffer, offset) {
   return { bool1, bool2 };
 }
 
-function getConnectedPeers(peer) {
-  return !peer ? [] : Object.entries(peer.connections)
-  .map((k) => k[1][0]).filter(p => p && p.peerConnection.connectionState !== 'failed')
+function getConnectedPeers() {
+  return !peer ? [] : Object.keys(peer.connections).map(p => peer.connections[p]).map( p=> p.length > 0 ? p[0] : null).filter(p => p && p.peerConnection.connectionState !== 'failed')
 }
 
 function sendMessageBufferToPeers(messageBuffer, peers) {
@@ -216,7 +215,7 @@ function sendMessageBufferToPeers(messageBuffer, peers) {
 }
 
 function sendMessageBufferToAllPeers(messageBuffer) {
-  sendMessageBufferToPeers(messageBuffer, getConnectedPeers(peer))
+  sendMessageBufferToPeers(messageBuffer, getConnectedPeers())
 }
 
 function handleMessageBufferTellNetworkIndexes(messageBuffer, peer, conn) {
