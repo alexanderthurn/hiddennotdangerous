@@ -121,3 +121,18 @@ function Object_assign (target, ...sources) {
     return target
   }
   
+
+  
+let HDND = {}
+HDND.AnimatedSprite = class AnimatedSprite extends PIXI.AnimatedSprite{
+    constructor(textures) {
+        super(textures, false)
+        this.frame = 0
+    }
+    animate(dt) {
+        this.frame = (this.frame + 0.001*dt/this.animationSpeed) % this.totalFrames
+        if (this.frame > this.totalFrames -1)
+            this.frame = 0
+        this.currentFrame= Math.floor(this.frame)
+    }
+}

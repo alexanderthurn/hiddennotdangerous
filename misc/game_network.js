@@ -127,10 +127,26 @@ function update(dt) {
             f.y += p.yAxis*0.1*dt
         }
 
-        if (p.xAxis > 0) {
-            f.sprite.textures = figuresTexture.animations.right
-        } else if (p.xAxis < 0) {
+        var angleDegrees = rad2deg(angle(0,0,p.xAxis,p.yAxis))
+        var offset = 45*0.5
+        if (angleDegrees >= 180 - offset || angleDegrees < -135 -offset) {
             f.sprite.textures = figuresTexture.animations.left
+        } else if (angleDegrees < -135+45 -offset){
+            f.sprite.textures = figuresTexture.animations.upleft
+        } else if (angleDegrees < -135+45+45 -offset){
+            f.sprite.textures = figuresTexture.animations.up
+        } else if (angleDegrees < -135+45+45+45 -offset){
+            f.sprite.textures = figuresTexture.animations.upright
+        } else if (angleDegrees < -135+45+45+45+45 -offset){
+            f.sprite.textures = figuresTexture.animations.right
+        } else if (angleDegrees < -135+45+45+45+45+45 -offset){
+            f.sprite.textures = figuresTexture.animations.downright
+        } else if (angleDegrees < -135+45+45+45+45+45+45 -offset){
+            f.sprite.textures = figuresTexture.animations.down
+        } else if (angleDegrees < -135+45+45+45+45+45+45+45 -offset){
+            f.sprite.textures = figuresTexture.animations.downleft
+        } else {
+            f.sprite.textures = figuresTexture.animations.dead
         }
 
 
@@ -139,23 +155,11 @@ function update(dt) {
         if (f.x < 0) f.x = 0
         if (f.y < 0) f.y = 0
 
-        f.sprite.animate(dt)
+        if (Math.abs(p.xAxis) + Math.abs(p.yAxis) > 0)
+            f.sprite.animate(dt)
     })
 }
 
-let HDND = {}
-HDND.AnimatedSprite = class AnimatedSprite extends PIXI.AnimatedSprite{
-    constructor(textures) {
-        super(textures, false)
-        this.frame = 0
-    }
-    animate(dt) {
-        this.frame = (this.frame + 0.001*dt/this.animationSpeed) % this.totalFrames
-        if (this.frame > this.totalFrames -1)
-            this.frame = 0
-        this.currentFrame= Math.floor(this.frame)
-    }
-}
 
 function render() {
     textareaCanvas1.value = JSON.stringify(players, null, 2)
