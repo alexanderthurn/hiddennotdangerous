@@ -1,0 +1,96 @@
+{
+    "frames": {
+        "down1": {
+            "frame": {"x": 0, "y": 0, "w":32, "h":32},
+            "sourceSize": {"w": 32, "h": 32},
+            "spriteSourceSize": {"x":0, "y":0, "w": 32, "h":32}
+        },
+        "down2": {
+            "frame":{"x": 32, "y": 0, "w":32, "h":32},
+            "sourceSize": {"w": 32, "h": 32},
+            "spriteSourceSize": {"x":0, "y":0, "w": 32, "h":32}
+        } ,
+        "down3": {
+            "frame": {"x": 64, "y": 0, "w":32, "h":32},
+            "sourceSize": {"w": 32, "h": 32},
+            "spriteSourceSize": {"x":0, "y":0, "w": 32, "h":32}
+        } ,
+        "down4": {
+            "frame": {"x": 96, "y": 0, "w":32, "h":32},
+            "sourceSize": {"w": 32, "h": 32},
+            "spriteSourceSize": {"x":0, "y":0, "w": 32, "h":32}
+        },
+        "up1": {
+            "frame": {"x": 0, "y": 32, "w":32, "h":32},
+            "sourceSize": {"w": 32, "h": 32},
+            "spriteSourceSize": {"x":0, "y":0, "w": 32, "h":32}
+        },
+        "up2": {
+            "frame":{"x": 32, "y": 32, "w":32, "h":32},
+            "sourceSize": {"w": 32, "h": 32},
+            "spriteSourceSize": {"x":0, "y":0, "w": 32, "h":32}
+        } ,
+        "up3": {
+            "frame": {"x": 64, "y": 32, "w":32, "h":32},
+            "sourceSize": {"w": 32, "h": 32},
+            "spriteSourceSize": {"x":0, "y":0, "w": 32, "h":32}
+        } ,
+        "up4": {
+            "frame": {"x": 96, "y": 32, "w":32, "h":32},
+            "sourceSize": {"w": 32, "h": 32},
+            "spriteSourceSize": {"x":0, "y":0, "w": 32, "h":32}
+        },
+        "right1": {
+            "frame": {"x": 0, "y": 64, "w":32, "h":32},
+            "sourceSize": {"w": 32, "h": 32},
+            "spriteSourceSize": {"x":0, "y":0, "w": 32, "h":32}
+        },
+        "right2": {
+            "frame":{"x": 32, "y": 64, "w":32, "h":32},
+            "sourceSize": {"w": 32, "h": 32},
+            "spriteSourceSize": {"x":0, "y":0, "w": 32, "h":32}
+        } ,
+        "right3": {
+            "frame": {"x": 64, "y": 64, "w":32, "h":32},
+            "sourceSize": {"w": 32, "h": 32},
+            "spriteSourceSize": {"x":0, "y":0, "w": 32, "h":32}
+        } ,
+        "right4": {
+            "frame": {"x": 96, "y": 64, "w":32, "h":32},
+            "sourceSize": {"w": 32, "h": 32},
+            "spriteSourceSize": {"x":0, "y":0, "w": 32, "h":32}
+        },
+        "left1": {
+            "frame": {"x": 0, "y": 96, "w":32, "h":32},
+            "sourceSize": {"w": 32, "h": 32},
+            "spriteSourceSize": {"x":0, "y":0, "w": 32, "h":32}
+        },
+        "left2": {
+            "frame":{"x": 32, "y": 96, "w":32, "h":32},
+            "sourceSize": {"w": 32, "h": 32},
+            "spriteSourceSize": {"x":0, "y":0, "w": 32, "h":32}
+        } ,
+        "left3": {
+            "frame": {"x": 64, "y": 96, "w":32, "h":32},
+            "sourceSize": {"w": 32, "h": 32},
+            "spriteSourceSize": {"x":0, "y":0, "w": 32, "h":32}
+        } ,
+        "left4": {
+            "frame": {"x": 96, "y": 96, "w":32, "h":32},
+            "sourceSize": {"w": 32, "h": 32},
+            "spriteSourceSize": {"x":0, "y":0, "w": 32, "h":32}
+        }
+    },
+    "meta": {
+        "image": "../gfx/character_base_topview_32x32_angles_sleepanimation.png",
+        "format": "RGBA8888",
+        "size": { "w": 128, "h": 288 },
+        "scale": 1
+    },
+    "animations": {
+        "down": ["down1","down2","down3","down4"],
+        "up": ["up1","up2","up3","up4"],
+        "right": ["right1","right2","right3","right4"],
+        "left": ["left1","left2","left3","left4"]
+    }
+}

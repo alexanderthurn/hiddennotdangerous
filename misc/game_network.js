@@ -26,7 +26,7 @@ async function initApp() {
     await PIXI.Assets.load('../gfx/plain_grass.jpg');
     await PIXI.Assets.load('../gfx/character_base_topview_32x32.png');
     await PIXI.Assets.load('https://pixijs.com/assets/bitmap-font/desyrel.xml');
-    figuresTexture = await PIXI.Assets.load('../gfx/character_base_32x32.json')
+    figuresTexture = await PIXI.Assets.load('../gfx/character_base_topview_32x32_angles_sleepanimation.json')
 
     let container = new PIXI.Container()
     container.x = 0
@@ -127,6 +127,13 @@ function update(dt) {
             f.y += p.yAxis*0.1*dt
         }
 
+        if (p.xAxis > 0) {
+            f.sprite.textures = figuresTexture.animations.right
+        } else if (p.xAxis < 0) {
+            f.sprite.textures = figuresTexture.animations.left
+        }
+
+
         if (f.x > canvas.width) f.x = canvas.width
         if (f.y > canvas.height) f.y = canvas.height
         if (f.x < 0) f.x = 0
@@ -174,8 +181,10 @@ function createFigure(props) {
     var f = new PIXI.Container()
     Object_assign(f, props)
 
-    let sprite = new PIXI.Sprite(figuresTexture.textures['down1']);
+    let sprite = new PIXI.AnimatedSprite(figuresTexture.animations.down);
     sprite.anchor.set(0.5)
+    sprite.animationSpeed = 0.1
+    sprite.play()
 
     const bitmapFontText =createBitmapText({
         text: f.networkIndex + ':' + f.playerIndex,
@@ -183,10 +192,12 @@ function createFigure(props) {
             fontSize: 24,
             align: 'center',
         },
+        y: 10,
         anchor:0.5
     });
     
     f.addChild(sprite)
+    f.sprite = sprite
     f.addChild(bitmapFontText);
     return f
 }
