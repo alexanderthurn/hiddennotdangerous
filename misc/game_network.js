@@ -16,6 +16,8 @@ var btnSend = document.getElementById('btnSend')
 var PEERMESSAGEID_PLAYERSANDFIGURES = 17
 
 
+var figuresTexture
+
 async function initApp() {
     app = new PIXI.Application();
     await app.init({ background: '#1099bb', width: 320, height: 480 });
@@ -24,6 +26,7 @@ async function initApp() {
     await PIXI.Assets.load('../gfx/plain_grass.jpg');
     await PIXI.Assets.load('../gfx/character_base_topview_32x32.png');
     await PIXI.Assets.load('https://pixijs.com/assets/bitmap-font/desyrel.xml');
+    figuresTexture = await PIXI.Assets.load('../gfx/character_base_32x32.json')
 
     let container = new PIXI.Container()
     container.x = 0
@@ -44,6 +47,9 @@ async function initApp() {
     bitmapFontText.x = canvas.width/2
     bitmapFontText.y =  sprite.height/2
     container.addChild(bitmapFontText);
+    
+    app.stage.addChild(createBean({x:150, y: 150}))
+
 
     now = Date.now();
     then = Date.now()
@@ -86,6 +92,7 @@ async function initApp() {
     
     btnJoin.addEventListener('click', joinLocalPlayer)
     btnRemove.addEventListener('click', removeRandomLocalPlayer)
+
 }
 
 initApp()
@@ -163,14 +170,12 @@ function joinLocalPlayer() {
 
 
 function createFigure(props) {
+
     var f = new PIXI.Container()
     Object_assign(f, props)
 
-    let sprite = PIXI.Sprite.from('../gfx/character_base_topview_32x32.png');
+    let sprite = new PIXI.Sprite(figuresTexture.textures['down1']);
     sprite.anchor.set(0.5)
-    sprite.x = 0
-    sprite.y = 0
-    sprite.scale = 0.25
 
     const bitmapFontText =createBitmapText({
         text: f.networkIndex + ':' + f.playerIndex,
@@ -183,9 +188,11 @@ function createFigure(props) {
     
     f.addChild(sprite)
     f.addChild(bitmapFontText);
-    f.addChild(createBean({x:0, y: 50}))
-
     return f
+}
+
+function destroyFigure(f) {
+
 }
 
 function createBean(props) {
