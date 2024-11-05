@@ -92,7 +92,8 @@ async function initApp() {
     btnJoin.addEventListener('click', joinLocalPlayer)
     btnRemove.addEventListener('click', removeRandomLocalPlayer)
     btnSendPlayersFigures.addEventListener('click', sendPlayersAndFigures)
-
+    btnSendPing.addEventListener('click', () => {sendMessageBufferToAllPeers(getMessageBufferPing())})
+    
 }
 
 initApp()
@@ -170,6 +171,7 @@ function render() {
     document.getElementById('txtNetworkId').innerText = networkIdLocal
     document.getElementById('txtNetworkIndex').innerText = networkIndexLocal
     document.getElementById('txtPeerId').innerText = peer?.id
+    document.getElementById('txtDtPingPong').innerText = dtPingPong
 }
 
 function sendPlayersAndFigures() {

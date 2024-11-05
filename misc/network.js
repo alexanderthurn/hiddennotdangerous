@@ -4,10 +4,9 @@ if (!networkIdLocal) {
   sessionStorage.setItem('networkId', networkIdLocal)
 }
 var networkIndexLocal = -1
-
 const MAX_NETWORK_INDEX = 255
 var networkIndexes = {}
-
+var dtPingPong = -1
 var peer = undefined
 var tlog = undefined
 var peerIdDefault = undefined
@@ -16,12 +15,16 @@ var dataReceivedMethod = undefined
 const PEERMESSAGEID_TELL_NETWORKINDEXES = 0
 const PEERMESSAGEID_WANT_NETWORKINDEXES = 1
 const PEERMESSAGEID_TEXT = 2
+const PEERMESSAGEID_PING = 3
+const PEERMESSAGEID_PONG = 4
 
 const MessageTitles = {
 }
 MessageTitles[PEERMESSAGEID_TELL_NETWORKINDEXES] = 'TellIndexes'
 MessageTitles[PEERMESSAGEID_WANT_NETWORKINDEXES] = 'WantIndexes'
 MessageTitles[PEERMESSAGEID_TEXT] = 'Text'
+MessageTitles[PEERMESSAGEID_PING] = 'Ping'
+MessageTitles[PEERMESSAGEID_PONG] = 'Pong'
 
 function getMessageTitleByType(messageId) {
   if (MessageTitles[messageId]) {
@@ -328,9 +331,55 @@ function getMessageBufferText(text) {
     let offset = 0
     view.setUint8(0, PEERMESSAGEID_TEXT)
     offset += 1
-    offset = writeTextToBuffer(buffer,offset, text)
+    writeTextToBuffer(buffer,offset, text)
+    offset += 4
   return buffer
 }
+
+
+function handleMessageBufferPing(messageBuffer, peer, conn) {
+  
+  let view = new DataView(messageBuffer)
+  var timestamp = view.getBigUint64(1, false)
+  
+  var pongMessage = getMessageBufferPong(timestamp)
+  sendMessageBufferToPeers(pongMessage, [conn])
+  return timestamp
+}
+
+function getMessageBufferPing() {
+    let payloadLength = 1 + 8
+    let messageBuffer = new ArrayBuffer(payloadLength)
+    let view = new DataView(messageBuffer)
+    let offset = 0
+    view.setUint8(0, PEERMESSAGEID_PING)
+    offset += 1
+    view.setBigUint64(offset, BigInt(Date.now()), false)
+    offset += 8
+  return messageBuffer
+}
+
+
+function handleMessageBufferPong(messageBuffer, peer, conn) {
+  let view = new DataView(messageBuffer)
+  var timestamp = view.getBigUint64(1, false)
+  dtPingPong = Date.now() - Number(timestamp)
+  return 'pong response: sent:' + timestamp + ' now: ' + Date.now() + ' dt: ' + dtPingPong
+}
+
+function getMessageBufferPong(timestamp) {
+    let payloadLength = 1 + 8
+    let buffer = new ArrayBuffer(payloadLength)
+    let view = new DataView(buffer)
+    let offset = 0
+    view.setUint8(0, PEERMESSAGEID_PONG)
+    offset += 1
+    view.setBigUint64(offset, timestamp, false)
+    offset += 8
+    return buffer
+}
+
+
 
 function getMessageType(messageBuffer) {
   const view = new DataView(messageBuffer);
@@ -354,6 +403,12 @@ function internalDataReceivedMethod(messageBuffer, peer, conn) {
         break
       case PEERMESSAGEID_TEXT:
         result = handleMessageBufferText(messageBuffer, peer, conn)
+        break
+      case PEERMESSAGEID_PING:
+        result = handleMessageBufferPing(messageBuffer, peer, conn)
+        break
+      case PEERMESSAGEID_PONG:
+        result = handleMessageBufferPong(messageBuffer, peer, conn)
         break
       default:
         if (dataReceivedMethod) {
