@@ -7,6 +7,7 @@ var networkIndexLocal = -1
 const MAX_NETWORK_INDEX = 255
 var networkIndexes = {}
 var dtPingPong = -1
+var timestampLastMessageSent = -1, thresholdLastMessageSent = 2000, thresholdMessagesHighPrio = 5, thresholdMessagesHighPrioSent = -1
 var peer = undefined
 var tlog = undefined
 var peerIdDefault = undefined
@@ -212,13 +213,41 @@ function getConnectedPeers() {
   return !peer ? [] : Object.keys(peer.connections).map(p => peer.connections[p]).map( p=> p.length > 0 ? p[0] : null).filter(p => p && p.peerConnection.connectionState !== 'failed')
 }
 
-function sendMessageBufferToPeers(messageBuffer, peers) {
-  tlog('sending msg "'+getMessageTypeTitle(messageBuffer)+'" ('+ messageBuffer.byteLength+ ' bytes) to ' + peers.length + ' peer(s)');
-  peers.forEach((k) => {k.send(messageBuffer)});
+function isSendMessageAllowed(highPrio) {
+  var result = 0
+  var timestamp = Date.now()
+  var dtLastMessage = (timestamp - timestampLastMessageSent)
+  var thresholdReached = dtLastMessage > thresholdLastMessageSent
+  var highPrioAllowed = thresholdMessagesHighPrioSent < thresholdMessagesHighPrio
+  if (thresholdReached) {
+    result = 1
+  } else if (highPrio && highPrioAllowed) {
+    result = 2
+  }
+  return result
 }
 
-function sendMessageBufferToAllPeers(messageBuffer) {
-  sendMessageBufferToPeers(messageBuffer, getConnectedPeers())
+function sendMessageBufferToPeers(messageBuffer, peers, highPrio) {
+  var isAllowed = isSendMessageAllowed(highPrio)
+  
+  if (isAllowed) {
+    tlog('sending msg "'+getMessageTypeTitle(messageBuffer)+'" ('+ messageBuffer.byteLength+ ' bytes) to ' + peers.length + ' peer(s)');
+    peers.forEach((k) => {k.send(messageBuffer)});
+    if (isAllowed === 1) {
+      thresholdMessagesHighPrioSent = 0
+      timestampLastMessageSent = Date.now()
+    } else if (isAllowed === 2) {
+      thresholdMessagesHighPrioSent++
+    }
+
+  }
+ 
+
+  return isAllowed
+}
+
+function sendMessageBufferToAllPeers(messageBuffer, highPrio) {
+  return sendMessageBufferToPeers(messageBuffer, getConnectedPeers(), highPrio)
 }
 
 function handleMessageBufferTellNetworkIndexes(messageBuffer, peer, conn) {
@@ -289,9 +318,9 @@ function handleMessageBufferWantNetworkIndexes(messageBuffer, peer, conn) {
   if (index < 0) {
     setNetworkIndex(networkId, getFreeNetworkIndex())
     reply = getMessageBufferTellNetworkIndexes()
-    sendMessageBufferToAllPeers(reply)
+    sendMessageBufferToAllPeers(reply, true)
   } else {
-    sendMessageBufferToPeers(reply, [conn])
+    sendMessageBufferToPeers(reply, [conn], true)
   }
 
   return 'todo'
@@ -343,7 +372,7 @@ function handleMessageBufferPing(messageBuffer, peer, conn) {
   var timestamp = view.getBigUint64(1, false)
   
   var pongMessage = getMessageBufferPong(timestamp)
-  sendMessageBufferToPeers(pongMessage, [conn])
+  sendMessageBufferToPeers(pongMessage, [conn], true)
   return timestamp
 }
 
@@ -455,8 +484,8 @@ function initNetwork(roomName, options) {
         tlog(`connecting to peer ${peerIdDefault} `);
         conn = peer.connect(peerIdDefault, {serialization: 'binary', reliable:false});
         conn.on('close', () => {tlog('conn('+conn.peer+') closed'); initNetwork(roomName, options)})
-        conn.on('open', () => {tlog('conn('+conn.peer+') opened'); sendMessageBufferToPeers(getMessageBufferWantNetworkIndexes(), [conn])})
-        conn.on('error', () => tlog('conn('+conn.peer+') error' + data))
+        conn.on('open', () => {tlog('conn('+conn.peer+') opened'); sendMessageBufferToPeers(getMessageBufferWantNetworkIndexes(), [conn], true)})
+        conn.on('error', (err) => tlog('conn('+conn.peer+') error' + err.type))
         conn.on('data', (data) => {tlog('conn('+conn.peer+') received msg "'+getMessageTypeTitle(data)+'" ('+data.byteLength+'): ' + internalDataReceivedMethod(data, peer, conn))
         })
       });

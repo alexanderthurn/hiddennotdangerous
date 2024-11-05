@@ -61,8 +61,7 @@ function handleMessagePlayersAndFigures(buffer, peer, conn) {
     return 'received ' + playersToSendLength + ' players and ' + figuresToSendLength +' figures'
   }
 
-function getMessagePlayersAndFigures() {
-    const dataToSend = getPlayersAndFiguresDataToSend()
+function getMessagePlayersAndFigures(dataToSend) {
     const figuresToSend = dataToSend.figures
     const playersToSend = dataToSend.players
     const payloadLength = 1 + (1+playersToSend.length*playerPayloadBytes) + (1+figuresToSend.length*figurePayloadBytes) 
@@ -129,7 +128,7 @@ function getPlayersAndFiguresDataToSend() {
 
     }
 
-    if (isMaster(peer)) {
+    if (false && isMaster(peer)) {
         jsonObject.figures = figures
         jsonObject.players = players
     } else {

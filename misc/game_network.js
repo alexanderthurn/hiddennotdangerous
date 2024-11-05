@@ -79,6 +79,7 @@ async function initApp() {
         handleInput(dt)
         update(dt)
         render()
+        updateNetwork(dt)
         then = now
     })
 
@@ -91,12 +92,41 @@ async function initApp() {
     
     btnJoin.addEventListener('click', joinLocalPlayer)
     btnRemove.addEventListener('click', removeRandomLocalPlayer)
-    btnSendPlayersFigures.addEventListener('click', sendPlayersAndFigures)
+    btnSendPlayersFigures.addEventListener('click', () => {sendPlayersAndFigures(getPlayersAndFiguresDataToSend(), false)})
     btnSendPing.addEventListener('click', () => {sendMessageBufferToAllPeers(getMessageBufferPing())})
     
 }
 
-initApp()
+
+document.addEventListener("DOMContentLoaded", function(event){
+    initApp()
+})
+
+var lastSentPlayers = []
+
+function updateNetwork(dt) {
+
+   
+    var dataToSend = getPlayersAndFiguresDataToSend()
+    var ns = dataToSend?.players.map(x => {
+        return {
+            xAxis: x.xAxis,
+            yAxis: x.yAxis
+        }
+    })
+
+    var ls = lastSentPlayers
+    var localPlayerInputChanged = (ls?.length !== ns?.length) || (ns.length > 0 && ns?.some((p,i) => {
+        return p.xAxis !== ls[i].xAxis || p.yAxis !== ls[i].yAxis
+    }))
+
+    var isSendingAllowed = isSendMessageAllowed(localPlayerInputChanged)
+
+    if (isSendingAllowed && localPlayerInputChanged && sendPlayersAndFigures(dataToSend, localPlayerInputChanged)) {
+       console.log('sent was allowed', isSendingAllowed, 'input changed', localPlayerInputChanged, Date.now())
+       lastSentPlayers = ns
+    } 
+}
 
 function handleInput(dt) {
     players.filter(p => p.networkIndex === networkIndexLocal).forEach((p,i) => {
@@ -174,8 +204,8 @@ function render() {
     document.getElementById('txtDtPingPong').innerText = dtPingPong
 }
 
-function sendPlayersAndFigures() {
-    sendMessageBufferToAllPeers(getMessagePlayersAndFigures())
+function sendPlayersAndFigures(dataToSend, highPrio) {
+    return sendMessageBufferToAllPeers(getMessagePlayersAndFigures(dataToSend), highPrio)
 }
 
 function removeRandomLocalPlayer() {
@@ -190,8 +220,7 @@ function removeRandomLocalPlayer() {
 
 function joinLocalPlayer() {
     if (networkIndexLocal < 0) {
-        sendMessageBufferToAllPeers(getMessageBufferWantNetworkIndexes())
-        return
+        return sendMessageBufferToAllPeers(getMessageBufferWantNetworkIndexes())
     }
     var playerIndex = players.length
     var player = createPlayer({networkIndex: networkIndexLocal, playerIndex: playerIndex, xAxis: 0, yAxis: 0 })
