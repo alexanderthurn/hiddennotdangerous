@@ -210,7 +210,7 @@ function getConnectedPeers() {
 }
 
 function sendMessageBufferToPeers(messageBuffer, peers) {
-  tlog('sending msg('+getMessageTypeTitle(messageBuffer)+') to ' + peers.length + ' peer(s)');
+  tlog('sending msg "'+getMessageTypeTitle(messageBuffer)+'" ('+ messageBuffer.byteLength+ ' bytes) to ' + peers.length + ' peer(s)');
   peers.forEach((k) => {k.send(messageBuffer)});
 }
 
@@ -385,7 +385,7 @@ function initNetwork(roomName, options) {
     conn.on('close', () => tlog('conn('+conn.peer+') closed'))
     conn.on('open', () => tlog('conn('+conn.peer+') opened'))
     conn.on('error', (err) => tlog('conn('+conn.peer+') error:' + err))
-    conn.on('data', (data) => {tlog('conn('+conn.peer+') data type('+getMessageTypeTitle(data)+'): ' + internalDataReceivedMethod(data, peer, conn)) /* sendJsonToPeers(data, getConnectedPeers(peer).filter(p => p.peer !== conn.peer))*/})
+    conn.on('data', (data) => {tlog('conn('+conn.peer+') received msg "'+getMessageTypeTitle(data)+'" ('+data.byteLength+'): ' + internalDataReceivedMethod(data, peer, conn)) /* sendJsonToPeers(data, getConnectedPeers(peer).filter(p => p.peer !== conn.peer))*/})
   });
 
   peer.on('error', function (err) {
@@ -402,7 +402,8 @@ function initNetwork(roomName, options) {
         conn.on('close', () => {tlog('conn('+conn.peer+') closed'); initNetwork(roomName, options)})
         conn.on('open', () => {tlog('conn('+conn.peer+') opened'); sendMessageBufferToPeers(getMessageBufferWantNetworkIndexes(), [conn])})
         conn.on('error', () => tlog('conn('+conn.peer+') error' + data))
-        conn.on('data', (data) => {tlog('conn('+conn.peer+') data type('+getMessageTypeTitle(data)+'): ' + internalDataReceivedMethod(data, peer, conn)) })
+        conn.on('data', (data) => {tlog('conn('+conn.peer+') received msg "'+getMessageTypeTitle(data)+'" ('+data.byteLength+'): ' + internalDataReceivedMethod(data, peer, conn))
+        })
       });
 
     } else {
