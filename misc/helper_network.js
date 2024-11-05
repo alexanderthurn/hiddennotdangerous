@@ -1,11 +1,69 @@
 
-function sendMessagePlayersAndFigures(peerId, peer, conn) {
+const playerPayloadBytes = 1+1+4+1 // 1*1 int8 (networkIndex) + 1*1 int8 (playerIndex) + 2*2 floatUnitCircle (xAxis/yAxis) + 1*1 boolean (isActionButtonPressed, 1 Byte)
+const figurePayloadBytes = 1+1+4+2 // 1*1 int8 (networkIndex) + 1*1 int8 (playerIndex) + 2*2 float3000 for (x/y) + 1*2 floatAngle
+
+function handleMessagePlayersAndFigures(buffer, peer, conn) {
+    const view = new DataView(buffer);
+    var offset = 1
+
+    // players
+    var playersToSendLength = view.getUint8(offset);
+    var playersToSend = []
+    offset+=1
+    for (var pi = 0; pi < playersToSendLength; pi++) {
+        var p = {}
+        p.networkIndex = view.getUint8(offset + 0);
+        p.playerIndex = view.getUint8(offset + 1);
+        p.xAxis = readUnitCircleFloatAsInt16(buffer, offset + 2)
+        p.yAxis = readUnitCircleFloatAsInt16(buffer, offset + 4)
+        p.isActionButtonPressed = view.getUint8(offset + 6) > 0 ? true : false
+        offset += playerPayloadBytes
+        playersToSend.push(p)
+    }
+
+    // figures
+    var figuresToSendLength = view.getUint8(offset)
+    var figuresToSend = []
+    for (var fi = 0; fi < figuresToSendLength; fi++) {
+        var f = {}
+        f.networkIndex = view.getUint8(offset + 0);
+        f.playerIndex = view.getUint8(offset + 1);
+        f.x = readUnitCircleFloatAsInt16(buffer, offset + 2)
+        f.y = readUnitCircleFloatAsInt16(buffer, offset + 4)
+        f.angle = readAngleAsInt16(buffer, offset + 6)
+        offset += figurePayloadBytes
+        figuresToSend.push(p)
+    }
+
+    playersToSend.forEach(p => {
+        var player = players.find(pp => pp.networkIndex === p.networkIndex && pp.playerIndex === p.playerIndex)
+        if (!player) {
+            player = createPlayer(p)
+            players.push(player)
+        } else {
+            Object_assign(player, p)
+        }
+    })
+
+    figuresToSend.forEach(f => {
+        var figure= figures.find(ff => ff.networkIndex === f.networkIndex && ff.playerIndex === f.playerIndex)
+        if (!figure) {
+            figure =  createFigure(f)  
+            figures.push(figure)
+            app.stage.addChild(figure)
+        } else {
+            Object_assign(figure, f)
+        }
+    })
+
+    return 'received ' + playersToSendLength + ' players and ' + figuresToSendLength +' figures'
+  }
+
+function getMessagePlayersAndFigures() {
     const dataToSend = getPlayersAndFiguresDataToSend()
     const figuresToSend = dataToSend.figures
     const playersToSend = dataToSend.players
-    const playerPayloadBytes = 4+1+1+1 // 2* floatUnitCircle aka 2 Byte (2*2 Bytes) + 1 * boolean (isActionButtonPressed, 1 Byte) + 1* int8 (playerIndex) + 1*int8 (networkIndex)
-    const figurePayloadBytes = 1+1+4+2 // 1*int8 (networkIndex) + 1* int8 (playerIndex) + 4  float3000 aka int16 (x/y) + 2 floatAngle aka int16 (angle)
-    const payloadLength = 1+(1+figuresToSend.length*figurePayloadBytes) + (1+playersToSend.length*playerPayloadBytes)
+    const payloadLength = 1 + (1+playersToSend.length*playerPayloadBytes) + (1+figuresToSend.length*figurePayloadBytes) 
 
     let buffer = new ArrayBuffer(payloadLength)
     let view = new DataView(buffer)
@@ -15,21 +73,21 @@ function sendMessagePlayersAndFigures(peerId, peer, conn) {
     view.setUint8(0, PEERMESSAGEID_PLAYERSANDFIGURES)
     offset+=1
 
-    // number of players
-    view.setUint8(1, playersToSend.length)
+    // players
+    view.setUint8(offset, playersToSend.length)
     offset+=1
 
     playersToSend.forEach((p) => {
-        writeUnitCircleFloatAsInt16(buffer, offset + 0, p.xAxis)
-        writeUnitCircleFloatAsInt16(buffer, offset + 2, p.yAxis)
-        view.setUint8(offset + 4, p.isActionButtonPressed ? 1 : 0)
-        view.setUint8(offset + 5, p.networkIndex)
-        view.setUint8(offset + 6, p.playerIndex)
+        view.setUint8(offset + 0, p.networkIndex)
+        view.setUint8(offset + 1, p.playerIndex)
+        writeUnitCircleFloatAsInt16(buffer, offset + 2, p.xAxis)
+        writeUnitCircleFloatAsInt16(buffer, offset + 4, p.yAxis)
+        view.setUint8(offset + 6, p.isActionButtonPressed ? 1 : 0)
         offset += playerPayloadBytes
     })
 
-    // number of figures
-    view.setUint8(2, figuresToSend.length)
+    // figures
+    view.setUint8(offset, figuresToSend.length)
     offset+=1
 
     figuresToSend.forEach((f) => {
@@ -40,34 +98,28 @@ function sendMessagePlayersAndFigures(peerId, peer, conn) {
         writeAngleAsInt16(buffer, offset + 6, f.angle)
         offset+=figurePayloadBytes
     })
-    conn.send(buffer)
+    
+    return buffer
 }
 
 
-function dataReceived(d, peer, conn) {
-    var jsonObject = d
- 
-    if (jsonObject.players) {
-        jsonObject.players.filter(p => p.networkIndex !== networkIndexLocal).forEach(p => {
-            var indexInArray = players.findIndex(pp => pp.networkIndex === p.networkIndex && pp.playerIndex === p.playerIndex)
-            if (indexInArray >= 0) {
-                players[indexInArray] = k
-            } else {
-                players.push(p)
-            }
-        })
+function dataReceived(messageBuffer, peer, conn) {
+    const messageType = getMessageType(messageBuffer)
+    var result = 'unknown'
+    try {
+      switch (messageType) {
+        case PEERMESSAGEID_PLAYERSANDFIGURES:
+          result = handleMessagePlayersAndFigures(messageBuffer, peer, conn)
+          break
+        default:
+            result = 'unknown'
+          break
+      }
+    } catch(e) {
+        result = 'error dataReceived: ' + e.message + ' ' + getMessageTypeTitle(messageBuffer)
     }
 
-    if (jsonObject.figures) {
-        jsonObject.figures.filter(p => p.networkIndex !== networkIndexLocal).forEach(p => {
-            var indexInArray = figures.findIndex(pp => pp.networkIndex === p.networkIndex && pp.playerIndex === p.playerIndex)
-            if (indexInArray >= 0) {
-                figures[indexInArray] = k
-            } else {
-                figures.push(p)
-            }
-        })
-    }
+    return result
 }
 
 function getPlayersAndFiguresDataToSend() {
@@ -86,9 +138,7 @@ function getPlayersAndFiguresDataToSend() {
     return jsonObject
 }
 
-function sendData() {
-   
-}
+
 
 
 function textareaLog(d) {

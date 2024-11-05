@@ -14,7 +14,7 @@ var btnWantNetworkIndex = document.getElementById('btnWantNetworkIndex')
 var btnTellNetworkIndex = document.getElementById('btnTellNetworkIndex')
 var btnSend = document.getElementById('btnSend')
 var PEERMESSAGEID_PLAYERSANDFIGURES = 17
-
+MessageTitles[PEERMESSAGEID_PLAYERSANDFIGURES] = 'PlayersAndFigures'
 
 var figuresTexture
 
@@ -79,7 +79,6 @@ async function initApp() {
         handleInput(dt)
         update(dt)
         render()
-        //sendData()
         then = now
     })
 
@@ -92,6 +91,7 @@ async function initApp() {
     
     btnJoin.addEventListener('click', joinLocalPlayer)
     btnRemove.addEventListener('click', removeRandomLocalPlayer)
+    btnSendPlayersFigures.addEventListener('click', sendPlayersAndFigures)
 
 }
 
@@ -170,6 +170,10 @@ function render() {
     document.getElementById('txtPeerId').innerText = peer?.id
 }
 
+function sendPlayersAndFigures() {
+    sendMessageBufferToAllPeers(getMessagePlayersAndFigures())
+}
+
 function removeRandomLocalPlayer() {
     var playersLocal = players.filter(p => p.networkIndex === networkIndexLocal)
     var pIndex = Math.floor(Math.random() * playersLocal.length)
@@ -186,21 +190,29 @@ function joinLocalPlayer() {
         return
     }
     var playerIndex = players.length
-    var player = {networkIndex: networkIndexLocal, playerIndex: playerIndex, type: 'keyboard', xAxis: 0, yAxis: 0 }
+    var player = createPlayer({networkIndex: networkIndexLocal, playerIndex: playerIndex, xAxis: 0, yAxis: 0 })
     var figure =  createFigure({networkIndex: networkIndexLocal, playerIndex: playerIndex, x: Math.random()*320, y:Math.random()*320, angle: 0})
-
-
+    
     players.push(player)
     figures.push(figure)
     app.stage.addChild(figure)
+}
+
+function createPlayer(props) {
+    var p = {networkIndex: 255, playerIndex: 255, type: 'keyboard'}
+    if (props) {
+        Object_assign(p, props)
+    }
+    return p
 }
 
 
 function createFigure(props) {
 
     var f = new PIXI.Container()
-    Object_assign(f, props)
-
+    if (props) {
+        Object_assign(f, props)
+    }
     let sprite = new HDND.AnimatedSprite(figuresTexture.animations.down);
     sprite.anchor.set(0.5)
     sprite.animationSpeed = 0.1
@@ -228,7 +240,9 @@ function destroyFigure(f) {
 
 function createBean(props) {
     var b = new PIXI.Container()
-    Object_assign(b, props)
+    if (props) {
+        Object_assign(b, props)
+    }
 
     let c = new PIXI.Graphics()
         .circle(0,0, 50)
@@ -252,7 +266,9 @@ function createBitmapText(props) {
         }
     });
 
-    Object_assign(t, props)
-
+    if (props) {
+        Object_assign(t, props)
+    }
+    
     return t
 }

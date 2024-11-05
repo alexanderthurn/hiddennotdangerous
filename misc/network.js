@@ -210,7 +210,7 @@ function getConnectedPeers() {
 }
 
 function sendMessageBufferToPeers(messageBuffer, peers) {
-  tlog('sending msg('+getMessageType(messageBuffer)+') to ' + peers.length + ' peer(s)');
+  tlog('sending msg('+getMessageTypeTitle(messageBuffer)+') to ' + peers.length + ' peer(s)');
   peers.forEach((k) => {k.send(messageBuffer)});
 }
 
@@ -234,7 +234,6 @@ function handleMessageBufferTellNetworkIndexes(messageBuffer, peer, conn) {
         networkIndexLocal = networkIndex
       }
     }
-
 
    return 'received index: ' + networkIndexLocal
 }
@@ -363,7 +362,7 @@ function internalDataReceivedMethod(messageBuffer, peer, conn) {
         break
     }
   } catch(e) {
-    tlog('error: ' + e.message + ' ' + getMessageTypeTitle(messageBuffer))
+    result = 'error internalDataReceivedMethod: ' + e.message + ' ' + getMessageTypeTitle(messageBuffer)
   }
  // tlog('received message('+messageType+'): '+ result)
 
