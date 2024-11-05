@@ -157,6 +157,8 @@ function update(dt) {
 
         if (Math.abs(p.xAxis) + Math.abs(p.yAxis) > 0)
             f.sprite.animate(dt)
+
+        f.zIndex = Math.round(f.y)
     })
 }
 
@@ -269,6 +271,6 @@ function createBitmapText(props) {
     if (props) {
         Object_assign(t, props)
     }
-    
+
     return t
 }

@@ -1,6 +1,6 @@
 
-const playerPayloadBytes = 1+1+4+1 // 1*1 int8 (networkIndex) + 1*1 int8 (playerIndex) + 2*2 floatUnitCircle (xAxis/yAxis) + 1*1 boolean (isActionButtonPressed, 1 Byte)
-const figurePayloadBytes = 1+1+4+2 // 1*1 int8 (networkIndex) + 1*1 int8 (playerIndex) + 2*2 float3000 for (x/y) + 1*2 floatAngle
+const playerPayloadBytes = 1+1+8+1 // 1*1 int8 (networkIndex) + 1*1 int8 (playerIndex) + 2*2 floatUnitCircle (xAxis/yAxis) + 1*1 boolean (isActionButtonPressed, 1 Byte)
+const figurePayloadBytes = 1+1+8+4 // 1*1 int8 (networkIndex) + 1*1 int8 (playerIndex) + 2*2 float3000 for (x/y) + 1*2 floatAngle
 
 function handleMessagePlayersAndFigures(buffer, peer, conn) {
     const view = new DataView(buffer);
@@ -14,9 +14,9 @@ function handleMessagePlayersAndFigures(buffer, peer, conn) {
         var p = {}
         p.networkIndex = view.getUint8(offset + 0);
         p.playerIndex = view.getUint8(offset + 1);
-        p.xAxis = readUnitCircleFloatAsInt16(buffer, offset + 2)
-        p.yAxis = readUnitCircleFloatAsInt16(buffer, offset + 4)
-        p.isActionButtonPressed = view.getUint8(offset + 6) > 0 ? true : false
+        p.xAxis = view.getFloat32(offset + 2, false)
+        p.yAxis = view.getFloat32(offset + 6, false)
+        p.isActionButtonPressed = view.getUint8(offset + 10) > 0 ? true : false
         offset += playerPayloadBytes
         playersToSend.push(p)
     }
@@ -24,15 +24,17 @@ function handleMessagePlayersAndFigures(buffer, peer, conn) {
     // figures
     var figuresToSendLength = view.getUint8(offset)
     var figuresToSend = []
+    offset+=1
+
     for (var fi = 0; fi < figuresToSendLength; fi++) {
         var f = {}
         f.networkIndex = view.getUint8(offset + 0);
         f.playerIndex = view.getUint8(offset + 1);
-        f.x = readUnitCircleFloatAsInt16(buffer, offset + 2)
-        f.y = readUnitCircleFloatAsInt16(buffer, offset + 4)
-        f.angle = readAngleAsInt16(buffer, offset + 6)
+        f.x = view.getFloat32(offset + 2, false)
+        f.y = view.getFloat32(offset + 6, false)
+        f.angle = view.getFloat32(buffer, offset + 10, false)
         offset += figurePayloadBytes
-        figuresToSend.push(p)
+        figuresToSend.push(f)
     }
 
     playersToSend.forEach(p => {
@@ -80,9 +82,9 @@ function getMessagePlayersAndFigures() {
     playersToSend.forEach((p) => {
         view.setUint8(offset + 0, p.networkIndex)
         view.setUint8(offset + 1, p.playerIndex)
-        writeUnitCircleFloatAsInt16(buffer, offset + 2, p.xAxis)
-        writeUnitCircleFloatAsInt16(buffer, offset + 4, p.yAxis)
-        view.setUint8(offset + 6, p.isActionButtonPressed ? 1 : 0)
+        view.setFloat32(offset + 2, p.xAxis, false)
+        view.setFloat32(offset + 6, p.yAxis, false)
+        view.setUint8(offset + 10, p.isActionButtonPressed ? 1 : 0)
         offset += playerPayloadBytes
     })
 
@@ -93,9 +95,9 @@ function getMessagePlayersAndFigures() {
     figuresToSend.forEach((f) => {
         view.setUint8(offset + 0, f.networkIndex)
         view.setUint8(offset + 1, f.playerIndex)
-        write3000erFloatAsInt16(buffer, offset + 2, f.x)
-        write3000erFloatAsInt16(buffer, offset + 4, f.y)
-        writeAngleAsInt16(buffer, offset + 6, f.angle)
+        view.setFloat32(offset + 2, f.x, false)
+        view.setFloat32(offset + 6, f.y, false)
+        view.setFloat32(offset + 10, f.angle, false)
         offset+=figurePayloadBytes
     })
     
