@@ -7,7 +7,7 @@ var networkIndexLocal = -1
 const MAX_NETWORK_INDEX = 255
 var networkIndexes = {}
 var dtPingPong = -1
-var timestampLastMessageSent = -1, thresholdLastMessageSent = 2000, thresholdMessagesHighPrio = 5, thresholdMessagesHighPrioSent = -1
+var timestampLastMessageSent = -1, thresholdLastMessageSent = 1000, thresholdMessagesHighPrio = 10, thresholdMessagesHighPrioSent = -1
 var peer = undefined
 var tlog = undefined
 var peerIdDefault = undefined
