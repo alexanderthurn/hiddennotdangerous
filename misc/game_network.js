@@ -14,7 +14,9 @@ var btnWantNetworkIndex = document.getElementById('btnWantNetworkIndex')
 var btnTellNetworkIndex = document.getElementById('btnTellNetworkIndex')
 var btnSend = document.getElementById('btnSend')
 var PEERMESSAGEID_PLAYERSANDFIGURES = 17
+MessageTitles[PEERMESSAGEID_PLAYERSANDFIGURES] = 'PlayersAndFigures'
 
+var figuresTexture
 
 async function initApp() {
     app = new PIXI.Application();
@@ -24,6 +26,7 @@ async function initApp() {
     await PIXI.Assets.load('../gfx/plain_grass.jpg');
     await PIXI.Assets.load('../gfx/character_base_topview_32x32.png');
     await PIXI.Assets.load('https://pixijs.com/assets/bitmap-font/desyrel.xml');
+    figuresTexture = await PIXI.Assets.load('../gfx/character_base_topview_32x32_angles_sleepanimation.json')
 
     let container = new PIXI.Container()
     container.x = 0
@@ -38,26 +41,18 @@ async function initApp() {
     sprite.height = canvas.height/5
     container.addChild(sprite)
     
-    const bitmapFontText = new PIXI.BitmapText({
-        text: 'Knirps und Knall',
-        style: {
-            fontFamily: 'Desyrel',
-            fontSize: 32,
-            align: 'left',
-        }
-    });
+    const bitmapFontText = createBitmapText({text: 'Knirps und Knall', style:{fontSize:32}})
 
     bitmapFontText.anchor.set(0.5,0.5)
     bitmapFontText.x = canvas.width/2
     bitmapFontText.y =  sprite.height/2
     container.addChild(bitmapFontText);
-
+    
+    app.stage.addChild(createBean({x:150, y: 150}))
 
 
     now = Date.now();
     then = Date.now()
-
-
 
     btnSend
     .addEventListener('click', function (event) {
@@ -84,7 +79,7 @@ async function initApp() {
         handleInput(dt)
         update(dt)
         render()
-        //sendData()
+        updateNetwork(dt)
         then = now
     })
 
@@ -96,15 +91,42 @@ async function initApp() {
     }})
     
     btnJoin.addEventListener('click', joinLocalPlayer)
+    btnRemove.addEventListener('click', removeRandomLocalPlayer)
+    btnSendPlayersFigures.addEventListener('click', () => {sendPlayersAndFigures(getPlayersAndFiguresDataToSend(), false)})
+    btnSendPing.addEventListener('click', () => {sendMessageBufferToAllPeers(getMessageBufferPing())})
+    
 }
 
-initApp()
 
+document.addEventListener("DOMContentLoaded", function(event){
+    initApp()
+})
 
+var lastSentPlayers = []
 
+function updateNetwork(dt) {
 
+   
+    var dataToSend = getPlayersAndFiguresDataToSend()
+    var ns = dataToSend?.players.map(x => {
+        return {
+            xAxis: x.xAxis,
+            yAxis: x.yAxis
+        }
+    })
 
+    var ls = lastSentPlayers
+    var localPlayerInputChanged = (ls?.length !== ns?.length) || (ns.length > 0 && ns?.some((p,i) => {
+        return p.xAxis !== ls[i].xAxis || p.yAxis !== ls[i].yAxis
+    }))
 
+    var isSendingAllowed = isSendMessageAllowed(localPlayerInputChanged)
+
+    if (isSendingAllowed && localPlayerInputChanged && sendPlayersAndFigures(dataToSend, localPlayerInputChanged)) {
+       console.log('sent was allowed', isSendingAllowed, 'input changed', localPlayerInputChanged, Date.now())
+       lastSentPlayers = ns
+    } 
+}
 
 function handleInput(dt) {
     players.filter(p => p.networkIndex === networkIndexLocal).forEach((p,i) => {
@@ -136,174 +158,150 @@ function update(dt) {
             f.y += p.yAxis*0.1*dt
         }
 
+        var angleDegrees = rad2deg(angle(0,0,p.xAxis,p.yAxis))
+        var offset = 45*0.5
+        if (angleDegrees >= 180 - offset || angleDegrees < -135 -offset) {
+            f.sprite.textures = figuresTexture.animations.left
+        } else if (angleDegrees < -135+45 -offset){
+            f.sprite.textures = figuresTexture.animations.upleft
+        } else if (angleDegrees < -135+45+45 -offset){
+            f.sprite.textures = figuresTexture.animations.up
+        } else if (angleDegrees < -135+45+45+45 -offset){
+            f.sprite.textures = figuresTexture.animations.upright
+        } else if (angleDegrees < -135+45+45+45+45 -offset){
+            f.sprite.textures = figuresTexture.animations.right
+        } else if (angleDegrees < -135+45+45+45+45+45 -offset){
+            f.sprite.textures = figuresTexture.animations.downright
+        } else if (angleDegrees < -135+45+45+45+45+45+45 -offset){
+            f.sprite.textures = figuresTexture.animations.down
+        } else if (angleDegrees < -135+45+45+45+45+45+45+45 -offset){
+            f.sprite.textures = figuresTexture.animations.downleft
+        } else {
+            f.sprite.textures = figuresTexture.animations.dead
+        }
+
+
         if (f.x > canvas.width) f.x = canvas.width
         if (f.y > canvas.height) f.y = canvas.height
         if (f.x < 0) f.x = 0
         if (f.y < 0) f.y = 0
 
-        f.container.x = f.x
-        f.container.y = f.y
+        if (Math.abs(p.xAxis) + Math.abs(p.yAxis) > 0)
+            f.sprite.animate(dt)
+
+        f.zIndex = Math.round(f.y)
     })
 }
 
+
 function render() {
-    var dataToSend = getPlayersAndFiguresDataToSend()
     textareaCanvas1.value = JSON.stringify(players, null, 2)
-   // textareaCanvas2.value = JSON.stringify(figures,null, 2)
-   // textAreaCanvas3.value = JSON.stringify(dataToSend,null, 2)
-    textAreaCanvas4.value = JSON.stringify({peers: getConnectedPeers(), networkIndexes:networkIndexes},null, 2)
+    textareaCanvas2.value = JSON.stringify(figures.map(f => ({x: f.x, y: f.y, networkIndex: f.networkIndex, playerIndex: f.playerIndex})),null, 2)
+    textAreaCanvas3.value = JSON.stringify({peers: getConnectedPeers().map(p => p.peer), networkIndexes:networkIndexes},null, 2)
     document.getElementById('txtNetworkId').innerText = networkIdLocal
     document.getElementById('txtNetworkIndex').innerText = networkIndexLocal
     document.getElementById('txtPeerId').innerText = peer?.id
+    document.getElementById('txtDtPingPong').innerText = dtPingPong
 }
 
-function textareaLog(d) {
-    var textArea = document.getElementById('textAreaLog')
-    textArea.value += d + '\n';
-    textArea.scrollTop = textArea.scrollHeight;
-    var color = 'white'
-    if (peer && peer.open) {
-        if (isMaster(peer)) {
-            color = 'gold'
-        } else {
-            color = 'silver'
-        }
-    } 
+function sendPlayersAndFigures(dataToSend, highPrio) {
+    return sendMessageBufferToAllPeers(getMessagePlayersAndFigures(dataToSend), highPrio)
+}
 
-    document.getElementsByTagName('body')[0].style.backgroundColor = color
-    console.log(d)
+function removeRandomLocalPlayer() {
+    var playersLocal = players.filter(p => p.networkIndex === networkIndexLocal)
+    var pIndex = Math.floor(Math.random() * playersLocal.length)
+    var fIndex = figures.findIndex(f => f.playerIndex === players[pIndex].playerIndex)
+
+    app.stage.removeChild(figures[fIndex])
+    players.splice(pIndex,1)
+    figures.splice(fIndex,1)
 }
 
 function joinLocalPlayer() {
     if (networkIndexLocal < 0) {
-        sendMessageBufferToAllPeers(getMessageBufferWantNetworkIndexes())
-        return
+        return sendMessageBufferToAllPeers(getMessageBufferWantNetworkIndexes())
     }
     var playerIndex = players.length
-    var player = {networkIndex: networkIndexLocal, playerIndex: playerIndex, type: 'keyboard', xAxis: 0, yAxis: 0 }
-    var figure = {networkIndex: networkIndexLocal, playerIndex: playerIndex, x: Math.random()*320, y:Math.random()*320, angle: 0}
-
+    var player = createPlayer({networkIndex: networkIndexLocal, playerIndex: playerIndex, xAxis: 0, yAxis: 0 })
+    var figure =  createFigure({networkIndex: networkIndexLocal, playerIndex: playerIndex, x: Math.random()*320, y:Math.random()*320, angle: 0})
+    
     players.push(player)
     figures.push(figure)
+    app.stage.addChild(figure)
+}
+
+function createPlayer(props) {
+    var p = {networkIndex: 255, playerIndex: 255, type: 'keyboard'}
+    if (props) {
+        Object_assign(p, props)
+    }
+    return p
+}
 
 
-    let container = new PIXI.Container()
-    container.x = figure.x
-    container.y = figure.y
-    app.stage.addChild(container)
+function createFigure(props) {
 
-    let sprite = PIXI.Sprite.from('../gfx/character_base_topview_32x32.png');
+    var f = new PIXI.Container()
+    if (props) {
+        Object_assign(f, props)
+    }
+    let sprite = new HDND.AnimatedSprite(figuresTexture.animations.down);
     sprite.anchor.set(0.5)
-    sprite.x = 0
-    sprite.y = 0
-    sprite.scale = 0.25
-    container.addChild(sprite)
+    sprite.animationSpeed = 0.1
+    sprite.frame = 0
 
-    const bitmapFontText = new PIXI.BitmapText({
-        text: figure.networkIndex + ':' + figure.playerIndex,
+    const bitmapFontText =createBitmapText({
+        text: f.networkIndex + ':' + f.playerIndex,
         style: {
-            fontFamily: 'Desyrel',
             fontSize: 24,
             align: 'center',
+        },
+        y: 10,
+        anchor:0.5
+    });
+    
+    f.addChild(sprite)
+    f.sprite = sprite
+    f.addChild(bitmapFontText);
+    return f
+}
+
+function destroyFigure(f) {
+
+}
+
+function createBean(props) {
+    var b = new PIXI.Container()
+    if (props) {
+        Object_assign(b, props)
+    }
+
+    let c = new PIXI.Graphics()
+        .circle(0,0, 50)
+        .fill('white')
+        .circle(0,0, 40)
+        .stroke('black')
+
+    b.addChild(c)
+
+    b.addChild(createBitmapText({text: 'B'}))
+    return b
+}
+
+function createBitmapText(props) {
+    var t = new PIXI.BitmapText({
+        text: '',
+        style: {
+            fontFamily: 'Desyrel',
+            fontSize: 16,
+            align: 'left',
         }
     });
 
-    bitmapFontText.anchor.set(0.5)
-    bitmapFontText.x = 0//app.screen.width/2
-    bitmapFontText.y = 0//app.screen.height/2
-    container.addChild(bitmapFontText);
-
-    figure.container = container
-}
-
-
-function dataReceived(d, peer, conn) {
-    var jsonObject = d
- 
-    if (jsonObject.players) {
-        jsonObject.players.filter(p => p.networkIndex !== networkIndexLocal).forEach(p => {
-            var indexInArray = players.findIndex(pp => pp.networkIndex === p.networkIndex && pp.playerIndex === p.playerIndex)
-            if (indexInArray >= 0) {
-                players[indexInArray] = k
-            } else {
-                players.push(p)
-            }
-        })
+    if (props) {
+        Object_assign(t, props)
     }
 
-    if (jsonObject.figures) {
-        jsonObject.figures.filter(p => p.networkIndex !== networkIndexLocal).forEach(p => {
-            var indexInArray = figures.findIndex(pp => pp.networkIndex === p.networkIndex && pp.playerIndex === p.playerIndex)
-            if (indexInArray >= 0) {
-                figures[indexInArray] = k
-            } else {
-                figures.push(p)
-            }
-        })
-    }
-}
-
-function getPlayersAndFiguresDataToSend() {
-    var jsonObject = {
-
-    }
-
-    if (isMaster(peer)) {
-        jsonObject.figures = figures
-        jsonObject.players = players
-    } else {
-        jsonObject.players = players.filter(p => p.networkIndex === networkIndexLocal)
-        jsonObject.figures = figures.filter(p => p.networkIndex === networkIndexLocal)
-    }
-
-    return jsonObject
-}
-
-function sendData() {
-   
-}
-
-
-function sendMessagePlayersAndFigures(peerId, peer, conn) {
-    const dataToSend = getPlayersAndFiguresDataToSend()
-    const figuresToSend = dataToSend.figures
-    const playersToSend = dataToSend.players
-    const playerPayloadBytes = 4+1+1+1 // 2* floatUnitCircle aka 2 Byte (2*2 Bytes) + 1 * boolean (isActionButtonPressed, 1 Byte) + 1* int8 (playerIndex) + 1*int8 (networkIndex)
-    const figurePayloadBytes = 1+1+4+2 // 1*int8 (networkIndex) + 1* int8 (playerIndex) + 4  float3000 aka int16 (x/y) + 2 floatAngle aka int16 (angle)
-    const payloadLength = 1+(1+figuresToSend.length*figurePayloadBytes) + (1+playersToSend.length*playerPayloadBytes)
-
-    let buffer = new ArrayBuffer(payloadLength)
-    let view = new DataView(buffer)
-    var offset = 0
-
-    // message id
-    view.setUint8(0, PEERMESSAGEID_PLAYERSANDFIGURES)
-    offset+=1
-
-    // number of players
-    view.setUint8(1, playersToSend.length)
-    offset+=1
-
-    playersToSend.forEach((p) => {
-        writeUnitCircleFloatAsInt16(buffer, offset + 0, p.xAxis)
-        writeUnitCircleFloatAsInt16(buffer, offset + 2, p.yAxis)
-        view.setUint8(offset + 4, p.isActionButtonPressed ? 1 : 0)
-        view.setUint8(offset + 5, p.networkIndex)
-        view.setUint8(offset + 6, p.playerIndex)
-        offset += playerPayloadBytes
-    })
-
-    // number of figures
-    view.setUint8(2, figuresToSend.length)
-    offset+=1
-
-    figuresToSend.forEach((f) => {
-        view.setUint8(offset + 0, f.networkIndex)
-        view.setUint8(offset + 1, f.playerIndex)
-        write3000erFloatAsInt16(buffer, offset + 2, f.x)
-        write3000erFloatAsInt16(buffer, offset + 4, f.y)
-        writeAngleAsInt16(buffer, offset + 6, f.angle)
-        offset+=figurePayloadBytes
-    })
-    conn.send(buffer)
+    return t
 }

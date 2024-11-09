@@ -4,10 +4,10 @@ if (!networkIdLocal) {
   sessionStorage.setItem('networkId', networkIdLocal)
 }
 var networkIndexLocal = -1
-
 const MAX_NETWORK_INDEX = 255
 var networkIndexes = {}
-
+var dtPingPong = -1
+var timestampLastMessageSent = -1, thresholdLastMessageSent = 1000, thresholdMessagesHighPrio = 10, thresholdMessagesHighPrioSent = -1
 var peer = undefined
 var tlog = undefined
 var peerIdDefault = undefined
@@ -16,12 +16,16 @@ var dataReceivedMethod = undefined
 const PEERMESSAGEID_TELL_NETWORKINDEXES = 0
 const PEERMESSAGEID_WANT_NETWORKINDEXES = 1
 const PEERMESSAGEID_TEXT = 2
+const PEERMESSAGEID_PING = 3
+const PEERMESSAGEID_PONG = 4
 
 const MessageTitles = {
 }
 MessageTitles[PEERMESSAGEID_TELL_NETWORKINDEXES] = 'TellIndexes'
 MessageTitles[PEERMESSAGEID_WANT_NETWORKINDEXES] = 'WantIndexes'
 MessageTitles[PEERMESSAGEID_TEXT] = 'Text'
+MessageTitles[PEERMESSAGEID_PING] = 'Ping'
+MessageTitles[PEERMESSAGEID_PONG] = 'Pong'
 
 function getMessageTitleByType(messageId) {
   if (MessageTitles[messageId]) {
@@ -205,18 +209,45 @@ function readTwoBooleans(buffer, offset) {
   return { bool1, bool2 };
 }
 
-function getConnectedPeers(peer) {
-  return !peer ? [] : Object.entries(peer.connections)
-  .map((k) => k[1][0]).filter(p => p && p.peerConnection.connectionState !== 'failed')
+function getConnectedPeers() {
+  return !peer ? [] : Object.keys(peer.connections).map(p => peer.connections[p]).map( p=> p.length > 0 ? p[0] : null).filter(p => p && p.peerConnection.connectionState !== 'failed')
 }
 
-function sendMessageBufferToPeers(messageBuffer, peers) {
-  tlog('sending msg('+getMessageType(messageBuffer)+') to ' + peers.length + ' peer(s)');
-  peers.forEach((k) => {k.send(messageBuffer)});
+function isSendMessageAllowed(highPrio) {
+  var result = 0
+  var timestamp = Date.now()
+  var dtLastMessage = (timestamp - timestampLastMessageSent)
+  var thresholdReached = dtLastMessage > thresholdLastMessageSent
+  var highPrioAllowed = thresholdMessagesHighPrioSent < thresholdMessagesHighPrio
+  if (thresholdReached) {
+    result = 1
+  } else if (highPrio && highPrioAllowed) {
+    result = 2
+  }
+  return result
 }
 
-function sendMessageBufferToAllPeers(messageBuffer) {
-  sendMessageBufferToPeers(messageBuffer, getConnectedPeers(peer))
+function sendMessageBufferToPeers(messageBuffer, peers, highPrio) {
+  var isAllowed = isSendMessageAllowed(highPrio)
+  
+  if (isAllowed) {
+    tlog('sending msg "'+getMessageTypeTitle(messageBuffer)+'" ('+ messageBuffer.byteLength+ ' bytes) to ' + peers.length + ' peer(s)');
+    peers.forEach((k) => {k.send(messageBuffer)});
+    if (isAllowed === 1) {
+      thresholdMessagesHighPrioSent = 0
+      timestampLastMessageSent = Date.now()
+    } else if (isAllowed === 2) {
+      thresholdMessagesHighPrioSent++
+    }
+
+  }
+ 
+
+  return isAllowed
+}
+
+function sendMessageBufferToAllPeers(messageBuffer, highPrio) {
+  return sendMessageBufferToPeers(messageBuffer, getConnectedPeers(), highPrio)
 }
 
 function handleMessageBufferTellNetworkIndexes(messageBuffer, peer, conn) {
@@ -235,7 +266,6 @@ function handleMessageBufferTellNetworkIndexes(messageBuffer, peer, conn) {
         networkIndexLocal = networkIndex
       }
     }
-
 
    return 'received index: ' + networkIndexLocal
 }
@@ -288,9 +318,9 @@ function handleMessageBufferWantNetworkIndexes(messageBuffer, peer, conn) {
   if (index < 0) {
     setNetworkIndex(networkId, getFreeNetworkIndex())
     reply = getMessageBufferTellNetworkIndexes()
-    sendMessageBufferToAllPeers(reply)
+    sendMessageBufferToAllPeers(reply, true)
   } else {
-    sendMessageBufferToPeers(reply, [conn])
+    sendMessageBufferToPeers(reply, [conn], true)
   }
 
   return 'todo'
@@ -330,9 +360,55 @@ function getMessageBufferText(text) {
     let offset = 0
     view.setUint8(0, PEERMESSAGEID_TEXT)
     offset += 1
-    offset = writeTextToBuffer(buffer,offset, text)
+    writeTextToBuffer(buffer,offset, text)
+    offset += 4
   return buffer
 }
+
+
+function handleMessageBufferPing(messageBuffer, peer, conn) {
+  
+  let view = new DataView(messageBuffer)
+  var timestamp = view.getBigUint64(1, false)
+  
+  var pongMessage = getMessageBufferPong(timestamp)
+  sendMessageBufferToPeers(pongMessage, [conn], true)
+  return timestamp
+}
+
+function getMessageBufferPing() {
+    let payloadLength = 1 + 8
+    let messageBuffer = new ArrayBuffer(payloadLength)
+    let view = new DataView(messageBuffer)
+    let offset = 0
+    view.setUint8(0, PEERMESSAGEID_PING)
+    offset += 1
+    view.setBigUint64(offset, BigInt(Date.now()), false)
+    offset += 8
+  return messageBuffer
+}
+
+
+function handleMessageBufferPong(messageBuffer, peer, conn) {
+  let view = new DataView(messageBuffer)
+  var timestamp = view.getBigUint64(1, false)
+  dtPingPong = Date.now() - Number(timestamp)
+  return 'pong response: sent:' + timestamp + ' now: ' + Date.now() + ' dt: ' + dtPingPong
+}
+
+function getMessageBufferPong(timestamp) {
+    let payloadLength = 1 + 8
+    let buffer = new ArrayBuffer(payloadLength)
+    let view = new DataView(buffer)
+    let offset = 0
+    view.setUint8(0, PEERMESSAGEID_PONG)
+    offset += 1
+    view.setBigUint64(offset, timestamp, false)
+    offset += 8
+    return buffer
+}
+
+
 
 function getMessageType(messageBuffer) {
   const view = new DataView(messageBuffer);
@@ -357,6 +433,12 @@ function internalDataReceivedMethod(messageBuffer, peer, conn) {
       case PEERMESSAGEID_TEXT:
         result = handleMessageBufferText(messageBuffer, peer, conn)
         break
+      case PEERMESSAGEID_PING:
+        result = handleMessageBufferPing(messageBuffer, peer, conn)
+        break
+      case PEERMESSAGEID_PONG:
+        result = handleMessageBufferPong(messageBuffer, peer, conn)
+        break
       default:
         if (dataReceivedMethod) {
           result = dataReceivedMethod(messageBuffer, peer, conn)
@@ -364,7 +446,7 @@ function internalDataReceivedMethod(messageBuffer, peer, conn) {
         break
     }
   } catch(e) {
-    tlog('error: ' + e.message + ' ' + getMessageTypeTitle(messageBuffer))
+    result = 'error internalDataReceivedMethod: ' + e.message + ' ' + getMessageTypeTitle(messageBuffer)
   }
  // tlog('received message('+messageType+'): '+ result)
 
@@ -387,7 +469,7 @@ function initNetwork(roomName, options) {
     conn.on('close', () => tlog('conn('+conn.peer+') closed'))
     conn.on('open', () => tlog('conn('+conn.peer+') opened'))
     conn.on('error', (err) => tlog('conn('+conn.peer+') error:' + err))
-    conn.on('data', (data) => {tlog('conn('+conn.peer+') data type('+getMessageTypeTitle(data)+'): ' + internalDataReceivedMethod(data, peer, conn)) /* sendJsonToPeers(data, getConnectedPeers(peer).filter(p => p.peer !== conn.peer))*/})
+    conn.on('data', (data) => {tlog('conn('+conn.peer+') received msg "'+getMessageTypeTitle(data)+'" ('+data.byteLength+'): ' + internalDataReceivedMethod(data, peer, conn)) /* sendJsonToPeers(data, getConnectedPeers(peer).filter(p => p.peer !== conn.peer))*/})
   });
 
   peer.on('error', function (err) {
@@ -402,9 +484,10 @@ function initNetwork(roomName, options) {
         tlog(`connecting to peer ${peerIdDefault} `);
         conn = peer.connect(peerIdDefault, {serialization: 'binary', reliable:false});
         conn.on('close', () => {tlog('conn('+conn.peer+') closed'); initNetwork(roomName, options)})
-        conn.on('open', () => {tlog('conn('+conn.peer+') opened'); sendMessageBufferToPeers(getMessageBufferWantNetworkIndexes(), [conn])})
-        conn.on('error', () => tlog('conn('+conn.peer+') error' + data))
-        conn.on('data', (data) => {tlog('conn('+conn.peer+') data type('+getMessageTypeTitle(data)+'): ' + internalDataReceivedMethod(data, peer, conn)) })
+        conn.on('open', () => {tlog('conn('+conn.peer+') opened'); sendMessageBufferToPeers(getMessageBufferWantNetworkIndexes(), [conn], true)})
+        conn.on('error', (err) => tlog('conn('+conn.peer+') error' + err.type))
+        conn.on('data', (data) => {tlog('conn('+conn.peer+') received msg "'+getMessageTypeTitle(data)+'" ('+data.byteLength+'): ' + internalDataReceivedMethod(data, peer, conn))
+        })
       });
 
     } else {
