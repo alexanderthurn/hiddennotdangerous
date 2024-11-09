@@ -40,7 +40,7 @@ var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAud
 var level = {}
 var tileMap, tileMap2;
 var playerImage = new Image()
-playerImage.src = 'gfx/character_base_32x32.png' // 'gfx/character_base_topview_32x32.png' beuelerjong
+playerImage.src = 'gfx/character_base_topview_32x32.png' // 'gfx/character_base_topview_32x32.png' beuelerjong
 var playerImageAnim = {
     width: 62,
     height: 62,
