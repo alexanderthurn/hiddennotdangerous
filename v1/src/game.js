@@ -40,7 +40,7 @@ var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAud
 var level = {}
 var tileMap, tileMap2;
 var playerImage = new Image()
-playerImage.src = 'gfx/character_base_32x32.png' // 'gfx/character_base_topview_32x32.png' beuelerjong
+playerImage.src = '../gfx/character_base_32x32.png' // '../gfx/character_base_topview_32x32.png' beuelerjong
 var playerImageAnim = {
     width: 62,
     height: 62,
@@ -66,7 +66,7 @@ loadPromises.push(new Promise((resolve, reject) => {
 }))
 
 var imageArrow = new Image()
-imageArrow.src = 'gfx/arrow.png'
+imageArrow.src = '../gfx/arrow.png'
 loadPromises.push(new Promise((resolve, reject) => {
     imageArrow.onload = () => {
         resolve()
@@ -74,14 +74,14 @@ loadPromises.push(new Promise((resolve, reject) => {
 }))
 
 var cloudImage = new Image()
-cloudImage.src = 'gfx/fart.png'
+cloudImage.src = '../gfx/fart.png'
 loadPromises.push(new Promise((resolve, reject) => {
     cloudImage.onload = () => {
         resolve()
     }
 }))
 var texture = new Image()
-texture.src = 'gfx/kacheln.png'
+texture.src = '../gfx/kacheln.png'
 loadPromises.push(new Promise((resolve, reject) => {
     texture.onload = () => {
         resolve();
@@ -134,7 +134,7 @@ cloudImageAnim = {
     default: {a: [[0,0,64,64],[64,0,64,64],[128,0,64,64],[0,64,64,64],[64,64,64,64],[128,64,64,64],[0,128,64,64],[64,128,64,64],[128,128,64,64]]}
 }
 var foodImage = new Image()
-foodImage.src = 'gfx/food-OCAL.png'
+foodImage.src = '../gfx/food-OCAL.png'
 foodImageAnim = {
     hasDirections: false,
     width: 64,
@@ -157,45 +157,45 @@ const textureTiles = {
 const tileWidth = 120;
 const textureTilesList = Object.values(textureTiles);
 const audio = {
-    attack: {title: 'sfx/sound2.mp3', currentTime: 0.15},
-    attack2: {title: 'sfx/sound1.mp3', currentTime: 0.15},
-    death: {title: 'sfx/gag-reflex-41207.mp3', currentTime: 0.0},
-    join: {title: 'sfx/sounddrum.mp3'},
-    firstBlood: {title: 'sfx/first-blood.mp3', volume: 0.2},
-    win: {title: 'sfx/audience-clapping-03-99963.mp3'},
+    attack: {title: '../sfx/sound2.mp3', currentTime: 0.15},
+    attack2: {title: '../sfx/sound1.mp3', currentTime: 0.15},
+    death: {title: '../sfx/gag-reflex-41207.mp3', currentTime: 0.0},
+    join: {title: '../sfx/sounddrum.mp3'},
+    firstBlood: {title: '../sfx/first-blood.mp3', volume: 0.2},
+    win: {title: '../sfx/audience-clapping-03-99963.mp3'},
     musicGame: [
-        {title: 'sfx/music1.mp3', currentTime: 20, volume: 0.5},
-        {title: 'sfx/music2.mp3', volume: 0.5},
-        {title: 'sfx/music3.mp3', volume: 0.5}
+        {title: '../sfx/music1.mp3', currentTime: 20, volume: 0.5},
+        {title: '../sfx/music2.mp3', volume: 0.5},
+        {title: '../sfx/music3.mp3', volume: 0.5}
     ],
     musicLobby: [
-        {title: 'sfx/lobby.mp3', volume: 0.2}
+        {title: '../sfx/lobby.mp3', volume: 0.2}
     ],
     multiKill: [
-        {title: 'sfx/double-kill.mp3', volume: 0.3},
-        {title: 'sfx/triple-kill.mp3', volume: 0.4},
-        {title: 'sfx/multi-kill.mp3', volume: 0.5},
-        {title: 'sfx/mega-kill.ogg'},
-        {title: 'sfx/ultra-kill.mp3', volume: 0.5},
-        {title: 'sfx/monster-kill.mp3', volume: 0.5},
-        {title: 'sfx/ludicrous-kill.mp3', volume: 0.5},
-        {title: 'sfx/holy-shit.ogg'}
+        {title: '../sfx/double-kill.mp3', volume: 0.3},
+        {title: '../sfx/triple-kill.mp3', volume: 0.4},
+        {title: '../sfx/multi-kill.mp3', volume: 0.5},
+        {title: '../sfx/mega-kill.ogg'},
+        {title: '../sfx/ultra-kill.mp3', volume: 0.5},
+        {title: '../sfx/monster-kill.mp3', volume: 0.5},
+        {title: '../sfx/ludicrous-kill.mp3', volume: 0.5},
+        {title: '../sfx/holy-shit.ogg'}
     ],
     totalKill: [
-        {title: 'sfx/killing-spree.mp3', volume: 0.5},
-        {title: 'sfx/rampage.mp3', volume: 0.5},
-        {title: 'sfx/dominating.mp3', volume: 0.5},
-        {title: 'sfx/unstoppable.ogg'},
-        {title: 'sfx/god-like.mp3', volume: 0.5},
-        {title: 'sfx/wicked-sick.ogg'}
+        {title: '../sfx/killing-spree.mp3', volume: 0.5},
+        {title: '../sfx/rampage.mp3', volume: 0.5},
+        {title: '../sfx/dominating.mp3', volume: 0.5},
+        {title: '../sfx/unstoppable.ogg'},
+        {title: '../sfx/god-like.mp3', volume: 0.5},
+        {title: '../sfx/wicked-sick.ogg'}
     ],
 
     eat: [
-        {title: 'sfx/eatingsfxwav-14588.mp3'},
-        {title: 'sfx/carrotnom-92106.mp3'},
-        {title: 'sfx/eat-a-cracker-95783.mp3', volume: 0.5},
-        {title: 'sfx/game-eat-sound-83240.mp3'},
-        {title: 'sfx/game-eat-sound-83240.mp3'}
+        {title: '../sfx/eatingsfxwav-14588.mp3'},
+        {title: '../sfx/carrotnom-92106.mp3'},
+        {title: '../sfx/eat-a-cracker-95783.mp3', volume: 0.5},
+        {title: '../sfx/game-eat-sound-83240.mp3'},
+        {title: '../sfx/game-eat-sound-83240.mp3'}
     ]
 }
 
