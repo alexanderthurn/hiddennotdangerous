@@ -4,7 +4,8 @@ __Blow your way to freedom, just don’t blow your cover!__
 
 ## Preview
 
-[Github Page Live Preview](https://alexanderthurn.github.io/hiddennotdangerous/v1)
+[V1 Live Preview](https://alexanderthurn.github.io/hiddennotdangerous/v1)
+[V2 Live Preview](https://alexanderthurn.github.io/hiddennotdangerous/v2)
 
 ## Game Description
 
