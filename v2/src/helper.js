@@ -303,6 +303,7 @@ createFigureAtlasData = () => {
 const addFigure = (app, figureSpritesheet, props) => {
     let figure = new PIXI.Container();
     figure = Object.assign(figure, props)
+    figure.rotation = 1*Math.PI
 
     const sprite = new PIXI.AnimatedSprite(figureSpritesheet.animations.down);
     sprite.anchor.set(0.5)
@@ -313,6 +314,29 @@ const addFigure = (app, figureSpritesheet, props) => {
     figure.addChild(sprite)
     figures.push(figure)
     app.stage.addChild(figure)
+}
+
+const addFigures = (app, figureSpritesheet) => {
+    for (var i = 0; i < maxPlayerFigures; i++) {
+        const [x, y] = getRandomXY(level)
+        const [xTarget, yTarget] = getRandomXY(level)
+
+        addFigure(app, figureSpritesheet, {
+            maxBreakDuration: 5000,
+            maxSpeed: 0.08,
+            index: i,
+            attackDuration: 500,
+            attackBreakDuration: 2000,
+            points: 0,
+            attackDistance: 80,
+            attackAngle: 90,
+            type: 'fighter'
+        })
+    }
+}
+
+const animateFigures = (app, figures, time) => {
+    const delta = time.deltaTime
 }
 
 const tileMapFunc = (image, layer) => {

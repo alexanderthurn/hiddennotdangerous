@@ -327,23 +327,8 @@ window.addEventListener("orientationchange", function(event){
 
 
 function gameInit(app, figureSpritesheet) {
-    for (var i = 0; i < maxPlayerFigures; i++) {
-        const [x, y] = getRandomXY(level)
-        const [xTarget, yTarget] = getRandomXY(level)
-
-        addFigure(app, figureSpritesheet, {
-            maxBreakDuration: 5000,
-            maxSpeed: 0.08,
-            index: i,
-            attackDuration: 500,
-            attackBreakDuration: 2000,
-            oldPoints: 0,
-            points: 0,
-            attackDistance: 80,
-            attackAngle: 90,
-            type: 'fighter'
-        })
-    }
+    addFigures(app, figureSpritesheet)
+    app.ticker.add((time) => animateFigures(app, figures, time))
 }
 
 function roundInit(completeRestart) {
@@ -388,7 +373,6 @@ function roundInit(completeRestart) {
         })
 
         if (completeRestart) {
-            figure.oldPoints = 0
             figure.points = 0
         }
 
@@ -583,7 +567,7 @@ function updateGame(figures, dt, dtProcessed) {
         btnsLobby.forEach(btn => {
             btn.playerPercentage = 0.0
             btn.playersPossible = figures.filter(f => f.playerId && f.type === 'fighter')
-            btn.playersNear = btn.playersPossible.filter(f => isInRect(f.x,f.y+f.imageAnim.height*0.5,btn.x,btn.y,btn.width,btn.height))
+            btn.playersNear = btn.playersPossible.filter(f => isInRect(f.x,f.y+f.height*0.5,btn.x,btn.y,btn.width,btn.height))
             
             if (btn === btnStart) {
                 const maxLoadingPercentage = btn.playersPossible.length > 1 ? btn.playersNear.length / btn.playersPossible.length : btn.playersNear.length*0.5;
@@ -617,7 +601,7 @@ function updateGame(figures, dt, dtProcessed) {
 
         figuresDead.forEach(f => {if (dtProcessed-f.killTime > deadDuration) {
             f.isDead = false
-            f.y-=f.imageAnim.height*0.25
+            f.y-=f.height*0.25
             f.killTime = 0
         }})
     }
@@ -651,7 +635,7 @@ function updateGame(figures, dt, dtProcessed) {
             if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance*f.scale) {
                 if (2*distanceAngles(rad2deg(f.angle), rad2deg(angle(f.x,f.y,fig.x,fig.y))+180) <= f.attackAngle) {
                     fig.isDead = true;
-                    fig.y+=f.imageAnim.height*0.25
+                    fig.y+=f.height*0.25
                     playAudioPool(soundDeathPool);
                     numberKilledFigures++;
                     fig.killTime = dtProcessed
