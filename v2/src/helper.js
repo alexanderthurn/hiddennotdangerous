@@ -275,10 +275,10 @@ createFigureAtlasData = () => {
         "up",
         "right",
         "left",
-        "downright",
-        "upright",
-        "upleft",
         "downleft",
+        "upleft",
+        "upright",
+        "downright",
         "dead"
     ]
 
@@ -303,13 +303,13 @@ createFigureAtlasData = () => {
 const addFigure = (app, figureSpritesheet, props) => {
     let figure = new PIXI.Container();
     figure = Object.assign(figure, props)
-    figure.rotation = 1*Math.PI
 
+    //const animations = PIXI.Assets.cache.get('../gfx/character_base_topview_32x32_angles_sleepanimation.json').data.animations
     const sprite = new PIXI.AnimatedSprite(figureSpritesheet.animations.down);
     sprite.anchor.set(0.5)
-    sprite.animationSpeed = 0.1
-    sprite.frame = 0
+    sprite.animationSpeed = 1/6
     sprite.scale = 2
+    sprite.currentAnimation = 'down'
 
     figure.addChild(sprite)
     figures.push(figure)
@@ -318,9 +318,6 @@ const addFigure = (app, figureSpritesheet, props) => {
 
 const addFigures = (app, figureSpritesheet) => {
     for (var i = 0; i < maxPlayerFigures; i++) {
-        const [x, y] = getRandomXY(level)
-        const [xTarget, yTarget] = getRandomXY(level)
-
         addFigure(app, figureSpritesheet, {
             maxBreakDuration: 5000,
             maxSpeed: 0.08,
@@ -335,8 +332,48 @@ const addFigures = (app, figureSpritesheet) => {
     }
 }
 
-const animateFigures = (app, figures, time) => {
+const walkFigure = figure => {
+    figure.speed = f.maxSpeed
+    figure.getChildAt(0).play()
+}
+
+const animateFigures = (app, figures, figureSpritesheet, time) => {
     const delta = time.deltaTime
+    figures.forEach(figure => {
+        const deg = rad2limiteddeg(figure.direction)
+        const sprite = figure.getChildAt(0)
+        let animation
+
+        if (distanceAngles(deg, 0) <= 22.5) {
+            animation = 'right'
+        } else if (distanceAngles(deg, 45) <= 22.5) {
+            animation = 'downright'
+        } else if (distanceAngles(deg, 90) <= 22.5) {
+            animation = 'down'
+        } else if (distanceAngles(deg, 135) <= 22.5) {
+            animation = 'downleft'
+        } else if (distanceAngles(deg, 180) <= 22.5) {
+            animation = 'left'
+        } else if (distanceAngles(deg, 225) <= 22.5) {
+            animation = 'upleft'
+        } else if (distanceAngles(deg, 270) <= 22.5) {
+            animation = 'up'
+        } else if (distanceAngles(deg, 315) <= 22.5) {
+            animation = 'upright'
+        }
+
+        if (animation != sprite.currentAnimation) {
+            sprite.currentAnimation = animation
+            sprite.textures = figureSpritesheet.animations[animation]
+        }
+
+        if (figure.speed > 0 && !sprite.playing) {
+            sprite.play()
+        }
+        if (figure.speed === 0 && sprite.playing) {
+            sprite.stop()
+        }
+    })
 }
 
 const tileMapFunc = (image, layer) => {
@@ -520,7 +557,6 @@ function addFartCloud(x,y,playerId, size=1) {
         image: cloudImage,
         imageAnim: cloudImageAnim,    
         speed: 0,
-        angle: 0,
         anim: 0,
         size: size,
         scale: 0,

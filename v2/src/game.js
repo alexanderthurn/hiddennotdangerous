@@ -328,7 +328,7 @@ window.addEventListener("orientationchange", function(event){
 
 function gameInit(app, figureSpritesheet) {
     addFigures(app, figureSpritesheet)
-    app.ticker.add((time) => animateFigures(app, figures, time))
+    app.ticker.add((time) => animateFigures(app, figures.filter(f => f.type === 'fighter'), figureSpritesheet, time))
 }
 
 function roundInit(completeRestart) {
@@ -365,7 +365,7 @@ function roundInit(completeRestart) {
             isDead: false, 
             playerId: activePlayerIds[i] || null,
             killTime: 0,
-            angle: angle(x,y,xTarget,yTarget),
+            direction: angle(x,y,xTarget,yTarget),
             isAttacking: false,
             lastAttackTime: undefined,
             beans: new Set(),
@@ -390,9 +390,7 @@ function roundInit(completeRestart) {
         imageAnim: foodImageAnim,
         frame: foodImageAnim.left.a,
         attackDistance: 32,
-        angle: 0,    
         speed: 0,
-        angle: 0,
         scale: 1,
         zIndex: -level.height,
         lastAttackTime: undefined,
@@ -411,7 +409,6 @@ function roundInit(completeRestart) {
         imageAnim: foodImageAnim,
         frame: foodImageAnim.up.a,
         speed: 0,
-        angle: 0,
         scale: 1,
         zIndex: -level.height,
         lastAttackTime: undefined,
@@ -427,7 +424,6 @@ function roundInit(completeRestart) {
         imageAnim: foodImageAnim,
         frame: foodImageAnim.down.a,
         speed: 0,
-        angle: 0,
         scale: 1,
         z: -level.height,
         lastAttackTime: undefined,
@@ -443,7 +439,6 @@ function roundInit(completeRestart) {
         imageAnim: foodImageAnim,
         frame: foodImageAnim.right.a,
         speed: 0,
-        angle: 0,
         scale: 1,
         zIndex: -level.height,
         lastAttackTime: undefined,
@@ -461,7 +456,6 @@ function roundInit(completeRestart) {
         imageAnim: foodImageAnim,
         frame: foodImageAnim.default.a,
         speed: 0,
-        angle: 0,
         scale: 1,
         zIndex: -level.height,
         lastAttackTime: undefined,
@@ -607,7 +601,7 @@ function updateGame(figures, dt, dtProcessed) {
     }
 
     figuresAlive.forEach(f => {
-        let xyNew = move(f.x, f.y, f.angle,f.speed, dt)
+        let xyNew = move(f.x, f.y, f.direction,f.speed, dt)
         if (xyNew) {
             [f.x, f.y] = cropXY(xyNew.x, xyNew.y, level)
         }
@@ -633,7 +627,7 @@ function updateGame(figures, dt, dtProcessed) {
     figuresAlive.filter(f => f.isAttacking).forEach(f => {
         figures.filter(fig => fig !== f && fig.playerId !== f.playerId && !fig.isDead && fig.type === 'fighter').forEach(fig => {
             if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance*f.scale) {
-                if (2*distanceAngles(rad2deg(f.angle), rad2deg(angle(f.x,f.y,fig.x,fig.y))+180) <= f.attackAngle) {
+                if (2*distanceAngles(rad2deg(f.direction), rad2deg(angle(f.x,f.y,fig.x,fig.y))+180) <= f.attackAngle) {
                     fig.isDead = true;
                     fig.y+=f.height*0.25
                     playAudioPool(soundDeathPool);
@@ -686,13 +680,13 @@ function handleInput(players, figures, dtProcessed) {
         f.speed = 0.0
         if (!f.isDead) {
             if (p.isMoving) {
-                f.angle = angle(0,0,p.xAxis,p.yAxis)
+                f.direction = angle(0,0,p.xAxis,p.yAxis)
                 f.speed = f.maxSpeed
             }
             if (p.isAttackButtonPressed && !f.isAttacking) {
                 if (!f.lastAttackTime || dtProcessed-f.lastAttackTime > f.attackBreakDuration) {
 
-                    let xyNew = move(f.x, f.y, f.angle+deg2rad(180),f.attackDistance*0.5, 1)
+                    let xyNew = move(f.x, f.y, f.direction+deg2rad(180),f.attackDistance*0.5, 1)
 
                     if (f.beans.size > 0) {
                         playAudioPool(soundAttack2Pool);
@@ -753,7 +747,7 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
                     }
                 }
             }
-            f.angle = angle(f.x,f.y,f.xTarget,f.yTarget)
+            f.direction = angle(f.x,f.y,f.xTarget,f.yTarget)
             f.speed = f.maxSpeed
         }
     })
