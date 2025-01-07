@@ -375,8 +375,6 @@ function roundInit(completeRestart) {
         if (completeRestart) {
             figure.points = 0
         }
-
-        figures.push(figure)
     })
     
     figures.push({
