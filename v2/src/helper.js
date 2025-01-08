@@ -295,6 +295,35 @@ createFigureAtlasData = () => {
     return atlasData
 }
 
+const animateFigure = (figure, figureSpritesheet) => {
+    const deg = rad2limiteddeg(figure.direction)
+    const sprite = figure.getChildAt(0)
+    let animation
+
+    if (distanceAngles(deg, 0) < 45) {
+        animation = 'right'
+    } else if (distanceAngles(deg, 90) <= 45) {
+        animation = 'down'
+    } else if (distanceAngles(deg, 180) < 45) {
+        animation = 'left'
+    } else {
+        animation = 'up'
+    }
+
+    if (animation != sprite.currentAnimation) {
+        sprite.currentAnimation = animation
+        sprite.textures = figureSpritesheet.animations[animation]
+    }
+
+    if (figure.speed > 0 && !sprite.playing) {
+        sprite.play()
+    }
+    if (figure.speed === 0 && sprite.playing) {
+        sprite.stop()
+        sprite.currentFrame = 0
+    }
+}
+
 const addFigure = (app, figureSpritesheet, props) => {
     let figure = new PIXI.Container();
     figure = Object.assign(figure, props)
@@ -308,6 +337,7 @@ const addFigure = (app, figureSpritesheet, props) => {
     figure.addChild(sprite)
     figures.push(figure)
     app.stage.addChild(figure)
+    app.ticker.add(() => animateFigure(figure, figureSpritesheet))
 }
 
 const addFigures = (app, figureSpritesheet) => {
@@ -324,43 +354,6 @@ const addFigures = (app, figureSpritesheet) => {
             type: 'fighter'
         })
     }
-}
-
-const walkFigure = figure => {
-    figure.speed = f.maxSpeed
-    figure.getChildAt(0).play()
-}
-
-const animateFigures = (app, figures, figureSpritesheet, time) => {
-    const delta = time.deltaTime
-    figures.forEach(figure => {
-        const deg = rad2limiteddeg(figure.direction)
-        const sprite = figure.getChildAt(0)
-        let animation
-
-        if (distanceAngles(deg, 0) < 45) {
-            animation = 'right'
-        } else if (distanceAngles(deg, 90) <= 45) {
-            animation = 'down'
-        } else if (distanceAngles(deg, 180) < 45) {
-            animation = 'left'
-        } else {
-            animation = 'up'
-        }
-
-        if (animation != sprite.currentAnimation) {
-            sprite.currentAnimation = animation
-            sprite.textures = figureSpritesheet.animations[animation]
-        }
-
-        if (figure.speed > 0 && !sprite.playing) {
-            sprite.play()
-        }
-        if (figure.speed === 0 && sprite.playing) {
-            sprite.stop()
-            sprite.currentFrame = 0
-        }
-    })
 }
 
 const tileMapFunc = (image, layer) => {

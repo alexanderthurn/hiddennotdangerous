@@ -328,7 +328,6 @@ window.addEventListener("orientationchange", function(event){
 
 function gameInit(app, figureSpritesheet) {
     addFigures(app, figureSpritesheet)
-    app.ticker.add((time) => animateFigures(app, figures.filter(f => f.type === 'fighter'), figureSpritesheet, time))
 }
 
 function roundInit(completeRestart) {
