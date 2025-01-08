@@ -264,7 +264,7 @@ const figureAtlasData = createFigureAtlasData();
 
         const assets = [
             {alias: 'grass', src: '../gfx/kacheln.png'},
-            {alias: 'players', src: '../gfx/character_base_topview_32x32_angles_sleepanimation.png'}
+            {alias: 'players', src: '../gfx/character_base_32x32.png'}
         ];
     
         // Load the assets defined above.

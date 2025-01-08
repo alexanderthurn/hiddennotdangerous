@@ -262,9 +262,9 @@ createFigureAtlasData = () => {
     const atlasData = {
         frames: {},
         meta: {
-            image: '../gfx/character_base_topview_32x32_angles_sleepanimation.png',
+            image: '../gfx/character_base_32x32.png',
             format: 'RGBA8888',
-            size: { w: 128, h: 288 },
+            size: { w: 128, h: 128 },
             scale: 1
         },
         animations: {}
@@ -274,12 +274,7 @@ createFigureAtlasData = () => {
         "down",
         "up",
         "right",
-        "left",
-        "downleft",
-        "upleft",
-        "upright",
-        "downright",
-        "dead"
+        "left"
     ]
 
     animations.forEach((e, j) => {
@@ -304,10 +299,9 @@ const addFigure = (app, figureSpritesheet, props) => {
     let figure = new PIXI.Container();
     figure = Object.assign(figure, props)
 
-    //const animations = PIXI.Assets.cache.get('../gfx/character_base_topview_32x32_angles_sleepanimation.json').data.animations
     const sprite = new PIXI.AnimatedSprite(figureSpritesheet.animations.down);
     sprite.anchor.set(0.5)
-    sprite.animationSpeed = 1/6
+    sprite.animationSpeed = 0.125
     sprite.scale = 2
     sprite.currentAnimation = 'down'
 
@@ -344,22 +338,14 @@ const animateFigures = (app, figures, figureSpritesheet, time) => {
         const sprite = figure.getChildAt(0)
         let animation
 
-        if (distanceAngles(deg, 0) <= 22.5) {
+        if (distanceAngles(deg, 0) < 45) {
             animation = 'right'
-        } else if (distanceAngles(deg, 45) <= 22.5) {
-            animation = 'downright'
-        } else if (distanceAngles(deg, 90) <= 22.5) {
+        } else if (distanceAngles(deg, 90) <= 45) {
             animation = 'down'
-        } else if (distanceAngles(deg, 135) <= 22.5) {
-            animation = 'downleft'
-        } else if (distanceAngles(deg, 180) <= 22.5) {
+        } else if (distanceAngles(deg, 180) < 45) {
             animation = 'left'
-        } else if (distanceAngles(deg, 225) <= 22.5) {
-            animation = 'upleft'
-        } else if (distanceAngles(deg, 270) <= 22.5) {
+        } else {
             animation = 'up'
-        } else if (distanceAngles(deg, 315) <= 22.5) {
-            animation = 'upright'
         }
 
         if (animation != sprite.currentAnimation) {
