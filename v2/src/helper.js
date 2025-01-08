@@ -296,6 +296,8 @@ createFigureAtlasData = () => {
 }
 
 const animateFigure = (figure, figureSpritesheet) => {
+    figure.zIndex = figure.y
+
     const deg = rad2limiteddeg(figure.direction)
     const sprite = figure.getChildAt(0)
     let animation

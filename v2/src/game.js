@@ -621,9 +621,12 @@ function updateGame(figures, dt, dtProcessed) {
 
     let numberKilledFigures = 0;
     let killTime;
-    figuresAlive.filter(f => f.isAttacking).forEach(f => {
+    figuresAlive.filter(f => f.isAttacking).forEach((f,i) => {
         figures.filter(fig => fig !== f && fig.playerId !== f.playerId && !fig.isDead && fig.type === 'fighter').forEach(fig => {
-            if (distance(f.x,f.y,fig.x,fig.y) < f.attackDistance*f.scale) {
+            const attackDistance = f.attackDistanceMultiplier ? f.attackDistanceMultiplier*f.attackDistance : f.attackDistance
+            console.log('0', distance(f.x,f.y,fig.x,fig.y), attackDistance)
+            if (distance(f.x,f.y,fig.x,fig.y) < attackDistance) {
+                console.log('1', distance(f.x,f.y,fig.x,fig.y));
                 if (2*distanceAngles(rad2deg(f.direction), rad2deg(angle(f.x,f.y,fig.x,fig.y))+180) <= f.attackAngle) {
                     fig.isDead = true;
                     fig.y+=f.height*0.25
@@ -755,28 +758,28 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
             if (!f.isAttacking) {
                 f.isAttacking = true
                 if (f.size === 5) {
-                    f.scale = 3*f.size
+                    f.attackDistanceMultiplier = 3*f.size
                 } else if (f.size === 1) {
-                    f.scale = 2*f.size
+                    f.attackDistanceMultiplier = 2*f.size
                 } else {
-                    f.scale = 1.5*f.size
+                    f.attackDistanceMultiplier = 1.5*f.size
                 }
                 
             }
-            f.scale*=Math.pow(0.999,dt)
-            if (f.scale < 0.1) {
-                f.scale = 0
+            f.attackDistanceMultiplier*=Math.pow(0.999,dt)
+            if (f.attackDistanceMultiplier < 0.1) {
+                f.attackDistanceMultiplier = 0
                 f.isDead = true
             }
 
         } else {
            
             if (f.size === 5) {
-                f.scale= f.lifetime/fartGrowDuration * 3*f.size
+                f.attackDistanceMultiplier= f.lifetime/fartGrowDuration * 3*f.size
             } else if (f.size === 1) {
-                f.scale= f.lifetime/fartGrowDuration * 2*f.size
+                f.attackDistanceMultiplier= f.lifetime/fartGrowDuration * 2*f.size
             } else {
-                f.scale= f.lifetime/fartGrowDuration * 1.5*f.size
+                f.attackDistanceMultiplier= f.lifetime/fartGrowDuration * 1.5*f.size
             }
 
         }
