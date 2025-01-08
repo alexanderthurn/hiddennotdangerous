@@ -3,9 +3,7 @@
 var laststep = 0, logit;
 var loadPromises = []
 var canvas = document.body;
-//var canvas = document.getElementById('canvas')
-var canvasRatio
-//const ctx = canvas.getContext("2d");
+
 var gamepadPlayers = []
 var mousePlayers = [];
 var mouses = [{pointerType: 'unknown', x: 0, y: 0, xCenter: undefined, yCenter: undefined, pressed: new Set()}]
@@ -248,14 +246,13 @@ const grassAtlasData = {
 };
 
 const figureAtlasData = createFigureAtlasData();
-var app;
 
 (async () =>
     {
         console.log('no need to hide');
 
         // Create a PixiJS application.
-        app = new PIXI.Application({ resizeTo: window });
+        const app = new PIXI.Application({ resizeTo: window });
     
         // Initialize the application.
         await app.init({ background: '#1099bb', resizeTo: window });
@@ -287,7 +284,7 @@ var app;
 
         addGrass(app, Object.keys(grassAtlasData.frames), grassSpritesheet);
 
-        adjustStageToScreen(level)
+        adjustStageToScreen(app, level)
         gameInit(app, figureSpritesheet);
         roundInit(true);
         window.requestAnimationFrame(gameLoop);

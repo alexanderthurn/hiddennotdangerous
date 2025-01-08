@@ -162,7 +162,7 @@ const toggleBots = () => {
     return count
 }
 
-function adjustStageToScreen(level) {
+function adjustStageToScreen(app, level) {
     level.width = 1920
     level.height = 1080
     level.padding = 16
@@ -184,12 +184,7 @@ function resizeCanvasToDisplaySize(canvas) {
     // look up the size the canvas is being displayed
     var width = canvas.clientWidth;
     var height = canvas.clientHeight;
-    canvasRatio = height / width
-    /*if (canvas.clientWidth > 1920) {
-        width = 1920
-        height = 1920*canvasRatio
-    }*/
-    // If it's resolution does not match change it
+
     if (canvas.width !== width || canvas.height !== height) {
       canvas.width = width;
       canvas.height = height;
