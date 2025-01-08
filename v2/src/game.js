@@ -248,13 +248,14 @@ const grassAtlasData = {
 };
 
 const figureAtlasData = createFigureAtlasData();
+var app;
 
 (async () =>
     {
         console.log('no need to hide');
 
         // Create a PixiJS application.
-        const app = new PIXI.Application();
+        app = new PIXI.Application({ resizeTo: window });
     
         // Initialize the application.
         await app.init({ background: '#1099bb', resizeTo: window });
@@ -285,9 +286,8 @@ const figureAtlasData = createFigureAtlasData();
         await grassSpritesheet.parse();
 
         addGrass(app, Object.keys(grassAtlasData.frames), grassSpritesheet);
-        console.log(app.screen);
 
-        addjustAfterResizeIfNeeded(level, canvas);
+        adjustStageToScreen(level)
         gameInit(app, figureSpritesheet);
         roundInit(true);
         window.requestAnimationFrame(gameLoop);
@@ -316,15 +316,6 @@ document.addEventListener("DOMContentLoaded", function(event){
     })*/
    
 })
-
-window.addEventListener("resize", function(event){
-    addjustAfterResizeIfNeeded(level, canvas)
-});
-
-window.addEventListener("orientationchange", function(event){
-    addjustAfterResizeIfNeeded(level, canvas)
-});
-
 
 function gameInit(app, figureSpritesheet) {
     addFigures(app, figureSpritesheet)
@@ -461,7 +452,6 @@ function roundInit(completeRestart) {
 
 }
 function gameLoop() {
-    addjustAfterResizeIfNeeded(level, canvas)
     now = Date.now();
     dt = now - then;
     if (fpsTime < now - 1000) {
@@ -624,20 +614,17 @@ function updateGame(figures, dt, dtProcessed) {
     figuresAlive.filter(f => f.isAttacking).forEach((f,i) => {
         figures.filter(fig => fig !== f && fig.playerId !== f.playerId && !fig.isDead && fig.type === 'fighter').forEach(fig => {
             const attackDistance = f.attackDistanceMultiplier ? f.attackDistanceMultiplier*f.attackDistance : f.attackDistance
-            console.log('0', distance(f.x,f.y,fig.x,fig.y), attackDistance)
             if (distance(f.x,f.y,fig.x,fig.y) < attackDistance) {
-                console.log('1', distance(f.x,f.y,fig.x,fig.y));
                 if (2*distanceAngles(rad2deg(f.direction), rad2deg(angle(f.x,f.y,fig.x,fig.y))+180) <= f.attackAngle) {
                     fig.isDead = true;
+                    fig.speed = 0;
                     fig.y+=f.height*0.25
                     playAudioPool(soundDeathPool);
                     numberKilledFigures++;
                     fig.killTime = dtProcessed
                     killTime = dtProcessed;
                 }
-                
             }
-            
         });
     })
     playKillingSounds(numberKilledFigures, killTime);

@@ -162,10 +162,22 @@ const toggleBots = () => {
     return count
 }
 
-function addjustAfterResizeIfNeeded(level, canvas) {
-    if (resizeCanvasToDisplaySize(canvas)) {
-        adjustLevelToCanvas(level, canvas)
-    }
+function adjustStageToScreen(level) {
+    level.width = 1920
+    level.height = 1080
+    level.padding = 16
+    level.scale = Math.min(app.screen.width / level.width, app.screen.height / level.height)
+    level.offsetX = (app.screen.width - level.scale * level.width) / 2
+    level.offsetY = (app.screen.height - level.scale * level.height) / 2
+    level.shortestPathNotBean5 = 2*0.6*level.height+2*0.3*Math.hypot(level.height, level.width);
+    level.shortestPathBean5 = 2*0.6*level.height+0.6*level.width+0.3*Math.hypot(level.height, level.width);
+
+    app.stage.width = level.width
+    app.stage.height = level.height
+    app.stage.scale.x = level.scale
+    app.stage.scale.y = level.scale
+    app.stage.x = level.offsetX;
+    app.stage.y = level.offsetY;
 }
 
 function resizeCanvasToDisplaySize(canvas) {
@@ -196,6 +208,7 @@ function adjustLevelToCanvas(level, canvas) {
     level.offsetY = (canvas.height - level.scale * level.height) / 2
     level.shortestPathNotBean5 = 2*0.6*level.height+2*0.3*Math.hypot(level.height, level.width);
     level.shortestPathBean5 = 2*0.6*level.height+0.6*level.width+0.3*Math.hypot(level.height, level.width);
+
 }
 
 function getRandomXY(level) {
@@ -290,13 +303,17 @@ createFigureAtlasData = () => {
         }
     });
 
-    console.log(atlasData);
-
     return atlasData
 }
 
 const animateFigure = (figure, figureSpritesheet) => {
     figure.zIndex = figure.y
+
+    if (figure.isDead) {
+        figure.angle = 90
+    } else {
+        figure.angle = 0
+    }
 
     const deg = rad2limiteddeg(figure.direction)
     const sprite = figure.getChildAt(0)
@@ -312,7 +329,7 @@ const animateFigure = (figure, figureSpritesheet) => {
         animation = 'up'
     }
 
-    if (animation != sprite.currentAnimation) {
+    if (sprite.currentAnimation != animation) {
         sprite.currentAnimation = animation
         sprite.textures = figureSpritesheet.animations[animation]
     }
@@ -353,7 +370,8 @@ const addFigures = (app, figureSpritesheet) => {
             points: 0,
             attackDistance: 80,
             attackAngle: 90,
-            type: 'fighter'
+            type: 'fighter',
+            zIndexBase: app.stage.height 
         })
     }
 }
