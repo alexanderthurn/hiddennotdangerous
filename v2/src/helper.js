@@ -358,6 +358,7 @@ const animateFigures = (app, figures, figureSpritesheet, time) => {
         }
         if (figure.speed === 0 && sprite.playing) {
             sprite.stop()
+            sprite.currentFrame = 0
         }
     })
 }
