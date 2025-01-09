@@ -461,7 +461,33 @@ const shadowrize = (image, anim) => {
     animOut.default.a = animOut.default.a.map(array => array.map(a => a*scale))
 
     return [offscreen,animOut];
-} 
+}
+
+const addFence = (app, level) =>
+    {
+        const horizontalFence = new PIXI.GraphicsContext().rect(0,0,level.width,level.padding*0.6)
+        .fill({color: 0x969696})
+        .rect(level.padding*0.5,level.padding*0.8,level.width-level.padding,level.padding*0.6)
+        .fill({color: 0x787878})
+        .rect(level.padding*0.5,level.padding*1.6,level.width-level.padding,level.padding*0.6)
+        .fill({color: 0x5A5A5A})
+
+        const upperFence = new PIXI.Graphics(horizontalFence)
+        .rect(0,0, level.padding*0.5, level.padding*2)
+        .rect(level.width-level.padding*0.5,0, level.padding*0.5, level.padding*2)
+        .fill({color: 0x969696})
+        app.stage.addChild(upperFence)
+
+        const offsetY = level.height-2*level.padding
+        const lowerFence = new PIXI.Graphics(horizontalFence)
+        .rect(0,level.padding*2-offsetY, level.padding*0.5, level.height-level.padding)
+        .rect(level.width-level.padding*0.5,level.padding*2-offsetY, level.padding*0.5, level.height-level.padding)
+        .fill({color: 0x969696})
+    
+        lowerFence.y = offsetY
+        lowerFence.zIndex = level.height
+        app.stage.addChild(lowerFence)
+    }
 
 const drawFence = (layer, ctx, level, shadow) => {
 

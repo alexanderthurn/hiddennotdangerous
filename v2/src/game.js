@@ -282,9 +282,10 @@ const figureAtlasData = createFigureAtlasData();
         await figureSpritesheet.parse();
         await grassSpritesheet.parse();
 
-        addGrass(app, Object.keys(grassAtlasData.frames), grassSpritesheet);
-
         adjustStageToScreen(app, level)
+
+        addGrass(app, Object.keys(grassAtlasData.frames), grassSpritesheet);
+        addFence(app, level);
         gameInit(app, figureSpritesheet);
         roundInit(true);
         window.requestAnimationFrame(gameLoop);
