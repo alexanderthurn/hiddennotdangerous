@@ -166,7 +166,7 @@ function adjustStageToScreen(app, level) {
     level.width = 1920
     level.height = 1080
     level.padding = 16
-    level.scale = Math.min(app.screen.width / level.width, app.screen.height / level.height)
+    level.scale = Math.min(app.screen.width / level.width, app.screen.height / level.height) * 0.9
     level.offsetX = (app.screen.width - level.scale * level.width) / 2
     level.offsetY = (app.screen.height - level.scale * level.height) / 2
     level.shortestPathNotBean5 = 2*0.6*level.height+2*0.3*Math.hypot(level.height, level.width);
@@ -479,7 +479,7 @@ const addFence = (app, level) =>
         app.stage.addChild(upperFence)
 
         const offsetY = level.height-2*level.padding
-        const lowerFence = new PIXI.Graphics(horizontalFence)
+        const lowerFence = new PIXI.Graphics(horizontalFence.clone())
         .rect(0,level.padding*2-offsetY, level.padding*0.5, level.height-level.padding)
         .rect(level.width-level.padding*0.5,level.padding*2-offsetY, level.padding*0.5, level.height-level.padding)
         .fill({color: 0x969696})
