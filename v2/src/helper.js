@@ -244,7 +244,44 @@ const colorize = (image, r, g, b) => {
     return offscreen;
 }
 
-const addGrass = (app, grassTextures, grassSpritesheet) => {
+const addFence = (app, level) => {
+    const horizontalFence = new PIXI.GraphicsContext().rect(0,0,level.width,level.padding*0.6)
+    .fill({color: 0x969696})
+    .rect(level.padding*0.5,level.padding*0.8,level.width-level.padding,level.padding*0.6)
+    .fill({color: 0x787878})
+    .rect(level.padding*0.5,level.padding*1.6,level.width-level.padding,level.padding*0.6)
+    .fill({color: 0x5A5A5A})
+
+    const upperFence = new PIXI.Graphics(horizontalFence)
+    .rect(0,0, level.padding*0.5, level.padding*2)
+    .rect(level.width-level.padding*0.5,0, level.padding*0.5, level.padding*2)
+    .fill({color: 0x969696})
+    app.stage.addChild(upperFence)
+
+    const offsetY = level.height-2*level.padding
+    const lowerFence = new PIXI.Graphics(horizontalFence.clone())
+    .rect(0,level.padding*2-offsetY, level.padding*0.5, level.height-level.padding)
+    .rect(level.width-level.padding*0.5,level.padding*2-offsetY, level.padding*0.5, level.height-level.padding)
+    .fill({color: 0x969696})
+
+    lowerFence.y = offsetY
+    lowerFence.zIndex = level.height
+    app.stage.addChild(lowerFence)
+}
+
+const addFood = (app, spritesheet, props) => {
+    let food = new PIXI.Container()
+    food = Object.assign(food, props)
+
+    const sprite = new PIXI.Sprite(spritesheet.textures.bean)
+    sprite.anchor.set(0.5)
+
+    food.addChild(sprite)
+    figures.push(food)
+    app.stage.addChild(food)
+}
+
+const addGrass = (app, textures, spritesheet) => {
     const widthInTiles = 16
     const heightInTiles = 9
 
@@ -257,8 +294,8 @@ const addGrass = (app, grassTextures, grassSpritesheet) => {
 
     for (let i = 0; i < widthInTiles; i++) {
         for (let j = 0; j < heightInTiles; j++) {
-            const grassTexture = grassTextures[tileArea[i][j]]
-            const grass = new PIXI.Sprite(grassSpritesheet.textures[grassTexture])
+            const texture = textures[tileArea[i][j]]
+            const grass = new PIXI.Sprite(spritesheet.textures[texture])
             grass.x = i*tileWidth
             grass.y = j*tileWidth
             app.stage.addChild(grass)
@@ -301,7 +338,7 @@ createFigureAtlasData = () => {
     return atlasData
 }
 
-const animateFigure = (figure, figureSpritesheet) => {
+const animateFigure = (figure, spritesheet) => {
     figure.zIndex = figure.y
 
     if (figure.isDead) {
@@ -326,7 +363,7 @@ const animateFigure = (figure, figureSpritesheet) => {
 
     if (sprite.currentAnimation != animation) {
         sprite.currentAnimation = animation
-        sprite.textures = figureSpritesheet.animations[animation]
+        sprite.textures = spritesheet.animations[animation]
     }
 
     if (figure.speed > 0 && !sprite.playing) {
@@ -338,11 +375,11 @@ const animateFigure = (figure, figureSpritesheet) => {
     }
 }
 
-const addFigure = (app, figureSpritesheet, props) => {
+const addFigure = (app, spritesheet, props) => {
     let figure = new PIXI.Container();
     figure = Object.assign(figure, props)
 
-    const sprite = new PIXI.AnimatedSprite(figureSpritesheet.animations.down);
+    const sprite = new PIXI.AnimatedSprite(spritesheet.animations.down);
     sprite.anchor.set(0.5)
     sprite.animationSpeed = 0.125
     sprite.scale = 2
@@ -351,12 +388,12 @@ const addFigure = (app, figureSpritesheet, props) => {
     figure.addChild(sprite)
     figures.push(figure)
     app.stage.addChild(figure)
-    app.ticker.add(() => animateFigure(figure, figureSpritesheet))
+    app.ticker.add(() => animateFigure(figure, spritesheet))
 }
 
-const addFigures = (app, figureSpritesheet) => {
+const addFigures = (app, spritesheet) => {
     for (var i = 0; i < maxPlayerFigures; i++) {
-        addFigure(app, figureSpritesheet, {
+        addFigure(app, spritesheet, {
             maxBreakDuration: 5000,
             maxSpeed: 0.08,
             index: i,
@@ -462,32 +499,6 @@ const shadowrize = (image, anim) => {
 
     return [offscreen,animOut];
 }
-
-const addFence = (app, level) =>
-    {
-        const horizontalFence = new PIXI.GraphicsContext().rect(0,0,level.width,level.padding*0.6)
-        .fill({color: 0x969696})
-        .rect(level.padding*0.5,level.padding*0.8,level.width-level.padding,level.padding*0.6)
-        .fill({color: 0x787878})
-        .rect(level.padding*0.5,level.padding*1.6,level.width-level.padding,level.padding*0.6)
-        .fill({color: 0x5A5A5A})
-
-        const upperFence = new PIXI.Graphics(horizontalFence)
-        .rect(0,0, level.padding*0.5, level.padding*2)
-        .rect(level.width-level.padding*0.5,0, level.padding*0.5, level.padding*2)
-        .fill({color: 0x969696})
-        app.stage.addChild(upperFence)
-
-        const offsetY = level.height-2*level.padding
-        const lowerFence = new PIXI.Graphics(horizontalFence.clone())
-        .rect(0,level.padding*2-offsetY, level.padding*0.5, level.height-level.padding)
-        .rect(level.width-level.padding*0.5,level.padding*2-offsetY, level.padding*0.5, level.height-level.padding)
-        .fill({color: 0x969696})
-    
-        lowerFence.y = offsetY
-        lowerFence.zIndex = level.height
-        app.stage.addChild(lowerFence)
-    }
 
 const drawFence = (layer, ctx, level, shadow) => {
 

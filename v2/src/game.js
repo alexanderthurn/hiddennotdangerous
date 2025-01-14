@@ -213,6 +213,48 @@ var soundMultiKill = audio.multiKill.map(audio => getAudio(audio));
 var soundTotalKill = audio.totalKill.map(audio => getAudio(audio));
 var soundWin = getAudio(audio.win);
 
+const foodAtlasData = {
+    frames: {
+        bean: {
+            frame: { x: 32, y: 192, w: 32, h: 32 },
+            sourceSize: { w: 32, h: 32 },
+            spriteSourceSize: { x: 0, y: 0, w: 32, h: 32 }
+        },
+        brokkoli: {
+            frame: { x: 256, y: 32, w: 32, h: 32 },
+            sourceSize: { w: 32, h: 32 },
+            spriteSourceSize: { x: 0, y: 0, w: 32, h: 32 }
+        },
+        onion: {
+            frame: { x: 192, y: 64, w: 32, h: 32 },
+            sourceSize: { w: 32, h: 32 },
+            spriteSourceSize: { x: 0, y: 0, w: 32, h: 32 }
+        },
+        salad: {
+            frame: { x: 64, y: 64, w: 32, h: 32 },
+            sourceSize: { w: 32, h: 32 },
+            spriteSourceSize: { x: 0, y: 0, w: 32, h: 32 }
+        },
+        taco: {
+            frame: { x: 224, y: 256, w: 32, h: 32 },
+            sourceSize: { w: 32, h: 32 },
+            spriteSourceSize: { x: 0, y: 0, w: 32, h: 32 }
+        }
+    },
+    meta: {
+        image: 'food',
+        format: 'RGBA8888',
+        size: { w: 320, h: 320 },
+        scale: 1
+    },
+    textures: {
+        bean: 'bean',
+        brokkoli: 'brokkoli',
+        onion: 'onion',
+        salad: 'salad',
+        taco: 'taco'
+    }
+};
 
 const grassAtlasData = {
     frames: {
@@ -230,7 +272,7 @@ const grassAtlasData = {
             frame: { x: 240, y: 0, w: 120, h: 120 },
             sourceSize: { w: 120, h: 120 },
             spriteSourceSize: { x: 0, y: 0, w: 120, h: 120 }
-        },
+        }
     },
     meta: {
         image: 'grass',
@@ -261,12 +303,18 @@ const figureAtlasData = createFigureAtlasData();
         document.body.appendChild(app.canvas);
 
         const assets = [
+            {alias: 'food', src: '../gfx/food-OCAL.png'},
             {alias: 'grass', src: '../gfx/kacheln.png'},
             {alias: 'players', src: '../gfx/character_base_32x32.png'}
         ];
     
         // Load the assets defined above.
         await PIXI.Assets.load(assets);
+
+        const foodSpritesheet = new PIXI.Spritesheet(
+            PIXI.Texture.from(foodAtlasData.meta.image),
+            foodAtlasData
+        );
 
         const grassSpritesheet = new PIXI.Spritesheet(
             PIXI.Texture.from(grassAtlasData.meta.image),
@@ -279,6 +327,7 @@ const figureAtlasData = createFigureAtlasData();
         );
         
         // Generate all the Textures asynchronously
+        await foodSpritesheet.parse();
         await figureSpritesheet.parse();
         await grassSpritesheet.parse();
 
@@ -286,6 +335,15 @@ const figureAtlasData = createFigureAtlasData();
 
         addGrass(app, Object.keys(grassAtlasData.frames), grassSpritesheet);
         addFence(app, level);
+        addFood(app, foodSpritesheet, {
+            id: 1,
+            type: 'bean',
+            x: level.width/5,
+            y: level.width/5,
+            attackDistance: 32,
+            lastAttackTime: undefined,
+            attackDuration: beanAttackDuration
+        });
         gameInit(app, figureSpritesheet);
         roundInit(true);
         window.requestAnimationFrame(gameLoop);
@@ -365,7 +423,7 @@ function roundInit(completeRestart) {
         }
     })
     
-    figures.push({
+    /*figures.push({
         id: 1,
         type: 'bean',
         x: level.width/5,
@@ -446,7 +504,7 @@ function roundInit(completeRestart) {
         zIndex: -level.height,
         lastAttackTime: undefined,
         attackDuration: beanAttackDuration
-    });
+    });*/
 
 }
 function gameLoop() {
@@ -585,7 +643,7 @@ function updateGame(figures, dt, dtProcessed) {
         }})
     }
 
-    figuresAlive.forEach(f => {
+    figuresAlive.filter(f => f.type === 'fighter').forEach(f => {
         let xyNew = move(f.x, f.y, f.direction,f.speed, dt)
         if (xyNew) {
             [f.x, f.y] = cropXY(xyNew.x, xyNew.y, level)
@@ -597,7 +655,7 @@ function updateGame(figures, dt, dtProcessed) {
     let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter');
     figures.filter(b => b.type === 'bean').forEach(b => {
         playerFigures.forEach(fig => {
-            if (distance(b.x,b.y,fig.x,fig.y + b.imageAnim.height*0.5) < b.attackDistance) {
+            if (distance(b.x,b.y,fig.x,fig.y + b.height*0.5) < b.attackDistance) {
                 if (!fig.beans.has(b.id)) {                    
                     playAudioPool(soundEatPool[fig.beans.size]);
                     fig.beans.add(b.id);
