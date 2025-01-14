@@ -273,9 +273,15 @@ const addFood = (app, spritesheet, props) => {
     let food = new PIXI.Container()
     food = Object.assign(food, props)
 
+    const plate = new PIXI.Graphics().circle(0, 0 , food.attackDistance)
+    .fill({color: 0xFFFFFF})
+    .circle(0, 0 , 0.8*food.attackDistance)
+    .stroke({color: 0x000000, width: 2})
+
     const sprite = new PIXI.Sprite(spritesheet.textures.bean)
     sprite.anchor.set(0.5)
 
+    food.addChild(plate)
     food.addChild(sprite)
     figures.push(food)
     app.stage.addChild(food)
