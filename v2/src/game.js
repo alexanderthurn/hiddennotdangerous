@@ -262,7 +262,7 @@ const foodDefinition = completeRestart => ({
         y: completeRestart ? level.height*1.6/5 : level.height*4/5,
     },
     brokkoli: {
-        x: completeRestart ? level.width*2.6/5 : level.width*4/5,
+        x: completeRestart ? level.width*2.6/5 : level.width/5,
         y: completeRestart ? level.height*0.8/5 : level.height/5,
     },
     onion: {
@@ -270,7 +270,7 @@ const foodDefinition = completeRestart => ({
         y: completeRestart ? level.height*1.6/5 : level.height*4/5,
     },
     salad: {
-        x: completeRestart ? level.width*3.4/5 : level.width/5,
+        x: completeRestart ? level.width*3.4/5 : level.width*4/5,
         y: completeRestart ? level.height*0.8/5 : level.height/5,
     },
     taco: {
