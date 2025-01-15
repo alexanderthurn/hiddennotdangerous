@@ -269,7 +269,16 @@ const addFence = (app, level) => {
     app.stage.addChild(lowerFence)
 }
 
-const addFood = (app, spritesheet, props) => {
+const animateFood = (figure) => {
+    const plate = figure.getChildAt(0)
+    let durationLastAttack = dtProcessed-figure.lastAttackTime
+    if (figure.lastAttackTime && durationLastAttack < figure.attackDuration) {
+        const perc = durationLastAttack/figure.attackDuration
+        plate.scale = 1 - 0.2 * Math.sin(perc*Math.PI)
+    }
+}
+
+const addFood = (app, texture, props) => {
     let food = new PIXI.Container()
     food = Object.assign(food, props)
 
@@ -278,13 +287,55 @@ const addFood = (app, spritesheet, props) => {
     .circle(0, 0 , 0.8*food.attackDistance)
     .stroke({color: 0x000000, width: 2})
 
-    const sprite = new PIXI.Sprite(spritesheet.textures.bean)
+    const sprite = new PIXI.Sprite(texture)
     sprite.anchor.set(0.5)
+    sprite.scale = 1.2
 
     food.addChild(plate)
     food.addChild(sprite)
     figures.push(food)
     app.stage.addChild(food)
+
+    app.ticker.add(() => animateFood(food))
+}
+
+const addFoods = (app, spritesheet) => {
+    const foodDefinition = [
+        {
+            texture: 'bean',
+            x: level.width*4/5,
+            y: level.height*4/5,
+        },
+        {
+            texture: 'brokkoli',
+            x: level.width*4/5,
+            y: level.height/5,
+        },{
+            texture: 'onion',
+            x: level.width/5,
+            y: level.height*4/5,
+        },{
+            texture: 'salad',
+            x: level.width/5,
+            y: level.height/5,
+        },{
+            texture: 'taco',
+            x: level.width/2,
+            y: level.height/2,
+        },
+    ]
+
+    foodDefinition.forEach(def => {
+        addFood(app, spritesheet.textures[def.texture], {
+            id: def.texture,
+            type: 'bean',
+            x: def.x,
+            y: def.y,
+            attackDistance: 32,
+            lastAttackTime: undefined,
+            attackDuration: beanAttackDuration
+        })
+    })
 }
 
 const addGrass = (app, textures, spritesheet) => {

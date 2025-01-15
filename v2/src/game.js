@@ -335,15 +335,7 @@ const figureAtlasData = createFigureAtlasData();
 
         addGrass(app, Object.keys(grassAtlasData.frames), grassSpritesheet);
         addFence(app, level);
-        addFood(app, foodSpritesheet, {
-            id: 1,
-            type: 'bean',
-            x: level.width/5,
-            y: level.width/5,
-            attackDistance: 32,
-            lastAttackTime: undefined,
-            attackDuration: beanAttackDuration
-        });
+        addFoods(app, foodSpritesheet);
         gameInit(app, figureSpritesheet);
         roundInit(true);
         window.requestAnimationFrame(gameLoop);
