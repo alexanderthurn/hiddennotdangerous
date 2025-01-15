@@ -357,9 +357,9 @@ const figureAtlasData = createFigureAtlasData();
 
         adjustStageToScreen(app, level)
 
-        addText(app);
         addGrass(app, Object.keys(grassAtlasData.frames), grassSpritesheet);
         addFence(app, level);
+        addText(app);
         addFoods(app, foodSpritesheet);
         addFigures(app, figureSpritesheet)
         roundInit(true);

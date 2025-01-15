@@ -269,13 +269,8 @@ const addFence = (app, level) => {
     app.stage.addChild(lowerFence)
 }
 
-const animateFood = (figure) => {
-    const plate = figure.getChildAt(0)
-    let durationLastAttack = dtProcessed-figure.lastAttackTime
-    if (figure.lastAttackTime && durationLastAttack < figure.attackDuration) {
-        const perc = durationLastAttack/figure.attackDuration
-        plate.scale = 1 - 0.2 * Math.sin(perc*Math.PI)
-    }
+const animateMenuText = text => {
+    text.visible = !isGameStarted
 }
 
 const addText = app => {
@@ -306,6 +301,37 @@ const addText = app => {
     authors.y = -level.width*0.005;
 
     app.stage.addChild(authors);
+
+    const fontHeight = level.width*0.017  
+    const howToPlay = new PIXI.Text({
+        text: 'HOW TO PLAY\n\nJoin by pressing any key on your Gamepad' 
+            + '\nor WASDT(Key1) or ' + String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0(RSHIFT)\nor mouse or touch' 
+            + '\n\n1.) Find your player 2.) Fart to knock out others\n3.) Stay hidden 4.) Eat to power up your farts' 
+            + '\n\nBe the last baby standing!',
+        style: {
+            align: 'center',
+            fontSize: fontHeight,
+            fill: 0xFFFFFF,
+            stroke: 0xFFFFFF
+        }
+    });
+
+    howToPlay.anchor.set(0.5,0);
+    howToPlay.x = level.width*0.22+fontHeight;
+    howToPlay.y = level.height*0.1;
+
+    app.stage.addChild(howToPlay);
+
+    app.ticker.add(() => animateMenuText(howToPlay))
+}
+
+const animateFood = (figure) => {
+    const plate = figure.getChildAt(0)
+    let durationLastAttack = dtProcessed-figure.lastAttackTime
+    if (figure.lastAttackTime && durationLastAttack < figure.attackDuration) {
+        const perc = durationLastAttack/figure.attackDuration
+        plate.scale = 1 - 0.2 * Math.sin(perc*Math.PI)
+    }
 }
 
 const addFood = (app, texture, props) => {
