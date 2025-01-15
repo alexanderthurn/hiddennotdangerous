@@ -278,6 +278,36 @@ const animateFood = (figure) => {
     }
 }
 
+const addText = app => {
+    const title = new PIXI.Text({
+        text: 'KNIRPS UND KNALL',
+        style: {
+            fontSize: level.width*0.02,
+            fill: 0xFFFFFF
+        }
+    });
+
+    title.anchor.set(0.5,1);
+    title.x = level.width/2;
+    title.y = -level.width*0.005;
+
+    app.stage.addChild(title);
+
+    const authors = new PIXI.Text({
+        text: 'made by TORSTEN STELLJES & ALEXANDER THURN',
+        style: {
+            fontSize: level.width*0.012,
+            fill: 0xFFFFFF
+        }
+    });
+
+    authors.anchor.set(1,1);
+    authors.x = level.width;
+    authors.y = -level.width*0.005;
+
+    app.stage.addChild(authors);
+}
+
 const addFood = (app, texture, props) => {
     let food = new PIXI.Container()
     food = Object.assign(food, props)

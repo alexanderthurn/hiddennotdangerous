@@ -318,7 +318,7 @@ const figureAtlasData = createFigureAtlasData();
         console.log('no need to hide');
 
         // Create a PixiJS application.
-        const app = new PIXI.Application({ resizeTo: window });
+        const app = new PIXI.Application();
     
         // Initialize the application.
         await app.init({ background: '#1099bb', resizeTo: window });
@@ -357,10 +357,11 @@ const figureAtlasData = createFigureAtlasData();
 
         adjustStageToScreen(app, level)
 
+        addText(app);
         addGrass(app, Object.keys(grassAtlasData.frames), grassSpritesheet);
         addFence(app, level);
         addFoods(app, foodSpritesheet);
-        gameInit(app, figureSpritesheet);
+        addFigures(app, figureSpritesheet)
         roundInit(true);
         window.requestAnimationFrame(gameLoop);
     }
@@ -388,10 +389,6 @@ document.addEventListener("DOMContentLoaded", function(event){
     })*/
    
 })
-
-function gameInit(app, figureSpritesheet) {
-    addFigures(app, figureSpritesheet)
-}
 
 function roundInit(completeRestart) {
     then = Date.now();
@@ -447,91 +444,8 @@ function roundInit(completeRestart) {
             lastAttackTime: undefined
         })
     })
-    
-    /*figures.push({
-        id: 1,
-        type: 'bean',
-        x: level.width/5,
-        y: level.height/5,
-        x: completeRestart ? level.width*3.4/5 : level.width*1/5,
-        y: completeRestart ? level.height*0.8/5 : level.height*1/5,
-        image: foodImage,
-        imageAnim: foodImageAnim,
-        frame: foodImageAnim.left.a,
-        attackDistance: 32,
-        speed: 0,
-        scale: 1,
-        zIndex: -level.height,
-        lastAttackTime: undefined,
-        attackDuration: beanAttackDuration
-
-    });
-    figures.push({
-        id: 2,
-        type: 'bean',
-        x: level.width*4/5,
-        y: level.height/5,
-        x: completeRestart ? level.width*2.6/5 : level.width*4/5,
-        y: completeRestart ? level.height*0.8/5 : level.height*1/5,
-        image: foodImage,
-        attackDistance: 32,
-        imageAnim: foodImageAnim,
-        frame: foodImageAnim.up.a,
-        speed: 0,
-        scale: 1,
-        zIndex: -level.height,
-        lastAttackTime: undefined,
-        attackDuration: beanAttackDuration
-    });
-    figures.push({
-        id: 3,
-        type: 'bean',
-        x: completeRestart ? level.width*2.6/5 : level.width*1/5,
-        y: completeRestart ? level.height*1.6/5 : level.height*4/5,
-        image: foodImage,
-        attackDistance: 32,
-        imageAnim: foodImageAnim,
-        frame: foodImageAnim.down.a,
-        speed: 0,
-        scale: 1,
-        z: -level.height,
-        lastAttackTime: undefined,
-        attackDuration: beanAttackDuration
-    });
-    figures.push({
-        id: 4,
-        type: 'bean',
-        x: completeRestart ? level.width*3.4/5 : level.width*4/5,
-        y: completeRestart ? level.height*1.6/5 : level.height*4/5,
-        image: foodImage,
-        attackDistance: 32,
-        imageAnim: foodImageAnim,
-        frame: foodImageAnim.right.a,
-        speed: 0,
-        scale: 1,
-        zIndex: -level.height,
-        lastAttackTime: undefined,
-        attackDuration: beanAttackDuration
-    });
-    figures.push({
-        id: 5,
-        type: 'bean',
-        x: level.width/2,
-        y: level.height/2,
-        x: completeRestart ? level.width*3.0/5 : level.width*2.5/5,
-        y: completeRestart ? level.height*1.2/5 : level.height*2.5/5,
-        image: foodImage,
-        attackDistance: 32,
-        imageAnim: foodImageAnim,
-        frame: foodImageAnim.default.a,
-        speed: 0,
-        scale: 1,
-        zIndex: -level.height,
-        lastAttackTime: undefined,
-        attackDuration: beanAttackDuration
-    });*/
-
 }
+
 function gameLoop() {
     now = Date.now();
     dt = now - then;
