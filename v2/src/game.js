@@ -256,6 +256,30 @@ const foodAtlasData = {
     }
 };
 
+const foodDefinition = completeRestart => ({
+    bean: {
+        x: completeRestart ? level.width*3.4/5 : level.width*4/5,
+        y: completeRestart ? level.height*1.6/5 : level.height*4/5,
+    },
+    brokkoli: {
+        x: completeRestart ? level.width*2.6/5 : level.width*4/5,
+        y: completeRestart ? level.height*0.8/5 : level.height/5,
+    },
+    onion: {
+        x: completeRestart ? level.width*2.6/5 : level.width/5,
+        y: completeRestart ? level.height*1.6/5 : level.height*4/5,
+    },
+    salad: {
+        x: completeRestart ? level.width*3.4/5 : level.width/5,
+        y: completeRestart ? level.height*0.8/5 : level.height/5,
+    },
+    taco: {
+        x: completeRestart ? level.width*3.0/5 : level.width/2,
+        y: completeRestart ? level.height*1.2/5 : level.height/2,
+    }
+})
+
+
 const grassAtlasData = {
     frames: {
         mushroom: {
@@ -413,6 +437,15 @@ function roundInit(completeRestart) {
         if (completeRestart) {
             figure.points = 0
         }
+    })
+
+    figures.filter(figure => figure.type === 'bean').forEach(figure => {
+        const {x, y} = foodDefinition(completeRestart)[figure.id]
+        Object.assign(figure, {
+            x,
+            y,
+            lastAttackTime: undefined
+        })
     })
     
     /*figures.push({

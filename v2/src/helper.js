@@ -300,37 +300,10 @@ const addFood = (app, texture, props) => {
 }
 
 const addFoods = (app, spritesheet) => {
-    const foodDefinition = [
-        {
-            texture: 'bean',
-            x: level.width*4/5,
-            y: level.height*4/5,
-        },
-        {
-            texture: 'brokkoli',
-            x: level.width*4/5,
-            y: level.height/5,
-        },{
-            texture: 'onion',
-            x: level.width/5,
-            y: level.height*4/5,
-        },{
-            texture: 'salad',
-            x: level.width/5,
-            y: level.height/5,
-        },{
-            texture: 'taco',
-            x: level.width/2,
-            y: level.height/2,
-        },
-    ]
-
-    foodDefinition.forEach(def => {
-        addFood(app, spritesheet.textures[def.texture], {
-            id: def.texture,
+    Object.keys(foodDefinition()).forEach(key => {
+        addFood(app, spritesheet.textures[key], {
+            id: key,
             type: 'bean',
-            x: def.x,
-            y: def.y,
             attackDistance: 32,
             lastAttackTime: undefined,
             attackDuration: beanAttackDuration
