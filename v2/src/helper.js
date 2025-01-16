@@ -269,11 +269,7 @@ const addFence = (app, level) => {
     app.stage.addChild(lowerFence)
 }
 
-const animateMenuText = text => {
-    text.visible = !isGameStarted
-}
-
-const addText = app => {
+const addHeadline = app => {
     const title = new PIXI.Text({
         text: 'KNIRPS UND KNALL',
         style: {
@@ -301,7 +297,13 @@ const addText = app => {
     authors.y = -level.width*0.005;
 
     app.stage.addChild(authors);
+}
 
+const animateMenuItems = text => {
+    text.visible = !isGameStarted
+}
+
+const addMenuItems = app => {
     const fontHeight = level.width*0.017  
     const howToPlay = new PIXI.Text({
         text: 'HOW TO PLAY\n\nJoin by pressing any key on your Gamepad' 
@@ -322,7 +324,7 @@ const addText = app => {
 
     app.stage.addChild(howToPlay);
 
-    app.ticker.add(() => animateMenuText(howToPlay))
+    app.ticker.add(() => animateMenuItems(howToPlay))
 }
 
 const animateFood = (figure) => {
