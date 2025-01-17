@@ -299,11 +299,42 @@ const addHeadline = app => {
     app.stage.addChild(authors);
 }
 
+const animateButton = button => {
+    const loadingBar = button.getChildAt(1)
+    loadingBar.width = button.width*button.loadingPercentage
+
+    console.log(3, loadingBar.width)
+}
+
+const addButton = (app, props) => {
+    const {x, y, width, height, loadingPercentage, loadingSpeed} = props
+
+    let button = new PIXI.Container()
+    button = Object.assign(button, {x, y, loadingPercentage, loadingSpeed})
+
+    const area = new PIXI.Graphics()
+    .rect(0, 0, width, height)
+    .fill({alpha: 0.5, color: 0x57412F})
+
+    const loadingBar = new PIXI.Graphics()
+    .rect(0, 0, 1, height)
+    .fill({alpha: 0.5, color: 0x787878})
+
+    button.addChild(area)
+    button.addChild(loadingBar)
+    btnsLobby.push(button)
+    app.stage.addChild(button)
+
+    app.ticker.add(() => animateButton(button))
+}
+
 const animateMenuItems = text => {
     text.visible = !isGameStarted
 }
 
 const addMenuItems = app => {
+    addButton(app, {x: level.width*(0.5-0.1), y: level.height*0.55, width: level.width*0.2, height: level.width*0.2, loadingPercentage: 0, loadingSpeed: 1/3000})
+
     const fontHeight = level.width*0.017  
     const howToPlay = new PIXI.Text({
         text: 'HOW TO PLAY\n\nJoin by pressing any key on your Gamepad' 
@@ -720,7 +751,7 @@ function drawButton(btn) {
         ctx.font = level.width*0.02+"px Arial";
         ctx.translate(btn.width*0.5,btn.height*0.5)
         ctx.translate(0,-fontHeight*Math.max(0,btn.text.split('\n').length-1)*0.5)
-        fillTextMultiline(ctx,btn.text,0,0,fontHeight) 
+        //fillTextMultiline(ctx,btn.text,0,0,fontHeight) 
     }
     ctx.restore()
 }

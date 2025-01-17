@@ -113,7 +113,7 @@ var btnBots = {
     execute: toggleBots
 }
 
-var btnsLobby = [btnMute, btnBots, btnStart]
+var btnsLobby = []
 
 var btnTouchController = {
     radius: 0,
@@ -542,6 +542,7 @@ function updateGame(figures, dt, dtProcessed) {
 
     if (!isGameStarted) {
         btnsLobby.forEach(btn => {
+            //console.log(0, btn.x,btn.y,btn.width,btn.height, btn.loadingPercentage, btn.loadingSpeed)
             btn.playerPercentage = 0.0
             btn.playersPossible = figures.filter(f => f.playerId && f.type === 'fighter')
             btn.playersNear = btn.playersPossible.filter(f => isInRect(f.x,f.y+f.height*0.5,btn.x,btn.y,btn.width,btn.height))
