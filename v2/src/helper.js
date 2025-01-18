@@ -300,14 +300,14 @@ const addHeadline = app => {
 }
 
 const animateButton = button => {
+    button.visible = !isGameStarted && figures.filter(f => f.playerId && f.type === 'fighter').length > 0
+
     const loadingBar = button.getChildAt(1)
     loadingBar.width = button.width*button.loadingPercentage
-
-    console.log(3, loadingBar.width)
 }
 
 const addButton = (app, props) => {
-    const {x, y, width, height, loadingPercentage, loadingSpeed} = props
+    const {x, y, width, height, loadingPercentage, loadingSpeed, text} = props
 
     let button = new PIXI.Container()
     button = Object.assign(button, {x, y, loadingPercentage, loadingSpeed})
@@ -317,23 +317,66 @@ const addButton = (app, props) => {
     .fill({alpha: 0.5, color: 0x57412F})
 
     const loadingBar = new PIXI.Graphics()
-    .rect(0, 0, 1, height)
+    .rect(0, 0, 0.1, height)
     .fill({alpha: 0.5, color: 0x787878})
+
+    const buttonText = new PIXI.Text({
+        style: {
+            align: 'center',
+            fontSize: level.width*0.017,
+            fill: 0xFFFFFF,
+            stroke: 0xFFFFFF
+        }
+    });
+    buttonText.anchor.set(0.5)
+    buttonText.x = width/2
+    buttonText.y = height/2
 
     button.addChild(area)
     button.addChild(loadingBar)
+    button.addChild(buttonText)
     btnsLobby.push(button)
     app.stage.addChild(button)
 
     app.ticker.add(() => animateButton(button))
+    return button
 }
 
-const animateMenuItems = text => {
-    text.visible = !isGameStarted
+const animateStartButton = button => {
+    let text = 'Walk here to\nSTART\n\n'+button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
+    if (button.playersPossible?.length === 1) {
+        text = 'Walk here to\nSTART\n\nmin 2 players\nor 1 player +1 bot'
+    } else if (button.playersPossible?.length > 1 && button.playersNear?.length === button.playersPossible?.length ) {
+        text ='Prepare your\nbellies'
+    } else if (button.playersNear?.length > 0) {
+        text = 'Walk here to\nSTART\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
+    }
+    button.getChildAt(2).text = text
+}
+
+const animateMuteButton = button => {
+    button.getChildAt(2).text = isMusicMuted() ? 'Music: OFF' : 'Music: ON'
+}
+
+const animateBotsButton = button => {
+    button.getChildAt(2).text = 'Bots: ' + getBotCount()
+}
+
+const addButtons = app => {
+    const startButton = addButton(app, {x: level.width*(0.5-0.1), y: level.height*0.55, width: level.width*0.2, height: level.width*0.2, loadingPercentage: 0, loadingSpeed: 1/3000})
+    const muteButton = addButton(app, {x: level.width*(1.0 - 0.05 -0.15), y: level.height*0.12, width: level.width*0.15, height: level.height*0.1, loadingPercentage: 0, loadingSpeed: 1/2500})
+    const botsButton = addButton(app, {x: level.width*(1.0 - 0.05 -0.15), y: level.height*0.12 + level.height*0.1 + 20, width: level.width*0.15, height: level.height*0.1, loadingPercentage: 0, loadingSpeed: 1/1500})
+    app.ticker.add(() => animateStartButton(startButton))
+    app.ticker.add(() => animateMuteButton(muteButton))
+    app.ticker.add(() => animateBotsButton(botsButton))
+}
+
+const animateMenuItems = menuItem => {
+    menuItem.visible = !isGameStarted
 }
 
 const addMenuItems = app => {
-    addButton(app, {x: level.width*(0.5-0.1), y: level.height*0.55, width: level.width*0.2, height: level.width*0.2, loadingPercentage: 0, loadingSpeed: 1/3000})
+    addButtons(app)
 
     const fontHeight = level.width*0.017  
     const howToPlay = new PIXI.Text({
