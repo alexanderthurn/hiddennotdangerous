@@ -363,6 +363,7 @@ const animateBotsButton = button => {
 
 const addButtons = app => {
     Object.entries(buttonDefinition()).forEach(([id, button]) => {buttons[id] = addButton(app, button)})
+
     app.ticker.add(() => animateStartButton(buttons.start))
     app.ticker.add(() => animateMuteButton(buttons.mute))
     app.ticker.add(() => animateBotsButton(buttons.bots))
@@ -498,14 +499,6 @@ createFigureAtlasData = () => {
 }
 
 const animateFigure = (figure, spritesheet) => {
-    figure.zIndex = figure.y
-
-    if (figure.isDead) {
-        figure.angle = 90
-    } else {
-        figure.angle = 0
-    }
-
     const deg = rad2limiteddeg(figure.direction)
     const sprite = figure.getChildAt(0)
     let animation
@@ -520,6 +513,22 @@ const animateFigure = (figure, spritesheet) => {
         animation = 'up'
     }
 
+    if (figure.isDead) {
+        figure.angle = 90
+    } else if (figure.isAttacking) {
+        if (distanceAngles(deg, 0) < 45) {
+            figure.angle = 20
+        } else if (distanceAngles(deg, 90) <= 45) {
+            figure.angle = -20
+        } else if (distanceAngles(deg, 180) < 45) {
+            figure.angle = -20
+        } else {
+            figure.angle = 20
+        }
+    } else {
+        figure.angle = 0
+    }
+
     if (sprite.currentAnimation != animation) {
         sprite.currentAnimation = animation
         sprite.textures = spritesheet.animations[animation]
@@ -529,11 +538,13 @@ const animateFigure = (figure, spritesheet) => {
         sprite.play()
     }
     if ((figure.speed === 0 && sprite.playing) || !windowHasFocus) {
-        sprite.stop()
         if (figure.speed === 0 && sprite.playing) {
             sprite.currentFrame = 0
         }
+        sprite.stop()
     }
+
+    figure.zIndex = figure.y
 }
 
 const addFigure = (app, spritesheet, props) => {
