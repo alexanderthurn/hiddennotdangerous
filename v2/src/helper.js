@@ -399,7 +399,36 @@ const addMenuItems = app => {
     app.ticker.add(() => animateMenuItems(howToPlay))
 }
 
-const animateFood = (figure) => {
+const animatePlayerScore = playerScore => {
+
+}
+
+const addPlayerScore = (app, props) => {
+    let playerScore = new PIXI.Container()
+    playerScore = Object.assign(playerScore, props)
+
+    const circle = new PIXI.Graphics()
+    .circle(0, 0, 24)
+    .fill({alpha: 0.5, color: 0x000000})
+    .stroke({alpha: 0.5, color: 0x000000, width: 1})
+
+    const text = new PIXI.Text({
+        text: 0,
+        style: {
+            fontSize: 36,
+            fill: 0xFFFFFF
+        }
+    });
+    text.anchor.set(0.5)
+
+    playerScore.addChild(circle)
+    playerScore.addChild(text)
+    app.stage.addChild(playerScore)
+
+    app.ticker.add(() => animatePlayerScore(playerScore))
+}
+
+const animateFood = figure => {
     const plate = figure.getChildAt(0)
     let durationLastAttack = dtProcessed-figure.lastAttackTime
     if (figure.lastAttackTime && durationLastAttack < figure.attackDuration) {

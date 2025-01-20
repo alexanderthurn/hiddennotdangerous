@@ -369,7 +369,8 @@ const figureAtlasData = createFigureAtlasData();
         addHeadline(app);
         addMenuItems(app);
         addFoods(app, foodSpritesheet);
-        addFigures(app, figureSpritesheet)
+        addFigures(app, figureSpritesheet);
+        addPlayerScore(app, {x:0, y:0});
         roundInit(true);
         window.requestAnimationFrame(gameLoop);
     }
