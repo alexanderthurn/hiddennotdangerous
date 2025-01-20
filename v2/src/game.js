@@ -89,32 +89,6 @@ loadPromises.push(new Promise((resolve, reject) => {
     }
 }))
 
-
-
-var btnStart = {
-    width: 0,
-    height: 0,
-    loadingSpeed: 1/3000,
-    loadingPercentage: 0,
-    execute: () => {restartGame = true}
-}
-
-var btnMute = {
-    width: 0,
-    height: 0,
-    loadingSpeed: 1/2500,
-    execute: toggleMusic
-}
-
-var btnBots = {
-    width: 0,
-    height: 0,
-    loadingSpeed: 1/1500,
-    execute: toggleBots
-}
-
-var btnsLobby = []
-
 var btnTouchController = {
     radius: 0,
 }
@@ -255,6 +229,39 @@ const foodAtlasData = {
         taco: 'taco'
     }
 };
+
+const buttonDefinition = () => ({
+    start: {
+        x: level.width*(0.5-0.1),
+        y: level.height*0.55,
+        width: level.width*0.2,
+        height: level.width*0.2,
+        loadingSpeed: 1/3000,
+        execute: () => {restartGame = true}
+    },
+    mute: {
+        x: level.width*(1.0 - 0.05 -0.15),
+        y: level.height*0.12,
+        width: level.width*0.15,
+        height: level.height*0.1,
+        loadingSpeed: 1/2500,
+        execute: toggleMusic
+    },
+    bots: {
+        x: level.width*(1.0 - 0.05 -0.15),
+        y: level.height*0.12 + level.height*0.1 + 20,
+        width: level.width*0.15,
+        height: level.height*0.1,
+        loadingSpeed: 1/1500,
+        execute: toggleBots
+    }
+})
+
+const buttons = {
+    start: {},
+    mute: {},
+    bots: {}
+}
 
 const foodDefinition = completeRestart => ({
     bean: {
@@ -401,16 +408,13 @@ function roundInit(completeRestart) {
     multikillCounter = 0;
     lastTotalkillAudio = 0;
     totalkillCounter = 0;
-    Object.assign(btnStart, {x: level.width*(0.5-0.1), y: level.height*0.55, width: level.width*0.2, height: level.width*0.2,loadingPercentage: 0.0})
-    Object.assign(btnMute,{x: level.width*(1.0 - 0.05 -0.15), y: level.height*0.12, width: level.width*0.15, height: level.height*0.1,loadingPercentage: 0.0})
-    Object.assign(btnBots,{x: btnMute.x, y: btnMute.y + btnMute.height + 20, width: btnMute.width, height: btnMute.height,loadingPercentage: 0.0})
     var activePlayerIds = figures.filter(f => f.playerId && f.type === 'fighter').map(f => f.playerId)
     if (completeRestart) {
         gamepadPlayers = []
         mousePlayers = []
         keyboardPlayers = []
     }
-    
+    Object.values(buttons).forEach(button => button.loadingPercentage = 0);
     figures.filter(figure => figure.type === 'fighter').forEach((figure, i) => {
         const [x, y] = getRandomXY(level)
         const [xTarget, yTarget] = getRandomXY(level)
@@ -541,13 +545,12 @@ function updateGame(figures, dt, dtProcessed) {
     let figuresDead = figures.filter(f => f.isDead);
 
     if (!isGameStarted) {
-        btnsLobby.forEach(btn => {
-            //console.log(0, btn.x,btn.y,btn.width,btn.height, btn.loadingPercentage, btn.loadingSpeed)
+        Object.values(buttons).forEach(btn => {
             btn.playerPercentage = 0.0
             btn.playersPossible = figures.filter(f => f.playerId && f.type === 'fighter')
             btn.playersNear = btn.playersPossible.filter(f => isInRect(f.x,f.y+f.height*0.5,btn.x,btn.y,btn.width,btn.height))
             
-            if (btn === btnStart) {
+            if (btn === buttons.start) {
                 const maxLoadingPercentage = btn.playersPossible.length > 1 ? btn.playersNear.length / btn.playersPossible.length : btn.playersNear.length*0.5;
                 const minLoadingPercentage = Math.max(btn.playersNear.length-1, 0) / Math.max(btn.playersPossible.length, 1);
                 

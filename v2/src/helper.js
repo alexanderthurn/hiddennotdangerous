@@ -307,10 +307,10 @@ const animateButton = button => {
 }
 
 const addButton = (app, props) => {
-    const {x, y, width, height, loadingPercentage, loadingSpeed, text} = props
+    const {x, y, width, height, loadingPercentage, loadingSpeed, execute} = props
 
     let button = new PIXI.Container()
-    button = Object.assign(button, {x, y, loadingPercentage, loadingSpeed})
+    button = Object.assign(button, {x, y, loadingPercentage, loadingSpeed, execute})
 
     const area = new PIXI.Graphics()
     .rect(0, 0, width, height)
@@ -335,7 +335,6 @@ const addButton = (app, props) => {
     button.addChild(area)
     button.addChild(loadingBar)
     button.addChild(buttonText)
-    btnsLobby.push(button)
     app.stage.addChild(button)
 
     app.ticker.add(() => animateButton(button))
@@ -363,12 +362,10 @@ const animateBotsButton = button => {
 }
 
 const addButtons = app => {
-    const startButton = addButton(app, {x: level.width*(0.5-0.1), y: level.height*0.55, width: level.width*0.2, height: level.width*0.2, loadingPercentage: 0, loadingSpeed: 1/3000})
-    const muteButton = addButton(app, {x: level.width*(1.0 - 0.05 -0.15), y: level.height*0.12, width: level.width*0.15, height: level.height*0.1, loadingPercentage: 0, loadingSpeed: 1/2500})
-    const botsButton = addButton(app, {x: level.width*(1.0 - 0.05 -0.15), y: level.height*0.12 + level.height*0.1 + 20, width: level.width*0.15, height: level.height*0.1, loadingPercentage: 0, loadingSpeed: 1/1500})
-    app.ticker.add(() => animateStartButton(startButton))
-    app.ticker.add(() => animateMuteButton(muteButton))
-    app.ticker.add(() => animateBotsButton(botsButton))
+    Object.entries(buttonDefinition()).forEach(([id, button]) => {buttons[id] = addButton(app, button)})
+    app.ticker.add(() => animateStartButton(buttons.start))
+    app.ticker.add(() => animateMuteButton(buttons.mute))
+    app.ticker.add(() => animateBotsButton(buttons.bots))
 }
 
 const animateMenuItems = menuItem => {
