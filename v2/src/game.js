@@ -319,13 +319,14 @@ const grassAtlasData = {
 };
 
 const figureAtlasData = createFigureAtlasData();
+var app;
 
 (async () =>
     {
         console.log('no need to hide');
 
         // Create a PixiJS application.
-        const app = new PIXI.Application();
+        app = new PIXI.Application();
     
         // Initialize the application.
         await app.init({ background: '#1099bb', resizeTo: window });
@@ -370,7 +371,8 @@ const figureAtlasData = createFigureAtlasData();
         addMenuItems(app);
         addFoods(app, foodSpritesheet);
         addFigures(app, figureSpritesheet);
-        addPlayerScore(app, {x:0, y:0});
+        app.ticker.add(() => animateWinningCeremony(figures));
+        //addPlayerScore(app, {x:0, y:0});
         roundInit(true);
         window.requestAnimationFrame(gameLoop);
     }
@@ -437,8 +439,8 @@ function roundInit(completeRestart) {
             beansFarted: new Set()
         })
 
-        if (completeRestart) {
-            figure.points = 0
+        if (completeRestart && figure.score) {
+            figure.score.points = 0
         }
     })
 
@@ -499,17 +501,17 @@ function gameLoop() {
         if (isGameStarted && survivors.length < 2) {
             lastWinnerPlayerIds.clear();
             if (survivors.length == 1) {
-                figuresPlayer.forEach(f => f.oldPoints = f.points);
-                survivors[0].points++
+                figuresPlayer.forEach(f => f.score.oldPoints = f.score.points);
+                survivors[0].score.points++
                 lastWinnerPlayerIds.add(survivors[0].playerId);
                 lastRoundEndThen = dtProcessed
             }
             restartGame = true;
         }
 
-        const maxPoints = Math.max(...figuresPlayer.map(f => f.points));
+        const maxPoints = Math.max(...figuresPlayer.map(f => f.score.points));
         if (maxPoints >= pointsToWin) {
-            const figuresWithMaxPoints = figuresPlayer.filter(f => f.points === maxPoints);
+            const figuresWithMaxPoints = figuresPlayer.filter(f => f.score.points === maxPoints);
             if (figuresWithMaxPoints.length === 1) {
                 if (!lastFinalWinnerPlayerId) {
                    playAudio(soundWin)
@@ -643,6 +645,7 @@ function handleInput(players, figures, dtProcessed) {
                 return
             }
             var figure = figures.find(f => !f.playerId && f.type === 'fighter')
+            addPlayerScore(app, figure)
             figure.isDead = false
             figure.playerId = p.playerId
             if (!isGameStarted) {

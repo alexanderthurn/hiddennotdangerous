@@ -403,9 +403,12 @@ const animatePlayerScore = playerScore => {
 
 }
 
-const addPlayerScore = (app, props) => {
+const addPlayerScore = (app, figure) => {
     let playerScore = new PIXI.Container()
-    playerScore = Object.assign(playerScore, props)
+    const offx = 48*1.2
+    const figureIndex = figures.filter(f => f.type === 'fighter').findIndex(f => !f.playerId)
+    console.log('a', figures, figureIndex)
+    playerScore = Object.assign(playerScore, {x:32+figureIndex*offx, y:level.height+32, points: 0})
 
     const circle = new PIXI.Graphics()
     .circle(0, 0, 24)
@@ -421,11 +424,16 @@ const addPlayerScore = (app, props) => {
     });
     text.anchor.set(0.5)
 
+    figure.score = playerScore
     playerScore.addChild(circle)
     playerScore.addChild(text)
     app.stage.addChild(playerScore)
 
     app.ticker.add(() => animatePlayerScore(playerScore))
+}
+
+const animateWinningCeremony = figures => {
+
 }
 
 const animateFood = figure => {
