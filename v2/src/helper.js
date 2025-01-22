@@ -400,14 +400,14 @@ const addMenuItems = app => {
 }
 
 const animatePlayerScore = figure => {
-    const dt1 = dtProcessed - newPlayerIdThen;
+    if (!restartGame) {
+        var lp = !newPlayerIds.has(figure.playerId) ? 1 : Math.min(dtProcessed - newPlayerIdThen / moveNewPlayerDuration, 1)
+        var lpi = 1-lp
 
-    var lp = !newPlayerIds.has(figure.playerId) ? 1 : Math.min(dt1 / moveNewPlayerDuration, 1)
-    var lpi = 1-lp
-
-    figure.score.x = lpi * (level.width*0.5) + lp*figure.score.xDefault
-    figure.score.y = lpi*(level.height*0.5) + lp*figure.score.yDefault
-    figure.score.scale = 12*lpi + lp
+        figure.score.x = lpi * (level.width*0.5) + lp*figure.score.xDefault
+        figure.score.y = lpi*(level.height*0.5) + lp*figure.score.yDefault
+        figure.score.scale = 12*lpi + lp
+    }
 
     figure.score.getChildAt(1).text = figure.score.points
 
@@ -452,8 +452,60 @@ const addPlayerScore = (app, figure, player) => {
     app.ticker.add(() => animatePlayerScore(figure))
 }
 
-const animateWinningCeremony = figures => {
+const animateWinningCeremony = () => {
+    const figuresPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
+    const playerFiguresSortedByNewPoints = figuresPlayer.toSorted((f1,f2) => (f1.points-f1.oldPoints) - (f2.points-f2.oldPoints))
 
+    figuresPlayer.forEach(f => {
+        const sortIndex = playerFiguresSortedByNewPoints.findIndex(fig => fig.playerId === f.playerId);
+        const dt2 = dtProcessed - (lastRoundEndThen + sortIndex*moveScoreToPlayerDuration);
+        const dt3 = dtProcessed - (lastRoundEndThen + figuresPlayer.length*moveScoreToPlayerDuration);
+        const dt4 = dtProcessed - (lastRoundEndThen + figuresPlayer.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
+        let fillStyle = 'rgba(0, 0, 0, 0.5)';
+        let points = f.points;
+
+        if (lastRoundEndThen && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
+            const lp = dt2 / moveScoreToPlayerDuration
+            const lpi = 1-lp
+
+            f.score.x = lpi*f.score.xDefault + lp*f.x
+            f.score.y = lpi*f.score.yDefault + lp*f.y
+
+            console.log(lastFinalWinnerPlayerId, f.playerId)
+            if (lastFinalWinnerPlayerId === f.playerId) {
+                f.score.scale = (lpi + 2*lp)*(lpi + 2*lp)
+            } else {
+                f.score.scale = lpi + 2*lp
+            }
+
+            if (lastWinnerPlayerIds.has(f.playerId)) {
+                fillStyle = 'rgba(178, 145, 70, 0.5)'
+            }
+            points = f.oldPoints;
+        } else if (lastRoundEndThen && dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
+            f.score.x = f.x
+            f.score.y = f.y
+            if (lastFinalWinnerPlayerId === f.playerId) {
+                f.score.scale = 4
+            } else {
+                f.score.scale = 2
+            }
+
+            if (lastWinnerPlayerIds.has(f.playerId)) {
+                fillStyle = 'rgba(178, 145, 70, 0.5)'
+            }
+        } else if (lastRoundEndThen && dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
+            const lp = dt4 / moveScoreToPlayerDuration
+            const lpi = 1-lp
+
+            f.score.x = lpi*f.x + lp*f.score.xDefault
+            f.score.y = lpi*f.y + lp*f.score.yDefault
+            f.score.scale = 2*lpi + lp
+            if (lastFinalWinnerPlayerId) {
+                points = 0;
+            }
+        }
+    })
 }
 
 const animateFood = figure => {

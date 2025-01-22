@@ -372,7 +372,7 @@ var app;
         addMenuItems(app);
         addFoods(app, foodSpritesheet);
         addFigures(app, figureSpritesheet);
-        app.ticker.add(() => animateWinningCeremony(figures));
+        app.ticker.add(() => animateWinningCeremony());
         //addPlayerScore(app, {x:0, y:0});
         roundInit(true);
         window.requestAnimationFrame(gameLoop);
