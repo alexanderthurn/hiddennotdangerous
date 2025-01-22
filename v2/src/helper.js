@@ -399,16 +399,22 @@ const addMenuItems = app => {
     app.ticker.add(() => animateMenuItems(howToPlay))
 }
 
-const animatePlayerScore = playerScore => {
+const animatePlayerScore = figure => {
+    const dt1 = dtProcessed - newPlayerIdThen;
 
+    var lp = !newPlayerIds.has(figure.playerId) ? 1 : Math.min(dt1 / moveNewPlayerDuration, 1)
+    var lpi = 1-lp
+
+    figure.score.x = lpi * (level.width*0.5) + lp*figure.score.xDefault
+    figure.score.y = lpi*(level.height*0.5) + lp*figure.score.yDefault
+    figure.score.scale = 12*lpi + lp
 }
 
 const addPlayerScore = (app, figure) => {
     let playerScore = new PIXI.Container()
     const offx = 48*1.2
     const figureIndex = figures.filter(f => f.type === 'fighter').findIndex(f => !f.playerId)
-    console.log('a', figures, figureIndex)
-    playerScore = Object.assign(playerScore, {x:32+figureIndex*offx, y:level.height+32, points: 0})
+    playerScore = Object.assign(playerScore, {x:32+figureIndex*offx, y:level.height+32, xDefault:32+figureIndex*offx, yDefault:level.height+32, points: 0})
 
     const circle = new PIXI.Graphics()
     .circle(0, 0, 24)
@@ -429,7 +435,7 @@ const addPlayerScore = (app, figure) => {
     playerScore.addChild(text)
     app.stage.addChild(playerScore)
 
-    app.ticker.add(() => animatePlayerScore(playerScore))
+    app.ticker.add(() => animatePlayerScore(figure))
 }
 
 const animateWinningCeremony = figures => {
