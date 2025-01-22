@@ -16,6 +16,7 @@ const defaultkeyboardPlayer = {
 };
 var keyboardPlayers = [];
 var botPlayers = []
+var players = []
 var keyboards = [{bindings: {
     'KeyA': {playerId: 'k0', action: 'left'},
     'KeyD': {playerId: 'k0', action: 'right'},
@@ -462,7 +463,7 @@ function gameLoop() {
         fps = Math.floor(1000/dt)
     }
 
-    var players = collectInputs()
+    players = collectInputs()
     const oldNumberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.map(f => f.type === 'fighter' && f.playerId).includes(k.playerId)).length;
 
     // remove figures without valid playerId
@@ -645,7 +646,7 @@ function handleInput(players, figures, dtProcessed) {
                 return
             }
             var figure = figures.find(f => !f.playerId && f.type === 'fighter')
-            addPlayerScore(app, figure)
+            addPlayerScore(app, figure, p)
             figure.isDead = false
             figure.playerId = p.playerId
             if (!isGameStarted) {

@@ -408,19 +408,33 @@ const animatePlayerScore = figure => {
     figure.score.x = lpi * (level.width*0.5) + lp*figure.score.xDefault
     figure.score.y = lpi*(level.height*0.5) + lp*figure.score.yDefault
     figure.score.scale = 12*lpi + lp
+
+    figure.score.getChildAt(1).text = figure.score.points
+
+    if (figure.isAttacking && !restartGame) {
+        figure.score.x += -5+10*Math.random()
+        figure.score.y += -5+10*Math.random()
+    }
 }
 
-const addPlayerScore = (app, figure) => {
+const addPlayerScore = (app, figure, player) => {
     let playerScore = new PIXI.Container()
     const offx = 48*1.2
     const figureIndex = figures.filter(f => f.type === 'fighter').findIndex(f => !f.playerId)
-    playerScore = Object.assign(playerScore, {x:32+figureIndex*offx, y:level.height+32, xDefault:32+figureIndex*offx, yDefault:level.height+32, points: 0})
+    playerScore.xDefault = 32+figureIndex*offx
+    playerScore.yDefault = level.height+32
+    playerScore.points = 0
+    playerScore.zIndex = 2*level.height
 
     const circle = new PIXI.Graphics()
     .circle(0, 0, 24)
     .fill({alpha: 0.5, color: 0x000000})
-    .stroke({alpha: 0.5, color: 0x000000, width: 1})
-
+    if (player.type === 'bot') {
+        circle.stroke({alpha: 0.5, color: 0xFF0000, width: 2})
+    } else {
+        circle.stroke({alpha: 0.5, color: 0x000000, width: 1})
+    }
+    
     const text = new PIXI.Text({
         text: 0,
         style: {
