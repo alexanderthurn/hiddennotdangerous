@@ -652,10 +652,10 @@ const animateFigure = (figure, spritesheet) => {
         sprite.textures = spritesheet.animations[animation]
     }
 
-    if ((figure.speed > 0 && !sprite.playing) || windowHasFocus) {
+    if (!(figure.speed === 0 || !windowHasFocus || restartGame) && !sprite.playing) {
         sprite.play()
     }
-    if ((figure.speed === 0 && sprite.playing) || !windowHasFocus) {
+    if ((figure.speed === 0 || !windowHasFocus || restartGame) && sprite.playing) {
         if (figure.speed === 0 && sprite.playing) {
             sprite.currentFrame = 0
         }
