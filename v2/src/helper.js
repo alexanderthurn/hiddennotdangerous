@@ -399,6 +399,11 @@ const addMenuItems = app => {
     app.ticker.add(() => animateMenuItems(howToPlay))
 }
 
+const botCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: 0x000000}).stroke({alpha: 0.5, color: 0xFF0000, width: 2})
+const playerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: 0x000000}).stroke({alpha: 0.5, color: 0x000000, width: 1})
+const botWinnerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: 0xB29146}).stroke({alpha: 0.5, color: 0xFF0000, width: 2})
+const playerWinnerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: 0xB29146}).stroke({alpha: 0.5, color: 0x000000, width: 1})
+
 const animatePlayerScore = figure => {
     if (!restartGame) {
         var lp = !newPlayerIds.has(figure.playerId) ? 1 : Math.min(dtProcessed - newPlayerIdThen / moveNewPlayerDuration, 1)
@@ -426,13 +431,11 @@ const addPlayerScore = (app, figure, player) => {
     playerScore.points = 0
     playerScore.zIndex = 2*level.height
 
-    const circle = new PIXI.Graphics()
-    .circle(0, 0, 24)
-    .fill({alpha: 0.5, color: 0x000000})
+    let circle
     if (player.type === 'bot') {
-        circle.stroke({alpha: 0.5, color: 0xFF0000, width: 2})
+        circle = new PIXI.Graphics(botCircleContext)
     } else {
-        circle.stroke({alpha: 0.5, color: 0x000000, width: 1})
+        circle = new PIXI.Graphics(playerCircleContext)
     }
     
     const text = new PIXI.Text({
@@ -452,13 +455,14 @@ const addPlayerScore = (app, figure, player) => {
     app.ticker.add(() => animatePlayerScore(figure))
 }
 
+const figureIsBot = figure => figure.playerId?.includes('b')
+
 const animateWinningCeremony = () => {
     const figuresPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
-    const playerFiguresSortedByNewPoints = figuresPlayer.toSorted((f1,f2) => (f1.points-f1.oldPoints) - (f2.points-f2.oldPoints))
+    const playerFiguresSortedByNewPoints = figuresPlayer.toSorted((f1,f2) => (f1.score.points-f1.score.oldPoints) - (f2.score.points-f2.score.oldPoints))
 
-    figuresPlayer.forEach(f => {
-        const sortIndex = playerFiguresSortedByNewPoints.findIndex(fig => fig.playerId === f.playerId);
-        const dt2 = dtProcessed - (lastRoundEndThen + sortIndex*moveScoreToPlayerDuration);
+    playerFiguresSortedByNewPoints.forEach((f, i) => {
+        const dt2 = dtProcessed - (lastRoundEndThen + i*moveScoreToPlayerDuration);
         const dt3 = dtProcessed - (lastRoundEndThen + figuresPlayer.length*moveScoreToPlayerDuration);
         const dt4 = dtProcessed - (lastRoundEndThen + figuresPlayer.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
         let fillStyle = 'rgba(0, 0, 0, 0.5)';
@@ -479,7 +483,11 @@ const animateWinningCeremony = () => {
             }
 
             if (lastWinnerPlayerIds.has(f.playerId)) {
-                fillStyle = 'rgba(178, 145, 70, 0.5)'
+                if (figureIsBot(f)) {
+                    f.score.getChildAt(0).context = botWinnerCircleContext
+                } else {
+                    f.score.getChildAt(0).context = playerWinnerCircleContext
+                }
             }
             points = f.oldPoints;
         } else if (lastRoundEndThen && dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
@@ -490,10 +498,6 @@ const animateWinningCeremony = () => {
             } else {
                 f.score.scale = 2
             }
-
-            if (lastWinnerPlayerIds.has(f.playerId)) {
-                fillStyle = 'rgba(178, 145, 70, 0.5)'
-            }
         } else if (lastRoundEndThen && dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
             const lp = dt4 / moveScoreToPlayerDuration
             const lpi = 1-lp
@@ -503,6 +507,11 @@ const animateWinningCeremony = () => {
             f.score.scale = 2*lpi + lp
             if (lastFinalWinnerPlayerId) {
                 points = 0;
+            }
+            if (figureIsBot(f)) {
+                f.score.getChildAt(0).context = botCircleContext
+            } else {
+                f.score.getChildAt(0).context = playerCircleContext
             }
         }
     })
