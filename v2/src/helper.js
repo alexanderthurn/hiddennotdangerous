@@ -180,32 +180,6 @@ function adjustStageToScreen(app, level) {
     app.stage.y = level.offsetY;
 }
 
-function resizeCanvasToDisplaySize(canvas) {
-    // look up the size the canvas is being displayed
-    var width = canvas.clientWidth;
-    var height = canvas.clientHeight;
-
-    if (canvas.width !== width || canvas.height !== height) {
-      canvas.width = width;
-      canvas.height = height;
-      return true;
-    }
-
-    return false;
-}
-
-function adjustLevelToCanvas(level, canvas) {
-    level.width = 1920
-    level.height = 1080
-    level.padding = 16
-    level.scale = Math.min(canvas.width / level.width, canvas.height / level.height)*0.9
-    level.offsetX = (canvas.width - level.scale * level.width) / 2
-    level.offsetY = (canvas.height - level.scale * level.height) / 2
-    level.shortestPathNotBean5 = 2*0.6*level.height+2*0.3*Math.hypot(level.height, level.width);
-    level.shortestPathBean5 = 2*0.6*level.height+0.6*level.width+0.3*Math.hypot(level.height, level.width);
-
-}
-
 function getRandomXY(level) {
     return[level.padding+Math.random()*(level.width-level.padding*2), level.padding+Math.random()*(level.height-level.padding*2)]
 }
@@ -221,27 +195,6 @@ function cropXY(x,y,level) {
 
 function isInRect(x,y,rx,ry,rw,rh) {
     return x >= rx && x <= rx+rw && y >= ry && y < ry+rh
-}
-
-const colorize = (image, r, g, b) => {
-    const imageSize = image.width;
-  
-    const offscreen = new OffscreenCanvas(imageSize, imageSize);
-    const ctx = offscreen.getContext("2d");
-  
-    ctx.drawImage(image, 0, 0);
-  
-    const imageData = ctx.getImageData(0, 0, imageSize, imageSize);
-  
-    for (let i = 0; i < imageData.data.length; i += 4) {
-      imageData.data[i + 0] *= r;
-      imageData.data[i + 1] *= g;
-      imageData.data[i + 2] *= b;
-    }
-  
-    ctx.putImageData(imageData, 0, 0);
-  
-    return offscreen;
 }
 
 const addFence = (app, level) => {
@@ -698,158 +651,9 @@ const addFigures = (app, spritesheet) => {
     }
 }
 
-const tileMapFunc = (image, layer) => {
-    const offscreen = new OffscreenCanvas(level.width+level.padding*2, level.height+level.padding*2);
-    const ctx = offscreen.getContext("2d");
-
-    ctx.translate(level.padding, level.padding)
-    
-    if (layer < 1) {
-        ctx.save()
-        const heightInTiles = getHeightInTiles();
-        const widthInTiles = getWidthInTiles();
-        for (let i = 0; i < tileArea.length; i++) {
-            for (let j = tileArea[i].length; j < heightInTiles; j++) {
-                tileArea[i][j] = getRandomInt(3);
-            }
-        }
-        for (let i = tileArea.length; i < widthInTiles; i++) {
-            tileArea[i] = [];
-            for (let j = 0; j < heightInTiles; j++) {
-                tileArea[i][j] = getRandomInt(3);
-            }
-        }
-
-        maxI = Math.min(tileArea.length, widthInTiles);
-        for (let i = 0; i < maxI; i++) {
-            maxJ = Math.min(tileArea[i].length, heightInTiles);
-            for (let j = 0; j < Math.min(tileArea[i].length, heightInTiles); j++) {
-                const tile = textureTilesList[tileArea[i][j]];
-                let relTileWidth = 1;
-                let relTileHeight = 1;
-                if (i === maxI-1) {
-                    relTileWidth = (level.width % tileWidth) / tileWidth;
-                    relTileWidth = relTileWidth > 0 ? relTileWidth : 1;
-                }
-                if (j === maxJ-1) {
-                    relTileHeight = (level.height % tileWidth) / tileWidth;
-                    relTileHeight = relTileHeight > 0 ? relTileHeight : 1;
-                }
-                ctx.drawImage(image, tile[0], tile[1], relTileWidth * tile[2], relTileHeight * tile[3], 0, 0, relTileWidth * tileWidth, relTileHeight * tileWidth)
-                if(j < Math.min(tileArea[i].length, heightInTiles)-1) {
-                    ctx.translate(0, tileWidth);
-                } else {
-                    ctx.translate(tileWidth, -tileWidth * j);
-                }   
-            }
-        }
-        ctx.restore()
-
-        drawFence(0, ctx, level)
-        drawFence(1, ctx, level)
-
-    } else {
-        drawFence(1, ctx, level, true)
-    }
-
-    return offscreen;
-}
-
-const shadowrize = (image, anim) => {
-    const tileWidth = anim.tileSpace
-    const tileHeight = anim.tileSpace
-    const scale = 2
-    const w = image.width / tileWidth
-    const h = image.height / tileHeight
-    const offscreen = new OffscreenCanvas(image.width*scale, image.height*scale);
-    const ctx = offscreen.getContext("2d");
-    ctx.shadowColor = "rgba(0,0,0,0.5)"
-    ctx.shadowOffsetX = -image.width*10;
-    ctx.shadowOffsetY = -anim.tileWidth*0.5;
-    ctx.shadowBlur = 2;
-    
-    for (var x = 0; x < w;x++) {
-        for (var y=0; y <h;y++) {
-            ctx.save()
-            ctx.translate(x*tileWidth*scale+image.width*10+tileWidth*scale*0.6,y*tileHeight*scale+tileHeight*scale*0.5)
-            ctx.transform(1, 0.1, -0.8, 1, 0, 0);
-            ctx.drawImage(image, x*tileWidth,y*tileHeight, tileWidth, tileHeight, 0,0, tileWidth, tileHeight)
-            ctx.restore()
-        }
-    }
-    
-    animOut = JSON.parse(JSON.stringify(anim))
-    animOut.width*=scale
-    animOut.height*=scale
-    animOut.down.a = animOut.down.a.map(array => array.map(a => a*scale))
-    animOut.up.a = animOut.up.a.map(array => array.map(a => a*scale))
-    animOut.left.a = animOut.left.a.map(array => array.map(a => a*scale))
-    animOut.right.a = animOut.right.a.map(array => array.map(a => a*scale))
-    animOut.default.a = animOut.default.a.map(array => array.map(a => a*scale))
-
-    return [offscreen,animOut];
-}
-
-const drawFence = (layer, ctx, level, shadow) => {
-
-    ctx.save()
-    ctx.lineWidth = level.padding;
-    var y = 0
-    var x = 0
-    
-    if (!shadow) {
-        ctx.shadowColor = "rgba(0,0,0,0.5)"
-        ctx.shadowOffsetX = 12;
-        ctx.shadowOffsetY = -12;
-        ctx.shadowBlur = 8;
-    } else {
-
-        ctx.fillStyle = "rgba(150,150,150,1.0)";
-    }
-
-    if (layer === 1) {
-        ctx.fillRect(x,level.padding*2, level.padding*0.5, level.height-level.padding)
-        ctx.fillRect(x+level.width-level.padding*0.5,level.padding*2, level.padding*0.5, level.height-level.padding)
-        y = level.height-level.padding-level.padding
-    } else {
-        ctx.fillRect(x,0, level.padding, level.padding*2)
-        ctx.fillRect(x+level.width-level.padding*0.5,0, level.padding*0.5, level.padding*2)
-        y = 0
-    }
-
-    ctx.fillRect(x,y,level.width,level.padding*0.6)
-    ctx.fillStyle = "rgba(120,120,120,1.0)";
-    ctx.fillRect(x+level.padding*0.5,y+level.padding*0.8,level.width-level.padding,level.padding*0.6)
-    ctx.fillStyle = "rgba(90,90,90,1.0)";
-    ctx.fillRect(x+level.padding*0.5,y+level.padding*1.6,level.width-level.padding,level.padding*0.6)
-
-    
-
-    ctx.restore()
-
-    if (!shadow) {
-        drawFence(layer,ctx,level,true)
-    }
-
-}
-
 var fillTextWithStroke = (ctx, text,x,y) => {
     ctx.fillText(text,x,y)
     ctx.strokeText(text,x,y)
-}
-
-var fillTextWithStrokeMultiline = (ctx, text, x,y, fontHeight) => {
-    text?.split("\n").forEach(t => {
-        fillTextWithStroke(ctx, t, x,y)
-        ctx.translate(0,fontHeight*1.1)
-    })
-}
-
-var fillTextMultiline = (ctx, text, x,y, fontHeight) => {
-    text?.split("\n").forEach(t => {
-        ctx.fillText(t,x,y)
-        ctx.translate(0,fontHeight*1.1)
-    })
 }
 
 function toggleMusic() {
@@ -889,38 +693,4 @@ function addFartCloud(x,y,playerId, size=1) {
         attackDistance: 64,
         lifetime: 0
     })
-}
-
-
-function drawButton(btn) {
-    ctx.save()
-    ctx.translate(btn.x,btn.y)
-    ctx.save()
-        // ctx.translate(level.width*(0.04+0.52),level.height*0.3)
-        ctx.beginPath();
-
-        ctx.fillStyle = "rgba(87,65,47,0.5)";
-        ctx.fillRect(0,0, btn.width, btn.height)
-        ctx.fillStyle = "rgba(120,120,120,0.5)";
-        ctx.globalCompositeOperation = "color-burn";
-       // ctx.fillStyle = "rgba(255,255,255,0.2)";
-        ctx.fillRect(0,0, btn.width*btn.loadingPercentage, btn.height)
-        ctx.closePath()
-        ctx.fill();
-    ctx.restore()
-
-    if (btn.text) {
-        var fontHeight = level.width*0.017  
-        ctx.font = fontHeight+"px Arial";
-        ctx.fillStyle = "white";
-        ctx.strokeStyle = "white";
-        ctx.textAlign = "center";
-        ctx.textBaseline='middle'
-        ctx.lineWidth = 0
-        ctx.font = level.width*0.02+"px Arial";
-        ctx.translate(btn.width*0.5,btn.height*0.5)
-        ctx.translate(0,-fontHeight*Math.max(0,btn.text.split('\n').length-1)*0.5)
-        //fillTextMultiline(ctx,btn.text,0,0,fontHeight) 
-    }
-    ctx.restore()
 }

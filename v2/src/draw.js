@@ -10,167 +10,23 @@ function draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, layer) {
     ctx.translate(level.offsetX, level.offsetY)
     ctx.scale(level.scale, level.scale)
     //ctx.transform(level.scale, 0, 0, level.scale, level.offsetX, level.offsetY)
-
-    if (layer === 0) {
-        ctx.drawImage(tileMap,-level.padding, -level.padding) //, level.width+level.pading*2, level.height+level.pading*2, -level.pading, -level.pading, level.width+level.pading*2, level.height+level.pading*2);
-    }
-
-    if (!isGameStarted) {
-        ctx.save()
-        
-        ctx.save()
-        ctx.translate(level.width*0.05,level.height*0.05)
-        ctx.beginPath();
-        ctx.fillStyle = "rgba(120,120,120,0.5)";
-        ctx.globalCompositeOperation = "destination-out";
-        ctx.fillRect(0,0, level.width*0.4, level.height*0.42)
-        ctx.closePath()
-        ctx.fill();
-        ctx.restore()
-
-        var fontHeight = level.width*0.017  
-        ctx.font = fontHeight+"px Arial";
-        ctx.fillStyle = "white";
-        ctx.strokeStyle = "white";
-        ctx.textAlign = "center";
-        ctx.textBaseline='top'
-        ctx.lineWidth = 0
-        ctx.translate(level.width*0.22+fontHeight,level.height*0.1)
-        var txt = 'HOW TO PLAY\n\nJoin by pressing any key on your Gamepad' 
-                  + '\nor WASDT(Key1) or ' + String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0(RSHIFT)\nor mouse or touch' 
-                  + '\n\n1.) Find your player 2.) Fart to knock out others\n3.) Stay hidden 4.) Eat to power up your farts' 
-                  + '\n\nBe the last baby standing!'
-        
-                 
-        fillTextMultiline(ctx, txt,0,0, fontHeight)
-        ctx.restore()
-
-
-        if (figuresPlayer.length > 0) {
-            var text = 'Walk here to\nSTART\n\n'+btnStart.playersNear.length + '/' + btnStart.playersPossible.length + ' players'
-            if (btnStart.playersPossible.length === 1) {
-                text = 'Walk here to\nSTART\n\nmin 2 players\nor 1 player +1 bot'
-            } else if (btnStart.playersPossible.length > 1 && btnStart.playersNear.length === btnStart.playersPossible.length ) {
-                text ='Prepare your\nbellies'
-            } else if (btnStart.playersNear.length > 0) {
-                text = 'Walk here to\nSTART\n\n' + btnStart.playersNear.length + '/' + btnStart.playersPossible.length + ' players'
-            } 
-            btnStart.text = text
-
-            if (isMusicMuted()) {
-                btnMute.text = 'Music: OFF'
-            } else {
-                btnMute.text = 'Music: ON'
-            } 
-            btnBots.text = 'Bots: ' + getBotCount()
-            btnsLobby.forEach(btn => {
-                drawButton(btn)
-            })
-        }
-    }
     
     figuresSorted.forEach(f => {
         
         let deg = rad2limiteddeg(f.angle)
         let sprite = null
-        let spriteShadow = null
-
-        if (f.imageAnim) {
-            let frame
-            let frameShadow
-            if (f.frame) {
-                frame = f.frame
-            } else if (f.imageAnim.hasDirections) {
-                if (distanceAngles(deg, 0) < 45) {
-                    frame = f.imageAnim.right.a
-                    frameShadow = f.imageShadowAnim && f.imageShadowAnim.right.a
-                } else if (distanceAngles(deg, 90) <= 45){
-                    frame = f.imageAnim.down.a
-                    frameShadow = f.imageShadowAnim && f.imageShadowAnim.down.a
-                } else if (distanceAngles(deg, 180) < 45){
-                    frame = f.imageAnim.left.a
-                    frameShadow = f.imageShadowAnim && f.imageShadowAnim.left.a
-                } else {
-                    frame = f.imageAnim.up.a
-                    frameShadow = f.imageShadowAnim && f.imageShadowAnim.up.a
-                }
-            } else {
-                frame = f.imageAnim.default.a
-                frameShadow = f.imageShadowAnim && f.imageShadowAnim.default.a
-            }
-
-            let indexFrame = 0;
-            if (f.imageAnim?.animDefaultSpeed > 0 || f.speed > 0) {
-                indexFrame = Math.floor(f.anim) % frame.length;
-            }
-
-            sprite = frame[indexFrame]
-            spriteShadow = frameShadow && frameShadow[indexFrame]
-        }
         
-     
-
         ctx.save()
         ctx.translate(f.x, f.y)
 
-        if (layer === 0) {
-            if (f.isDead) {
-                ctx.rotate(deg2rad(90))
-                ctx.scale(f.scale,f.scale)
-                ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
-            } else if (f.imageShadow) {
-                ctx.scale(f.scale, f.scale)
-                ctx.drawImage(f.imageShadow, spriteShadow[0], spriteShadow[1], spriteShadow[2], spriteShadow[3], 0 - f.imageShadowAnim.width*0.5, 0 - f.imageShadowAnim.height*0.5, f.imageShadowAnim.width, f.imageShadowAnim.height)
-            }
-        } else {
-            if (f.type === 'bean') {
-                // bean image
-                let durationLastAttack = dtProcessed-f.lastAttackTime
-                if (f.lastAttackTime && durationLastAttack < f.attackDuration) {
-                    const perc = durationLastAttack/f.attackDuration
-                    ctx.scale(1.0 - 0.2*Math.sin(perc*Math.PI), 1.0 - 0.2*Math.sin(perc*Math.PI))
-                } else {
-                    ctx.scale(1.0, 1.0)
+        if (!f.isDead) {
+            if (f.isAttacking) {
+                if (f.type === 'cloud') {
+                    ctx.globalCompositeOperation = "difference";
                 }
-
-                ctx.save()
-                  ctx.scale(f.scale, f.scale)
-                  ctx.lineWidth = 2
-                  ctx.strokeStyle = 'black'
-                  //ctx.transform(1, 1, -0.7, 1, 0, 0);
-                  ctx.beginPath();
-                  ctx.fillStyle = "rgba(255,255,255,1)";
-                  ctx.arc(0,0,f.attackDistance, 0, 2 * Math.PI)
-                  ctx.closePath()
-                  ctx.fill();
-                  ctx.beginPath();
-                  ctx.fillStyle = "rgba(255,255,255,1)";
-                  ctx.arc(0,0,f.attackDistance*0.8, 0, 2 * Math.PI)
-                  ctx.closePath()
-                  ctx.fill();
-                  ctx.stroke()
-                ctx.restore()
-                ctx.scale(0.6*f.scale, 0.6*f.scale)
-                ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
-            } else if (!f.isDead) {
-                if (f.isAttacking) {
-                    if (f.type == 'fighter') {
-                        if (distanceAngles(deg, 0) < 45) {
-                            ctx.rotate(deg2rad(20))
-                        } else if (distanceAngles(deg, 90) <= 45){
-                            ctx.rotate(deg2rad(-20))
-                        } else if (distanceAngles(deg, 180) < 45){
-                            ctx.rotate(deg2rad(-20))
-                        } else {
-                            ctx.rotate(deg2rad(20))
-                        }
-                    } else if (f.type === 'cloud') {
-                        ctx.globalCompositeOperation = "difference";
-                    }
-                } 
-                ctx.scale( f.scale, f.scale)
-                ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
-            }
+            } 
+            ctx.scale( f.scale, f.scale)
+            ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
         }
         ctx.restore()  
        
@@ -212,10 +68,6 @@ function draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, layer) {
             }
         }
     })
-
-    if (layer === 1) {
-        ctx.drawImage(tileMap2,-level.padding, -level.padding) //, level.width+level.pading*2, level.height+level.pading*2, -level.pading, -level.pading, level.width+level.pading*2, level.height+level.pading*2);
-    }
 
     if (layer === 1) {
         const playerFiguresSortedByNewPoints = figuresPlayer.toSorted((f1,f2) => (f1.points-f1.oldPoints) - (f2.points-f2.oldPoints));
@@ -322,29 +174,6 @@ function draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, layer) {
     
   
     }
-
-
-    if (layer === 1) {
-        ctx.save()
-        ctx.font = level.width*0.02+"px Arial";
-        ctx.fillStyle = "white"//rgba(139,69,19,0.4)";
-        //ctx.strokeStyle = "white";
-        ctx.textAlign = "center";
-        ctx.textBaseline='bottom'
-        ctx.lineWidth = 0
-        ctx.translate(0.5*level.width,-level.width*0.005)
-        ctx.fillText('STEALTHY STINKERS',0,0)
-        ctx.translate(0.5*level.width,0)
-        //ctx.strokeStyle = "white";
-        ctx.fillStyle = "white";
-        ctx.textAlign = "right";
-        ctx.lineWidth = 0
-        ctx.font = level.width*0.012+"px Arial";
-        ctx.fillText('made by TORSTEN STELLJES & ALEXANDER THURN',0,0)
-        ctx.restore()
-    }
-    
-    
 
     ctx.restore()
 

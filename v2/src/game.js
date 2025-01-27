@@ -36,7 +36,7 @@ var isGameStarted = false, restartGame = false, newPlayerIds = new Set(), newPla
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figuresV2 = []
-var figures = [], maxPlayerFigures = 32, pointsToWin = 3, deadDuration = 5000, beanAttackDuration = 800, fartGrowDuration = 2000
+var figures = [], maxPlayerFigures = 32, pointsToWin = 1, deadDuration = 5000, beanAttackDuration = 800, fartGrowDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = {}
@@ -57,15 +57,6 @@ var playerImageAnim = {
     left: {a: [[0,32*3,31,31], [32*1,32*3,31,31], [32*2,32*3,31,31], [32*3,32*3,31,31]]},
     default: {a: [[0,0,31,31]]}
 }
-
-var playerShadowImage
-var playerImageShadowAnim
-loadPromises.push(new Promise((resolve, reject) => {
-    playerImage.onload = () => {
-        [playerShadowImage, playerImageShadowAnim] = shadowrize(playerImage,playerImageAnim)
-        resolve()
-    }
-}))
 
 var imageArrow = new Image()
 imageArrow.src = '../gfx/arrow.png'
@@ -394,8 +385,6 @@ document.addEventListener("DOMContentLoaded", function(event){
 
     Promise.all(loadPromises).then(() => {
         //playAudioPool(soundAttackPool, 0);
-        tileMap = tileMapFunc(texture,0);
-        tileMap2 = tileMapFunc(texture,1)
         gameInit(true)
         window.requestAnimationFrame(gameLoop);
     })*/
