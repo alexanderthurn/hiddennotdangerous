@@ -496,7 +496,7 @@ const addWinningCeremony = app => {
                 width: 6,
             }
         }
-    });
+    })
     winnerText.anchor.set(0.5)
     winnerText.x = level.width/2
     winnerText.y = level.height/2
@@ -686,6 +686,45 @@ const addFigures = (app, spritesheet) => {
             zIndexBase: app.stage.height 
         })
     }
+}
+
+const animatePauseOverlay = overlay => {
+    overlay.getChildAt(1).text = isGameStarted ? 'Pause' : 'Welcome to Knirps und Knall'
+    overlay.visible = !windowHasFocus
+}
+
+const createPauseOverlay = app => {
+    const overlay = new PIXI.Container();
+
+    const background = new PIXI.Graphics().rect(-level.offsetX, -level.offsetY + app.screen.height/4, app.screen.width, app.screen.height/2)
+    .fill({alpha: 0.9, color: 0x57412f})
+    background.scale = 1/level.scale
+
+    const text = new PIXI.Text({
+        style: {
+            fontSize: 0.05*app.screen.width,
+            fill: 0xFFFFFF
+        }
+    });
+    text.anchor.set(0.5)
+    text.x = level.width/2
+    text.y = level.height/2
+
+    overlay.addChild(background)
+    overlay.addChild(text)
+
+    app.ticker.add(() => animatePauseOverlay(overlay))
+    return overlay
+}
+
+const addOverlay = app => {
+    const overlay = new PIXI.Container();
+    overlay.zIndex = 4*level.height
+
+    const pauseOverlay = createPauseOverlay(app)
+
+    overlay.addChild(pauseOverlay)
+    app.stage.addChild(overlay)
 }
 
 var fillTextWithStroke = (ctx, text,x,y) => {
