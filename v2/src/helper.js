@@ -204,31 +204,6 @@ const addLevelContainer = app => {
     app.stage.addChild(levelContainer)
 }
 
-const addFence = (app, level) => {
-    const horizontalFence = new PIXI.GraphicsContext().rect(0,0,level.width,level.padding*0.6)
-    .fill({color: 0x969696})
-    .rect(level.padding*0.5,level.padding*0.8,level.width-level.padding,level.padding*0.6)
-    .fill({color: 0x787878})
-    .rect(level.padding*0.5,level.padding*1.6,level.width-level.padding,level.padding*0.6)
-    .fill({color: 0x5A5A5A})
-
-    const upperFence = new PIXI.Graphics(horizontalFence)
-    .rect(0,0, level.padding*0.5, level.padding*2)
-    .rect(level.width-level.padding*0.5,0, level.padding*0.5, level.padding*2)
-    .fill({color: 0x969696})
-    app.stage.getChildAt(0).addChild(upperFence)
-
-    const offsetY = level.height-2*level.padding
-    const lowerFence = new PIXI.Graphics(horizontalFence.clone())
-    .rect(0,level.padding*2-offsetY, level.padding*0.5, level.height-level.padding)
-    .rect(level.width-level.padding*0.5,level.padding*2-offsetY, level.padding*0.5, level.height-level.padding)
-    .fill({color: 0x969696})
-
-    lowerFence.y = offsetY
-    lowerFence.zIndex = level.height
-    app.stage.getChildAt(0).addChild(lowerFence)
-}
-
 const addHeadline = app => {
     const title = new PIXI.Text({
         text: 'KNIRPS UND KNALL',
@@ -612,6 +587,35 @@ createFigureAtlasData = () => {
     return atlasData
 }
 
+
+const createHorizontalFence = (app, level) => {
+    return new PIXI.GraphicsContext().rect(0,0,level.width,level.padding*0.6)
+    .fill({color: 0x969696})
+    .rect(level.padding*0.5,level.padding*0.8,level.width-level.padding,level.padding*0.6)
+    .fill({color: 0x787878})
+    .rect(level.padding*0.5,level.padding*1.6,level.width-level.padding,level.padding*0.6)
+    .fill({color: 0x5A5A5A})
+}
+
+const createUpperFence = (app, level) => {
+    return new PIXI.Graphics(createHorizontalFence(app,level))
+    .rect(0,0, level.padding*0.5, level.padding*2)
+    .rect(level.width-level.padding*0.5,0, level.padding*0.5, level.padding*2)
+    .fill({color: 0x969696})
+}
+
+const createLowerFence = (app, level) => {
+    const offsetY = level.height-2*level.padding
+    const lowerFence = new PIXI.Graphics(createHorizontalFence(app,level))
+    .rect(0,level.padding*2-offsetY, level.padding*0.5, level.height-level.padding)
+    .rect(level.width-level.padding*0.5,level.padding*2-offsetY, level.padding*0.5, level.height-level.padding)
+    .fill({color: 0x969696})
+
+    lowerFence.y = offsetY
+    lowerFence.zIndex = level.height
+    return lowerFence
+}
+
 const animateFigure = (figure, spritesheet) => {
     const deg = rad2limiteddeg(figure.direction)
     const sprite = figure.getChildAt(0)
@@ -661,7 +665,7 @@ const animateFigure = (figure, spritesheet) => {
     figure.zIndex = figure.y
 }
 
-const addFigure = (app, spritesheet, props) => {
+const createFigure = (app, spritesheet, props) => {
     let figure = new PIXI.Container();
     figure = Object.assign(figure, props)
 
@@ -673,13 +677,18 @@ const addFigure = (app, spritesheet, props) => {
 
     figure.addChild(sprite)
     figures.push(figure)
-    app.stage.getChildAt(0).addChild(figure)
     app.ticker.add(() => animateFigure(figure, spritesheet))
+    return figure
 }
 
-const addFigures = (app, spritesheet) => {
+const addFigureContainer = (app, spritesheet) => {
+    let figureContainer = new PIXI.Container()
+
+    const upperFence = createUpperFence(app, level)
+    figureContainer.addChild(upperFence)
+
     for (var i = 0; i < maxPlayerFigures; i++) {
-        addFigure(app, spritesheet, {
+        const figure = createFigure(app, spritesheet, {
             maxBreakDuration: 5000,
             maxSpeed: 0.08,
             index: i,
@@ -691,7 +700,12 @@ const addFigures = (app, spritesheet) => {
             type: 'fighter',
             zIndexBase: app.stage.getChildAt(0).height 
         })
+        figureContainer.addChild(figure)
     }
+    const lowerFence = createLowerFence(app, level)
+    figureContainer.addChild(lowerFence)
+
+    app.stage.getChildAt(0).addChild(figureContainer)
 }
 
 const animatePauseOverlay = overlay => {
@@ -742,7 +756,7 @@ const createFpsText = app => {
     return fpsText
 }
 
-const addOverlay = app => {
+const addOverlayContainer = app => {
     const overlay = new PIXI.Container();
     overlay.zIndex = 4*level.height
 

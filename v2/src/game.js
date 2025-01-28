@@ -313,13 +313,12 @@ var app;
         adjustStageToScreen(app, level)
 
         addGrass(app, Object.keys(grassAtlasData.frames), grassSpritesheet);
-        addFence(app, level);
         addHeadline(app);
         addMenuItems(app);
         addFoods(app, foodSpritesheet);
-        addFigures(app, figureSpritesheet);
+        addFigureContainer(app, figureSpritesheet);
         addWinningCeremony(app);
-        addOverlay(app);
+        addOverlayContainer(app);
         roundInit(true);
         window.requestAnimationFrame(gameLoop);
     }
