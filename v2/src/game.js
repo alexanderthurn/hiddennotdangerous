@@ -355,6 +355,7 @@ var app;
         await figureSpritesheet.parse();
         await grassSpritesheet.parse();
 
+        addLevelContainer(app)
         adjustStageToScreen(app, level)
 
         addGrass(app, Object.keys(grassAtlasData.frames), grassSpritesheet);

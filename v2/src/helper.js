@@ -173,12 +173,12 @@ function adjustStageToScreen(app, level) {
     level.shortestPathNotBean5 = 2*0.6*level.height+2*0.3*Math.hypot(level.height, level.width);
     level.shortestPathBean5 = 2*0.6*level.height+0.6*level.width+0.3*Math.hypot(level.height, level.width);
 
-    app.stage.width = level.width
-    app.stage.height = level.height
-    app.stage.scale.x = level.scale
-    app.stage.scale.y = level.scale
-    app.stage.x = level.offsetX;
-    app.stage.y = level.offsetY;
+    app.stage.getChildAt(0).width = level.width
+    app.stage.getChildAt(0).height = level.height
+    app.stage.getChildAt(0).scale.x = level.scale
+    app.stage.getChildAt(0).scale.y = level.scale
+    app.stage.getChildAt(0).x = level.offsetX;
+    app.stage.getChildAt(0).y = level.offsetY;
 }
 
 function getRandomXY(level) {
@@ -198,6 +198,12 @@ function isInRect(x,y,rx,ry,rw,rh) {
     return x >= rx && x <= rx+rw && y >= ry && y < ry+rh
 }
 
+const addLevelContainer = app => {
+    const levelContainer = new PIXI.Container()
+
+    app.stage.addChild(levelContainer)
+}
+
 const addFence = (app, level) => {
     const horizontalFence = new PIXI.GraphicsContext().rect(0,0,level.width,level.padding*0.6)
     .fill({color: 0x969696})
@@ -210,7 +216,7 @@ const addFence = (app, level) => {
     .rect(0,0, level.padding*0.5, level.padding*2)
     .rect(level.width-level.padding*0.5,0, level.padding*0.5, level.padding*2)
     .fill({color: 0x969696})
-    app.stage.addChild(upperFence)
+    app.stage.getChildAt(0).addChild(upperFence)
 
     const offsetY = level.height-2*level.padding
     const lowerFence = new PIXI.Graphics(horizontalFence.clone())
@@ -220,7 +226,7 @@ const addFence = (app, level) => {
 
     lowerFence.y = offsetY
     lowerFence.zIndex = level.height
-    app.stage.addChild(lowerFence)
+    app.stage.getChildAt(0).addChild(lowerFence)
 }
 
 const addHeadline = app => {
@@ -236,7 +242,7 @@ const addHeadline = app => {
     title.x = level.width/2;
     title.y = -level.width*0.005;
 
-    app.stage.addChild(title);
+    app.stage.getChildAt(0).addChild(title);
 
     const authors = new PIXI.Text({
         text: 'made by TORSTEN STELLJES & ALEXANDER THURN',
@@ -250,7 +256,7 @@ const addHeadline = app => {
     authors.x = level.width;
     authors.y = -level.width*0.005;
 
-    app.stage.addChild(authors);
+    app.stage.getChildAt(0).addChild(authors);
 }
 
 const animateButton = button => {
@@ -289,7 +295,7 @@ const addButton = (app, props) => {
     button.addChild(area)
     button.addChild(loadingBar)
     button.addChild(buttonText)
-    app.stage.addChild(button)
+    app.stage.getChildAt(0).addChild(button)
 
     app.ticker.add(() => animateButton(button))
     return button
@@ -347,7 +353,7 @@ const addMenuItems = app => {
     howToPlay.x = level.width*0.22+fontHeight;
     howToPlay.y = level.height*0.1;
 
-    app.stage.addChild(howToPlay);
+    app.stage.getChildAt(0).addChild(howToPlay);
 
     app.ticker.add(() => animateMenuItems(howToPlay))
 }
@@ -403,7 +409,7 @@ const addPlayerScore = (app, figure, player) => {
     figure.score = playerScore
     playerScore.addChild(circle)
     playerScore.addChild(text)
-    app.stage.addChild(playerScore)
+    app.stage.getChildAt(0).addChild(playerScore)
 
     app.ticker.add(() => animatePlayerScore(figure))
 }
@@ -502,7 +508,7 @@ const addWinningCeremony = app => {
     winnerText.y = level.height/2
     winnerText.zIndex = 3*level.height
 
-    app.stage.addChild(winnerText)
+    app.stage.getChildAt(0).addChild(winnerText)
 
     app.ticker.add(() => animateWinningCeremony(winnerText))
 }
@@ -532,7 +538,7 @@ const addFood = (app, texture, props) => {
     food.addChild(plate)
     food.addChild(sprite)
     figures.push(food)
-    app.stage.addChild(food)
+    app.stage.getChildAt(0).addChild(food)
 
     app.ticker.add(() => animateFood(food))
 }
@@ -566,7 +572,7 @@ const addGrass = (app, textures, spritesheet) => {
             const grass = new PIXI.Sprite(spritesheet.textures[texture])
             grass.x = i*tileWidth
             grass.y = j*tileWidth
-            app.stage.addChild(grass)
+            app.stage.getChildAt(0).addChild(grass)
         }
     }
 }
@@ -667,7 +673,7 @@ const addFigure = (app, spritesheet, props) => {
 
     figure.addChild(sprite)
     figures.push(figure)
-    app.stage.addChild(figure)
+    app.stage.getChildAt(0).addChild(figure)
     app.ticker.add(() => animateFigure(figure, spritesheet))
 }
 
@@ -683,32 +689,31 @@ const addFigures = (app, spritesheet) => {
             attackDistance: 80,
             attackAngle: 90,
             type: 'fighter',
-            zIndexBase: app.stage.height 
+            zIndexBase: app.stage.getChildAt(0).height 
         })
     }
 }
 
 const animatePauseOverlay = overlay => {
     overlay.getChildAt(1).text = isGameStarted ? 'Pause' : 'Welcome to Knirps und Knall'
-    overlay.visible = !windowHasFocus
+    //overlay.visible = !windowHasFocus
 }
 
 const createPauseOverlay = app => {
     const overlay = new PIXI.Container();
 
-    const background = new PIXI.Graphics().rect(-level.offsetX, -level.offsetY + app.screen.height/4, app.screen.width, app.screen.height/2)
+    const background = new PIXI.Graphics().rect(0, app.screen.height/4, app.screen.width, app.screen.height/2)
     .fill({alpha: 0.9, color: 0x57412f})
-    background.scale = 1/level.scale
 
     const text = new PIXI.Text({
         style: {
             fontSize: 0.05*app.screen.width,
             fill: 0xFFFFFF
         }
-    });
+    })
     text.anchor.set(0.5)
-    text.x = level.width/2
-    text.y = level.height/2
+    text.x = app.screen.width/2
+    text.y = app.screen.height/2
 
     overlay.addChild(background)
     overlay.addChild(text)
@@ -722,8 +727,19 @@ const addOverlay = app => {
     overlay.zIndex = 4*level.height
 
     const pauseOverlay = createPauseOverlay(app)
+    const fpsText = new PIXI.Text({
+        text: '10FPS',
+        style: {
+            fontSize: 16,
+            fill: 0xFFFFFF
+        }
+    })
+    fpsText.anchor.set(1,0)
+    fpsText.x = app.screen.width
+    fpsText.y = 0
 
     overlay.addChild(pauseOverlay)
+    overlay.addChild(fpsText)
     app.stage.addChild(overlay)
 }
 
