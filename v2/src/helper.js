@@ -696,7 +696,7 @@ const addFigures = (app, spritesheet) => {
 
 const animatePauseOverlay = overlay => {
     overlay.getChildAt(1).text = isGameStarted ? 'Pause' : 'Welcome to Knirps und Knall'
-    //overlay.visible = !windowHasFocus
+    overlay.visible = !windowHasFocus
 }
 
 const createPauseOverlay = app => {
@@ -722,13 +722,13 @@ const createPauseOverlay = app => {
     return overlay
 }
 
-const addOverlay = app => {
-    const overlay = new PIXI.Container();
-    overlay.zIndex = 4*level.height
+const animateFpsText = fpsText => {
+    fpsText.text = fps + ' FPS'
+    fpsText.visible = windowHasFocus
+}
 
-    const pauseOverlay = createPauseOverlay(app)
+const createFpsText = app => {
     const fpsText = new PIXI.Text({
-        text: '10FPS',
         style: {
             fontSize: 16,
             fill: 0xFFFFFF
@@ -737,6 +737,17 @@ const addOverlay = app => {
     fpsText.anchor.set(1,0)
     fpsText.x = app.screen.width
     fpsText.y = 0
+
+    app.ticker.add(() => animateFpsText(fpsText))
+    return fpsText
+}
+
+const addOverlay = app => {
+    const overlay = new PIXI.Container();
+    overlay.zIndex = 4*level.height
+
+    const pauseOverlay = createPauseOverlay(app)
+    const fpsText = createFpsText(app)
 
     overlay.addChild(pauseOverlay)
     overlay.addChild(fpsText)
