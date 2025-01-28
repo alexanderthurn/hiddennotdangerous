@@ -50,6 +50,7 @@ const rad2deg = rad => (rad * 180.0) / Math.PI;
 const rad2limiteddeg = rad => mod(rad2deg(rad),360);
 
 const distanceAngles = (a1, a2) => {let d = mod(Math.abs(a1 - a2),360); return Math.min(d, 360-d)};
+const distanceAngles2 = (a1, a2) => Math.abs(a1 - a2) % 360;
 
 const getNextDiscreteAngle = (angle, numberDiscreteAngles) => deg2rad(Math.round(rad2deg(angle)*numberDiscreteAngles/360)*360/numberDiscreteAngles);
 
@@ -410,15 +411,18 @@ const addPlayerScore = (app, figure, player) => {
 
 const figureIsBot = figure => figure.playerId?.includes('b')
 
-const animateWinningCeremony = () => {
-    const figuresPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
-    const playerFiguresSortedByNewPoints = figuresPlayer.toSorted((f1,f2) => (f1.score.points-f1.score.oldPoints) - (f2.score.points-f2.score.oldPoints))
+const animateWinningCeremony = winnerText => {
+    const playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
+    const playerFiguresSortedByNewPoints = playerFigures.toSorted((f1,f2) => (f1.score.points-f1.score.oldPoints) - (f2.score.points-f2.score.oldPoints))
+    const lastFinalWinnerIndex = playerFigures.findIndex(f => f.playerId === lastFinalWinnerPlayerId)
+    const lastFinalWinnerFigure = playerFigures[lastFinalWinnerIndex]
+    const lastFinalWinnerNumber = lastFinalWinnerIndex+1
+    const dt3 = dtProcessed - (lastRoundEndThen + playerFigures.length*moveScoreToPlayerDuration);
+    const dt4 = dtProcessed - (lastRoundEndThen + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
 
     playerFiguresSortedByNewPoints.forEach((f, i) => {
         const dt2 = dtProcessed - (lastRoundEndThen + i*moveScoreToPlayerDuration);
-        const dt3 = dtProcessed - (lastRoundEndThen + figuresPlayer.length*moveScoreToPlayerDuration);
-        const dt4 = dtProcessed - (lastRoundEndThen + figuresPlayer.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
-        let fillStyle = 'rgba(0, 0, 0, 0.5)';
+        
         let points = f.points;
 
         if (lastRoundEndThen && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
@@ -428,7 +432,6 @@ const animateWinningCeremony = () => {
             f.score.x = lpi*f.score.xDefault + lp*f.x
             f.score.y = lpi*f.score.yDefault + lp*f.y
 
-            console.log(lastFinalWinnerPlayerId, f.playerId)
             if (lastFinalWinnerPlayerId === f.playerId) {
                 f.score.scale = (lpi + 2*lp)*(lpi + 2*lp)
             } else {
@@ -468,6 +471,41 @@ const animateWinningCeremony = () => {
             }
         }
     })
+    
+    if (!!lastFinalWinnerNumber && dt3 >= 0 && dt3 < showFinalWinnerDuration) {
+        winnerText.visible = true
+        if (figureIsBot(lastFinalWinnerFigure)) {
+            winnerText.text = `Player ${lastFinalWinnerNumber} (Bot) wins`
+        } else {
+            winnerText.text = `Player ${lastFinalWinnerNumber} wins`
+        }
+    } else {
+        winnerText.visible = false
+    }
+}
+
+const addWinningCeremony = app => {
+    let winnerText = new PIXI.Text({
+        style: {
+            fontSize: level.width*0.1,
+            fill: {
+                alpha: 0.8,
+                color: 0x8B4513
+            },
+            stroke: {
+                color: 0xFFFFFF,
+                width: 6,
+            }
+        }
+    });
+    winnerText.anchor.set(0.5)
+    winnerText.x = level.width/2
+    winnerText.y = level.height/2
+    winnerText.zIndex = 3*level.height
+
+    app.stage.addChild(winnerText)
+
+    app.ticker.add(() => animateWinningCeremony(winnerText))
 }
 
 const animateFood = figure => {
