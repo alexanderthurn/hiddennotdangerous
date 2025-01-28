@@ -1,5 +1,3 @@
-
-
 var laststep = 0, logit;
 var loadPromises = []
 var canvas = document.body;
@@ -40,23 +38,6 @@ var figures = [], maxPlayerFigures = 32, pointsToWin = 1, deadDuration = 5000, b
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = {}
-var tileMap, tileMap2;
-var playerImage = new Image()
-playerImage.src = '../gfx/character_base_32x32.png' // '../gfx/character_base_topview_32x32.png' beuelerjong
-var playerImageAnim = {
-    width: 62,
-    height: 62,
-    tileWidth: 31,
-    tileHeight: 31,
-    tileSpace: 32,
-    hasDirections: true,
-    animDefaultSpeed: 0,
-    down: {a: [[0,0,31,31], [32*1,0,31,31], [32*2,0,31,31], [32*3,0,31,31]]},
-    up: {a: [[0,32*1,31,31], [32*1,32*1,31,31], [32*2,32*1,31,31], [32*3,32*1,31,31]]},
-    right: {a: [[0,32*2,31,31], [32*1,32*2,31,31], [32*2,32*2,31,31], [32*3,32*2,31,31]]},
-    left: {a: [[0,32*3,31,31], [32*1,32*3,31,31], [32*2,32*3,31,31], [32*3,32*3,31,31]]},
-    default: {a: [[0,0,31,31]]}
-}
 
 var imageArrow = new Image()
 imageArrow.src = '../gfx/arrow.png'
@@ -71,13 +52,6 @@ cloudImage.src = '../gfx/fart.png'
 loadPromises.push(new Promise((resolve, reject) => {
     cloudImage.onload = () => {
         resolve()
-    }
-}))
-var texture = new Image()
-texture.src = '../gfx/kacheln.png'
-loadPromises.push(new Promise((resolve, reject) => {
-    texture.onload = () => {
-        resolve();
     }
 }))
 
@@ -100,29 +74,9 @@ cloudImageAnim = {
     animDefaultSpeed: 0.1,
     default: {a: [[0,0,64,64],[64,0,64,64],[128,0,64,64],[0,64,64,64],[64,64,64,64],[128,64,64,64],[0,128,64,64],[64,128,64,64],[128,128,64,64]]}
 }
-var foodImage = new Image()
-foodImage.src = '../gfx/food-OCAL.png'
-foodImageAnim = {
-    hasDirections: false,
-    width: 64,
-    height: 64,
-    animDefaultSpeed: 0,
-    down: {a: [[192,64,32,32]]},
-    up: {a: [[64,64,32,32]]},
-    left: {a: [[256,32,32,32]]},
-    right: {a: [[32,192,32,32]]},
-    default: {a: [[224,256,32,32]]}
-}
-
 
 let tileArea = []
-const textureTiles = {
-    flowers: [120*2, 0, 120, 120],
-    grass: [120*1, 0, 120, 120],
-    mushrooms: [120*0, 0, 120, 120]
-}
 const tileWidth = 120;
-const textureTilesList = Object.values(textureTiles);
 const audio = {
     attack: {title: '../sfx/sound2.mp3', currentTime: 0.15},
     attack2: {title: '../sfx/sound1.mp3', currentTime: 0.15},

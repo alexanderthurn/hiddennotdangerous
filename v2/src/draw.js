@@ -71,29 +71,6 @@ function draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, layer) {
 
     ctx.restore()
 
-    if (layer === 1) {
-        ctx.save()
-        ctx.font = "16px Arial";
-        ctx.fillStyle = "white";
-        ctx.textBaseline='top'
-        ctx.textAlign = "right";
-        if (windowHasFocus) {
-            ctx.fillText(fps + " FPS", canvas.width, 0);
-        } else {
-            
-        ctx.fillStyle = "rgba(87,65,47,0.9)";
-            ctx.fillRect(canvas.width*0.0, canvas.height*0.25, canvas.width*1, canvas.height*0.5)
-            ctx.fillStyle = "white";
-            ctx.textBaseline='middle'
-            ctx.textAlign = "center";
-            ctx.font = canvas.width*0.05 + "px Arial";
-            ctx.fillText(isGameStarted ? 'Pause' : 'Welcome to Stealthy Stinkers', canvas.width*0.5, canvas.height*0.5);
-        }
-        
-      ctx.restore()
-    }
-
-
     if (layer === 1 && showDebug) {
 
       ctx.save()
