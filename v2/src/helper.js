@@ -339,8 +339,7 @@ const addMenuItems = app => {
         style: {
             align: 'center',
             fontSize: fontHeight,
-            fill: 0xFFFFFF,
-            stroke: 0xFFFFFF
+            fill: 0xFFFFFF
         }
     });
 
