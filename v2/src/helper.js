@@ -783,8 +783,7 @@ const createPlayersText = app => {
 const animateFiguresText = figuresText => {
     const text = ['Figures with player']
     figures.filter(f => f.playerId).forEach(f => {
-        text.push('playerId: ' + f.playerId + ' x: ' + Math.floor(f.x) + ' y: ' + Math.floor(f.y) + ' Beans: ' + f.beans?.sized)
-        console.log(f.beans?.size)
+        text.push('playerId: ' + f.playerId + ' x: ' + Math.floor(f.x) + ' y: ' + Math.floor(f.y) + ' Beans: ' + f.beans?.size)
     })
     figuresText.text = text.join('\n')
     figuresText.visible = showDebug
