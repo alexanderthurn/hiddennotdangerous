@@ -799,30 +799,30 @@ const createFiguresText = app => {
     return figuresText
 }
 
-const getTouchControlCircle = (x, y, radius) => new PIXI.Graphics().circle(x, y , radius).fill({alpha: 0.3, color: 0xFFFFFF})
-
 const createTouchControl = app => {
-    const touchContol = new PIXI.Container();
+    const touchControl = new PIXI.Container();
 
     let minHeightWidth = Math.min(app.screen.width, app.screen.height)
     const distanceToBorder = 0.3*minHeightWidth
     const radius = 0.18*minHeightWidth
 
-    const moveControlBackground = getTouchControlCircle(distanceToBorder, app.screen.height - distanceToBorder, radius)
-    const moveControlStick = getTouchControlCircle(distanceToBorder, app.screen.height - distanceToBorder, radius/2)
-    const attackControlBackground = getTouchControlCircle(app.screen.width - distanceToBorder, app.screen.height - distanceToBorder, radius)
+    const moveControlBackground = new PIXI.Graphics().circle(distanceToBorder, app.screen.height - distanceToBorder, radius).fill({alpha: 0.3, color: 0xFFFFFF})
+    const moveControlStick = new PIXI.Graphics().circle(distanceToBorder, app.screen.height - distanceToBorder, radius/2).fill({alpha: 0.3, color: 0xFFFFFF})
+    const attackControl = new PIXI.Graphics().circle(app.screen.width - distanceToBorder, app.screen.height - distanceToBorder, radius).fill({alpha: 0.4, color: 0xFFFFFF})
 
-    touchContol.addChild(moveControlBackground, moveControlStick, attackControlBackground)
+    touchControl.addChild(moveControlBackground, moveControlStick, attackControl)
 
     app.ticker.add(() => {
         const mp = mousePlayers.length > 0 ? mousePlayers[0] : mouses[0]
-        touchContol.visible = mp.pointerType === 'touch'
+        touchControl.visible = mp.pointerType === 'touch'
         const xy = move(0, 0, angle(0, 0, mp.xAxis, mp.yAxis), radius/2, mp.isMoving)
-        moveControlStick.x = xy.x
-        moveControlStick.y = xy.y
+        moveControlStick.x = xy.x || 0
+        moveControlStick.y = xy.y || 0
+        attackControl.alpha = mp.isAttackButtonPressed ? 1 : 0.75
+
     })
 
-    return touchContol
+    return touchControl
 }
 
 const addOverlayContainer = app => {
