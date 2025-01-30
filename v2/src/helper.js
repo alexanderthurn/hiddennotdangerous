@@ -756,15 +756,68 @@ const createFpsText = app => {
     return fpsText
 }
 
+const animatePlayersText = playersText => {
+    const text = ['Players']
+    players.forEach(p => {
+        text.push(p.playerId + ' xAxis: ' + p.xAxis.toFixed(2) + ' yAxis: ' + p.yAxis.toFixed(2) + ' Attack?: ' + p.isAttackButtonPressed)
+    })
+    playersText.text = text.join('\n')
+    playersText.visible = showDebug
+}
+
+const createPlayersText = app => {
+    const playersText = new PIXI.Text({
+        style: {
+            fontSize: 16,
+            fill: 0xFFFFFF
+        }
+    })
+    playersText.anchor.set(0,0)
+    playersText.x = 0
+    playersText.y = 0
+
+    app.ticker.add(() => animatePlayersText(playersText))
+    return playersText
+}
+
+const animateFiguresText = figuresText => {
+    const text = ['Figures with player']
+    figures.filter(f => f.playerId).forEach(f => {
+        text.push('playerId: ' + f.playerId + ' x: ' + Math.floor(f.x) + ' y: ' + Math.floor(f.y) + ' Beans: ' + f.beans?.sized)
+        console.log(f.beans?.size)
+    })
+    figuresText.text = text.join('\n')
+    figuresText.visible = showDebug
+}
+
+const createFiguresText = app => {
+    const figuresText = new PIXI.Text({
+        style: {
+            fontSize: 16,
+            fill: 0xFFFFFF
+        }
+    })
+    figuresText.anchor.set(0,1)
+    figuresText.x = 0
+    figuresText.y = app.screen.height
+
+    app.ticker.add(() => animateFiguresText(figuresText))
+    return figuresText
+}
+
 const addOverlayContainer = app => {
     const overlay = new PIXI.Container();
     overlay.zIndex = 4*level.height
 
     const pauseOverlay = createPauseOverlay(app)
     const fpsText = createFpsText(app)
+    const playersText = createPlayersText(app)
+    const figuresText = createFiguresText(app)
 
     overlay.addChild(pauseOverlay)
     overlay.addChild(fpsText)
+    overlay.addChild(playersText)
+    overlay.addChild(figuresText)
     app.stage.addChild(overlay)
 }
 
