@@ -71,38 +71,6 @@ function draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, layer) {
 
     ctx.restore()
 
-    if (layer === 1 && showDebug) {
-
-      ctx.save()
-        ctx.font = "16px serif";
-        ctx.fillStyle = "white";
-        ctx.textAlign = "left";
-        ctx.textBaseline='top'
-        
-        ctx.save()
-
-        
-
-          ctx.fillText('Players',0,0)
-          players.forEach((g,i) => {
-              ctx.translate(0,16)
-              ctx.fillText(g.playerId + " xAxis: " + g.xAxis.toFixed(2) + " yAxis: " + g.yAxis.toFixed(2) + " Attack?: " + g.isAttackButtonPressed,0,0) 
-          })
-        ctx.restore()
-    
-        ctx.save()
-          ctx.textBaseline='bottom'
-          ctx.translate(0,canvas.height)
-          figures.filter(f => f.playerId).forEach((g,i) => {
-              ctx.fillText("playerId: " + g.playerId + " x: " + Math.floor(g.x) + " y: " + Math.floor(g.y) + " Beans: " + g.beans?.size,0,0) 
-              ctx.translate(0,-16)
-          })
-          ctx.fillText('Figures with player',0,0)
-        ctx.restore()
-      ctx.restore()
-  }
-
-
   if (layer === 1) {
     var mp = mousePlayers.length > 0 ? mousePlayers[0] : mouses[0]
 

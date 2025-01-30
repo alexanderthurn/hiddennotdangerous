@@ -267,9 +267,7 @@ const addButton = (app, props) => {
     buttonText.x = width/2
     buttonText.y = height/2
 
-    button.addChild(area)
-    button.addChild(loadingBar)
-    button.addChild(buttonText)
+    button.addChild(area, loadingBar, buttonText)
     app.stage.getChildAt(0).addChild(button)
 
     app.ticker.add(() => animateButton(button))
@@ -382,8 +380,7 @@ const addPlayerScore = (app, figure, player) => {
     text.anchor.set(0.5)
 
     figure.score = playerScore
-    playerScore.addChild(circle)
-    playerScore.addChild(text)
+    playerScore.addChild(circle, text)
     app.stage.getChildAt(0).addChild(playerScore)
 
     app.ticker.add(() => animatePlayerScore(figure))
@@ -510,8 +507,7 @@ const addFood = (app, texture, props) => {
     sprite.anchor.set(0.5)
     sprite.scale = 1.2
 
-    food.addChild(plate)
-    food.addChild(sprite)
+    food.addChild(plate, sprite)
     figures.push(food)
     app.stage.getChildAt(0).addChild(food)
 
@@ -729,8 +725,7 @@ const createPauseOverlay = app => {
     text.x = app.screen.width/2
     text.y = app.screen.height/2
 
-    overlay.addChild(background)
-    overlay.addChild(text)
+    overlay.addChild(background, text)
 
     app.ticker.add(() => animatePauseOverlay(overlay))
     return overlay
@@ -804,6 +799,32 @@ const createFiguresText = app => {
     return figuresText
 }
 
+const getTouchControlCircle = (x, y, radius) => new PIXI.Graphics().circle(x, y , radius).fill({alpha: 0.3, color: 0xFFFFFF})
+
+const createTouchControl = app => {
+    const touchContol = new PIXI.Container();
+
+    let minHeightWidth = Math.min(app.screen.width, app.screen.height)
+    const distanceToBorder = 0.3*minHeightWidth
+    const radius = 0.18*minHeightWidth
+
+    const moveControlBackground = getTouchControlCircle(distanceToBorder, app.screen.height - distanceToBorder, radius)
+    const moveControlStick = getTouchControlCircle(distanceToBorder, app.screen.height - distanceToBorder, radius/2)
+    const attackControlBackground = getTouchControlCircle(app.screen.width - distanceToBorder, app.screen.height - distanceToBorder, radius)
+
+    touchContol.addChild(moveControlBackground, moveControlStick, attackControlBackground)
+
+    app.ticker.add(() => {
+        const mp = mousePlayers.length > 0 ? mousePlayers[0] : mouses[0]
+        touchContol.visible = mp.pointerType === 'touch'
+        const xy = move(0, 0, angle(0, 0, mp.xAxis, mp.yAxis), radius/2, mp.isMoving)
+        moveControlStick.x = xy.x
+        moveControlStick.y = xy.y
+    })
+
+    return touchContol
+}
+
 const addOverlayContainer = app => {
     const overlay = new PIXI.Container();
     overlay.zIndex = 4*level.height
@@ -812,11 +833,9 @@ const addOverlayContainer = app => {
     const fpsText = createFpsText(app)
     const playersText = createPlayersText(app)
     const figuresText = createFiguresText(app)
+    const touchControl = createTouchControl(app)
 
-    overlay.addChild(pauseOverlay)
-    overlay.addChild(fpsText)
-    overlay.addChild(playersText)
-    overlay.addChild(figuresText)
+    overlay.addChild(pauseOverlay, fpsText, playersText, figuresText, touchControl)
     app.stage.addChild(overlay)
 }
 
