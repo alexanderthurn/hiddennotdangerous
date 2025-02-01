@@ -700,6 +700,8 @@ const addFigureContainer = (app, spritesheet) => {
     }
     const lowerFence = createLowerFence(app, level)
     figureContainer.addChild(lowerFence)
+    const mouseControl = createMouseControl(app)
+    figureContainer.addChild(mouseControl)
 
     app.stage.getChildAt(0).addChild(figureContainer)
 }
@@ -800,7 +802,7 @@ const createFiguresText = app => {
 }
 
 const createTouchControl = app => {
-    const touchControl = new PIXI.Container();
+    const touchControl = new PIXI.Container()
 
     let minHeightWidth = Math.min(app.screen.width, app.screen.height)
     const distanceToBorder = 0.3*minHeightWidth
@@ -819,10 +821,51 @@ const createTouchControl = app => {
         moveControlStick.x = xy.x || 0
         moveControlStick.y = xy.y || 0
         attackControl.alpha = mp.isAttackButtonPressed ? 1 : 0.75
-
     })
 
     return touchControl
+}
+
+const createMouseControl = app => {
+    const mouseControl = new PIXI.Container()
+
+    mp = mousePlayers.length > 0 ? mousePlayers[0] : mouses[0]
+    const circle = new PIXI.Graphics().circle(0, 0,level.width*0.03)
+    .stroke({alpha: 0.5, color: 0xFFFFFF, width:8})
+
+    const arrow = new PIXI.Container()
+    const arrowBody = new PIXI.Graphics().rect(0, -4, 1, 8).fill({alpha: 0.5, color: 0xFFFFFF})
+    const arrowHead = new PIXI.Graphics().moveTo(0, -12).lineTo(12, 0).lineTo(0,12).fill({alpha: 0.5, color: 0xFFFFFF})
+    arrow.addChild(arrowBody, arrowHead)
+
+    const circlePointer = new PIXI.Graphics().circle(0, 0, 12)
+    .fill({alpha: 0.5, color: 0xFFFFFF})
+
+    app.ticker.add(() => {
+        const mp = mousePlayers.length > 0 ? mousePlayers[0] : mouses[0]
+        if (mp.xCenter !== undefined && mp.yCenter !== undefined) {
+            circle.x = mp.xCenter
+            circle.y = mp.yCenter
+            arrow.visible = mp.isMoving
+            if (mp.isMoving) {
+                const length = distance(mp.xCenter, mp.yCenter, mp.x, mp.y)
+                arrow.x = mp.xCenter
+                arrow.y = mp.yCenter
+                arrow.rotation = angle(mp.xCenter, mp.yCenter, mp.x, mp.y)
+                arrow.getChildAt(0).width = length-12
+                arrow.getChildAt(1).x = length-12
+            }
+        }
+        circlePointer.x = mp.x
+        circlePointer.y = mp.y
+
+        arrow.visible = mp.isMoving
+        circlePointer.visible = !mp.isMoving
+        mouseControl.visible = mp.pointerType !== 'touch'
+    })
+    mouseControl.addChild(circle, arrow, circlePointer)
+
+    return mouseControl
 }
 
 const addOverlayContainer = app => {
