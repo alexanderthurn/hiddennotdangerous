@@ -828,18 +828,19 @@ const createTouchControl = app => {
 
 const createMouseControl = app => {
     const mouseControl = new PIXI.Container()
+    mouseControl.alpha = 0.5
 
     mp = mousePlayers.length > 0 ? mousePlayers[0] : mouses[0]
     const circle = new PIXI.Graphics().circle(0, 0,level.width*0.03)
-    .stroke({alpha: 0.5, color: 0xFFFFFF, width:8})
+    .stroke({color: 0xFFFFFF, width:8})
 
     const arrow = new PIXI.Container()
-    const arrowBody = new PIXI.Graphics().rect(0, -4, 1, 8).fill({alpha: 0.5, color: 0xFFFFFF})
-    const arrowHead = new PIXI.Graphics().moveTo(0, -12).lineTo(12, 0).lineTo(0,12).fill({alpha: 0.5, color: 0xFFFFFF})
+    const arrowBody = new PIXI.Graphics().rect(0, -4, 1, 8).fill(0xFFFFFF)
+    const arrowHead = new PIXI.Graphics().moveTo(0, -12).lineTo(12, 0).lineTo(0,12).fill(0xFFFFFF)
     arrow.addChild(arrowBody, arrowHead)
 
     const circlePointer = new PIXI.Graphics().circle(0, 0, 12)
-    .fill({alpha: 0.5, color: 0xFFFFFF})
+    .fill(0xFFFFFF)
 
     app.ticker.add(() => {
         const mp = mousePlayers.length > 0 ? mousePlayers[0] : mouses[0]
@@ -861,7 +862,7 @@ const createMouseControl = app => {
 
         arrow.visible = mp.isMoving
         circlePointer.visible = !mp.isMoving
-        mouseControl.visible = mp.pointerType !== 'touch'
+        mouseControl.visible = mp.pointerType === 'mouse'
     })
     mouseControl.addChild(circle, arrow, circlePointer)
 
