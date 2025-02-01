@@ -318,6 +318,7 @@ var app;
         addFoods(app, foodSpritesheet);
         addFigureContainer(app, figureSpritesheet);
         addWinningCeremony(app);
+        addControlContainer(app)
         addOverlayContainer(app);
         roundInit(true);
         window.requestAnimationFrame(gameLoop);

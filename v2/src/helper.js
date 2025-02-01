@@ -700,10 +700,17 @@ const addFigureContainer = (app, spritesheet) => {
     }
     const lowerFence = createLowerFence(app, level)
     figureContainer.addChild(lowerFence)
-    const mouseControl = createMouseControl(app)
-    figureContainer.addChild(mouseControl)
 
     app.stage.getChildAt(0).addChild(figureContainer)
+}
+
+const addControlContainer = (app, spritesheet) => {
+    let controlContainer = new PIXI.Container()
+    
+    const mouseControl = createMouseControl(app)
+    controlContainer.addChild(mouseControl)
+
+    app.stage.getChildAt(0).addChild(controlContainer)
 }
 
 const animatePauseOverlay = overlay => {
