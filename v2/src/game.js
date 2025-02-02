@@ -610,9 +610,7 @@ function handleInput(players, figures, dtProcessed) {
 
                     if (f.beans.size > 0) {
                         playAudioPool(soundAttack2Pool);
-                        console.log(figures)
                         addFartCloud(app, cloudContainer, cloudSpritesheet, {x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size})
-                        console.log(figures)
                     } else {
                         playAudioPool(soundAttackPool);
                     }

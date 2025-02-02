@@ -944,7 +944,7 @@ const animateFartCloud = cloud => {
     if (cloud.attackDistanceMultiplier) {
         cloud.scale = cloud.attackDistanceMultiplier
     }
-    
+
     if (!(!windowHasFocus || restartGame) && !cloud.playing) {
         cloud.play()
     }
@@ -958,6 +958,7 @@ const addFartCloud = (app, container, spritesheet, props) => {
     cloud = Object.assign(cloud, {
         type: 'cloud',
         attackAngle: 360,
+        direction: 0,
         isAttacking: false,
         attackDuration: 10000000,
         attackDistance: 64,
