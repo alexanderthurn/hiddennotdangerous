@@ -13,22 +13,9 @@ function draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, layer) {
     
     figuresSorted.forEach(f => {
         
-        let deg = rad2limiteddeg(f.angle)
-        let sprite = null
-        
         ctx.save()
         ctx.translate(f.x, f.y)
 
-        if (!f.isDead) {
-            if (f.isAttacking) {
-                if (f.type === 'cloud') {
-                    ctx.globalCompositeOperation = "difference";
-                }
-            } 
-            ctx.scale( f.scale, f.scale)
-            ctx.drawImage(f.image, sprite[0], sprite[1], sprite[2], sprite[3], 0 - f.imageAnim.width*0.5, 0 - f.imageAnim.height*0.5, f.imageAnim.width, f.imageAnim.height)
-        }
-        ctx.restore()  
        
         if (showDebug && layer === 1) {
             if (f.isAttacking) {
