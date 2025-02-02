@@ -942,7 +942,7 @@ function toggleMusic() {
 
 const animateFartCloud = cloud => {
     if (cloud.attackDistanceMultiplier) {
-        cloud.scale = cloud.attackDistanceMultiplier
+        cloud.scale = 3*cloud.attackDistanceMultiplier
     }
 
     if (!(!windowHasFocus || restartGame) && !cloud.playing) {
@@ -968,7 +968,6 @@ const addFartCloud = (app, container, spritesheet, props) => {
     
     cloud.anchor.set(0.5)
     cloud.animationSpeed = 0.1
-    cloud.scale = 0
     cloud.currentAnimation = 'explode'
 
     figures.push(cloud)
