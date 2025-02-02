@@ -583,6 +583,33 @@ createFigureAtlasData = () => {
     return atlasData
 }
 
+createCloudAtlasData = () => {
+    const atlasData = {
+        frames: {},
+        meta: {
+            image: '../gfx/fart.png',
+            format: 'RGBA8888',
+            size: { w: 192, h: 192 },
+            scale: 1
+        },
+        animations: {}
+    }
+
+    atlasData.animations.explode = []
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; i < 3; i++) {
+            const frameName = 'explode' + (i+3*j)
+            atlasData.frames[frameName] = {
+                frame: {x: i*64, y: j*64, w:64, h:64},
+                sourceSize: {w: 64, h: 64},
+                spriteSourceSize: {x:0, y:0, w: 64, h:64}
+            }
+            atlasData.animations.explode.push(frameName)
+        }
+    }
+
+    return atlasData
+}
 
 const createHorizontalFence = (app, level) => {
     return new PIXI.GraphicsContext().rect(0,0,level.width,level.padding*0.6)
@@ -913,23 +940,40 @@ function toggleMusic() {
     }
 }
 
-function addFartCloud(x,y,playerId, size=1) {
-    figures.push({
+const animateFartCloud = sprite => {
+    if (!(!windowHasFocus || restartGame) && !sprite.playing) {
+        sprite.play()
+    }
+    if ((!windowHasFocus || restartGame) && sprite.playing) {
+        sprite.stop()
+    }
+}
+
+const addFartCloud = (app, container, spritesheet, props) => {
+    let cloud = new PIXI.AnimatedSprite(spritesheet.animations.explode)
+    cloud = Object.assign(cloud, {
         type: 'cloud',
-        x,
-        y,
-        playerId, playerId,
-        image: cloudImage,
-        imageAnim: cloudImageAnim,    
-        speed: 0,
-        anim: 0,
-        size: size,
-        scale: 0,
-        zIndex: 1000,
         attackAngle: 360,
         isAttacking: false,
         attackDuration: 10000000,
         attackDistance: 64,
-        lifetime: 0
+        lifetime: 0,
+        ...props
     })
+    
+    cloud.anchor.set(0.5)
+    cloud.animationSpeed = 0.125
+    cloud.scale = 0
+    cloud.currentAnimation = 'explode'
+
+    figures.push(cloud)
+    container.addChild(cloud)
+
+    app.ticker.add(() => animateFartCloud(cloud))
+}
+
+createCloudContainer = app => {
+    const cloudContainer = new PIXI.Container()
+    app.stage.getChildAt(0).addChild(cloudContainer)
+    return cloudContainer
 }

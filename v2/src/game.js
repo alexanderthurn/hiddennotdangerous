@@ -265,7 +265,10 @@ const grassAtlasData = {
 };
 
 const figureAtlasData = createFigureAtlasData();
+const cloudAtlasData = createCloudAtlasData();
+var cloudSpritesheet;
 var app;
+var cloudContainer;
 
 (async () =>
     {
@@ -283,11 +286,22 @@ var app;
         const assets = [
             {alias: 'food', src: '../gfx/food-OCAL.png'},
             {alias: 'grass', src: '../gfx/kacheln.png'},
-            {alias: 'players', src: '../gfx/character_base_32x32.png'}
+            {alias: 'players', src: '../gfx/character_base_32x32.png'},
+            {alias: 'cloud', src: '../gfx/fart.png'}
         ];
     
         // Load the assets defined above.
         await PIXI.Assets.load(assets);
+
+        cloudSpritesheet = new PIXI.Spritesheet(
+            PIXI.Texture.from(cloudAtlasData.meta.image),
+            cloudAtlasData
+        );
+
+        const figureSpritesheet = new PIXI.Spritesheet(
+            PIXI.Texture.from(figureAtlasData.meta.image),
+            figureAtlasData
+        );
 
         const foodSpritesheet = new PIXI.Spritesheet(
             PIXI.Texture.from(foodAtlasData.meta.image),
@@ -298,13 +312,9 @@ var app;
             PIXI.Texture.from(grassAtlasData.meta.image),
             grassAtlasData
         );
-
-        const figureSpritesheet = new PIXI.Spritesheet(
-            PIXI.Texture.from(figureAtlasData.meta.image),
-            figureAtlasData
-        );
         
         // Generate all the Textures asynchronously
+        await cloudSpritesheet.parse();
         await foodSpritesheet.parse();
         await figureSpritesheet.parse();
         await grassSpritesheet.parse();
@@ -317,6 +327,7 @@ var app;
         addMenuItems(app);
         addFoods(app, foodSpritesheet);
         addFigureContainer(app, figureSpritesheet);
+        cloudContainer = createCloudContainer(app);
         addWinningCeremony(app);
         addControlContainer(app)
         addOverlayContainer(app);
@@ -540,7 +551,7 @@ function updateGame(figures, dt, dtProcessed) {
         if (xyNew) {
             [f.x, f.y] = cropXY(xyNew.x, xyNew.y, level)
         }
-        f.anim += f.speed + f.imageAnim?.animDefaultSpeed
+        //f.anim += f.speed + f.imageAnim?.animDefaultSpeed
        // f.anim += f.isAttacking ? 0.5 : 0
     })
     
@@ -626,7 +637,9 @@ function handleInput(players, figures, dtProcessed) {
 
                     if (f.beans.size > 0) {
                         playAudioPool(soundAttack2Pool);
-                        addFartCloud(xyNew.x,xyNew.y,f.playerId,f.beans.size)
+                        console.log(figures)
+                        addFartCloud(app, cloudContainer, cloudSpritesheet, {x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size})
+                        console.log(figures)
                     } else {
                         playAudioPool(soundAttackPool);
                     }
