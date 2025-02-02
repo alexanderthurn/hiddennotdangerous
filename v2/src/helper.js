@@ -597,7 +597,7 @@ createCloudAtlasData = () => {
 
     atlasData.animations.explode = []
     for (let i = 0; i < 3; i++) {
-        for (let j = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
             const frameName = 'explode' + (i+3*j)
             atlasData.frames[frameName] = {
                 frame: {x: i*64, y: j*64, w:64, h:64},
@@ -940,12 +940,16 @@ function toggleMusic() {
     }
 }
 
-const animateFartCloud = sprite => {
-    if (!(!windowHasFocus || restartGame) && !sprite.playing) {
-        sprite.play()
+const animateFartCloud = cloud => {
+    if (cloud.attackDistanceMultiplier) {
+        cloud.scale = cloud.attackDistanceMultiplier
     }
-    if ((!windowHasFocus || restartGame) && sprite.playing) {
-        sprite.stop()
+    
+    if (!(!windowHasFocus || restartGame) && !cloud.playing) {
+        cloud.play()
+    }
+    if ((!windowHasFocus || restartGame) && cloud.playing) {
+        cloud.stop()
     }
 }
 
@@ -962,7 +966,7 @@ const addFartCloud = (app, container, spritesheet, props) => {
     })
     
     cloud.anchor.set(0.5)
-    cloud.animationSpeed = 0.125
+    cloud.animationSpeed = 0.1
     cloud.scale = 0
     cloud.currentAnimation = 'explode'
 

@@ -39,22 +39,6 @@ var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = {}
 
-var imageArrow = new Image()
-imageArrow.src = '../gfx/arrow.png'
-loadPromises.push(new Promise((resolve, reject) => {
-    imageArrow.onload = () => {
-        resolve()
-    }
-}))
-
-var cloudImage = new Image()
-cloudImage.src = '../gfx/fart.png'
-loadPromises.push(new Promise((resolve, reject) => {
-    cloudImage.onload = () => {
-        resolve()
-    }
-}))
-
 var btnTouchController = {
     radius: 0,
 }
@@ -64,15 +48,6 @@ var btnTouchController = {
 
 var btnTouchAction = {
     radius:0
-}
-
-
-cloudImageAnim = {
-    hasDirections: false,
-    width: 192,
-    height: 192,
-    animDefaultSpeed: 0.1,
-    default: {a: [[0,0,64,64],[64,0,64,64],[128,0,64,64],[0,64,64,64],[64,64,64,64],[128,64,64,64],[0,128,64,64],[64,128,64,64],[128,128,64,64]]}
 }
 
 let tileArea = []
@@ -551,8 +526,6 @@ function updateGame(figures, dt, dtProcessed) {
         if (xyNew) {
             [f.x, f.y] = cropXY(xyNew.x, xyNew.y, level)
         }
-        //f.anim += f.speed + f.imageAnim?.animDefaultSpeed
-       // f.anim += f.isAttacking ? 0.5 : 0
     })
     
     let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter');
@@ -735,7 +708,8 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
         
         
     })
-    var toDelete = figures.findIndex(f => f.type === 'cloud' && f.isDead)
-    if (toDelete >= 0)
-        figures.splice(toDelete,1)
+    var toDeleteIndex = figures.findIndex(f => f.type === 'cloud' && f.isDead)
+    figures.filter(f => f.type === 'cloud' && f.isDead).forEach(cloud => cloud.destroy())
+    if (toDeleteIndex >= 0)
+        figures.splice(toDeleteIndex,1)
 }
