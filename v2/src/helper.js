@@ -552,10 +552,7 @@ createFigureAtlasData = () => {
     const atlasData = {
         frames: {},
         meta: {
-            image: '../gfx/character_base_32x32.png',
-            format: 'RGBA8888',
-            size: { w: 128, h: 128 },
-            scale: 1
+            image: 'players'
         },
         animations: {}
     }
@@ -572,9 +569,7 @@ createFigureAtlasData = () => {
         for (let i = 0; i < 4; i++) {
             const frameName = e + i
             atlasData.frames[frameName] = {
-                frame: {x: i*32, y: j*32, w:32, h:32},
-                sourceSize: {w: 32, h: 32},
-                spriteSourceSize: {x:0, y:0, w: 32, h:32}
+                frame: {x: i*32, y: j*32, w:32, h:32}
             }
             atlasData.animations[e].push(frameName)
         }
@@ -587,10 +582,8 @@ createCloudAtlasData = () => {
     const atlasData = {
         frames: {},
         meta: {
-            image: '../gfx/fart.png',
-            format: 'RGBA8888',
-            size: { w: 192, h: 192 },
-            scale: 1
+            image: 'cloud',
+            scale: 1/3
         },
         animations: {}
     }
@@ -600,9 +593,7 @@ createCloudAtlasData = () => {
         for (let j = 0; j < 3; j++) {
             const frameName = 'explode' + (i+3*j)
             atlasData.frames[frameName] = {
-                frame: {x: i*64, y: j*64, w:64, h:64},
-                sourceSize: {w: 64, h: 64},
-                spriteSourceSize: {x:0, y:0, w: 64, h:64}
+                frame: {x: i*64, y: j*64, w:64, h:64}
             }
             atlasData.animations.explode.push(frameName)
         }
@@ -942,7 +933,7 @@ function toggleMusic() {
 
 const animateFartCloud = cloud => {
     if (cloud.attackDistanceMultiplier) {
-        cloud.scale = 3*cloud.attackDistanceMultiplier
+        cloud.scale = cloud.attackDistanceMultiplier
     }
 
     if (!(!windowHasFocus || restartGame) && !cloud.playing) {

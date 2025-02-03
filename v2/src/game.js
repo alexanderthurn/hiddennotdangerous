@@ -111,36 +111,23 @@ var soundWin = getAudio(audio.win);
 const foodAtlasData = {
     frames: {
         bean: {
-            frame: { x: 32, y: 192, w: 32, h: 32 },
-            sourceSize: { w: 32, h: 32 },
-            spriteSourceSize: { x: 0, y: 0, w: 32, h: 32 }
+            frame: { x: 32, y: 192, w: 32, h: 32 }
         },
         brokkoli: {
-            frame: { x: 256, y: 32, w: 32, h: 32 },
-            sourceSize: { w: 32, h: 32 },
-            spriteSourceSize: { x: 0, y: 0, w: 32, h: 32 }
+            frame: { x: 256, y: 32, w: 32, h: 32 }
         },
         onion: {
-            frame: { x: 192, y: 64, w: 32, h: 32 },
-            sourceSize: { w: 32, h: 32 },
-            spriteSourceSize: { x: 0, y: 0, w: 32, h: 32 }
+            frame: { x: 192, y: 64, w: 32, h: 32 }
         },
         salad: {
-            frame: { x: 64, y: 64, w: 32, h: 32 },
-            sourceSize: { w: 32, h: 32 },
-            spriteSourceSize: { x: 0, y: 0, w: 32, h: 32 }
+            frame: { x: 64, y: 64, w: 32, h: 32 }
         },
         taco: {
-            frame: { x: 224, y: 256, w: 32, h: 32 },
-            sourceSize: { w: 32, h: 32 },
-            spriteSourceSize: { x: 0, y: 0, w: 32, h: 32 }
+            frame: { x: 224, y: 256, w: 32, h: 32 }
         }
     },
     meta: {
-        image: 'food',
-        format: 'RGBA8888',
-        size: { w: 320, h: 320 },
-        scale: 1
+        image: 'food'
     },
     textures: {
         bean: 'bean',
@@ -211,26 +198,17 @@ const foodDefinition = completeRestart => ({
 const grassAtlasData = {
     frames: {
         mushroom: {
-            frame: { x: 0, y: 0, w: 120, h: 120 },
-            sourceSize: { w: 120, h: 120 },
-            spriteSourceSize: { x: 0, y: 0, w: 120, h: 120 }
+            frame: { x: 0, y: 0, w: 120, h: 120 }
         },
         plain: {
-            frame: { x: 120, y: 0, w: 120, h: 120 },
-            sourceSize: { w: 120, h: 120 },
-            spriteSourceSize: { x: 0, y: 0, w: 120, h: 120 }
+            frame: { x: 120, y: 0, w: 120, h: 120 }
         },
         flowers: {
-            frame: { x: 240, y: 0, w: 120, h: 120 },
-            sourceSize: { w: 120, h: 120 },
-            spriteSourceSize: { x: 0, y: 0, w: 120, h: 120 }
+            frame: { x: 240, y: 0, w: 120, h: 120 }
         }
     },
     meta: {
-        image: 'grass',
-        format: 'RGBA8888',
-        size: { w: 360, h: 120 },
-        scale: 1
+        image: 'grass'
     },
     textures: {
         mushroom: 'mushroom',
