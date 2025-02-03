@@ -216,7 +216,7 @@ const grassAtlasData = {
 
 const figureAtlasData = createFigureAtlasData();
 const cloudAtlasData = createCloudAtlasData();
-var cloudSpritesheet;
+var spriteSheets;
 var app;
 var cloudContainer;
 
@@ -243,40 +243,31 @@ var cloudContainer;
         // Load the assets defined above.
         await PIXI.Assets.load(assets);
 
-        cloudSpritesheet = new PIXI.Spritesheet(
-            PIXI.Texture.from(cloudAtlasData.meta.image),
-            cloudAtlasData
-        );
-
-        const figureSpritesheet = new PIXI.Spritesheet(
-            PIXI.Texture.from(figureAtlasData.meta.image),
-            figureAtlasData
-        );
-
-        const foodSpritesheet = new PIXI.Spritesheet(
-            PIXI.Texture.from(foodAtlasData.meta.image),
-            foodAtlasData
-        );
-
-        const grassSpritesheet = new PIXI.Spritesheet(
-            PIXI.Texture.from(grassAtlasData.meta.image),
-            grassAtlasData
-        );
+        const atlasData = {
+            cloud: cloudAtlasData,
+            figure: figureAtlasData,
+            food: foodAtlasData,
+            grass: grassAtlasData
+        }
         
+        spriteSheets = Object.entries(atlasData).reduce((acc, [key, value]) => ({...acc, [key]: new PIXI.Spritesheet(
+            PIXI.Texture.from(value.meta.image),
+            value
+        )}), {})
+
         // Generate all the Textures asynchronously
-        await cloudSpritesheet.parse();
-        await foodSpritesheet.parse();
-        await figureSpritesheet.parse();
-        await grassSpritesheet.parse();
+        await Promise.all(Object.values(spriteSheets).map(async spriteSheet => 
+            await spriteSheet.parse()
+        ))
 
         addLevelContainer(app)
         adjustStageToScreen(app, level)
 
-        addGrass(app, Object.keys(grassAtlasData.frames), grassSpritesheet);
+        addGrass(app, Object.keys(atlasData.grass.frames), spriteSheets.grass);
         addHeadline(app);
         addMenuItems(app);
-        addFoods(app, foodSpritesheet);
-        addFigureContainer(app, figureSpritesheet);
+        addFoods(app, spriteSheets.food);
+        addFigureContainer(app, spriteSheets.figure);
         cloudContainer = createCloudContainer(app);
         addWinningCeremony(app);
         addControlContainer(app)
@@ -578,7 +569,7 @@ function handleInput(players, figures, dtProcessed) {
 
                     if (f.beans.size > 0) {
                         playAudioPool(soundAttack2Pool);
-                        addFartCloud(app, cloudContainer, cloudSpritesheet, {x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size})
+                        addFartCloud(app, cloudContainer, spriteSheets.cloud, {x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size})
                     } else {
                         playAudioPool(soundAttackPool);
                     }
