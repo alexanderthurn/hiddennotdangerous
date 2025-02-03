@@ -313,7 +313,6 @@ document.addEventListener("DOMContentLoaded", function(event){
 function roundInit(completeRestart) {
     then = Date.now();
     startTime = then;
-    //dtProcessed = 0
     lastFinalWinnerPlayerId = undefined
     fpsTime = then
     lastKillTime = undefined;
@@ -349,7 +348,7 @@ function roundInit(completeRestart) {
         })
 
         if (completeRestart && figure.score) {
-            figure.score.points = 0
+            destroyContainer(app, figure.score)
         }
     })
 
@@ -556,7 +555,7 @@ function handleInput(players, figures, dtProcessed) {
             figure.playerId = p.playerId
             if (!isGameStarted) {
                 figure.x = level.width*0.04+ Math.random() * level.width*0.4
-                figure.y = level.height*0.05+Math.random()*level.height*0.42
+                figure.y = level.height*0.05+Math.random() * level.height*0.42
             }
             playAudio(soundJoin);
             newPlayerIds.clear();

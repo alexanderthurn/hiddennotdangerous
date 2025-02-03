@@ -163,6 +163,16 @@ const toggleBots = () => {
     return count
 }
 
+const addAnimation = (container, callback) => {
+    container.tickerCallback = callback
+    app.ticker.add(callback)
+}
+
+const destroyContainer = (app, container) => {
+    app.ticker.remove(container.tickerCallback)
+    container.destroy()
+}
+
 function adjustStageToScreen(app, level) {
     level.width = 1920
     level.height = 1080
@@ -270,7 +280,7 @@ const addButton = (app, props) => {
     button.addChild(area, loadingBar, buttonText)
     app.stage.getChildAt(0).addChild(button)
 
-    app.ticker.add(() => animateButton(button))
+    addAnimation(button, () => animateButton(button))
     return button
 }
 
@@ -383,7 +393,7 @@ const addPlayerScore = (app, figure, player) => {
     playerScore.addChild(circle, text)
     app.stage.getChildAt(0).addChild(playerScore)
 
-    app.ticker.add(() => animatePlayerScore(figure))
+    addAnimation(playerScore, () => animatePlayerScore(figure))
 }
 
 const figureIsBot = figure => figure.playerId?.includes('b')
