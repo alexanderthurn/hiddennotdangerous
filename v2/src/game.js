@@ -528,7 +528,6 @@ function updateGame(figures, dt, dtProcessed) {
                 if (2*distanceAngles(rad2deg(f.direction), rad2deg(angle(f.x,f.y,fig.x,fig.y))+180) <= f.attackAngle) {
                     fig.isDead = true;
                     fig.speed = 0;
-                    fig.y+=f.height*0.25
                     playAudioPool(soundDeathPool);
                     numberKilledFigures++;
                     fig.killTime = dtProcessed
