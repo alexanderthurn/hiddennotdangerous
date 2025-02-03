@@ -974,7 +974,7 @@ const addFartCloud = (app, container, spritesheet, props) => {
     figures.push(cloud)
     container.addChild(cloud)
 
-    app.ticker.add(() => animateFartCloud(cloud))
+    addAnimation(cloud, () => animateFartCloud(cloud))
 }
 
 createCloudContainer = app => {

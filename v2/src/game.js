@@ -43,9 +43,6 @@ var btnTouchController = {
     radius: 0,
 }
 
-//btnTouchAction = {...btnTouchAction, x: canvas.width*0.85, y: canvas.height*0.5, loadingPercentage: 0.0, radius: canvas.width*0.02}
-
-
 var btnTouchAction = {
     radius:0
 }
@@ -396,13 +393,7 @@ function gameLoop() {
         
     }
 
-    const figuresSorted = figures.toSorted((f1,f2) => (f1.y +f1.zIndex) - (f2.y +f2.zIndex) )
     const figuresPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
-
-    //draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, 0);
-    //draw(players, figuresSorted, figuresPlayer, dt, dtProcessed, 1);
-
-    then = now
 
     if (!restartGame) {
         var survivors = figuresPlayer.filter(f => !f.isDead)
@@ -448,6 +439,7 @@ function gameLoop() {
         roundInit(!!lastFinalWinnerPlayerId);
     }
     
+    then = now
     window.requestAnimationFrame(gameLoop);
 }
 
@@ -683,7 +675,7 @@ function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
         
     })
     var toDeleteIndex = figures.findIndex(f => f.type === 'cloud' && f.isDead)
-    figures.filter(f => f.type === 'cloud' && f.isDead).forEach(cloud => cloud.destroy())
+    figures.filter(f => f.type === 'cloud' && f.isDead).forEach(cloud => destroyContainer(app, cloud))
     if (toDeleteIndex >= 0)
         figures.splice(toDeleteIndex,1)
 }
