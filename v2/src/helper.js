@@ -183,12 +183,12 @@ function adjustStageToScreen(app, level) {
     level.shortestPathNotBean5 = 2*0.6*level.height+2*0.3*Math.hypot(level.height, level.width);
     level.shortestPathBean5 = 2*0.6*level.height+0.6*level.width+0.3*Math.hypot(level.height, level.width);
 
-    app.stage.getChildAt(0).width = level.width
-    app.stage.getChildAt(0).height = level.height
-    app.stage.getChildAt(0).scale.x = level.scale
-    app.stage.getChildAt(0).scale.y = level.scale
-    app.stage.getChildAt(0).x = level.offsetX;
-    app.stage.getChildAt(0).y = level.offsetY;
+    levelContainer.width = level.width
+    levelContainer.height = level.height
+    levelContainer.scale.x = level.scale
+    levelContainer.scale.y = level.scale
+    levelContainer.x = level.offsetX;
+    levelContainer.y = level.offsetY;
 }
 
 function getRandomXY(level) {
@@ -227,7 +227,7 @@ const addHeadline = app => {
     title.x = level.width/2;
     title.y = -level.width*0.005;
 
-    app.stage.getChildAt(0).addChild(title);
+    levelContainer.addChild(title);
 
     const authors = new PIXI.Text({
         text: 'made by TORSTEN STELLJES & ALEXANDER THURN',
@@ -241,7 +241,7 @@ const addHeadline = app => {
     authors.x = level.width;
     authors.y = -level.width*0.005;
 
-    app.stage.getChildAt(0).addChild(authors);
+    levelContainer.addChild(authors);
 }
 
 const animateButton = button => {
@@ -251,7 +251,7 @@ const animateButton = button => {
     loadingBar.width = button.width*button.loadingPercentage
 }
 
-const addButton = (app, props) => {
+const addButton = props => {
     const {x, y, width, height, loadingPercentage, loadingSpeed, execute} = props
 
     let button = new PIXI.Container()
@@ -278,7 +278,7 @@ const addButton = (app, props) => {
     buttonText.y = height/2
 
     button.addChild(area, loadingBar, buttonText)
-    app.stage.getChildAt(0).addChild(button)
+    levelContainer.addChild(button)
 
     addAnimation(button, () => animateButton(button))
     return button
@@ -305,7 +305,7 @@ const animateBotsButton = button => {
 }
 
 const addButtons = app => {
-    Object.entries(buttonDefinition()).forEach(([id, button]) => {buttons[id] = addButton(app, button)})
+    Object.entries(buttonDefinition()).forEach(([id, button]) => {buttons[id] = addButton(button)})
 
     app.ticker.add(() => animateStartButton(buttons.start))
     app.ticker.add(() => animateMuteButton(buttons.mute))
@@ -336,7 +336,7 @@ const addMenuItems = app => {
     howToPlay.x = level.width*0.22+fontHeight;
     howToPlay.y = level.height*0.1;
 
-    app.stage.getChildAt(0).addChild(howToPlay);
+    levelContainer.addChild(howToPlay);
 
     app.ticker.add(() => animateMenuItems(howToPlay))
 }
@@ -364,7 +364,7 @@ const animatePlayerScore = figure => {
     }
 }
 
-const addPlayerScore = (app, figure, player) => {
+const addPlayerScore = (figure, player) => {
     let playerScore = new PIXI.Container()
     const offx = 48*1.2
     const figureIndex = figures.filter(f => f.type === 'fighter').findIndex(f => !f.playerId)
@@ -391,7 +391,7 @@ const addPlayerScore = (app, figure, player) => {
 
     figure.score = playerScore
     playerScore.addChild(circle, text)
-    app.stage.getChildAt(0).addChild(playerScore)
+    levelContainer.addChild(playerScore)
 
     addAnimation(playerScore, () => animatePlayerScore(figure))
 }
@@ -490,7 +490,7 @@ const addWinningCeremony = app => {
     winnerText.y = level.height/2
     winnerText.zIndex = 3*level.height
 
-    app.stage.getChildAt(0).addChild(winnerText)
+    levelContainer.addChild(winnerText)
 
     app.ticker.add(() => animateWinningCeremony(winnerText))
 }
@@ -519,7 +519,7 @@ const addFood = (app, texture, props) => {
 
     food.addChild(plate, sprite)
     figures.push(food)
-    app.stage.getChildAt(0).addChild(food)
+    levelContainer.addChild(food)
 
     app.ticker.add(() => animateFood(food))
 }
@@ -536,7 +536,7 @@ const addFoods = (app, spritesheet) => {
     })
 }
 
-const addGrass = (app, textures, spritesheet) => {
+const addGrass = (textures, spritesheet) => {
     const widthInTiles = 16
     const heightInTiles = 9
 
@@ -553,7 +553,7 @@ const addGrass = (app, textures, spritesheet) => {
             const grass = new PIXI.Sprite(spritesheet.textures[texture])
             grass.x = i*tileWidth
             grass.y = j*tileWidth
-            app.stage.getChildAt(0).addChild(grass)
+            levelContainer.addChild(grass)
         }
     }
 }
@@ -612,7 +612,7 @@ createCloudAtlasData = () => {
     return atlasData
 }
 
-const createHorizontalFence = (app, level) => {
+const createHorizontalFence = level => {
     return new PIXI.GraphicsContext().rect(0,0,level.width,level.padding*0.6)
     .fill({color: 0x969696})
     .rect(level.padding*0.5,level.padding*0.8,level.width-level.padding,level.padding*0.6)
@@ -621,16 +621,16 @@ const createHorizontalFence = (app, level) => {
     .fill({color: 0x5A5A5A})
 }
 
-const createUpperFence = (app, level) => {
-    return new PIXI.Graphics(createHorizontalFence(app,level))
+const createUpperFence = level => {
+    return new PIXI.Graphics(createHorizontalFence(level))
     .rect(0,0, level.padding*0.5, level.padding*2)
     .rect(level.width-level.padding*0.5,0, level.padding*0.5, level.padding*2)
     .fill({color: 0x969696})
 }
 
-const createLowerFence = (app, level) => {
+const createLowerFence = level => {
     const offsetY = level.height-2*level.padding
-    const lowerFence = new PIXI.Graphics(createHorizontalFence(app,level))
+    const lowerFence = new PIXI.Graphics(createHorizontalFence(level))
     .rect(0,level.padding*2-offsetY, level.padding*0.5, level.height-level.padding)
     .rect(level.width-level.padding*0.5,level.padding*2-offsetY, level.padding*0.5, level.height-level.padding)
     .fill({color: 0x969696})
@@ -708,7 +708,7 @@ const createFigure = (app, spritesheet, props) => {
 const addFigureContainer = (app, spritesheet) => {
     let figureContainer = new PIXI.Container()
 
-    const upperFence = createUpperFence(app, level)
+    const upperFence = createUpperFence(level)
     figureContainer.addChild(upperFence)
 
     for (var i = 0; i < maxPlayerFigures; i++) {
@@ -722,23 +722,23 @@ const addFigureContainer = (app, spritesheet) => {
             attackDistance: 80,
             attackAngle: 90,
             type: 'fighter',
-            zIndexBase: app.stage.getChildAt(0).height 
+            zIndexBase: levelContainer.height 
         })
         figureContainer.addChild(figure)
     }
-    const lowerFence = createLowerFence(app, level)
+    const lowerFence = createLowerFence(level)
     figureContainer.addChild(lowerFence)
 
-    app.stage.getChildAt(0).addChild(figureContainer)
+    levelContainer.addChild(figureContainer)
 }
 
-const addControlContainer = (app, spritesheet) => {
+const addControlContainer = app => {
     let controlContainer = new PIXI.Container()
     
     const mouseControl = createMouseControl(app)
     controlContainer.addChild(mouseControl)
 
-    app.stage.getChildAt(0).addChild(controlContainer)
+    levelContainer.addChild(controlContainer)
 }
 
 const animatePauseOverlay = overlay => {
@@ -954,7 +954,7 @@ const animateFartCloud = cloud => {
     }
 }
 
-const addFartCloud = (app, container, spritesheet, props) => {
+const addFartCloud = (spritesheet, props) => {
     let cloud = new PIXI.AnimatedSprite(spritesheet.animations.explode)
     cloud = Object.assign(cloud, {
         type: 'cloud',
@@ -972,13 +972,8 @@ const addFartCloud = (app, container, spritesheet, props) => {
     cloud.currentAnimation = 'explode'
 
     figures.push(cloud)
-    container.addChild(cloud)
+    levelContainer.addChild(cloud)
+    cloudLayer.attach(cloud)
 
     addAnimation(cloud, () => animateFartCloud(cloud))
-}
-
-createCloudContainer = app => {
-    const cloudContainer = new PIXI.Container()
-    app.stage.getChildAt(0).addChild(cloudContainer)
-    return cloudContainer
 }

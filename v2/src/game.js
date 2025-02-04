@@ -217,15 +217,13 @@ const grassAtlasData = {
 const figureAtlasData = createFigureAtlasData();
 const cloudAtlasData = createCloudAtlasData();
 var spriteSheets;
-var app;
-var cloudContainer;
+const app = new PIXI.Application();
+const levelContainer = new PIXI.Container();
+const cloudLayer = new PIXI.RenderLayer();
 
 (async () =>
     {
         console.log('no need to hide');
-
-        // Create a PixiJS application.
-        app = new PIXI.Application();
     
         // Initialize the application.
         await app.init({antialias: true, backgroundAlpha: 0, resizeTo: window});
@@ -260,15 +258,14 @@ var cloudContainer;
             await spriteSheet.parse()
         ))
 
-        addLevelContainer(app)
+        app.stage.addChild(levelContainer)
         adjustStageToScreen(app, level)
-
-        addGrass(app, Object.keys(atlasData.grass.frames), spriteSheets.grass);
+        addGrass(Object.keys(atlasData.grass.frames), spriteSheets.grass);
         addHeadline(app);
         addMenuItems(app);
         addFoods(app, spriteSheets.food);
         addFigureContainer(app, spriteSheets.figure);
-        cloudContainer = createCloudContainer(app);
+        app.stage.getChildAt(0).addChild(cloudLayer)
         addWinningCeremony(app);
         addControlContainer(app)
         addOverlayContainer(app);
@@ -533,7 +530,7 @@ function handleInput(players, figures, dtProcessed) {
                 return
             }
             var figure = figures.find(f => !f.playerId && f.type === 'fighter')
-            addPlayerScore(app, figure, p)
+            addPlayerScore(figure, p)
             figure.isDead = false
             figure.playerId = p.playerId
             if (!isGameStarted) {
@@ -569,7 +566,7 @@ function handleInput(players, figures, dtProcessed) {
 
                     if (f.beans.size > 0) {
                         playAudioPool(soundAttack2Pool);
-                        addFartCloud(app, cloudContainer, spriteSheets.cloud, {x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size})
+                        addFartCloud(spriteSheets.cloud, {x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size})
                     } else {
                         playAudioPool(soundAttackPool);
                     }
