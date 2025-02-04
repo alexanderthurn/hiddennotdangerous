@@ -208,13 +208,7 @@ function isInRect(x,y,rx,ry,rw,rh) {
     return x >= rx && x <= rx+rw && y >= ry && y < ry+rh
 }
 
-const addLevelContainer = app => {
-    const levelContainer = new PIXI.Container()
-
-    app.stage.addChild(levelContainer)
-}
-
-const addHeadline = app => {
+const addHeadline = () => {
     const title = new PIXI.Text({
         text: 'KNIRPS UND KNALL',
         style: {
@@ -371,7 +365,6 @@ const addPlayerScore = (figure, player) => {
     playerScore.xDefault = 32+figureIndex*offx
     playerScore.yDefault = level.height+32
     playerScore.points = 0
-    playerScore.zIndex = 2*level.height
 
     let circle
     if (player.type === 'bot') {
@@ -392,6 +385,7 @@ const addPlayerScore = (figure, player) => {
     figure.score = playerScore
     playerScore.addChild(circle, text)
     levelContainer.addChild(playerScore)
+    scoreLayer.attach(playerScore)
 
     addAnimation(playerScore, () => animatePlayerScore(figure))
 }
@@ -488,7 +482,6 @@ const addWinningCeremony = app => {
     winnerText.anchor.set(0.5)
     winnerText.x = level.width/2
     winnerText.y = level.height/2
-    winnerText.zIndex = 3*level.height
 
     levelContainer.addChild(winnerText)
 
@@ -722,7 +715,6 @@ const addFigureContainer = (app, spritesheet) => {
             attackDistance: 80,
             attackAngle: 90,
             type: 'fighter',
-            zIndexBase: levelContainer.height 
         })
         figureContainer.addChild(figure)
     }
@@ -906,7 +898,6 @@ const createMouseControl = app => {
 
 const addOverlayContainer = app => {
     const overlay = new PIXI.Container();
-    overlay.zIndex = 4*level.height
 
     const pauseOverlay = createPauseOverlay(app)
     const fpsText = createFpsText(app)

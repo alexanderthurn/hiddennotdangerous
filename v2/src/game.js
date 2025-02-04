@@ -220,6 +220,7 @@ var spriteSheets;
 const app = new PIXI.Application();
 const levelContainer = new PIXI.Container();
 const cloudLayer = new PIXI.RenderLayer();
+const scoreLayer = new PIXI.RenderLayer();
 
 (async () =>
     {
@@ -261,11 +262,12 @@ const cloudLayer = new PIXI.RenderLayer();
         app.stage.addChild(levelContainer)
         adjustStageToScreen(app, level)
         addGrass(Object.keys(atlasData.grass.frames), spriteSheets.grass);
-        addHeadline(app);
+        addHeadline();
         addMenuItems(app);
         addFoods(app, spriteSheets.food);
         addFigureContainer(app, spriteSheets.figure);
         app.stage.getChildAt(0).addChild(cloudLayer)
+        app.stage.getChildAt(0).addChild(scoreLayer)
         addWinningCeremony(app);
         addControlContainer(app)
         addOverlayContainer(app);
