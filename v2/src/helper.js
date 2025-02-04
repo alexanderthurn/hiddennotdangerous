@@ -350,7 +350,7 @@ const animatePlayerScore = figure => {
         figure.score.scale = 12*lpi + lp
     }
 
-    figure.score.getChildAt(1).text = figure.score.points
+    figure.score.getChildAt(1).text = figure.score.shownPoints
 
     if (figure.isAttacking && !restartGame) {
         figure.score.x += -5+10*Math.random()
@@ -364,6 +364,7 @@ const addPlayerScore = (figure, player) => {
     const figureIndex = figures.filter(f => f.type === 'fighter').findIndex(f => !f.playerId)
     playerScore.xDefault = 32+figureIndex*offx
     playerScore.yDefault = level.height+32
+    playerScore.shownPoints = 0
     playerScore.points = 0
 
     let circle
@@ -404,8 +405,6 @@ const animateWinningCeremony = winnerText => {
     playerFiguresSortedByNewPoints.forEach((f, i) => {
         const dt2 = dtProcessed - (lastRoundEndThen + i*moveScoreToPlayerDuration);
         
-        let points = f.points;
-
         if (lastRoundEndThen && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
             const lp = dt2 / moveScoreToPlayerDuration
             const lpi = 1-lp
@@ -426,7 +425,6 @@ const animateWinningCeremony = winnerText => {
                     f.score.getChildAt(0).context = playerWinnerCircleContext
                 }
             }
-            points = f.oldPoints;
         } else if (lastRoundEndThen && dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
             f.score.x = f.x
             f.score.y = f.y
@@ -435,6 +433,7 @@ const animateWinningCeremony = winnerText => {
             } else {
                 f.score.scale = 2
             }
+            f.score.shownPoints = f.score.points
         } else if (lastRoundEndThen && dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
             const lp = dt4 / moveScoreToPlayerDuration
             const lpi = 1-lp
@@ -443,7 +442,7 @@ const animateWinningCeremony = winnerText => {
             f.score.y = lpi*f.y + lp*f.score.yDefault
             f.score.scale = 2*lpi + lp
             if (lastFinalWinnerPlayerId) {
-                points = 0;
+                f.score.shownPoints = 0
             }
             if (figureIsBot(f)) {
                 f.score.getChildAt(0).context = botCircleContext
