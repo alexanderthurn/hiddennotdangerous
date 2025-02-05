@@ -385,8 +385,8 @@ const addPlayerScore = (figure, player) => {
 
     figure.score = playerScore
     playerScore.addChild(circle, text)
-    levelContainer.addChild(playerScore)
-    scoreLayer.attach(playerScore)
+    scoreContainer.addChild(playerScore)
+    //scoreLayer.attach(playerScore)
 
     addAnimation(playerScore, () => animatePlayerScore(figure))
 }
@@ -403,6 +403,7 @@ const animateWinningCeremony = winnerText => {
     const dt4 = dtProcessed - (lastRoundEndThen + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
 
     playerFiguresSortedByNewPoints.forEach((f, i) => {
+        f.score.zIndex = i
         const dt2 = dtProcessed - (lastRoundEndThen + i*moveScoreToPlayerDuration);
         
         if (lastRoundEndThen && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
