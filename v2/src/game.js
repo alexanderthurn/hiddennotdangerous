@@ -220,8 +220,7 @@ var spriteSheets;
 const app = new PIXI.Application();
 const levelContainer = new PIXI.Container();
 const cloudLayer = new PIXI.RenderLayer();
-const scoreContainer = new PIXI.Container();
-const scoreLayer = new PIXI.RenderLayer();
+const scoreLayer = new PIXI.RenderLayer({sortableChildren: true});
 
 (async () =>
     {
@@ -268,8 +267,7 @@ const scoreLayer = new PIXI.RenderLayer();
         addFoods(app, spriteSheets.food);
         addFigureContainer(app, spriteSheets.figure);
         levelContainer.addChild(cloudLayer)
-        levelContainer.addChild(scoreContainer)
-        //levelContainer.addChild(scoreLayer)
+        levelContainer.addChild(scoreLayer)
         addWinningCeremony(app);
         addControlContainer(app)
         addOverlayContainer(app);

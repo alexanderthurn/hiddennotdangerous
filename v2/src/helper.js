@@ -385,8 +385,8 @@ const addPlayerScore = (figure, player) => {
 
     figure.score = playerScore
     playerScore.addChild(circle, text)
-    scoreContainer.addChild(playerScore)
-    //scoreLayer.attach(playerScore)
+    levelContainer.addChild(playerScore)
+    scoreLayer.attach(playerScore)
 
     addAnimation(playerScore, () => animatePlayerScore(figure))
 }
