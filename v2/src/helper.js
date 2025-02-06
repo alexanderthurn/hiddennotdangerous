@@ -711,12 +711,12 @@ const createFigure = (app, spritesheet, props) => {
     sprite.scale = 2
     sprite.currentAnimation = 'down'
 
-    const attackAngle = createAttackAngle(figure)
+    const attackArc = createAttackArc(figure)
 
-    figure.addChild(sprite, attackAngle)
+    figure.addChild(sprite, attackArc)
     figures.push(figure)
     figureLayer.attach(figure)
-    debugLayer.attach(attackAngle)
+    debugLayer.attach(attackArc)
 
     app.ticker.add(() => animateFigure(figure, spritesheet))
     return figure
@@ -919,21 +919,21 @@ const createMouseControl = app => {
     return mouseControl
 }
 
-const animateAttackAngle = (attackAngle, figure) => {
-    attackAngle.rotation = figure.direction
-    attackAngle.visible = showDebug && figure.isAttacking
+const animateAttackArc = (attackArc, figure) => {
+    attackArc.rotation = figure.direction
+    attackArc.visible = showDebug && figure.isAttacking
 }
 
-const createAttackAngle = figure => {
-    const attackAngleContainer = new PIXI.Container()
+const createAttackArc = figure => {
+    const attackArcContainer = new PIXI.Container()
     
     let startAngle = deg2rad(45+figure.attackAngle)
     let endAngle = startAngle + deg2rad(figure.attackAngle)
-    const attackAngle = new PIXI.Graphics().moveTo(0, 0).arc(0, 0, figure.attackDistance, startAngle, endAngle).fill({alpha: 0.2, color: 0x000000})
-    attackAngleContainer.addChild(attackAngle)
+    const attackArc = new PIXI.Graphics().moveTo(0, 0).arc(0, 0, figure.attackDistance, startAngle, endAngle).fill({alpha: 0.2, color: 0x000000})
+    attackArcContainer.addChild(attackArc)
 
-    app.ticker.add(() => animateAttackAngle(attackAngleContainer, figure))
-    return attackAngleContainer
+    app.ticker.add(() => animateAttackArc(attackArcContainer, figure))
+    return attackArcContainer
 }
 
 const addDebug = app => {
