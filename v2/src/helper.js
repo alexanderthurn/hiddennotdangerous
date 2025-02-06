@@ -711,8 +711,13 @@ const createFigure = (app, spritesheet, props) => {
     sprite.scale = 2
     sprite.currentAnimation = 'down'
 
-    figure.addChild(sprite)
+    const attackAngle = createAttackAngle(figure)
+
+    figure.addChild(sprite, attackAngle)
     figures.push(figure)
+    figureLayer.attach(figure)
+    debugLayer.attach(attackAngle)
+
     app.ticker.add(() => animateFigure(figure, spritesheet))
     return figure
 }
@@ -735,7 +740,6 @@ const addFigures = (app, spritesheet) => {
             type: 'fighter',
         })
         levelContainer.addChild(figure)
-        figureLayer.attach(figure)
     }
     
     figureLayer.attach(upperFence, upperFence)
@@ -913,6 +917,23 @@ const createMouseControl = app => {
     mouseControl.addChild(circle, arrow, circlePointer)
 
     return mouseControl
+}
+
+const animateAttackAngle = (attackAngle, figure) => {
+    attackAngle.rotation = figure.direction
+    attackAngle.visible = showDebug && figure.isAttacking
+}
+
+const createAttackAngle = figure => {
+    const attackAngleContainer = new PIXI.Container()
+    
+    let startAngle = deg2rad(45+figure.attackAngle)
+    let endAngle = startAngle + deg2rad(figure.attackAngle)
+    const attackAngle = new PIXI.Graphics().moveTo(0, 0).arc(0, 0, figure.attackDistance, startAngle, endAngle).fill({alpha: 0.2, color: 0x000000})
+    attackAngleContainer.addChild(attackAngle)
+
+    app.ticker.add(() => animateAttackAngle(attackAngleContainer, figure))
+    return attackAngleContainer
 }
 
 const addDebug = app => {

@@ -262,13 +262,12 @@ const debugLayer = new PIXI.RenderLayer();
             await spriteSheet.parse()
         ))
 
-        app.stage.addChild(levelContainer, overlayLayer, debugLayer)
+        app.stage.addChild(levelContainer, figureLayer, cloudLayer, scoreLayer, overlayLayer, debugLayer)
         adjustStageToScreen(app, level)
         addGrass(Object.keys(atlasData.grass.frames), spriteSheets.grass);
         addHeadline();
         addMenuItems(app);
         addFoods(app, spriteSheets.food);
-        levelContainer.addChild(figureLayer, cloudLayer, scoreLayer)
         addFigures(app, spriteSheets.figure);
         addWinningCeremony(app);
         addOverlay(app)
