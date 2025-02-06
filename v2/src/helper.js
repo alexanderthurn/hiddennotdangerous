@@ -235,7 +235,7 @@ const addHeadline = () => {
         }
     });
 
-    title.anchor.set(0.5,1);
+    title.anchor.set(0.5, 1);
     title.x = level.width/2;
     title.y = -level.width*0.005;
 
@@ -249,7 +249,7 @@ const addHeadline = () => {
         }
     });
 
-    authors.anchor.set(1,1);
+    authors.anchor.set(1, 1);
     authors.x = level.width;
     authors.y = -level.width*0.005;
 
@@ -344,7 +344,7 @@ const addMenuItems = app => {
         }
     });
 
-    howToPlay.anchor.set(0.5,0);
+    howToPlay.anchor.set(0.5, 0);
     howToPlay.x = level.width*0.22+fontHeight;
     howToPlay.y = level.height*0.1;
 
@@ -514,6 +514,9 @@ const animateFood = figure => {
         const perc = durationLastAttack/figure.attackDuration
         plate.scale = 1 - 0.2 * Math.sin(perc*Math.PI)
     }
+
+    const marker = figure.getChildAt(2)
+    marker.visible = showDebug
 }
 
 const addFood = (app, texture, props) => {
@@ -529,9 +532,12 @@ const addFood = (app, texture, props) => {
     sprite.anchor.set(0.5)
     sprite.scale = 1.2
 
-    food.addChild(plate, sprite)
+    const marker = new PIXI.Graphics(figureMarkerBlue)
+
+    food.addChild(plate, sprite, marker)
     figures.push(food)
     levelContainer.addChild(food)
+    debugLayer.attach(marker)
 
     app.ticker.add(() => animateFood(food))
 }
@@ -701,6 +707,55 @@ const animateFigure = (figure, spritesheet) => {
     figure.zIndex = figure.y
 }
 
+const figureMarker = new PIXI.GraphicsContext().circle(0, 0, 5)
+const figureMarkerBlue = figureMarker.clone().fill(0x0000FF)
+const figureMarkerGreen = figureMarker.clone().fill(0x008000)
+const figureMarkerRed = figureMarker.clone().fill(0xFF0000)
+
+const animateFigureMarker = (attackArc, figure) => {
+    attackArc.rotation = figure.direction
+    attackArc.visible = showDebug && figure.isAttacking
+}
+
+createFigureMarker = figure => {
+    const markerContainer = new PIXI.Container()
+    const marker = new PIXI.Graphics(figureMarkerGreen)
+
+    const markerText = new PIXI.Text({
+        style: {
+            fontSize: 16,
+            fill: 0xFFFFFF
+        }
+    })
+    markerText.anchor.set(0, 1)
+
+    markerContainer.addChild(marker, markerText)
+
+    app.ticker.add(() => {
+        marker.context = figure.playerId ? figureMarkerRed : figureMarkerGreen
+        markerText.text = figure.playerId ? figure.playerId + ' ' + figure.beans.size : ''
+        markerContainer.visible = showDebug
+    })
+    return markerContainer
+}
+
+const animateAttackArc = (attackArc, figure) => {
+    attackArc.rotation = figure.direction
+    attackArc.visible = showDebug && figure.isAttacking
+}
+
+const createAttackArc = figure => {
+    const attackArcContainer = new PIXI.Container()
+    
+    let startAngle = deg2rad(45+figure.attackAngle)
+    let endAngle = startAngle + deg2rad(figure.attackAngle)
+    const attackArc = new PIXI.Graphics().moveTo(0, 0).arc(0, 0, figure.attackDistance, startAngle, endAngle).fill({alpha: 0.2, color: 0x000000})
+    attackArcContainer.addChild(attackArc)
+
+    app.ticker.add(() => animateAttackArc(attackArcContainer, figure))
+    return attackArcContainer
+}
+
 const createFigure = (app, spritesheet, props) => {
     let figure = new PIXI.Container();
     figure = Object.assign(figure, props)
@@ -712,11 +767,12 @@ const createFigure = (app, spritesheet, props) => {
     sprite.currentAnimation = 'down'
 
     const attackArc = createAttackArc(figure)
+    const marker = createFigureMarker(figure)
 
-    figure.addChild(sprite, attackArc)
+    figure.addChild(sprite, attackArc, marker)
     figures.push(figure)
     figureLayer.attach(figure)
-    debugLayer.attach(attackArc)
+    debugLayer.attach(attackArc, marker)
 
     app.ticker.add(() => animateFigure(figure, spritesheet))
     return figure
@@ -797,7 +853,7 @@ const createFpsText = app => {
             fill: 0xFFFFFF
         }
     })
-    fpsText.anchor.set(1,0)
+    fpsText.anchor.set(1, 0)
     fpsText.x = app.screen.width
     fpsText.y = 0
 
@@ -820,7 +876,7 @@ const createPlayersText = app => {
             fill: 0xFFFFFF
         }
     })
-    playersText.anchor.set(0,0)
+    playersText.anchor.set(0)
     playersText.x = 0
     playersText.y = 0
 
@@ -843,7 +899,7 @@ const createFiguresText = app => {
             fill: 0xFFFFFF
         }
     })
-    figuresText.anchor.set(0,1)
+    figuresText.anchor.set(0, 1)
     figuresText.x = 0
     figuresText.y = app.screen.height
 
@@ -917,23 +973,6 @@ const createMouseControl = app => {
     mouseControl.addChild(circle, arrow, circlePointer)
 
     return mouseControl
-}
-
-const animateAttackArc = (attackArc, figure) => {
-    attackArc.rotation = figure.direction
-    attackArc.visible = showDebug && figure.isAttacking
-}
-
-const createAttackArc = figure => {
-    const attackArcContainer = new PIXI.Container()
-    
-    let startAngle = deg2rad(45+figure.attackAngle)
-    let endAngle = startAngle + deg2rad(figure.attackAngle)
-    const attackArc = new PIXI.Graphics().moveTo(0, 0).arc(0, 0, figure.attackDistance, startAngle, endAngle).fill({alpha: 0.2, color: 0x000000})
-    attackArcContainer.addChild(attackArc)
-
-    app.ticker.add(() => animateAttackArc(attackArcContainer, figure))
-    return attackArcContainer
 }
 
 const addDebug = app => {
