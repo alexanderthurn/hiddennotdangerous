@@ -219,8 +219,11 @@ const cloudAtlasData = createCloudAtlasData();
 var spriteSheets;
 const app = new PIXI.Application();
 const levelContainer = new PIXI.Container();
+const figureLayer = new PIXI.RenderLayer({sortableChildren: true});
 const cloudLayer = new PIXI.RenderLayer();
 const scoreLayer = new PIXI.RenderLayer({sortableChildren: true});
+const overlayLayer = new PIXI.RenderLayer();
+const debugLayer = new PIXI.RenderLayer();
 
 (async () =>
     {
@@ -259,18 +262,17 @@ const scoreLayer = new PIXI.RenderLayer({sortableChildren: true});
             await spriteSheet.parse()
         ))
 
-        app.stage.addChild(levelContainer)
+        app.stage.addChild(levelContainer, overlayLayer, debugLayer)
         adjustStageToScreen(app, level)
         addGrass(Object.keys(atlasData.grass.frames), spriteSheets.grass);
         addHeadline();
         addMenuItems(app);
         addFoods(app, spriteSheets.food);
-        addFigureContainer(app, spriteSheets.figure);
-        levelContainer.addChild(cloudLayer)
-        levelContainer.addChild(scoreLayer)
+        levelContainer.addChild(figureLayer, cloudLayer, scoreLayer)
+        addFigures(app, spriteSheets.figure);
         addWinningCeremony(app);
-        addControlContainer(app)
-        addOverlayContainer(app);
+        addOverlay(app)
+        addDebug(app);
         roundInit(true);
         window.requestAnimationFrame(gameLoop);
     }

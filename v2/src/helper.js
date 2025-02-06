@@ -163,6 +163,24 @@ const toggleBots = () => {
     return count
 }
 
+function toggleMusic() {
+    if (isMusicMuted()) {
+        unmuteAudio()
+        if (isGameStarted) {
+            playPlaylist(shuffle(musicGame))
+        } else {
+            playPlaylist(musicLobby)
+        }
+    } else {
+        muteAudio()
+        if (isGameStarted) {
+            stopPlaylist(musicGame)
+        } else {
+            stopPlaylist(musicLobby)
+        }
+    }
+}
+
 const addAnimation = (container, callback) => {
     container.tickerCallback = callback
     app.ticker.add(callback)
@@ -484,6 +502,7 @@ const addWinningCeremony = app => {
     winnerText.y = level.height/2
 
     levelContainer.addChild(winnerText)
+    overlayLayer.attach(winnerText)
 
     app.ticker.add(() => animateWinningCeremony(winnerText))
 }
@@ -698,11 +717,10 @@ const createFigure = (app, spritesheet, props) => {
     return figure
 }
 
-const addFigureContainer = (app, spritesheet) => {
-    let figureContainer = new PIXI.Container()
-
+const addFigures = (app, spritesheet) => {
     const upperFence = createUpperFence(level)
-    figureContainer.addChild(upperFence)
+    const lowerFence = createLowerFence(level)
+    levelContainer.addChild(upperFence, lowerFence)
 
     for (var i = 0; i < maxPlayerFigures; i++) {
         const figure = createFigure(app, spritesheet, {
@@ -716,21 +734,24 @@ const addFigureContainer = (app, spritesheet) => {
             attackAngle: 90,
             type: 'fighter',
         })
-        figureContainer.addChild(figure)
+        levelContainer.addChild(figure)
+        figureLayer.attach(figure)
     }
-    const lowerFence = createLowerFence(level)
-    figureContainer.addChild(lowerFence)
-
-    levelContainer.addChild(figureContainer)
+    
+    figureLayer.attach(upperFence, upperFence)
 }
 
-const addControlContainer = app => {
-    let controlContainer = new PIXI.Container()
-    
+const addOverlay = app => {
     const mouseControl = createMouseControl(app)
-    controlContainer.addChild(mouseControl)
+    const touchControl = createTouchControl(app)
+    const fpsText = createFpsText(app)
+    const pauseOverlay = createPauseOverlay(app)
 
-    levelContainer.addChild(controlContainer)
+    levelContainer.addChild(mouseControl)
+    overlayLayer.attach(mouseControl)
+
+    app.stage.addChild(touchControl, fpsText, pauseOverlay)
+    overlayLayer.attach(mouseControl, touchControl, fpsText, pauseOverlay)
 }
 
 const animatePauseOverlay = overlay => {
@@ -786,7 +807,6 @@ const animatePlayersText = playersText => {
         text.push(p.playerId + ' xAxis: ' + p.xAxis.toFixed(2) + ' yAxis: ' + p.yAxis.toFixed(2) + ' Attack?: ' + p.isAttackButtonPressed)
     })
     playersText.text = text.join('\n')
-    playersText.visible = showDebug
 }
 
 const createPlayersText = app => {
@@ -810,7 +830,6 @@ const animateFiguresText = figuresText => {
         text.push('playerId: ' + f.playerId + ' x: ' + Math.floor(f.x) + ' y: ' + Math.floor(f.y) + ' Beans: ' + f.beans?.size)
     })
     figuresText.text = text.join('\n')
-    figuresText.visible = showDebug
 }
 
 const createFiguresText = app => {
@@ -889,47 +908,24 @@ const createMouseControl = app => {
 
         arrow.visible = mp.isMoving
         circlePointer.visible = !mp.isMoving
-        mouseControl.visible = mp.pointerType === 'mouse'
+        mouseControl.visible = mp.pointerType !== 'touch' && mp.xCenter !== undefined && mp.yCenter !== undefined
     })
     mouseControl.addChild(circle, arrow, circlePointer)
 
     return mouseControl
 }
 
-const addOverlayContainer = app => {
-    const overlay = new PIXI.Container();
+const addDebug = app => {
+    const debugContainer = new PIXI.Container();
 
-    const pauseOverlay = createPauseOverlay(app)
-    const fpsText = createFpsText(app)
     const playersText = createPlayersText(app)
     const figuresText = createFiguresText(app)
-    const touchControl = createTouchControl(app)
 
-    overlay.addChild(pauseOverlay, fpsText, playersText, figuresText, touchControl)
-    app.stage.addChild(overlay)
-}
+    debugContainer.addChild(playersText, figuresText)
+    app.stage.addChild(debugContainer)
+    debugLayer.attach(debugContainer)
 
-var fillTextWithStroke = (ctx, text,x,y) => {
-    ctx.fillText(text,x,y)
-    ctx.strokeText(text,x,y)
-}
-
-function toggleMusic() {
-    if (isMusicMuted()) {
-        unmuteAudio()
-        if (isGameStarted) {
-            playPlaylist(shuffle(musicGame))
-        } else {
-            playPlaylist(musicLobby)
-        }
-    } else {
-        muteAudio()
-        if (isGameStarted) {
-            stopPlaylist(musicGame)
-        } else {
-            stopPlaylist(musicLobby)
-        }
-    }
+    app.ticker.add(() => debugContainer.visible = showDebug)
 }
 
 const animateFartCloud = cloud => {
