@@ -377,7 +377,9 @@ const createLowerFence = level => {
 
 const animateFigure = (figure, spritesheet) => {
     const deg = rad2limiteddeg(figure.direction)
-    const sprite = figure.getChildAt(0)
+    const spriteContainer = figure.getChildAt(0)
+    const sprite = spriteContainer.getChildAt(0)
+    console.log(spriteContainer, sprite)
     let animation
 
     if (distanceAngles(deg, 0) < 45) {
@@ -421,10 +423,10 @@ const animateFigure = (figure, spritesheet) => {
         sprite.stop()
     }
 
-    figure.zIndex = figure.y
+    spriteContainer.zIndex = figure.y
 }
 
-const figureMarker = new PIXI.GraphicsContext().circle(0, 0, 5).fill()
+const figureMarker = new PIXI.GraphicsContext().circle(0, 0, 30).fill()
 
 const animateFigureMarker = (attackArc, figure) => {
     attackArc.rotation = figure.direction
@@ -446,6 +448,8 @@ createFigureMarker = figure => {
     markerContainer.addChild(marker, markerText)
 
     app.ticker.add(() => {
+        console.log(marker.zIndex)
+        marker.zIndex = figure.y
         marker.tint = figure.playerId ? 0xFF0000 : 0x008000
         markerText.text = figure.playerId ? figure.playerId + ' ' + figure.beans.size : ''
         markerContainer.visible = showDebug
@@ -474,18 +478,21 @@ const createFigure = (app, spritesheet, props) => {
     let figure = new PIXI.Container();
     figure = Object.assign(figure, props)
 
-    const sprite = new PIXI.AnimatedSprite(spritesheet.animations.down);
+    const sprite = new PIXI.AnimatedSprite(spritesheet.animations.down)
     sprite.anchor.set(0.5)
     sprite.animationSpeed = 0.125
     sprite.scale = 2
     sprite.currentAnimation = 'down'
 
+    const spriteContainer = new PIXI.Container()
+    spriteContainer.addChild(sprite)
+
     const attackArc = createAttackArc(figure)
     const marker = createFigureMarker(figure)
 
-    figure.addChild(sprite, attackArc, marker)
+    figure.addChild(spriteContainer, attackArc, marker)
     figures.push(figure)
-    figureLayer.attach(figure)
+    figureLayer.attach(spriteContainer)
     debugLayer.attach(attackArc, marker)
 
     app.ticker.add(() => animateFigure(figure, spritesheet))
