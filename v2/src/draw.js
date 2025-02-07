@@ -302,7 +302,8 @@ const addFood = (app, texture, props) => {
     sprite.anchor.set(0.5)
     sprite.scale = 1.2
 
-    const marker = new PIXI.Graphics(figureMarkerBlue)
+    const marker = new PIXI.Graphics(figureMarker)
+    marker.tint = 0x0000FF
 
     food.addChild(plate, sprite, marker)
     figures.push(food)
@@ -423,10 +424,7 @@ const animateFigure = (figure, spritesheet) => {
     figure.zIndex = figure.y
 }
 
-const figureMarker = new PIXI.GraphicsContext().circle(0, 0, 5)
-const figureMarkerBlue = figureMarker.clone().fill(0x0000FF)
-const figureMarkerGreen = figureMarker.clone().fill(0x008000)
-const figureMarkerRed = figureMarker.clone().fill(0xFF0000)
+const figureMarker = new PIXI.GraphicsContext().circle(0, 0, 5).fill()
 
 const animateFigureMarker = (attackArc, figure) => {
     attackArc.rotation = figure.direction
@@ -435,7 +433,7 @@ const animateFigureMarker = (attackArc, figure) => {
 
 createFigureMarker = figure => {
     const markerContainer = new PIXI.Container()
-    const marker = new PIXI.Graphics(figureMarkerGreen)
+    const marker = new PIXI.Graphics(figureMarker)
 
     const markerText = new PIXI.Text({
         style: {
@@ -448,7 +446,7 @@ createFigureMarker = figure => {
     markerContainer.addChild(marker, markerText)
 
     app.ticker.add(() => {
-        marker.context = figure.playerId ? figureMarkerRed : figureMarkerGreen
+        marker.tint = figure.playerId ? 0xFF0000 : 0x008000
         markerText.text = figure.playerId ? figure.playerId + ' ' + figure.beans.size : ''
         markerContainer.visible = showDebug
     })
