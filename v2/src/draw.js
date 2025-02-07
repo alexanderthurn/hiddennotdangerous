@@ -378,7 +378,6 @@ const createLowerFence = level => {
 const animateFigure = (figure, spritesheet) => {
     const deg = rad2limiteddeg(figure.direction)
     const sprite = figure.getChildAt(0)
-    console.log(sprite)
     let animation
 
     if (distanceAngles(deg, 0) < 45) {
