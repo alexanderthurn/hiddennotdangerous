@@ -512,7 +512,7 @@ const addFigures = (app, spritesheet) => {
         levelContainer.addChild(figure)
     }
     
-    figureLayer.attach(upperFence, upperFence)
+    figureLayer.attach(upperFence, lowerFence)
 }
 
 const addOverlay = app => {
