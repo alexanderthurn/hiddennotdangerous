@@ -223,7 +223,7 @@ const figureLayer = new PIXI.RenderLayer({sortableChildren: true});
 const cloudLayer = new PIXI.RenderLayer();
 const scoreLayer = new PIXI.RenderLayer({sortableChildren: true});
 const overlayLayer = new PIXI.RenderLayer();
-const debugLayer = new PIXI.RenderLayer();
+const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
 
 (async () =>
     {
