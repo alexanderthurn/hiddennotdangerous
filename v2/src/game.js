@@ -1,7 +1,6 @@
-var laststep = 0, logit;
-var loadPromises = []
 var canvas = document.body;
 
+var loadPromises = []
 var gamepadPlayers = []
 var mousePlayers = [];
 var mouses = [{pointerType: 'unknown', x: 0, y: 0, xCenter: undefined, yCenter: undefined, pressed: new Set()}]
@@ -33,7 +32,6 @@ var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var isGameStarted = false, restartGame = false, newPlayerIds = new Set(), newPlayerIdThen, lastWinnerPlayerIds = new Set(), lastRoundEndThen, lastFinalWinnerPlayerId;
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
-var figuresV2 = []
 var figures = [], maxPlayerFigures = 32, pointsToWin = 1, deadDuration = 5000, beanAttackDuration = 800, fartGrowDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
@@ -228,6 +226,8 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
 (async () =>
     {
         console.log('no need to hide');
+
+        await Promise.all(loadPromises);
     
         // Initialize the application.
         await app.init({antialias: true, backgroundAlpha: 0, resizeTo: window});
