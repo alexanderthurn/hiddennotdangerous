@@ -278,14 +278,14 @@ const addWinningCeremony = app => {
 }
 
 const animateFood = figure => {
-    const plate = figure.getChildAt(0)
+    const plate = figure.getChildByLabel('plate')
     let durationLastAttack = dtProcessed-figure.lastAttackTime
     if (figure.lastAttackTime && durationLastAttack < figure.attackDuration) {
         const perc = durationLastAttack/figure.attackDuration
         plate.scale = 1 - 0.2 * Math.sin(perc*Math.PI)
     }
 
-    const marker = figure.getChildAt(2)
+    const marker = figure.getChildByLabel('marker')
     marker.visible = showDebug
 }
 
@@ -297,15 +297,17 @@ const addFood = (app, texture, props) => {
     .fill({color: 0xFFFFFF})
     .circle(0, 0 , 0.8*food.attackDistance)
     .stroke({color: 0x000000, width: 2})
+    plate.label = 'plate'
 
-    const sprite = new PIXI.Sprite(texture)
-    sprite.anchor.set(0.5)
-    sprite.scale = 1.2
+    const meal = new PIXI.Sprite(texture)
+    meal.anchor.set(0.5)
+    meal.scale = 1.2
 
     const marker = new PIXI.Graphics(figureMarker)
     marker.tint = 0x0000FF
+    marker.label = 'marker'
 
-    food.addChild(plate, sprite, marker)
+    food.addChild(plate, meal, marker)
     figures.push(food)
     levelContainer.addChild(food)
     debugLayer.attach(marker)
@@ -377,7 +379,7 @@ const createLowerFence = level => {
 
 const animateFigure = (figure, spritesheet) => {
     const deg = rad2limiteddeg(figure.direction)
-    const sprite = figure.getChildAt(0)
+    const body = figure.getChildByLabel('body')
     let animation
 
     if (distanceAngles(deg, 0) < 45) {
@@ -406,19 +408,19 @@ const animateFigure = (figure, spritesheet) => {
         figure.angle = 0
     }
 
-    if (sprite.currentAnimation != animation) {
-        sprite.currentAnimation = animation
-        sprite.textures = spritesheet.animations[animation]
+    if (body.currentAnimation != animation) {
+        body.currentAnimation = animation
+        body.textures = spritesheet.animations[animation]
     }
 
-    if (!(figure.speed === 0 || !windowHasFocus || restartGame) && !sprite.playing) {
-        sprite.play()
+    if (!(figure.speed === 0 || !windowHasFocus || restartGame) && !body.playing) {
+        body.play()
     }
-    if ((figure.speed === 0 || !windowHasFocus || restartGame) && sprite.playing) {
-        if (figure.speed === 0 && sprite.playing) {
-            sprite.currentFrame = 0
+    if ((figure.speed === 0 || !windowHasFocus || restartGame) && body.playing) {
+        if (figure.speed === 0 && body.playing) {
+            body.currentFrame = 0
         }
-        sprite.stop()
+        body.stop()
     }
 
     figure.children.forEach(child => child.zIndex = figure.y)
@@ -474,18 +476,19 @@ const createFigure = (app, spritesheet, props) => {
     let figure = new PIXI.Container({sortableChildren: false});
     figure = Object.assign(figure, props)
 
-    const sprite = new PIXI.AnimatedSprite(spritesheet.animations.down)
-    sprite.anchor.set(0.5)
-    sprite.animationSpeed = 0.125
-    sprite.scale = 2
-    sprite.currentAnimation = 'down'
+    const body = new PIXI.AnimatedSprite(spritesheet.animations.down)
+    body.anchor.set(0.5)
+    body.animationSpeed = 0.125
+    body.scale = 2
+    body.currentAnimation = 'down'
+    body.label = 'body'
 
     const attackArc = createAttackArc(figure)
     const marker = createFigureMarker(figure)
 
-    figure.addChild(sprite, attackArc, marker)
+    figure.addChild(body, attackArc, marker)
     figures.push(figure)
-    figureLayer.attach(sprite)
+    figureLayer.attach(body)
     debugLayer.attach(attackArc, marker)
 
     app.ticker.add(() => animateFigure(figure, spritesheet))
