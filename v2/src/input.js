@@ -109,9 +109,8 @@ window.addEventListener('pointermove', event => {
         return
     }
 
-    mouses[0].x = ((event.clientX - level.offsetX)/level.scale)
-    console.log('bla', mouses[0].x)
-    mouses[0].y = ((event.clientY - level.offsetY)/level.scale) 
+    mouses[0].x = event.clientX
+    mouses[0].y = event.clientY
 
     if (mousePlayers.length > 0) {
         mousePlayers[0].x = mouses[0].x
@@ -269,10 +268,8 @@ function collectInputs() {
         var f = figures.find(f => f.playerId ===  mp.playerId && f.type === 'fighter')
         if (f) {
             if (mp.pointerType === 'touch') {
-                let touchLocalX = (btnTouchController.x - canvas.offsetLeft - level.offsetX)/level.scale;
-                let touchLocalY = (btnTouchController.y - canvas.offsetTop - level.offsetY)/level.scale;
-                let x = mp.x - touchLocalX
-                let y = mp.y - touchLocalY
+                let x = mp.x - btnTouchController.x
+                let y = mp.y - btnTouchController.y
                 mp.xAxis = x
                 mp.yAxis = y   
                 if (!mp.pressed.has(0)) {

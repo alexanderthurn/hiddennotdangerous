@@ -524,10 +524,7 @@ const addOverlay = app => {
     const fpsText = createFpsText(app)
     const pauseOverlay = createPauseOverlay(app)
 
-    levelContainer.addChild(mouseControl)
-    overlayLayer.attach(mouseControl)
-
-    app.stage.addChild(touchControl, fpsText, pauseOverlay)
+    app.stage.addChild(mouseControl, touchControl, fpsText, pauseOverlay)
     overlayLayer.attach(mouseControl, touchControl, fpsText, pauseOverlay)
 }
 
