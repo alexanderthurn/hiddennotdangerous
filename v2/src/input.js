@@ -68,7 +68,7 @@ window.addEventListener('pointerdown', event => {
     }
 
     if (event.pointerType === 'touch') {
-        if (event.clientX < (btnTouchAction.radius > 0 ? (btnTouchAction.x + btnTouchController.x) >> 1 : canvas.width*0.7) || event.clientY < canvas.height * 0.5) {
+        if (event.clientX < (btnTouchAction.radius > 0 ? (btnTouchAction.x + btnTouchController.x) >> 1 : app.screen.width*0.7) || event.clientY < app.screen.height * 0.5) {
             mousePlayers[0].pressed.add(0);
             pointerEvents[event.pointerId] = 0
         } else {
