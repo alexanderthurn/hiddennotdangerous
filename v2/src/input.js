@@ -110,6 +110,7 @@ window.addEventListener('pointermove', event => {
     }
 
     mouses[0].x = ((event.clientX - level.offsetX)/level.scale)
+    console.log('bla', mouses[0].x)
     mouses[0].y = ((event.clientY - level.offsetY)/level.scale) 
 
     if (mousePlayers.length > 0) {
@@ -282,12 +283,8 @@ function collectInputs() {
 
                 mp.isMoving = Math.abs(mp.xAxis) + Math.abs(mp.yAxis) > 4
                
-
             } else if (mp.pointerType === 'mouse') {
-                if (mp.xCenter === undefined) mp.xCenter = (canvas.width*0.5-canvas.offsetLeft-level.offsetX)/level.scale
-                if (mp.yCenter === undefined) mp.yCenter = (canvas.height*0.5-canvas.offsetTop-level.offsetY)/level.scale
-                
-                let x = mp.x- mp.xCenter;
+                let x = mp.x- mp.xCenter
                 let y = mp.y- mp.yCenter
                 mp.xAxis = x
                 mp.yAxis = y   
