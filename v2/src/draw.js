@@ -646,8 +646,6 @@ const createTouchControl = app => {
     attackControl.x = app.screen.width - distanceToBorder
     attackControl.y = app.screen.height - distanceToBorder
 
-    alert('createtouch ' + moveControl.x + ' ' + moveControl.y)
-
     btnTouchController = moveControl
     btnTouchAction = attackControl
     touchControl.addChild(moveControl, attackControl)
