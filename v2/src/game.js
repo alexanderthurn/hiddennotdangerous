@@ -35,7 +35,7 @@ var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figures = [], maxPlayerFigures = 32, pointsToWin = 1, deadDuration = 5000, beanAttackDuration = 800, fartGrowDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
-var level = {}
+var level = createLevel()
 
 var btnTouchController = {
     radius: 0,
@@ -216,7 +216,7 @@ const figureAtlasData = createFigureAtlasData();
 const cloudAtlasData = createCloudAtlasData();
 var spriteSheets;
 const app = new PIXI.Application();
-const levelContainer = new PIXI.Container();
+var levelContainer;
 const figureLayer = new PIXI.RenderLayer({sortableChildren: true});
 const cloudLayer = new PIXI.RenderLayer();
 const scoreLayer = new PIXI.RenderLayer({sortableChildren: true});
@@ -262,8 +262,8 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
             await spriteSheet.parse()
         ))
 
+        levelContainer = createLevelContainer(app, level);
         app.stage.addChild(levelContainer, figureLayer, cloudLayer, scoreLayer, overlayLayer, debugLayer)
-        adjustStageToScreen(app, level)
         addGrass(Object.keys(atlasData.grass.frames), spriteSheets.grass);
         addHeadline();
         addMenuItems(app);
@@ -272,11 +272,11 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         addWinningCeremony(app);
         addOverlay(app)
         addDebug(app);
+       
         roundInit(true);
         window.requestAnimationFrame(gameLoop);
     }
 )();
-
 
 document.addEventListener("DOMContentLoaded", function(event){
     /*addjustAfterResizeIfNeeded(level, canvas)

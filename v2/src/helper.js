@@ -191,22 +191,29 @@ const destroyContainer = (app, container) => {
     container.destroy()
 }
 
-function adjustStageToScreen(app, level) {
-    level.width = 1920
-    level.height = 1080
-    level.padding = 16
-    level.scale = Math.min(app.screen.width / level.width, app.screen.height / level.height) * 0.9
-    level.offsetX = (app.screen.width - level.scale * level.width) / 2
-    level.offsetY = (app.screen.height - level.scale * level.height) / 2
+const createLevelContainer = (app, level) => {
+    const levelContainer = new PIXI.Container()
+
+    app.ticker.add(() => {
+        const scale = Math.min(app.screen.width / level.width, app.screen.height / level.height) * 0.9
+        const offsetX = (app.screen.width - scale * level.width) / 2
+        const offsetY = (app.screen.height - scale * level.height) / 2
+
+        levelContainer.scale.x = scale
+        levelContainer.scale.y = scale
+        levelContainer.x = offsetX
+        levelContainer.y = offsetY
+    })
+
+    return levelContainer
+}
+
+function createLevel() {
+    const level = {width: 1920, height: 1080, padding: 16}
     level.shortestPathNotBean5 = 2*0.6*level.height+2*0.3*Math.hypot(level.height, level.width);
     level.shortestPathBean5 = 2*0.6*level.height+0.6*level.width+0.3*Math.hypot(level.height, level.width);
 
-    levelContainer.width = level.width
-    levelContainer.height = level.height
-    levelContainer.scale.x = level.scale
-    levelContainer.scale.y = level.scale
-    levelContainer.x = level.offsetX;
-    levelContainer.y = level.offsetY;
+    return level
 }
 
 function getRandomXY(level) {
