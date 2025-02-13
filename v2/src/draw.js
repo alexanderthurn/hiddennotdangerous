@@ -528,30 +528,37 @@ const addOverlay = app => {
     overlayLayer.attach(mouseControl, touchControl, fpsText, pauseOverlay)
 }
 
-const animatePauseOverlay = overlay => {
-    overlay.getChildAt(1).text = isGameStarted ? 'Pause' : 'Welcome to Knirps und Knall'
+const animatePauseOverlay = (app, overlay) => {
+    const background = overlay.getChildByLabel('background')
+    const text = overlay.getChildByLabel('text')
+    background.height = app.screen.height/2
+    background.width = app.screen.width
+    background.y = app.screen.height/4
+    text.text = isGameStarted ? 'Pause' : 'Welcome to Knirps und Knall'
+    text.style.fontSize = 0.05*app.screen.width
+    text.x = app.screen.width/2
+    text.y = app.screen.height/2
     overlay.visible = !windowHasFocus
 }
 
 const createPauseOverlay = app => {
     const overlay = new PIXI.Container();
 
-    const background = new PIXI.Graphics().rect(0, app.screen.height/4, app.screen.width, app.screen.height/2)
+    const background = new PIXI.Graphics().rect(0, 0, app.screen.width, app.screen.height/2)
     .fill({alpha: 0.9, color: 0x57412f})
+    background.label = 'background'
 
     const text = new PIXI.Text({
         style: {
-            fontSize: 0.05*app.screen.width,
             fill: 0xFFFFFF
         }
     })
     text.anchor.set(0.5)
-    text.x = app.screen.width/2
-    text.y = app.screen.height/2
+    text.label = 'text'
 
     overlay.addChild(background, text)
 
-    app.ticker.add(() => animatePauseOverlay(overlay))
+    app.ticker.add(() => animatePauseOverlay(app, overlay))
     return overlay
 }
 
