@@ -1,5 +1,3 @@
-var canvas = document.body;
-
 var loadPromises = []
 var gamepadPlayers = []
 var mousePlayers = [];
@@ -226,14 +224,16 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
 (async () =>
     {
         console.log('no need to hide');
-
-        await Promise.all(loadPromises);
     
         // Initialize the application.
         await app.init({antialias: true, backgroundAlpha: 0, resizeTo: window});
     
         // Then adding the application's canvas to the DOM body.
         document.body.appendChild(app.canvas);
+
+        const loadingText = createLoadingText(app);
+
+        await Promise.all(loadPromises);
 
         const assets = [
             {alias: 'food', src: '../gfx/food-OCAL.png'},
@@ -262,6 +262,7 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
             await spriteSheet.parse()
         ))
 
+        destroyContainer(app, loadingText)
         levelContainer = createLevelContainer(app, level);
         app.stage.addChild(levelContainer, figureLayer, cloudLayer, scoreLayer, overlayLayer, debugLayer)
         addGrass(Object.keys(atlasData.grass.frames), spriteSheets.grass);
@@ -277,26 +278,6 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         window.requestAnimationFrame(gameLoop);
     }
 )();
-
-document.addEventListener("DOMContentLoaded", function(event){
-    /*addjustAfterResizeIfNeeded(level, canvas)
-
-    // loading images
-    ctx.save()
-    ctx.font = canvas.height*0.1+"px serif";
-    ctx.fillStyle = "white";
-    ctx.textAlign = "left";
-    ctx.textBaseline='top'
-    ctx.fillText('Loading...',0,0)
-    ctx.restore()
-
-    Promise.all(loadPromises).then(() => {
-        //playAudioPool(soundAttackPool, 0);
-        gameInit(true)
-        window.requestAnimationFrame(gameLoop);
-    })*/
-   
-})
 
 function roundInit(completeRestart) {
     then = Date.now();

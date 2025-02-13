@@ -1,3 +1,17 @@
+const createLoadingText = app => {
+    const text = new PIXI.Text({
+        text: 'Loading...',
+        style: {
+            fontFamily: 'Serif',
+            fontSize: app.screen.height*0.1,
+            fill: 0xFFFFFF
+        }
+    })
+
+    app.stage.addChild(text)
+    return text
+}
+
 const addHeadline = () => {
     const title = new PIXI.Text({
         text: 'KNIRPS UND KNALL',
