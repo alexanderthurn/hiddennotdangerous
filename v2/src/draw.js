@@ -605,12 +605,13 @@ const createPlayersText = app => {
     return playersText
 }
 
-const animateFiguresText = figuresText => {
+const animateFiguresText = (app, figuresText) => {
     const text = ['Figures with player']
     figures.filter(f => f.playerId).forEach(f => {
         text.push('playerId: ' + f.playerId + ' x: ' + Math.floor(f.x) + ' y: ' + Math.floor(f.y) + ' Beans: ' + f.beans?.size)
     })
     figuresText.text = text.join('\n')
+    figuresText.y = app.screen.height
 }
 
 const createFiguresText = app => {
@@ -622,9 +623,8 @@ const createFiguresText = app => {
     })
     figuresText.anchor.set(0, 1)
     figuresText.x = 0
-    figuresText.y = app.screen.height
 
-    app.ticker.add(() => animateFiguresText(figuresText))
+    app.ticker.add(() => animateFiguresText(app, figuresText))
     return figuresText
 }
 
@@ -730,7 +730,9 @@ const addDebug = app => {
     app.stage.addChild(debugContainer)
     debugLayer.attach(debugContainer)
 
-    app.ticker.add(() => debugContainer.visible = showDebug)
+    app.ticker.add(() => {
+        debugContainer.visible = showDebug
+    })
 }
 
 const animateFartCloud = cloud => {
