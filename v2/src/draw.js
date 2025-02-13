@@ -562,7 +562,8 @@ const createPauseOverlay = app => {
     return overlay
 }
 
-const animateFpsText = fpsText => {
+const animateFpsText = (app, fpsText) => {
+    fpsText.x = app.screen.width
     fpsText.text = fps + ' FPS'
     fpsText.visible = windowHasFocus
 }
@@ -575,10 +576,9 @@ const createFpsText = app => {
         }
     })
     fpsText.anchor.set(1, 0)
-    fpsText.x = app.screen.width
     fpsText.y = 0
 
-    app.ticker.add(() => animateFpsText(fpsText))
+    app.ticker.add(() => animateFpsText(app, fpsText))
     return fpsText
 }
 
@@ -639,24 +639,35 @@ const createTouchControl = app => {
     const moveControlBackground = new PIXI.Graphics().circle(0, 0, radius).fill({alpha: 0.3, color: 0xFFFFFF})
     const moveControlStick = new PIXI.Graphics().circle(0, 0, radius/2).fill({alpha: 0.3, color: 0xFFFFFF})
     moveControl.addChild(moveControlBackground, moveControlStick)
-    moveControl.radius = radius
-    moveControl.x = distanceToBorder
-    moveControl.y = app.screen.height - distanceToBorder
+    moveControl.startRadius = radius
 
     const attackControl = new PIXI.Container()
     const attackControlButton = new PIXI.Graphics().circle(0, 0, radius).fill({alpha: 0.4, color: 0xFFFFFF})
     attackControl.addChild(attackControlButton)
-    attackControl.radius = radius
-    attackControl.x = app.screen.width - distanceToBorder
-    attackControl.y = app.screen.height - distanceToBorder
+    attackControl.startRadius = radius
 
     btnTouchController = moveControl
     btnTouchAction = attackControl
     touchControl.addChild(moveControl, attackControl)
 
     app.ticker.add(() => {
+        let minHeightWidth = Math.min(app.screen.width, app.screen.height)
+        const distanceToBorder = 0.3*minHeightWidth
+        const radius = 0.18*minHeightWidth
+
         const mp = mousePlayers.length > 0 ? mousePlayers[0] : mouses[0]
         touchControl.visible = mp.pointerType === 'touch'
+
+        moveControl.radius = radius
+        moveControl.scale = radius/moveControl.startRadius
+        moveControl.x = distanceToBorder
+        moveControl.y = app.screen.height - distanceToBorder
+
+        attackControl.radius = radius
+        attackControl.scale = radius/attackControl.startRadius
+        attackControl.x = app.screen.width - distanceToBorder
+        attackControl.y = app.screen.height - distanceToBorder
+
         const xy = move(0, 0, angle(0, 0, mp.xAxis, mp.yAxis), radius/2, mp.isMoving)
         moveControlStick.x = xy.x || 0
         moveControlStick.y = xy.y || 0
