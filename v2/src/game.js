@@ -345,6 +345,7 @@ function gameLoop() {
     // remove figures without valid playerId
     figures.filter(f => f.playerId).forEach((f) => {
         if (!players.some(p => p.playerId === f.playerId)) {
+            destroyContainer(app, f.score)
             f.playerId = null
         }
     })
