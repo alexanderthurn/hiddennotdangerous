@@ -181,6 +181,21 @@ function toggleMusic() {
     }
 }
 
+const loadButton = (btn, aimLoadingPercentage) => {
+    if (btn.loadingPercentage < aimLoadingPercentage) {
+        btn.loadingPercentage += btn.loadingSpeed * dt;
+        btn.loadingPercentage = Math.min(btn.loadingPercentage, aimLoadingPercentage);
+    } else if (btn.loadingPercentage > aimLoadingPercentage) {
+        btn.loadingPercentage -= btn.loadingSpeed * dt;
+        btn.loadingPercentage = Math.max(btn.loadingPercentage, aimLoadingPercentage);
+    }
+    
+    if (btn.loadingPercentage >= 1) {
+        btn.loadingPercentage = 0
+        btn.execute()
+    }
+}
+
 const addAnimation = (container, callback) => {
     container.tickerCallback = callback
     app.ticker.add(callback)

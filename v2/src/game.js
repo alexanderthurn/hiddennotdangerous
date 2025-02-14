@@ -421,37 +421,17 @@ function updateGame(figures, dt, dtProcessed) {
 
     if (!isGameStarted) {
         Object.values(buttons).forEach(btn => {
-            btn.playerPercentage = 0.0
             btn.playersPossible = figures.filter(f => f.playerId && f.type === 'fighter')
             btn.playersNear = btn.playersPossible.filter(f => isInRect(f.x,f.y+f.height*0.5,btn.x,btn.y,btn.width,btn.height))
             
+            let aimLoadingPercentage
             if (btn === buttons.start) {
-                const maxLoadingPercentage = btn.playersNear.length / Math.max(btn.playersPossible.length, 2);
-                const minLoadingPercentage = Math.max(btn.playersNear.length-1, 0) / Math.max(btn.playersPossible.length, 1);
-                
-                if (btn.loadingPercentage < maxLoadingPercentage) {
-                    btn.loadingPercentage += btn.loadingSpeed * dt;
-                    btn.loadingPercentage = Math.min(btn.loadingPercentage, maxLoadingPercentage);
-                } else if (btn.loadingPercentage > maxLoadingPercentage) {
-                    btn.loadingPercentage -= btn.loadingSpeed * dt;
-                    btn.loadingPercentage = Math.max(btn.loadingPercentage, minLoadingPercentage);
-                }
+                aimLoadingPercentage = btn.playersNear.length / Math.max(btn.playersPossible.length, 2);
             } else {
-                 if (btn.playersNear.length > 0) {
-                    btn.loadingPercentage += btn.loadingSpeed * dt;
-                } else {
-                    btn.loadingPercentage -= btn.loadingSpeed * dt
-                }
-                btn.loadingPercentage = btn.loadingPercentage > 0 ? btn.loadingPercentage : 0;
+                aimLoadingPercentage = btn.playersNear.length > 0 ? 1 : 0;
             }
-
-            if (btn.loadingPercentage >= 1) {
-                btn.loadingPercentage = 0
-                btn.execute()
-            }
+            loadButton(btn, aimLoadingPercentage)
         })
-       
-
 
         figuresDead.forEach(f => {if (dtProcessed-f.killTime > deadDuration) {
             f.isDead = false
