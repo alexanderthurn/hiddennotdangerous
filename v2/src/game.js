@@ -426,19 +426,17 @@ function updateGame(figures, dt, dtProcessed) {
             btn.playersNear = btn.playersPossible.filter(f => isInRect(f.x,f.y+f.height*0.5,btn.x,btn.y,btn.width,btn.height))
             
             if (btn === buttons.start) {
-                const maxLoadingPercentage = btn.playersPossible.length > 1 ? btn.playersNear.length / btn.playersPossible.length : btn.playersNear.length*0.5;
+                const maxLoadingPercentage = btn.playersNear.length / Math.max(btn.playersPossible.length, 2);
                 const minLoadingPercentage = Math.max(btn.playersNear.length-1, 0) / Math.max(btn.playersPossible.length, 1);
                 
-                if (btn.loadingPercentage <= maxLoadingPercentage) {
+                if (btn.loadingPercentage < maxLoadingPercentage) {
                     btn.loadingPercentage += btn.loadingSpeed * dt;
                     btn.loadingPercentage = Math.min(btn.loadingPercentage, maxLoadingPercentage);
-                } else {
+                } else if (btn.loadingPercentage > maxLoadingPercentage) {
                     btn.loadingPercentage -= btn.loadingSpeed * dt;
                     btn.loadingPercentage = Math.max(btn.loadingPercentage, minLoadingPercentage);
                 }
-
             } else {
-                
                  if (btn.playersNear.length > 0) {
                     btn.loadingPercentage += btn.loadingSpeed * dt;
                 } else {
