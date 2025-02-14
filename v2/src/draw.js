@@ -394,6 +394,7 @@ const createLowerFence = level => {
 const animateFigure = (figure, spritesheet) => {
     const deg = rad2limiteddeg(figure.direction)
     const body = figure.getChildByLabel('body')
+    const shadow = figure.getChildByLabel('shadow')
     let animation
 
     if (distanceAngles(deg, 0) < 45) {
@@ -408,6 +409,7 @@ const animateFigure = (figure, spritesheet) => {
 
     if (figure.isDead) {
         figure.angle = 90
+      
     } else if (figure.isAttacking) {
         if (distanceAngles(deg, 0) < 45) {
             figure.angle = 20
@@ -425,16 +427,25 @@ const animateFigure = (figure, spritesheet) => {
     if (body.currentAnimation != animation) {
         body.currentAnimation = animation
         body.textures = spritesheet.animations[animation]
+
+        shadow.currentAnimation = animation
+        shadow.textures = spritesheet.animations[animation]
     }
+
+    shadow.visible = !figure.isDead
+    shadow.angle = -figure.angle
 
     if (!(figure.speed === 0 || !windowHasFocus || restartGame) && !body.playing) {
         body.play()
+        shadow.play()
     }
     if ((figure.speed === 0 || !windowHasFocus || restartGame) && body.playing) {
         if (figure.speed === 0 && body.playing) {
             body.currentFrame = 0
+            shadow.currentFrame = 0
         }
         body.stop()
+        shadow.stop()
     }
 
     figure.children.forEach(child => child.zIndex = figure.y)
@@ -497,10 +508,22 @@ const createFigure = (app, spritesheet, props) => {
     body.currentAnimation = 'down'
     body.label = 'body'
 
+    const shadow = new PIXI.AnimatedSprite(spritesheet.animations.down)
+    shadow.anchor.set(0.1,0.5)
+    shadow.animationSpeed = 0.125
+    shadow.currentAnimation = 'down'
+    shadow.label = 'shadow'
+    shadow.tint = 0x000000
+    shadow.scale.set(2*1.005, 2*1.28)
+    shadow.skew.set(-0.68, 0.1)
+    shadow.rotation = 0.1
+    shadow.alpha = 0.3
+    
+
     const attackArc = createAttackArc(figure)
     const marker = createFigureMarker(figure)
 
-    figure.addChild(body, attackArc, marker)
+    figure.addChild(body, attackArc, marker, shadow)
     figures.push(figure)
     figureLayer.attach(body)
     debugLayer.attach(attackArc, marker)
