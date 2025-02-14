@@ -146,7 +146,7 @@ const playerWinnerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fi
 
 const animatePlayerScore = figure => {
     if (!restartGame) {
-        var lp = !newPlayerIds.has(figure.playerId) ? 1 : Math.min((dtProcessed - newPlayerIdThen) / moveNewPlayerDuration, 1)
+        var lp = Math.min((dtProcessed - figure.playerJoinedTime) / moveNewPlayerDuration, 1)
         var lpi = 1-lp
 
         figure.score.x = lpi * (level.width*0.5) + lp*figure.score.xDefault

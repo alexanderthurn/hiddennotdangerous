@@ -27,7 +27,7 @@ var keyboards = [{bindings: {
     'ShiftRight': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var isGameStarted = false, restartGame = false, newPlayerIds = new Set(), newPlayerIdThen, lastWinnerPlayerIds = new Set(), lastRoundEndThen, lastFinalWinnerPlayerId;
+var isGameStarted = false, restartGame = false, lastWinnerPlayerIds = new Set(), lastRoundEndThen, lastFinalWinnerPlayerId;
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figures = [], maxPlayerFigures = 32, pointsToWin = 1, deadDuration = 5000, beanAttackDuration = 800, fartGrowDuration = 2000
@@ -312,6 +312,7 @@ function roundInit(completeRestart) {
             direction: angle(x,y,xTarget,yTarget),
             isAttacking: false,
             lastAttackTime: undefined,
+            playerJoinedTime: undefined,
             beans: new Set(),
             beansFarted: new Set()
         })
@@ -346,6 +347,7 @@ function gameLoop() {
     figures.filter(f => f.playerId).forEach((f) => {
         if (!players.some(p => p.playerId === f.playerId)) {
             destroyContainer(app, f.score)
+            f.playerJoinedTime = undefined
             f.playerId = null
         }
     })
@@ -493,6 +495,7 @@ function handleInput(players, figures, dtProcessed) {
                 return
             }
             var figure = figures.find(f => !f.playerId && f.type === 'fighter')
+            figure.playerJoinedTime = dtProcessed
             addPlayerScore(figure, p)
             figure.isDead = false
             figure.playerId = p.playerId
@@ -501,9 +504,6 @@ function handleInput(players, figures, dtProcessed) {
                 figure.y = level.height*0.05+Math.random() * level.height*0.42
             }
             playAudio(soundJoin);
-            newPlayerIds.clear();
-            newPlayerIds.add(figure.playerId);
-            newPlayerIdThen = dtProcessed
 
             if (joinedFighters.length === 0) {
                 if (!isMusicMuted()) {
