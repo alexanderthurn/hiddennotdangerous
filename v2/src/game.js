@@ -215,6 +215,7 @@ const cloudAtlasData = createCloudAtlasData();
 var spriteSheets;
 const app = new PIXI.Application();
 var levelContainer;
+const figureShadowLayer = new PIXI.RenderLayer();
 const figureLayer = new PIXI.RenderLayer({sortableChildren: true});
 const cloudLayer = new PIXI.RenderLayer();
 const scoreLayer = new PIXI.RenderLayer({sortableChildren: true});
@@ -264,7 +265,7 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
 
         destroyContainer(app, loadingText)
         levelContainer = createLevelContainer(app, level);
-        app.stage.addChild(levelContainer, figureLayer, cloudLayer, scoreLayer, overlayLayer, debugLayer)
+        app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, scoreLayer, overlayLayer, debugLayer)
         addGrass(Object.keys(atlasData.grass.frames), spriteSheets.grass);
         addHeadline();
         addMenuItems(app);

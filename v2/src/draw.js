@@ -409,18 +409,22 @@ const animateFigure = (figure, spritesheet) => {
 
     if (figure.isDead) {
         figure.angle = 90
-    } else if (figure.isAttacking) {
-        if (distanceAngles(deg, 0) < 45) {
-            figure.angle = 20
-        } else if (distanceAngles(deg, 90) <= 45) {
-            figure.angle = -20
-        } else if (distanceAngles(deg, 180) < 45) {
-            figure.angle = -20
-        } else {
-            figure.angle = 20
-        }
+        figureLayer.detach(body)
     } else {
-        figure.angle = 0
+        if (figure.isAttacking) {
+            if (distanceAngles(deg, 0) < 45) {
+                figure.angle = 20
+            } else if (distanceAngles(deg, 90) <= 45) {
+                figure.angle = -20
+            } else if (distanceAngles(deg, 180) < 45) {
+                figure.angle = -20
+            } else {
+                figure.angle = 20
+            }
+        } else {
+            figure.angle = 0
+        }
+        figureLayer.attach(body)
     }
 
     if (body.currentAnimation != animation) {
@@ -521,6 +525,7 @@ const createFigure = (app, spritesheet, props) => {
 
     figure.addChild(body, attackArc, marker, shadow)
     figures.push(figure)
+    figureShadowLayer.attach(shadow)
     figureLayer.attach(body)
     debugLayer.attach(attackArc, marker)
 
