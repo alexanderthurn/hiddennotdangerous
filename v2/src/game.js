@@ -269,6 +269,7 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         addHeadline();
         addMenuItems(app);
         addFoods(app, spriteSheets.food);
+        addLevelBoundary(app);
         addFigures(app, spriteSheets.figure);
         addWinningCeremony(app);
         addOverlay(app)

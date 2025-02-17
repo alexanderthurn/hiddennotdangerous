@@ -409,7 +409,6 @@ const animateFigure = (figure, spritesheet) => {
 
     if (figure.isDead) {
         figure.angle = 90
-      
     } else if (figure.isAttacking) {
         if (distanceAngles(deg, 0) < 45) {
             figure.angle = 20
@@ -438,8 +437,7 @@ const animateFigure = (figure, spritesheet) => {
     if (!(figure.speed === 0 || !windowHasFocus || restartGame) && !body.playing) {
         body.play()
         shadow.play()
-    }
-    if ((figure.speed === 0 || !windowHasFocus || restartGame) && body.playing) {
+    } else if ((figure.speed === 0 || !windowHasFocus || restartGame) && body.playing) {
         if (figure.speed === 0 && body.playing) {
             body.currentFrame = 0
             shadow.currentFrame = 0
@@ -509,16 +507,14 @@ const createFigure = (app, spritesheet, props) => {
     body.label = 'body'
 
     const shadow = new PIXI.AnimatedSprite(spritesheet.animations.down)
-    shadow.anchor.set(0.1,0.5)
+    shadow.anchor.set(0.1   ,0.5)
     shadow.animationSpeed = 0.125
     shadow.currentAnimation = 'down'
     shadow.label = 'shadow'
     shadow.tint = 0x000000
     shadow.scale.set(2*1.005, 2*1.28)
     shadow.skew.set(-0.68, 0.1)
-    shadow.rotation = 0.1
     shadow.alpha = 0.3
-    
 
     const attackArc = createAttackArc(figure)
     const marker = createFigureMarker(figure)
@@ -532,11 +528,14 @@ const createFigure = (app, spritesheet, props) => {
     return figure
 }
 
-const addFigures = (app, spritesheet) => {
+const addLevelBoundary = () => {
     const upperFence = createUpperFence(level)
     const lowerFence = createLowerFence(level)
     levelContainer.addChild(upperFence, lowerFence)
+    figureLayer.attach(lowerFence)
+}
 
+const addFigures = (app, spritesheet) => {
     for (var i = 0; i < maxPlayerFigures; i++) {
         const figure = createFigure(app, spritesheet, {
             maxBreakDuration: 5000,
@@ -551,8 +550,6 @@ const addFigures = (app, spritesheet) => {
         })
         levelContainer.addChild(figure)
     }
-    
-    figureLayer.attach(upperFence, lowerFence)
 }
 
 const addOverlay = app => {
