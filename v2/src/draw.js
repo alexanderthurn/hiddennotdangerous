@@ -1,3 +1,11 @@
+const shadowDefinition = {
+    alpha: 0.3,
+    angle: 6,
+    scale: {x: 1.005, y: 1.28},
+    skew: {x: -0.68, y: 0},
+    color: 0x000000
+}
+
 const createLoadingText = app => {
     const text = new PIXI.Text({
         text: 'Loading...',
@@ -391,6 +399,20 @@ const createLowerFence = level => {
     return lowerFence
 }
 
+const addLevelBoundary = () => {
+    const upperFence = createUpperFence(level)
+    const upperFenceShadow = upperFence.clone()
+
+    /*upperFenceShadow.alpha = shadowDefinition.alpha
+    upperFenceShadow.scale.set(2*shadowDefinition.scale.x, 2*shadowDefinition.scale.y)
+    upperFenceShadow.skew.set(shadowDefinition.skew.x, shadowDefinition.skew.y)
+    upperFenceShadow.tint = shadowDefinition.color*/
+
+    const lowerFence = createLowerFence(level)
+    levelContainer.addChild(upperFenceShadow, upperFence, lowerFence)
+    figureLayer.attach(lowerFence)
+}
+
 const animateFigure = (figure, spritesheet) => {
     const deg = rad2limiteddeg(figure.direction)
     const body = figure.getChildByLabel('body')
@@ -408,21 +430,21 @@ const animateFigure = (figure, spritesheet) => {
     }
 
     if (figure.isDead) {
-        figure.angle = 90
+        body.angle = 90
         figureLayer.detach(body)
     } else {
         if (figure.isAttacking) {
             if (distanceAngles(deg, 0) < 45) {
-                figure.angle = 20
+                body.angle = 20
             } else if (distanceAngles(deg, 90) <= 45) {
-                figure.angle = -20
+                body.angle = -20
             } else if (distanceAngles(deg, 180) < 45) {
-                figure.angle = -20
+                body.angle = -20
             } else {
-                figure.angle = 20
+                body.angle = 20
             }
         } else {
-            figure.angle = 0
+            body.angle = 0
         }
         figureLayer.attach(body)
     }
@@ -436,7 +458,6 @@ const animateFigure = (figure, spritesheet) => {
     }
 
     shadow.visible = !figure.isDead
-    shadow.angle = -figure.angle
 
     if (!(figure.speed === 0 || !windowHasFocus || restartGame) && !body.playing) {
         body.play()
@@ -506,19 +527,20 @@ const createFigure = (app, spritesheet, props) => {
     const body = new PIXI.AnimatedSprite(spritesheet.animations.down)
     body.anchor.set(0.5)
     body.animationSpeed = 0.125
-    body.scale = 2
     body.currentAnimation = 'down'
+    body.scale = 2
     body.label = 'body'
 
     const shadow = new PIXI.AnimatedSprite(spritesheet.animations.down)
-    shadow.anchor.set(0.1   ,0.5)
+    shadow.anchor.set(0.1, 0.5)
     shadow.animationSpeed = 0.125
     shadow.currentAnimation = 'down'
+    shadow.alpha = shadowDefinition.alpha
+    shadow.scale.set(2*shadowDefinition.scale.x, 2*shadowDefinition.scale.y)
+    shadow.skew.set(shadowDefinition.skew.x, shadowDefinition.skew.y)
+    shadow.angle = shadowDefinition.angle
+    shadow.tint = shadowDefinition.color
     shadow.label = 'shadow'
-    shadow.tint = 0x000000
-    shadow.scale.set(2*1.005, 2*1.28)
-    shadow.skew.set(-0.68, 0.1)
-    shadow.alpha = 0.3
 
     const attackArc = createAttackArc(figure)
     const marker = createFigureMarker(figure)
@@ -531,13 +553,6 @@ const createFigure = (app, spritesheet, props) => {
 
     app.ticker.add(() => animateFigure(figure, spritesheet))
     return figure
-}
-
-const addLevelBoundary = () => {
-    const upperFence = createUpperFence(level)
-    const lowerFence = createLowerFence(level)
-    levelContainer.addChild(upperFence, lowerFence)
-    figureLayer.attach(lowerFence)
 }
 
 const addFigures = (app, spritesheet) => {
