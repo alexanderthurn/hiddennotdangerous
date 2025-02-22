@@ -193,6 +193,13 @@ class FWTouchControl extends PIXI.Container{
             fontSize: 64,
             fill: '#000'
         });
+
+        const textStyleSmall = new PIXI.TextStyle({
+            fontFamily: 'Xolonium',
+            fontStyle: 'Bold',
+            fontSize: 48,
+            fill: '#000'
+        });
         
         this.pointer = {pointerType: 'unknown', x: 0, y: 0, xCenter: undefined, yCenter: undefined, pressed: new Set(), events: {}}
         this.buttonContainers = []
@@ -220,22 +227,36 @@ class FWTouchControl extends PIXI.Container{
         for (let i = 0; i < 17; i++) {
             let buttonContainer = new PIXI.Container()
             let buttonBackground = new PIXI.Graphics().circle(0, 0, radius).fill({alpha: 1.0, color: 0xFFFFFF})
-            let buttonText = new PIXI.Text({text: i, style: textStyle})
+            let buttonText = new PIXI.Text({text: i, style: (i === 8 || i === 9 || i === 16) ? textStyleSmall : textStyle})
             buttonText.anchor.set(0.5)
             buttonContainer.addChild(buttonBackground, buttonText)
             buttonContainer.startRadius = radius
             buttonContainer.index = i
             buttonContainer.rPos = [0,0]
             buttonContainer.pressed = false
+            //buttonContainer.pressed = i % 2 > 0 ? true : false
+
+            buttonContainer.interactive = true
+
+            buttonContainer.addEventListener('pointerdown', {
+                handleEvent: function(event) {
+                    buttonContainer.pressed = true
+                }
+            }) 
+
+            buttonContainer.addEventListener('pointerup', {
+                handleEvent: function(event) {
+                    buttonContainer.pressed = false
+                }
+            }) 
+
+            buttonContainer.addEventListener('pointerleave', {
+                handleEvent: function(event) {
+                    buttonContainer.pressed = false
+                }
+            }) 
             this.buttonContainers.push(buttonContainer)
             this.addChild(buttonContainer)
-/*
-
-                case 0: buttonText.text = 'A'; buttonContainer.rPos = [0.85, 1.0, 0.075, -1.0, 0.0]; break;
-                case 1: buttonText.text = 'B'; buttonContainer.rPos = [1.0, 0.85, 0.075, 0.0, 0.0]; break;
-                case 2: buttonText.text = 'X'; buttonContainer.rPos = [0.7, 0.85, 0.075, -2.0, 0.0]; break;
-                case 3: buttonText.text = 'Y'; buttonContainer.rPos = [0.85, 0.7,0.075, -1.0, 0.0]; break;
-                */
 
             switch(i) {
                 case 0: buttonText.text = 'A'; buttonContainer.rPos = [1.0, 1.0, 0.075, -1.0, 0.0]; break;
@@ -262,7 +283,7 @@ class FWTouchControl extends PIXI.Container{
         //this.addChild(new PIXI.Graphics().rect(0,0,100,100).fill({color: '#fff', alpha: 1.0}))
 
 
-        window.addEventListener('pointerdown', event => {
+       /* window.addEventListener('pointerdown', event => {
 
             console.log('down', event)
            //if (event.clientX- btnTouchAction.radius > 0 ? (btnTouchAction.x + btnTouchController.x) >> 1 : app.screen.width*0.7) || event.clientY < app.screen.height * 0.5) {
@@ -301,6 +322,7 @@ class FWTouchControl extends PIXI.Container{
             event.preventDefault();
             event.stopPropagation();
         }, false);
+*/
 
     }
 
@@ -321,6 +343,8 @@ class FWTouchControl extends PIXI.Container{
         this.buttonContainers.forEach((container, index) => {
             container.radius = container.rPos[2]*minHeightWidth
             container.scale = container.radius/container.startRadius
+            container.alpha = (container.pressed ? 0.5 : 1.0)
+            container.tint = (container.pressed ? 0x000000 : 0xffffff) 
             container.x = (distanceToBorder + container.radius) + container.rPos[0]*(app.containerGame.screenWidth - distanceToBorder*2 -container.radius*2) + (container.rPos.length > 3 ? container.rPos[3]*container.radius*2 : 0)
             container.y = (distanceToBorder + container.radius) + container.rPos[1]*(app.containerGame.screenHeight - distanceToBorder*2 -container.radius*2) + (container.rPos.length > 4 ? container.rPos[4]*container.radius*2 : 0)
         })
