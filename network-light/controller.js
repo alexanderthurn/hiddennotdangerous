@@ -216,17 +216,37 @@ class FWTouchControl extends PIXI.Container{
             axisContainer.index = i
             axisContainer.xAxis = 0
             axisContainer.yAxis = 0
+            axisContainer.stick = axisStick
             switch(i) {
-                case 0: axisContainer.rPos = [0.0, 1.0, 0.2]; break;
-                case 1: axisContainer.rPos = [0.0, 1.0, 0.1, 2.0]; break;
+                case 0: axisContainer.rPos = [0.0, 1.0, 0.22]; break;
+                case 1: axisContainer.rPos = [0.0, 1.0, 0.11, 2.0]; break;
             }
+
+            axisContainer.interactive = true
+            axisContainer.addEventListener('pointermove', {
+                handleEvent: function(event) {
+                    axisContainer.xAxis = (event.x  - axisContainer.x) / axisContainer.radius
+                    axisContainer.yAxis = (event.y  - axisContainer.y) / axisContainer.radius
+                    if (Math.abs(axisContainer.xAxis) > 1.0) axisContainer.xAxis = 1.0 * Math.sign(axisContainer.xAxis)
+                    if (Math.abs(axisContainer.yAxis) > 1.0) axisContainer.yAxis = 1.0 * Math.sign(axisContainer.yAxis)
+                    axisContainer.stick.position.set(axisContainer.xAxis * axisContainer.radius, axisContainer.yAxis * axisContainer.radius)
+                }
+            }) 
+
+
             this.axesContainers.push(axisContainer)
             this.addChild(axisContainer)
         }
         
         for (let i = 0; i < 17; i++) {
             let buttonContainer = new PIXI.Container()
-            let buttonBackground = new PIXI.Graphics().circle(0, 0, radius).fill({alpha: 1.0, color: 0xFFFFFF})
+            let buttonBackground = new PIXI.Graphics();
+            
+            if ((i === 12 || i === 13 || i === 14 || i === 15)) {
+                buttonBackground.rect(-radius, -radius, radius*2, radius*2).fill({alpha: 1.0, color: 0xFFFFFF})
+            } else {
+                buttonBackground.circle(0, 0, radius).fill({alpha: 1.0, color: 0xFFFFFF})
+            }
             let buttonText = new PIXI.Text({text: i, style: (i === 8 || i === 9 || i === 16) ? textStyleSmall : textStyle})
             buttonText.anchor.set(0.5)
             buttonContainer.addChild(buttonBackground, buttonText)
@@ -255,14 +275,22 @@ class FWTouchControl extends PIXI.Container{
                     buttonContainer.pressed = false
                 }
             }) 
+
+            if ((i === 12 || i === 13 || i === 14 || i === 15)) {
+                buttonContainer.addEventListener('pointerenter', {
+                    handleEvent: function(event) {
+                        buttonContainer.pressed = true
+                    }
+                }) 
+            }
             this.buttonContainers.push(buttonContainer)
             this.addChild(buttonContainer)
 
             switch(i) {
-                case 0: buttonText.text = 'A'; buttonContainer.rPos = [1.0, 1.0, 0.075, -1.0, 0.0]; break;
-                case 1: buttonText.text = 'B'; buttonContainer.rPos = [1.0, 0.85, 0.075, 0.0, 0.0]; break;
-                case 2: buttonText.text = 'X'; buttonContainer.rPos = [1.0, 0.85, 0.075, -2.0, 0.0]; break;
-                case 3: buttonText.text = 'Y'; buttonContainer.rPos = [1.0, 0.7,0.075, -1.0, 0.0]; break;
+                case 0: buttonText.text = 'A'; buttonContainer.rPos = [1.0, 1.0, 0.09, -0.75, 0.0]; break;
+                case 1: buttonText.text = 'B'; buttonContainer.rPos = [1.0, 0.8, 0.09, 0.0, 0.0]; break;
+                case 2: buttonText.text = 'X'; buttonContainer.rPos = [1.0, 0.8, 0.09, -1.5, 0.0]; break;
+                case 3: buttonText.text = 'Y'; buttonContainer.rPos = [1.0, 0.6,0.09, -0.75, 0.0]; break;
                 case 4: buttonText.text = 'LB'; buttonContainer.rPos = [0.8, 0.0,0.05]; break;
                 case 5: buttonText.text = 'RB'; buttonContainer.rPos = [1.0, 0.0,0.05]; break;
                 case 6: buttonText.text = 'LT'; buttonContainer.rPos = [0.85, 0.1,0.05]; break;
@@ -271,10 +299,10 @@ class FWTouchControl extends PIXI.Container{
                 case 9: buttonText.text = 'START'; buttonContainer.rPos = [0.6, 0.5,0.075]; break;
                 case 10: buttonText.text = 'A1'; buttonContainer.rPos = [0.5, 1.0,0.05, -0.5]; break;
                 case 11: buttonText.text = 'A2'; buttonContainer.rPos = [0.5, 1.0,0.05, 0.5]; break;
-                case 12: buttonText.text = 'v'; buttonContainer.rPos = [0.0, 0.2,0.075,1.0, 1.0]; break;
-                case 13: buttonText.text = '^'; buttonContainer.rPos = [0.0, 0.2,0.075, 1.0, -1.0]; break;
-                case 14: buttonText.text = '<'; buttonContainer.rPos = [0.0, 0.2,0.075]; break;
-                case 15: buttonText.text = '>'; buttonContainer.rPos = [0.0, 0.2,0.075, 2.0, 0.0]; break;
+                case 12: buttonText.text = 'v'; buttonContainer.rPos = [0.035, 0.2,0.05,1.0, 0.75]; break;
+                case 13: buttonText.text = '^'; buttonContainer.rPos = [0.035, 0.2,0.05, 1.0, -1.25]; break;
+                case 14: buttonText.text = '<'; buttonContainer.rPos = [0.035, 0.2,0.05, 0.0, -0.25]; break;
+                case 15: buttonText.text = '>'; buttonContainer.rPos = [0.035, 0.2,0.05, 2.0, -0.25]; break;
                 case 16: buttonText.text = 'HOME'; buttonContainer.rPos = [0.5, 0.3,0.075]; break;
             }
         }
