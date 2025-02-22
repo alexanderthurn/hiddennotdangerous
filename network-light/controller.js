@@ -186,7 +186,7 @@ class NetworkGamepad {
 class FWTouchControl extends PIXI.Container{
     constructor(app, options) {
         super(options)
-
+        let self = this
         const textStyle = new PIXI.TextStyle({
             fontFamily: 'Xolonium',
             fontStyle: 'Bold',
@@ -230,6 +230,13 @@ class FWTouchControl extends PIXI.Container{
                     if (Math.abs(axisContainer.xAxis) > 1.0) axisContainer.xAxis = 1.0 * Math.sign(axisContainer.xAxis)
                     if (Math.abs(axisContainer.yAxis) > 1.0) axisContainer.yAxis = 1.0 * Math.sign(axisContainer.yAxis)
                     axisContainer.stick.position.set(axisContainer.xAxis * axisContainer.radius, axisContainer.yAxis * axisContainer.radius)
+                }
+            }) 
+
+            axisContainer.addEventListener('pointertap', {
+                handleEvent: function(event) {
+                    self.buttonContainers[10+i].pressed= true
+    
                 }
             }) 
 
