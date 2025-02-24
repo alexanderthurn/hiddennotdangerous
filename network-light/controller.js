@@ -1,6 +1,7 @@
 
 
 const angle = (x1, y1, x2, y2) => Math.atan2(y2 - y1, x2 - x1); 
+const version = '1.0.0'
 const getQueryParam = (key) => {
     const params = new URLSearchParams(window.location.search);
     return params.get(key); // Gibt den Wert des Parameters oder null zurück
@@ -33,7 +34,7 @@ class FWApplication extends PIXI.Application {
     
 
         this.containerLoading.bar = new PIXI.Graphics() 
-        this.containerLoading.title = new PIXI.Text({text: 'FW Remote', style: textStyle})
+        this.containerLoading.title = new PIXI.Text({text: 'F-Mote ' + version, style: textStyle})
         this.containerLoading.text = new PIXI.Text({text: '', style: textStyle})
         this.containerLoading.title.anchor.set(0.5,0.0)
         this.containerLoading.text.anchor.set(0.5,-2.0)
@@ -217,17 +218,33 @@ class FWTouchControl extends PIXI.Container{
             fontSize: 48,
             fill: '#000'
         });
+
+        const textStyleTitle = new PIXI.TextStyle({
+            fontFamily: 'Xolonium',
+            fontStyle: 'Bold',
+            fontSize: 32,
+            fill: '#fff'
+        });
         
         this.pointer = {pointerType: 'unknown', x: 0, y: 0, xCenter: undefined, yCenter: undefined, pressed: new Set(), events: {}}
         this.buttonContainers = []
         this.axesContainers = []
         this.dpadCenterContainer = new PIXI.Container()
+        this.border = new PIXI.Graphics().roundRect(-50,-50, 100, 100, 10).fill({alpha: 1.0, color: 0xFFFFFF}).stroke({alpha: 0.5, color: 0x000000, width: 1})
+        this.border.tint = 0xff0000
+        this.addChild(this.border)
+
+        this.title = new PIXI.Text({text: 'F-Mote ' + version, textStyleTitle})
+        this.title.anchor.set(0.5,1)
+        this.title.alpha = 0.5
+        this.addChild(this.title)
+          
 
         const radius = 128
         for (let i = 0; i < 2; i++) {
             let axisContainer = new PIXI.Container()
-            let axisBackground = new PIXI.Graphics().circle(0, 0, radius).fill({alpha: 0.5, color: 0xFFFFFF})
-            let axisStick = new PIXI.Graphics().circle(0, 0, radius/2).fill({alpha: 1.0, color: 0xFFFFFF})
+            let axisBackground = new PIXI.Graphics().circle(0, 0, radius).fill({alpha: 0.5, color: 0xFFFFFF}).stroke({alpha: 0.5, color: 0xffffff, width: radius/10})
+            let axisStick = new PIXI.Graphics().circle(0, 0, radius/2).fill({alpha: 1.0, color: 0xFFFFFF}).stroke({alpha: 0.5, color: 0x000000, width: radius/10})
             let axisStickShadow = new PIXI.Graphics().circle(0, 0, radius/2).fill({alpha: 1.0, color: 0xFFFFFF})
             axisStickShadow.alpha = 0.1
             axisStick.startRadius = axisStick.radius = radius/2
@@ -240,7 +257,7 @@ class FWTouchControl extends PIXI.Container{
             axisContainer.stick = axisStick
             axisContainer.stickShadow = axisStickShadow
             switch(i) {
-                case 0: axisContainer.rPos = [0.0, 1.0, 0.22]; break;
+                case 0: axisContainer.rPos = [0.05, 1.0, 0.22]; break;
                 case 1: axisContainer.rPos = [0.5, 1.0, 0.11, 0.0]; break;
             }
 
@@ -322,10 +339,10 @@ class FWTouchControl extends PIXI.Container{
                 else if (i === 14) rot = 90
                 else if (i === 15) rot = 270
                 
-                buttonContainer.buttonBackground.regularPoly(Math.sin(PIXI.DEG_TO_RAD * rot)*radius*1.5,-Math.cos(PIXI.DEG_TO_RAD * rot)*radius*1.5, radius, 3,  PIXI.DEG_TO_RAD * rot).fill({alpha: 1.0, color: 0xFFFFFF})
+                buttonContainer.buttonBackground.regularPoly(Math.sin(PIXI.DEG_TO_RAD * rot)*radius*1.5,-Math.cos(PIXI.DEG_TO_RAD * rot)*radius*1.5, radius, 3,  PIXI.DEG_TO_RAD * rot).fill({alpha: 1.0, color: 0xFFFFFF}).stroke({alpha: 0.5, color: 0x000000, width: radius/10})
 
             } else {
-                buttonContainer.buttonBackground.circle(0, 0, radius).fill({alpha: 1.0, color: 0xFFFFFF})
+                buttonContainer.buttonBackground.circle(0, 0, radius).fill({alpha: 1.0, color: 0xFFFFFF}).stroke({alpha: 0.5, color: 0x000000, width: radius/10})
             }
             buttonContainer.buttonText = new PIXI.Text({text: i, style: (i === 8 || i === 9 || i === 16 || i === 17) ? textStyleSmall : textStyle})
             buttonContainer.buttonText.anchor.set(0.5)
@@ -377,10 +394,10 @@ class FWTouchControl extends PIXI.Container{
                 case 1: buttonContainer.buttonText.text = 'B'; buttonContainer.key = 'l'; buttonContainer.rPos = [1.0, 0.8, 0.09, 0.0, 0.0]; break;
                 case 2: buttonContainer.buttonText.text = 'X'; buttonContainer.key = 'j'; buttonContainer.rPos = [1.0, 0.8, 0.09, -1.5, 0.0]; break;
                 case 3: buttonContainer.buttonText.text = 'Y'; buttonContainer.key = 'i'; buttonContainer.rPos = [1.0, 0.6,0.09, -0.75, 0.0]; break;
-                case 4: buttonContainer.buttonText.text = 'LB'; buttonContainer.key = 'z'; buttonContainer.rPos = [0.8, 0.0,0.05]; break;
-                case 5: buttonContainer.buttonText.text = 'RB'; buttonContainer.key = 'p'; buttonContainer.rPos = [1.0, 0.0,0.05]; break;
-                case 6: buttonContainer.buttonText.text = 'LT'; buttonContainer.key = 'u'; buttonContainer.rPos = [0.85, 0.1,0.05]; break;
-                case 7: buttonContainer.buttonText.text = 'RT'; buttonContainer.key = 'o'; buttonContainer.rPos = [0.95, 0.1,0.05]; break;
+                case 4: buttonContainer.buttonText.text = 'LB'; buttonContainer.key = 'z'; buttonContainer.rPos = [0.75, 0.05,0.05]; break;
+                case 5: buttonContainer.buttonText.text = 'RB'; buttonContainer.key = 'p'; buttonContainer.rPos = [0.95, 0.05,0.05]; break;
+                case 6: buttonContainer.buttonText.text = 'LT'; buttonContainer.key = 'u'; buttonContainer.rPos = [0.8, 0.15,0.05]; break;
+                case 7: buttonContainer.buttonText.text = 'RT'; buttonContainer.key = 'o'; buttonContainer.rPos = [0.9, 0.15,0.05]; break;
                 case 8: buttonContainer.buttonText.text = 'SELECT'; buttonContainer.key = 'ArrowLeft'; buttonContainer.rPos = [0.4, 0.3,0.075]; break;
                 case 9: buttonContainer.buttonText.text = 'START'; buttonContainer.key = 'ArrowRight'; buttonContainer.rPos = [0.6, 0.3,0.075]; break;
                 case 10: buttonContainer.buttonText.text = 'A1'; buttonContainer.key = 'q'; buttonContainer.rPos = [-2.5, 1.0,0.05, -0.5]; break;
@@ -398,6 +415,7 @@ class FWTouchControl extends PIXI.Container{
         this.dpadCenterContainer.stick = new PIXI.Graphics().rect(-radius, -radius, radius*2, radius*2).fill({alpha: 1.0, color: 0xFFFFFF})
         this.dpadCenterContainer.addChild(this.dpadCenterContainer.stick)
         this.addChild(this.dpadCenterContainer)
+
 
         window.addEventListener('keydown', {
             handleEvent: function(event) {
@@ -462,6 +480,10 @@ class FWTouchControl extends PIXI.Container{
         this.dpadCenterContainer.scale = this.dpadCenterContainer.radius/this.dpadCenterContainer.startRadius
         this.dpadCenterContainer.x = (distanceToBorder + this.dpadCenterContainer.radius) + this.dpadCenterContainer.rPos[0]*(app.containerGame.screenWidth - distanceToBorder*2 -this.dpadCenterContainer.radius*2) + (this.dpadCenterContainer.rPos.length > 3 ? this.dpadCenterContainer.rPos[3]*this.dpadCenterContainer.radius*2 : 0)
         this.dpadCenterContainer.y = (distanceToBorder + this.dpadCenterContainer.radius) + this.dpadCenterContainer.rPos[1]*(app.containerGame.screenHeight - distanceToBorder*2 -this.dpadCenterContainer.radius*2) + (this.dpadCenterContainer.rPos.length > 4 ? this.dpadCenterContainer.rPos[4]*this.dpadCenterContainer.radius*2 : 0)
+        this.border.scale.set(app.containerGame.screenWidth/102, app.containerGame.screenHeight/102)
+        this.border.position.set(0.5*app.containerGame.screenWidth, 0.5*app.containerGame.screenHeight)
+        this.title.position.set(app.containerGame.screenWidth*0.65,app.containerGame.screenHeight*0.95)
+        this.title.scale.set(app.containerGame.screenWidth/1500)
 
     }
 
