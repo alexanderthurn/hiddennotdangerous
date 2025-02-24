@@ -231,8 +231,8 @@ class FWTouchControl extends PIXI.Container{
         this.axesContainers = []
         this.connectionContainers = []
         this.dpadCenterContainer = new PIXI.Container()
-        this.border = new PIXI.Graphics().roundRect(-50,-50, 100, 100, 10).fill({alpha: 1.0, color: 0xFFFFFF}).stroke({alpha: 0.5, color: 0x000000, width: 1})
-        this.border.tint = 0xff0000
+        this.border = new PIXI.Graphics()
+        this.border.tint = 0xffaaff
         this.addChild(this.border)
 
         this.title = new PIXI.Text({text: 'F-Mote ' + version, textStyleTitle})
@@ -510,8 +510,15 @@ class FWTouchControl extends PIXI.Container{
         this.dpadCenterContainer.scale = this.dpadCenterContainer.radius/this.dpadCenterContainer.startRadius
         this.dpadCenterContainer.x = (distanceToBorder + this.dpadCenterContainer.radius) + this.dpadCenterContainer.rPos[0]*(app.containerGame.screenWidth - distanceToBorder*2 -this.dpadCenterContainer.radius*2) + (this.dpadCenterContainer.rPos.length > 3 ? this.dpadCenterContainer.rPos[3]*this.dpadCenterContainer.radius*2 : 0)
         this.dpadCenterContainer.y = (distanceToBorder + this.dpadCenterContainer.radius) + this.dpadCenterContainer.rPos[1]*(app.containerGame.screenHeight - distanceToBorder*2 -this.dpadCenterContainer.radius*2) + (this.dpadCenterContainer.rPos.length > 4 ? this.dpadCenterContainer.rPos[4]*this.dpadCenterContainer.radius*2 : 0)
-        this.border.scale.set(app.containerGame.screenWidth/102, app.containerGame.screenHeight/102)
-        this.border.position.set(0.5*app.containerGame.screenWidth, 0.5*app.containerGame.screenHeight)
+        
+        if (this.border.screenWidth !== app.containerGame.screenWidth ||  this.border.screenHeight !== app.containerGame.screenHeight) {    
+           this.border.clear()
+            this.border.roundRect(app.containerGame.screenWidth*0.01,app.containerGame.screenHeight*0.01, app.containerGame.screenWidth*0.98, app.containerGame.screenHeight*0.98, app.containerGame.screenWidth*0.1).fill({alpha: 1.0, color: 0xFFFFFF}).stroke({alpha: 1, color: 0x000000, width: app.containerGame.screenHeight*0.01})
+            this.border.screenWidth = app.containerGame.screenWidth
+            this.border.screenHeight = app.containerGame.screenHeight 
+        }
+       // this.border.scale.set(app.containerGame.screenWidth/102, app.containerGame.screenHeight/102)
+        //this.border.position.set(0.5*app.containerGame.screenWidth, 0.5*app.containerGame.screenHeight)
         this.title.position.set(app.containerGame.screenWidth*0.65,app.containerGame.screenHeight*0.95)
         this.title.scale.set(app.containerGame.screenWidth/1500)
 
