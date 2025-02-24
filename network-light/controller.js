@@ -229,6 +229,7 @@ class FWTouchControl extends PIXI.Container{
         this.pointer = {pointerType: 'unknown', x: 0, y: 0, xCenter: undefined, yCenter: undefined, pressed: new Set(), events: {}}
         this.buttonContainers = []
         this.axesContainers = []
+        this.connectionContainers = []
         this.dpadCenterContainer = new PIXI.Container()
         this.border = new PIXI.Graphics().roundRect(-50,-50, 100, 100, 10).fill({alpha: 1.0, color: 0xFFFFFF}).stroke({alpha: 0.5, color: 0x000000, width: 1})
         this.border.tint = 0xff0000
@@ -398,16 +399,16 @@ class FWTouchControl extends PIXI.Container{
                 case 5: buttonContainer.buttonText.text = 'RB'; buttonContainer.key = 'p'; buttonContainer.rPos = [0.95, 0.05,0.05]; break;
                 case 6: buttonContainer.buttonText.text = 'LT'; buttonContainer.key = 'u'; buttonContainer.rPos = [0.8, 0.15,0.05]; break;
                 case 7: buttonContainer.buttonText.text = 'RT'; buttonContainer.key = 'o'; buttonContainer.rPos = [0.9, 0.15,0.05]; break;
-                case 8: buttonContainer.buttonText.text = 'SELECT'; buttonContainer.key = 'ArrowLeft'; buttonContainer.rPos = [0.4, 0.3,0.075]; break;
-                case 9: buttonContainer.buttonText.text = 'START'; buttonContainer.key = 'ArrowRight'; buttonContainer.rPos = [0.6, 0.3,0.075]; break;
+                case 8: buttonContainer.buttonText.text = 'SELECT'; buttonContainer.key = 'ArrowLeft'; buttonContainer.rPos = [0.4, 0.35,0.075]; break;
+                case 9: buttonContainer.buttonText.text = 'START'; buttonContainer.key = 'ArrowRight'; buttonContainer.rPos = [0.6, 0.35,0.075]; break;
                 case 10: buttonContainer.buttonText.text = 'A1'; buttonContainer.key = 'q'; buttonContainer.rPos = [-2.5, 1.0,0.05, -0.5]; break;
                 case 11: buttonContainer.buttonText.text = 'A2'; buttonContainer.key = 'e'; buttonContainer.rPos = [-2.5, 1.0,0.05, 0.5]; break;
                 case 12: buttonContainer.buttonText.text = 'v'; buttonContainer.key = 's'; buttonContainer.rPos = [0.035, 0.2,0.05,1.0, 1.0]; break;
                 case 13: buttonContainer.buttonText.text = '^'; buttonContainer.key = 'w'; buttonContainer.rPos = [0.035, 0.2,0.05, 1.0, -1.0]; break;
                 case 14: buttonContainer.buttonText.text = '<'; buttonContainer.key = 'a'; buttonContainer.rPos = [0.035, 0.2,0.05, 0.0, 0]; break;
                 case 15: buttonContainer.buttonText.text = '>'; buttonContainer.key = 'd'; buttonContainer.rPos = [0.035, 0.2,0.05, 2.0, 0]; break;
-                case 16: buttonContainer.buttonText.text = 'HOME'; buttonContainer.key = 'ArrowUp'; buttonContainer.rPos = [0.5, 0.1,0.075]; break;
-                case 17: buttonContainer.buttonText.text = ''; buttonContainer.key = 'ArrowDown'; buttonContainer.rPos = [0.5, 0.5,0.075]; break;
+                case 16: buttonContainer.buttonText.text = 'HOME'; buttonContainer.key = 'ArrowUp'; buttonContainer.rPos = [0.5, 0.15,0.075]; break;
+                case 17: buttonContainer.buttonText.text = ''; buttonContainer.key = 'ArrowDown'; buttonContainer.rPos = [0.5, 0.55,0.075]; break;
             }
         }
         this.dpadCenterContainer.rPos = [0.035, 0.2,0.05, 1.0, 0];
@@ -415,6 +416,35 @@ class FWTouchControl extends PIXI.Container{
         this.dpadCenterContainer.stick = new PIXI.Graphics().rect(-radius, -radius, radius*2, radius*2).fill({alpha: 1.0, color: 0xFFFFFF})
         this.dpadCenterContainer.addChild(this.dpadCenterContainer.stick)
         this.addChild(this.dpadCenterContainer)
+
+
+        for (let i = 0; i < 5; i++) {
+            let connectionContainer = new PIXI.Container()
+            connectionContainer.background = new PIXI.Graphics()
+            connectionContainer.background.circle(0, 0, radius).fill({alpha: 1.0, color: 0xFFFFFF})
+            connectionContainer.addChild(connectionContainer.background)
+            connectionContainer.startRadius = radius
+            connectionContainer.radius = radius
+            connectionContainer.index = i
+            connectionContainer.rPos = [0,0]
+            connectionContainer.status = 0
+            if (i < 3) {
+                connectionContainer.status = 1
+            } 
+            if (i == 2) {
+                connectionContainer.status = 2
+            } 
+            switch(i) {
+                case 0: connectionContainer.rPos = [0.5, 0.0, 0.01, -3, 0.0]; break;
+                case 1: connectionContainer.rPos = [0.5, 0.0, 0.01, -1.5, 0.0]; break;
+                case 2: connectionContainer.rPos = [0.5, 0.0, 0.01, 0, 0.0]; break;
+                case 3: connectionContainer.rPos = [0.5, 0.0, 0.01, 1.5, 0.0]; break;
+                case 4: connectionContainer.rPos = [0.5, 0.0, 0.01, 3, 0.0]; break;
+            }
+            this.connectionContainers.push(connectionContainer)
+            this.addChild(connectionContainer)
+        }
+
 
 
         window.addEventListener('keydown', {
@@ -484,6 +514,19 @@ class FWTouchControl extends PIXI.Container{
         this.border.position.set(0.5*app.containerGame.screenWidth, 0.5*app.containerGame.screenHeight)
         this.title.position.set(app.containerGame.screenWidth*0.65,app.containerGame.screenHeight*0.95)
         this.title.scale.set(app.containerGame.screenWidth/1500)
+
+        this.connectionContainers.forEach((container, index) => {
+            container.radius = container.rPos[2]*minHeightWidth
+            container.scale = container.radius/container.startRadius
+            if (container.status === 1) container.tint = 0xffffff
+            else if (container.status === 2) container.tint = 0x00ff00
+            else container.tint = 0x5555ff
+            
+       
+
+            container.x = (distanceToBorder + container.radius) + container.rPos[0]*(app.containerGame.screenWidth - distanceToBorder*2 -container.radius*2) + (container.rPos.length > 3 ? container.rPos[3]*container.radius*2 : 0)
+            container.y = (distanceToBorder + container.radius) + container.rPos[1]*(app.containerGame.screenHeight - distanceToBorder*2 -container.radius*2) + (container.rPos.length > 4 ? container.rPos[4]*container.radius*2 : 0)
+        })
 
     }
 
