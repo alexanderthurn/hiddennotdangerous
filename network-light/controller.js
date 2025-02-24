@@ -99,13 +99,14 @@ async function init() {
 
     app.ticker.add((ticker) => {
 
-        const isPortrait = app.screen.width < app.screen.height;
-    
+        app.isPortrait = app.screen.width < app.screen.height;
+        app.ticker = ticker
+
        // app.containerGame.y = app.screen.height*0.25;
         //app.containerGame.pivot.set(app.screen.width*0.5, app.screen.height*0.5);
 
 
-        if (isPortrait) {
+        if (app.isPortrait) {
             app.containerGame.angle = -270 - ticker.lastTime*0.0;
             app.containerGame.x = app.screen.width
             //app.containerGame.scale.set( app.screen.width / app.screen.height, app.screen.width / app.screen.height);
@@ -119,7 +120,7 @@ async function init() {
             app.containerGame.screenHeight = app.screen.height;
         }
 
-        main(app, ticker)
+        main(app)
     })
 
 
@@ -130,8 +131,8 @@ window.addEventListener("load", (event) => {
 })
 
 
-function main(app, ticker) {
-    touchControl.update(app, ticker)
+function main(app) {
+    touchControl.update(app)
 }
 
 class NetworkGamepad {
@@ -233,14 +234,23 @@ class FWTouchControl extends PIXI.Container{
             axisContainer.interactive = true
             axisContainer.addEventListener('pointermove', {
                 handleEvent: function(event) {
-                    axisContainer.xAxis = (event.x  - axisContainer.x) / axisContainer.radius
-                    axisContainer.yAxis = (event.y  - axisContainer.y) / axisContainer.radius
+
+                    if (app.isPortrait) {
+                        //let gPos = axisContainer.getGlobalPosition()
+                        let localEvent = {x: event.y, y: app.containerGame.screenHeight - event.x}
+                        console.log(localEvent, axisContainer.x, axisContainer.y)
+                        axisContainer.xAxis = (localEvent.x  - axisContainer.x) / axisContainer.radius
+                        axisContainer.yAxis = (localEvent.y  - axisContainer.y) / axisContainer.radius
+                    } else {
+                        axisContainer.xAxis = (event.x  - axisContainer.x) / axisContainer.radius
+                        axisContainer.yAxis = (event.y  - axisContainer.y) / axisContainer.radius
+                    }
                     if (axisContainer.xAxis*axisContainer.xAxis + axisContainer.yAxis*axisContainer.yAxis > 1.0) {
                         axisContainer.xAxis = Math.cos(angle(0,0,axisContainer.xAxis, axisContainer.yAxis))
                         axisContainer.yAxis = Math.sin(angle(0,0,axisContainer.xAxis, axisContainer.yAxis))
                     }
-                    axisContainer.stick.position.set(axisContainer.xAxis * (axisContainer.startRadius-axisContainer.stick.startRadius), axisContainer.yAxis * (axisContainer.startRadius-axisContainer.stick.startRadius))
-                    console.log(axisContainer.xAxis, axisContainer.yAxis)
+                    axisContainer.stick.position.set(axisContainer.xAxis * (axisContainer.startRadius), axisContainer.yAxis * (axisContainer.startRadius))
+
                 }
             }) 
 
@@ -256,7 +266,7 @@ class FWTouchControl extends PIXI.Container{
             this.addChild(axisContainer)
         }
         
-        for (let i = 0; i < 17; i++) {
+        for (let i = 0; i < 18; i++) {
             let buttonContainer = new PIXI.Container()
             let buttonBackground = new PIXI.Graphics();
             
@@ -265,7 +275,7 @@ class FWTouchControl extends PIXI.Container{
             } else {
                 buttonBackground.circle(0, 0, radius).fill({alpha: 1.0, color: 0xFFFFFF})
             }
-            let buttonText = new PIXI.Text({text: i, style: (i === 8 || i === 9 || i === 16) ? textStyleSmall : textStyle})
+            let buttonText = new PIXI.Text({text: i, style: (i === 8 || i === 9 || i === 16 || i === 17) ? textStyleSmall : textStyle})
             buttonText.anchor.set(0.5)
             buttonContainer.addChild(buttonBackground, buttonText)
             buttonContainer.startRadius = radius
@@ -322,6 +332,7 @@ class FWTouchControl extends PIXI.Container{
                 case 14: buttonText.text = '<'; buttonContainer.rPos = [0.035, 0.2,0.05, 0.0, -0.25]; break;
                 case 15: buttonText.text = '>'; buttonContainer.rPos = [0.035, 0.2,0.05, 2.0, -0.25]; break;
                 case 16: buttonText.text = 'HOME'; buttonContainer.rPos = [0.5, 0.3,0.075]; break;
+                case 17: buttonText.text = '1234'; buttonContainer.rPos = [0.5, 0.7,0.075]; break;
             }
         }
         this.dpadCenterContainer.rPos = [0.035, 0.2,0.05, 1.0, -0.25];
@@ -374,7 +385,7 @@ class FWTouchControl extends PIXI.Container{
     }
 
 
-    update(app, ticker) {
+    update(app) {
         let minHeightWidth = Math.min(app.containerGame.screenWidth, app.containerGame.screenHeight)
         let maxHeightWidth = Math.max(app.containerGame.screenWidth, app.containerGame.screenHeight)
         //minHeightWidth = maxHeightWidth
