@@ -1,5 +1,5 @@
 
-const move = (x1, y1, angle, speed, dt) => ({x: x1 + Math.cos(angle)*speed*dt, y: y1 + Math.sin(angle)*speed*dt});
+
 const angle = (x1, y1, x2, y2) => Math.atan2(y2 - y1, x2 - x1); 
 
 var touchControl = null
@@ -88,6 +88,12 @@ async function init() {
     app.setLoading(0.0, 'Loading')
     touchControl = new FWTouchControl(app)
     app.containerGame.addChild(touchControl)
+
+    app.canvas.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    });
+
+
     app.finishLoading()
    
 
@@ -211,6 +217,8 @@ class FWTouchControl extends PIXI.Container{
             let axisContainer = new PIXI.Container()
             let axisBackground = new PIXI.Graphics().circle(0, 0, radius).fill({alpha: 0.5, color: 0xFFFFFF})
             let axisStick = new PIXI.Graphics().circle(0, 0, radius/2).fill({alpha: 1.0, color: 0xFFFFFF})
+            axisStick.startRadius = radius/2
+            axisStick.radius = radius/2
             axisContainer.addChild(axisBackground, axisStick)
             axisContainer.startRadius = radius
             axisContainer.index = i
@@ -219,7 +227,7 @@ class FWTouchControl extends PIXI.Container{
             axisContainer.stick = axisStick
             switch(i) {
                 case 0: axisContainer.rPos = [0.0, 1.0, 0.22]; break;
-                case 1: axisContainer.rPos = [0.0, 1.0, 0.11, 2.0]; break;
+                case 1: axisContainer.rPos = [5.0, 1.0, 0.11, 2.0]; break;
             }
 
             axisContainer.interactive = true
@@ -227,9 +235,12 @@ class FWTouchControl extends PIXI.Container{
                 handleEvent: function(event) {
                     axisContainer.xAxis = (event.x  - axisContainer.x) / axisContainer.radius
                     axisContainer.yAxis = (event.y  - axisContainer.y) / axisContainer.radius
-                    if (Math.abs(axisContainer.xAxis) > 1.0) axisContainer.xAxis = 1.0 * Math.sign(axisContainer.xAxis)
-                    if (Math.abs(axisContainer.yAxis) > 1.0) axisContainer.yAxis = 1.0 * Math.sign(axisContainer.yAxis)
-                    axisContainer.stick.position.set(axisContainer.xAxis * axisContainer.radius, axisContainer.yAxis * axisContainer.radius)
+                    if (axisContainer.xAxis*axisContainer.xAxis + axisContainer.yAxis*axisContainer.yAxis > 1.0) {
+                        axisContainer.xAxis = Math.cos(angle(0,0,axisContainer.xAxis, axisContainer.yAxis))
+                        axisContainer.yAxis = Math.sin(angle(0,0,axisContainer.xAxis, axisContainer.yAxis))
+                    }
+                    axisContainer.stick.position.set(axisContainer.xAxis * (axisContainer.startRadius-axisContainer.stick.startRadius), axisContainer.yAxis * (axisContainer.startRadius-axisContainer.stick.startRadius))
+                    console.log(axisContainer.xAxis, axisContainer.yAxis)
                 }
             }) 
 
@@ -374,7 +385,7 @@ class FWTouchControl extends PIXI.Container{
             container.scale = container.radius/container.startRadius
             container.x = (distanceToBorder + container.radius) + container.rPos[0]*(app.containerGame.screenWidth - distanceToBorder*2 -container.radius*2) + (container.rPos.length > 3 ? container.rPos[3]*container.radius*2 : 0)
             container.y = (distanceToBorder + container.radius) + container.rPos[1]*(app.containerGame.screenHeight - distanceToBorder*2 -container.radius*2) + (container.rPos.length > 4 ? container.rPos[4]*container.radius*2 : 0)
-       })
+        })
 
         this.buttonContainers.forEach((container, index) => {
             container.radius = container.rPos[2]*minHeightWidth
