@@ -204,7 +204,7 @@ class FWTouchControl extends PIXI.Container{
         this.pointer = {pointerType: 'unknown', x: 0, y: 0, xCenter: undefined, yCenter: undefined, pressed: new Set(), events: {}}
         this.buttonContainers = []
         this.axesContainers = []
-        this.dpadContainer = null
+        this.dpadCenterContainer = new PIXI.Container()
 
         const radius = 128
         for (let i = 0; i < 2; i++) {
@@ -313,10 +313,11 @@ class FWTouchControl extends PIXI.Container{
                 case 16: buttonText.text = 'HOME'; buttonContainer.rPos = [0.5, 0.3,0.075]; break;
             }
         }
-
-      
-        //this.addChild(new PIXI.Graphics().rect(0,0,100,100).fill({color: '#fff', alpha: 1.0}))
-
+        this.dpadCenterContainer.rPos = [0.035, 0.2,0.05, 1.0, -0.25];
+        this.dpadCenterContainer.startRadius = radius
+        this.dpadCenterContainer.stick = new PIXI.Graphics().rect(-radius, -radius, radius*2, radius*2).fill({alpha: 1.0, color: 0xFFFFFF})
+        this.dpadCenterContainer.addChild(this.dpadCenterContainer.stick)
+        this.addChild(this.dpadCenterContainer)
 
        /* window.addEventListener('pointerdown', event => {
 
@@ -383,6 +384,14 @@ class FWTouchControl extends PIXI.Container{
             container.x = (distanceToBorder + container.radius) + container.rPos[0]*(app.containerGame.screenWidth - distanceToBorder*2 -container.radius*2) + (container.rPos.length > 3 ? container.rPos[3]*container.radius*2 : 0)
             container.y = (distanceToBorder + container.radius) + container.rPos[1]*(app.containerGame.screenHeight - distanceToBorder*2 -container.radius*2) + (container.rPos.length > 4 ? container.rPos[4]*container.radius*2 : 0)
         })
+
+        
+       
+            this.dpadCenterContainer.radius = this.dpadCenterContainer.rPos[2]*minHeightWidth
+            this.dpadCenterContainer.scale = this.dpadCenterContainer.radius/this.dpadCenterContainer.startRadius
+            this.dpadCenterContainer.x = (distanceToBorder + this.dpadCenterContainer.radius) + this.dpadCenterContainer.rPos[0]*(app.containerGame.screenWidth - distanceToBorder*2 -this.dpadCenterContainer.radius*2) + (this.dpadCenterContainer.rPos.length > 3 ? this.dpadCenterContainer.rPos[3]*this.dpadCenterContainer.radius*2 : 0)
+            this.dpadCenterContainer.y = (distanceToBorder + this.dpadCenterContainer.radius) + this.dpadCenterContainer.rPos[1]*(app.containerGame.screenHeight - distanceToBorder*2 -this.dpadCenterContainer.radius*2) + (this.dpadCenterContainer.rPos.length > 4 ? this.dpadCenterContainer.rPos[4]*this.dpadCenterContainer.radius*2 : 0)
+        
 
         //if (!mp.pressed.has(0)) {
 
