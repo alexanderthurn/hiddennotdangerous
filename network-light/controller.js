@@ -348,24 +348,24 @@ class FWTouchControl extends PIXI.Container{
             this.addChild(buttonContainer)
 
             switch(i) {
-                case 0: buttonContainer.buttonText.text = 'A'; buttonContainer.rPos = [1.0, 1.0, 0.09, -0.75, 0.0]; break;
-                case 1: buttonContainer.buttonText.text = 'B'; buttonContainer.rPos = [1.0, 0.8, 0.09, 0.0, 0.0]; break;
-                case 2: buttonContainer.buttonText.text = 'X'; buttonContainer.rPos = [1.0, 0.8, 0.09, -1.5, 0.0]; break;
-                case 3: buttonContainer.buttonText.text = 'Y'; buttonContainer.rPos = [1.0, 0.6,0.09, -0.75, 0.0]; break;
-                case 4: buttonContainer.buttonText.text = 'LB'; buttonContainer.rPos = [0.8, 0.0,0.05]; break;
-                case 5: buttonContainer.buttonText.text = 'RB'; buttonContainer.rPos = [1.0, 0.0,0.05]; break;
-                case 6: buttonContainer.buttonText.text = 'LT'; buttonContainer.rPos = [0.85, 0.1,0.05]; break;
-                case 7: buttonContainer.buttonText.text = 'RT'; buttonContainer.rPos = [0.95, 0.1,0.05]; break;
-                case 8: buttonContainer.buttonText.text = 'SELECT'; buttonContainer.rPos = [0.4, 0.3,0.075]; break;
-                case 9: buttonContainer.buttonText.text = 'START'; buttonContainer.rPos = [0.6, 0.3,0.075]; break;
-                case 10: buttonContainer.buttonText.text = 'A1'; buttonContainer.rPos = [-2.5, 1.0,0.05, -0.5]; break;
-                case 11: buttonContainer.buttonText.text = 'A2'; buttonContainer.rPos = [-2.5, 1.0,0.05, 0.5]; break;
-                case 12: buttonContainer.buttonText.text = 'v'; buttonContainer.rPos = [0.035, 0.2,0.05,1.0, 1.0]; break;
-                case 13: buttonContainer.buttonText.text = '^'; buttonContainer.rPos = [0.035, 0.2,0.05, 1.0, -1.0]; break;
-                case 14: buttonContainer.buttonText.text = '<'; buttonContainer.rPos = [0.035, 0.2,0.05, 0.0, 0]; break;
-                case 15: buttonContainer.buttonText.text = '>'; buttonContainer.rPos = [0.035, 0.2,0.05, 2.0, 0]; break;
-                case 16: buttonContainer.buttonText.text = 'HOME'; buttonContainer.rPos = [0.5, 0.1,0.075]; break;
-                case 17: buttonContainer.buttonText.text = ''; buttonContainer.rPos = [0.5, 0.5,0.075]; break;
+                case 0: buttonContainer.buttonText.text = 'A'; buttonContainer.key = 's'; buttonContainer.rPos = [1.0, 1.0, 0.09, -0.75, 0.0]; break;
+                case 1: buttonContainer.buttonText.text = 'B'; buttonContainer.key = 'd'; buttonContainer.rPos = [1.0, 0.8, 0.09, 0.0, 0.0]; break;
+                case 2: buttonContainer.buttonText.text = 'X'; buttonContainer.key = 'a'; buttonContainer.rPos = [1.0, 0.8, 0.09, -1.5, 0.0]; break;
+                case 3: buttonContainer.buttonText.text = 'Y'; buttonContainer.key = 'w'; buttonContainer.rPos = [1.0, 0.6,0.09, -0.75, 0.0]; break;
+                case 4: buttonContainer.buttonText.text = 'LB'; buttonContainer.key = '1'; buttonContainer.rPos = [0.8, 0.0,0.05]; break;
+                case 5: buttonContainer.buttonText.text = 'RB'; buttonContainer.key = '4'; buttonContainer.rPos = [1.0, 0.0,0.05]; break;
+                case 6: buttonContainer.buttonText.text = 'LT'; buttonContainer.key = 'q'; buttonContainer.rPos = [0.85, 0.1,0.05]; break;
+                case 7: buttonContainer.buttonText.text = 'RT'; buttonContainer.key = 'e'; buttonContainer.rPos = [0.95, 0.1,0.05]; break;
+                case 8: buttonContainer.buttonText.text = 'SELECT'; buttonContainer.key = 'j'; buttonContainer.rPos = [0.4, 0.3,0.075]; break;
+                case 9: buttonContainer.buttonText.text = 'START'; buttonContainer.key = 'l'; buttonContainer.rPos = [0.6, 0.3,0.075]; break;
+                case 10: buttonContainer.buttonText.text = 'A1'; buttonContainer.key = 'u'; buttonContainer.rPos = [-2.5, 1.0,0.05, -0.5]; break;
+                case 11: buttonContainer.buttonText.text = 'A2'; buttonContainer.key = 'o'; buttonContainer.rPos = [-2.5, 1.0,0.05, 0.5]; break;
+                case 12: buttonContainer.buttonText.text = 'v'; buttonContainer.key = 'ArrowDown'; buttonContainer.rPos = [0.035, 0.2,0.05,1.0, 1.0]; break;
+                case 13: buttonContainer.buttonText.text = '^'; buttonContainer.key = 'ArrowUp'; buttonContainer.rPos = [0.035, 0.2,0.05, 1.0, -1.0]; break;
+                case 14: buttonContainer.buttonText.text = '<'; buttonContainer.key = 'ArrowLeft'; buttonContainer.rPos = [0.035, 0.2,0.05, 0.0, 0]; break;
+                case 15: buttonContainer.buttonText.text = '>'; buttonContainer.key = 'ArrowRight'; buttonContainer.rPos = [0.035, 0.2,0.05, 2.0, 0]; break;
+                case 16: buttonContainer.buttonText.text = 'HOME'; buttonContainer.key = 'i'; buttonContainer.rPos = [0.5, 0.1,0.075]; break;
+                case 17: buttonContainer.buttonText.text = ''; buttonContainer.key = 'k'; buttonContainer.rPos = [0.5, 0.5,0.075]; break;
             }
         }
         this.dpadCenterContainer.rPos = [0.035, 0.2,0.05, 1.0, 0];
@@ -373,6 +373,35 @@ class FWTouchControl extends PIXI.Container{
         this.dpadCenterContainer.stick = new PIXI.Graphics().rect(-radius, -radius, radius*2, radius*2).fill({alpha: 1.0, color: 0xFFFFFF})
         this.dpadCenterContainer.addChild(this.dpadCenterContainer.stick)
         this.addChild(this.dpadCenterContainer)
+
+        window.addEventListener('keydown', {
+            handleEvent: function(event) {
+                console.log(event)
+
+                self.buttonContainers.forEach(buttonContainer => {
+                    if (event.key === buttonContainer.key) {
+                        buttonContainer.pressed = true
+                    }
+                })
+               
+            }
+        })
+
+        window.addEventListener('keyup', {
+            handleEvent: function(event) {
+                console.log(event)
+
+                self.buttonContainers.forEach(buttonContainer => {
+                    if (event.key === buttonContainer.key) {
+                        buttonContainer.pressed = false
+                    }
+                })
+               
+            }
+        })
+        
+           
+        
     }
 
 
