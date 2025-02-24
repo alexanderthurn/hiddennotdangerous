@@ -298,7 +298,15 @@ class FWTouchControl extends PIXI.Container{
             buttonContainer.buttonBackground = new PIXI.Graphics();
             
             if ((i === 12 || i === 13 || i === 14 || i === 15)) {
-                buttonContainer.buttonBackground.rect(-radius, -radius, radius*2, radius*2).fill({alpha: 1.0, color: 0xFFFFFF})
+                buttonContainer.buttonBackground.rect(-radius, -radius, radius*2, radius*2)
+                let rot = 0
+                if (i === 12) rot = 0
+                else if (i === 13) rot = 180
+                else if (i === 14) rot = 90
+                else if (i === 15) rot = 270
+                
+                buttonContainer.buttonBackground.regularPoly(Math.sin(PIXI.DEG_TO_RAD * rot)*radius*1.5,-Math.cos(PIXI.DEG_TO_RAD * rot)*radius*1.5, radius, 3,  PIXI.DEG_TO_RAD * rot).fill({alpha: 1.0, color: 0xFFFFFF})
+
             } else {
                 buttonContainer.buttonBackground.circle(0, 0, radius).fill({alpha: 1.0, color: 0xFFFFFF})
             }
