@@ -106,6 +106,7 @@ async function init() {
 
     app.serverId = getQueryParam('id') || '1234'
     app.color =  new PIXI.Color(getQueryParam('color') || 'ff0000').toNumber()
+    app.connectedToServer = false
     app.finishLoading()
    
 
@@ -378,8 +379,8 @@ class FWTouchControl extends PIXI.Container{
             axisContainer.stick = axisStick
             axisContainer.stickShadow = axisStickShadow
             switch(i) {
-                case 0: axisContainer.rPos = [0.05, 1.0, 0.22]; break;
-                case 1: axisContainer.rPos = [0.5, 1.0, 0.11, 0.0]; break;
+                case 0: axisContainer.rPos = [0.05, 0.95, 0.2]; break;
+                case 1: axisContainer.rPos = [0.5, 0.95, 0.1, 0.0]; break;
             }
 
             axisContainer.interactive = true
@@ -526,15 +527,16 @@ class FWTouchControl extends PIXI.Container{
         this.title.position.set(app.containerGame.screenWidth*0.65,app.containerGame.screenHeight*0.95)
         this.title.scale.set(app.containerGame.screenWidth/1500)
 
+
+        if (app.connectedToServer) {
+            this.connectionContainers[2].status = 2 
+        }
         this.connectionContainers.forEach((container, index) => {
             container.radius = container.rPos[2]*minHeightWidth
             container.scale = container.radius/container.startRadius
             if (container.status === 1) container.tint = 0xffffff
             else if (container.status === 2) container.tint = 0x00ff00
             else container.tint = 0x5555ff
-            
-       
-
             container.x = (distanceToBorderX + container.radius) + container.rPos[0]*(app.containerGame.screenWidth - distanceToBorderX*2 -container.radius*2) + (container.rPos.length > 3 ? container.rPos[3]*container.radius*2 : 0)
             container.y = (distanceToBorderY + container.radius) + container.rPos[1]*(app.containerGame.screenHeight - distanceToBorderY*2 -container.radius*2) + (container.rPos.length > 4 ? container.rPos[4]*container.radius*2 : 0)
         })
