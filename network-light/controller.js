@@ -363,7 +363,7 @@ class FWTouchControl extends PIXI.Container{
         }
 
 
-        for (let i = 0; i < 2; i++) {
+        for (let i = 1; i >= 0; i--) {
             let axisContainer = new PIXI.Container()
             let axisBackground = new PIXI.Graphics().circle(0, 0, radius).fill({alpha: 0.5, color: 0xFFFFFF}).stroke({alpha: 0.5, color: 0xffffff, width: radius/10})
             let axisStick = new PIXI.Graphics().circle(0, 0, radius/2).fill({alpha: 1.0, color: 0xFFFFFF}).stroke({alpha: 0.5, color: 0x000000, width: radius/10})
