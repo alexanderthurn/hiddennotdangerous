@@ -1,7 +1,9 @@
 var qrCode = null
 
 var showQRCode = function(app) {
-  var url = window.location.protocol + '//' + window.location.host + window.location.pathname + '?id=' + app.serverId + '&color=' + app.color.toString(16)
+  let c = new PIXI.Color(app.color)
+
+  var url = window.location.protocol + '//' + window.location.host + window.location.pathname + '?id=' + app.serverId + '&color=' + c.toHex().replace('/^#/', '')
   if (!qrCode) {
     qrCode = new QRious({
       element: document.getElementById('qr'),
