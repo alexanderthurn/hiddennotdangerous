@@ -1,7 +1,7 @@
 const shadowDefinition = {
     alpha: 0.3,
-    angle: 6,
-    scale: {x: 1.005, y: 1.28},
+    angle: 0,
+    scale: {x: 1, y: 1.28},
     skew: {x: -0.68, y: 0},
     color: 0x000000
 }
@@ -401,15 +401,16 @@ const createLowerFence = level => {
 
 const addLevelBoundary = () => {
     const upperFence = createUpperFence(level)
-    const upperFenceShadow = upperFence.clone()
+    //const upperFenceShadow = upperFence.clone()
 
-    /*upperFenceShadow.alpha = shadowDefinition.alpha
-    upperFenceShadow.scale.set(2*shadowDefinition.scale.x, 2*shadowDefinition.scale.y)
+    /*upperFenceShadow.x = upperFence.x+25
+    upperFenceShadow.alpha = shadowDefinition.alpha
+    upperFenceShadow.scale.set(shadowDefinition.scale.x,shadowDefinition.scale.y)
     upperFenceShadow.skew.set(shadowDefinition.skew.x, shadowDefinition.skew.y)
     upperFenceShadow.tint = shadowDefinition.color*/
 
     const lowerFence = createLowerFence(level)
-    levelContainer.addChild(upperFenceShadow, upperFence, lowerFence)
+    levelContainer.addChild(upperFence, lowerFence)
     figureLayer.attach(lowerFence)
 }
 
@@ -538,7 +539,6 @@ const createFigure = (app, spritesheet, props) => {
     shadow.alpha = shadowDefinition.alpha
     shadow.scale.set(2*shadowDefinition.scale.x, 2*shadowDefinition.scale.y)
     shadow.skew.set(shadowDefinition.skew.x, shadowDefinition.skew.y)
-    shadow.angle = shadowDefinition.angle
     shadow.tint = shadowDefinition.color
     shadow.label = 'shadow'
 
