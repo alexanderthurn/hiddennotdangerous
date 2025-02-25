@@ -105,6 +105,7 @@ async function init() {
 
 
     app.serverId = getQueryParam('id') || '1234'
+    app.color =  new PIXI.Color(getQueryParam('color') || 'ff0000').toNumber()
     app.finishLoading()
    
 
@@ -232,7 +233,6 @@ class FWTouchControl extends PIXI.Container{
         this.connectionContainers = []
         this.dpadCenterContainer = new PIXI.Container()
         this.border = new PIXI.Graphics()
-        this.border.tint = 0xffaaff
         this.addChild(this.border)
 
         this.title = new PIXI.Text({text: 'F-Mote ' + version, textStyleTitle})
@@ -417,8 +417,6 @@ class FWTouchControl extends PIXI.Container{
 
             axisContainer.addEventListener('pointermove', {
                 handleEvent: function(event) {
-                    console.log(event.pointerType)
-
                     if (!axisContainer.pointerdown) {
                         return
                     }
@@ -501,7 +499,6 @@ class FWTouchControl extends PIXI.Container{
         this.buttonContainers.forEach((container, index) => {
             container.radius = container.rPos[2]*minHeightWidth
             container.scale = container.radius/container.startRadius
-            console.log(container.scale)
             container.alpha = (container.pressed ? 0.5 : 1.0)
             container.tint = (container.pressed ? 0x000000 : 0xffffff) 
             container.x = (distanceToBorderX + container.radius) + container.rPos[0]*(app.containerGame.screenWidth - distanceToBorderX*2 -container.radius*2) + (container.rPos.length > 3 ? container.rPos[3]*container.radius*2 : 0)
@@ -521,6 +518,9 @@ class FWTouchControl extends PIXI.Container{
             this.border.screenWidth = app.containerGame.screenWidth
             this.border.screenHeight = app.containerGame.screenHeight 
         }
+        
+        this.border.tint = app.color
+
        // this.border.scale.set(app.containerGame.screenWidth/102, app.containerGame.screenHeight/102)
         //this.border.position.set(0.5*app.containerGame.screenWidth, 0.5*app.containerGame.screenHeight)
         this.title.position.set(app.containerGame.screenWidth*0.65,app.containerGame.screenHeight*0.95)
