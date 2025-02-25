@@ -9,6 +9,18 @@ const getQueryParam = (key) => {
 
 var touchControl = null
 
+function setUrlParams(id) {
+    let url = new URL(window.location.href);
+    let params = new URLSearchParams(url.search);
+
+    if (id) {
+        params.set('id', id);
+    }
+
+    url.search = params.toString();
+    window.history.replaceState({}, '', url);
+}
+
 
 class FWApplication extends PIXI.Application {
     constructor(options) {
@@ -89,6 +101,29 @@ async function init() {
         autoDensity: true,
         resizeTo: window
     });
+
+    app.settingsDialog = document.getElementById('settingsDialog')
+    app.settingsDialog.addEventListener("close", () => console.log("Dialog wurde geschlossen"));
+    app.settingsDialog.addEventListener("cancel", () => console.log("Dialog wurde durch ESC oder Klick außerhalb geschlossen"));
+    app.settingsDialog.addEventListener("show", () => console.log("Dialog wurde geöffnet"));
+    app.settingsDialog.addEventListener("toggle", () => console.log("Dialog wurde geöffnet oder geschlossen"));
+
+
+    document.getElementById('btnScan').onclick = () => {
+        let qrCodeReader
+        
+        qrCodeReader = startQRCode((code) => {
+            if (code) {
+                app.serverId = code
+                setUrlParams(app.serverId)
+                app.settingsDialog.close()
+                qrCodeReader.onClose()
+                return true
+            }
+        })
+    }
+    
+
 
     app.setLoading(0.0, 'Loading')
     touchControl = new FWTouchControl(app)
@@ -278,6 +313,30 @@ class FWTouchControl extends PIXI.Container{
                 }
             }) 
 
+            if (i === 17) {
+                
+                buttonContainer.addEventListener('pointerdown', {
+                    handleEvent: function(event) {
+                        //setTimeout(() => {
+                            //app.serverId = prompt("Code eingeben", app.serverId)},0);  
+                        let btnAccept = app.settingsDialog.querySelector('#btnAccept')
+                        let input = app.settingsDialog.querySelector('#inputServerId')
+                        btnAccept.addEventListener('click', {   
+                            handleEvent: function(event) {
+                                app.serverId = input.value
+                                
+                                setUrlParams(app.serverId)
+                                app.settingsDialog.close()
+                            }
+                        })
+
+                        showQRCode(app)
+                        app.settingsDialog.showModal()
+
+                    }
+                }) 
+            }
+
             buttonContainer.addEventListener('pointerup', {
                 handleEvent: function(event) {
                     buttonContainer.pressed = false
@@ -450,6 +509,7 @@ class FWTouchControl extends PIXI.Container{
 
         window.addEventListener('keydown', {
             handleEvent: function(event) {
+                if (app.settingsDialog.open) return
 
                 self.buttonContainers.forEach(buttonContainer => {
                     if (event.key === buttonContainer.key) {
@@ -462,13 +522,22 @@ class FWTouchControl extends PIXI.Container{
 
         window.addEventListener('keyup', {
             handleEvent: function(event) {
-
+                if (app.settingsDialog.open) return
+                
+                let foundMatching = false
                 self.buttonContainers.forEach(buttonContainer => {
                     if (event.key === buttonContainer.key) {
                         buttonContainer.pressed = false
+                        foundMatching = true
                     }
-                    buttonContainer.buttonText.text = buttonContainer.key
                 })
+
+                if (foundMatching) {
+                    self.buttonContainers.forEach(buttonContainer => {
+                        buttonContainer.buttonText.text = buttonContainer.key
+                    })
+                }
+                
                
             }
         })

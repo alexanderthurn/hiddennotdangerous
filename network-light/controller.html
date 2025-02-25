@@ -25,11 +25,33 @@
                 touch-action: none; /* Blockiert Standard-Touch-Ereignisse */
                 pointer-events: auto;
             }
+
+            #settingsDialog {
+                width: 75%;
+                height: 75%;
+                min-width: 250px;
+                min-height:250px;
+            }
         </style>
         <script src="./peerjs.min.js"></script>
         <script src="./pixi.js"></script>
+        <script src="./qrious.min.js"></script>
+        <script src="./jsQR.js"></script>
     </head>
     <body>
         <script type="text/javascript" src="./controller.js"></script>
+        <script type="text/javascript" src="./qr.js"></script>
+        <dialog id="settingsDialog">
+            <p>Code:</p>
+            Scan: <button id="btnScan">with camera</button> or<br />
+            Manual: <input type="text" id="inputServerId">
+            <button id="btnAccept">Connect</button><br /><br />
+            Example:<br />
+		  <canvas id="canvasCamera" style="width:100%; max-width:600px;" hidden></canvas>
+          <div id="loadingMessage" hidden>🎥 Unable to access video stream (please make sure you have a webcam enabled)</div>
+          <br />
+          <canvas id="qr"></canvas>
+        </dialog>
+        
     </body>
 </html>
