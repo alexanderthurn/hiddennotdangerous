@@ -313,8 +313,8 @@ class FWTouchControl extends PIXI.Container{
                 case 3: buttonContainer.buttonText.text = 'Y'; buttonContainer.key = 'i'; buttonContainer.rPos = [1.0, 0.6,0.09, -0.75, 0.0]; break;
                 case 4: buttonContainer.buttonText.text = 'LB'; buttonContainer.key = 'z'; buttonContainer.rPos = [0.925, 0.1,0.07, -0.6]; break;
                 case 5: buttonContainer.buttonText.text = 'RB'; buttonContainer.key = 'p'; buttonContainer.rPos = [0.925, 0.1,0.07, 0.6]; break;
-                case 6: buttonContainer.buttonText.text = 'LT'; buttonContainer.key = 'u'; buttonContainer.rPos = [0.925, 0.3,0.07, 0.6]; break;
-                case 7: buttonContainer.buttonText.text = 'RT'; buttonContainer.key = 'o'; buttonContainer.rPos = [0.925, 0.3,0.07, -0.6]; break;
+                case 6: buttonContainer.buttonText.text = 'LT'; buttonContainer.key = 'o'; buttonContainer.rPos = [0.925, 0.3,0.07, 0.6]; break;
+                case 7: buttonContainer.buttonText.text = 'RT'; buttonContainer.key = 'u'; buttonContainer.rPos = [0.925, 0.3,0.07, -0.6]; break;
                 case 8: buttonContainer.buttonText.text = 'SELECT'; buttonContainer.key = 'ArrowLeft'; buttonContainer.rPos = [0.4, 0.35,0.075]; break;
                 case 9: buttonContainer.buttonText.text = 'START'; buttonContainer.key = 'ArrowRight'; buttonContainer.rPos = [0.6, 0.35,0.075]; break;
                 case 10: buttonContainer.buttonText.text = 'A1'; buttonContainer.key = 'q'; buttonContainer.rPos = [-2.5, 1.0,0.05, -0.5]; break;
