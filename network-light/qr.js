@@ -9,12 +9,12 @@ var showQRCode = function(app, elem) {
       element: elem,
       value: url,
       background: 'green',
-      backgroundAlpha: 0.8,
+      backgroundAlpha: 1.0,
       foreground: 'brown',
       foregroundAlpha: 0.8,
       level: 'H',
-      padding: 25,
-      size: app.screen.width*0.25, 
+      padding: 100,
+      size: 1024, 
     });
   } else {
     qrCode.value = url
@@ -32,7 +32,6 @@ var initDialog = (app) => {
   let btnClose = app.settingsDialog.querySelector('#btnClose')
   var canvasElement = document.getElementById("canvasCamera");
   var loadingMessage = document.getElementById("loadingMessage"); 
-  var canvas = canvasElement.getContext("2d");
 
   app.settingsDialog.addEventListener("close", () => {
           console.log("Dialog wurde geschlossen")
@@ -86,7 +85,7 @@ var initDialog = (app) => {
 var startQRCode = function(app, callbackCode) {
   var canvasElement = document.getElementById("canvasCamera");
   var loadingMessage = document.getElementById("loadingMessage"); 
-  var canvas = canvasElement.getContext("2d");
+  var canvas = canvasElement.getContext("2d", { willReadFrequently: true });
 
     if (app.qrCodeReader) {
       app.qrCodeReader.onClose()
