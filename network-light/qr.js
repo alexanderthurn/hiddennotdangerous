@@ -1,12 +1,12 @@
 var qrCode = null
 
-var showQRCode = function(app) {
+var showQRCode = function(app, elem) {
   let c = new PIXI.Color(app.color)
 
   var url = window.location.protocol + '//' + window.location.host + window.location.pathname + '?id=' + app.serverId + '&color=' + c.toHex().replace('/^#/', '')
   if (!qrCode) {
     qrCode = new QRious({
-      element: document.getElementById('qr'),
+      element: elem,
       value: url,
       background: 'green',
       backgroundAlpha: 0.8,
@@ -19,6 +19,8 @@ var showQRCode = function(app) {
   } else {
     qrCode.value = url
   }
+
+  return qrCode
 
 }
 
@@ -51,7 +53,6 @@ var startQRCode = function(callbackCode) {
 
     function tick() {
       
-        
 
       loadingMessage.innerText = "⌛ Loading video..."
       if (video.readyState === video.HAVE_ENOUGH_DATA) {

@@ -26,6 +26,10 @@
                 pointer-events: auto;
             }
 
+            #canvasCamera {
+                width:100%; 
+            }
+
             #settingsDialog {
                 width: 75%;
                 height: 75%;
@@ -40,17 +44,17 @@
     </head>
     <body>
         <script type="text/javascript" src="./controller.js"></script>
+        <script type="text/javascript" src="./fwtouchcontrol.js"></script>
         <script type="text/javascript" src="./qr.js"></script>
         <dialog id="settingsDialog">
-            <p>Code:</p>
-            Scan: <button id="btnScan">with camera</button> or<br />
-            Manual: <input type="text" id="inputServerId">
-            <button id="btnAccept">Connect</button><br /><br />
-            Example:<br />
-		  <canvas id="canvasCamera" style="width:100%; max-width:600px;" hidden></canvas>
-          <div id="loadingMessage" hidden>🎥 Unable to access video stream (please make sure you have a webcam enabled)</div>
-          <br />
-          <canvas id="qr"></canvas>
+            <button id="btnClose">Close</button><br />
+            <button id="btnScan">Scan QR with camera</button> or<br />  
+            Code: <input type="text" id="inputServerId" autofocus>
+            <button id="btnAccept">Accept</button><br /><br />
+		    <canvas id="canvasCamera" hidden></canvas>
+            <div id="loadingMessage" hidden>🎥 Unable to access video stream (please make sure you have a webcam enabled)</div>
+            Example QR:<br />
+            <canvas id="qr"></canvas>
         </dialog>
         
     </body>
