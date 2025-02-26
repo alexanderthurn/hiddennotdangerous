@@ -153,13 +153,15 @@ var startQRCode = function(app, callbackCode) {
                   id = id.split('&')[0]
               }
           } else if (code.data.indexOf('fw://') === 0) {
-              id = code.data
-              if (callbackCode(id)) {
-                return
-              }
+              id = code.data.split('fw://')[1]
+           
           } else {
             loadingMessage.hidden = false
             loadingMessage.innerText = 'QR-Code not recognized'
+          }
+
+          if (id && callbackCode(id)) {
+            isClosed = true
           }
         
         }
