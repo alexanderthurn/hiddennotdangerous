@@ -268,7 +268,7 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, scoreLayer, overlayLayer, debugLayer)
         addGrass(Object.keys(atlasData.grass.frames), spriteSheets.grass);
         addHeadline();
-        addMenuItems(app);
+        addLobbyItems(app);
         addFoods(app, spriteSheets.food);
         addLevelBoundary(app);
         addFigures(app, spriteSheets.figure);

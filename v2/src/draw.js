@@ -51,13 +51,13 @@ const addHeadline = () => {
 }
 
 const animateButton = button => {
-    button.visible = !isGameStarted && figures.filter(f => f.playerId && f.type === 'fighter').length > 0
+    button.visible = figures.filter(f => f.playerId && f.type === 'fighter').length > 0
 
     const loadingBar = button.getChildAt(1)
     loadingBar.width = button.width*button.loadingPercentage
 }
 
-const addButton = props => {
+const createButton = (props, lobbyContainer) => {
     const {x, y, width, height, loadingPercentage, loadingSpeed, execute} = props
 
     let button = new PIXI.Container()
@@ -84,7 +84,7 @@ const addButton = props => {
     buttonText.y = height/2
 
     button.addChild(area, loadingBar, buttonText)
-    levelContainer.addChild(button)
+    lobbyContainer.addChild(button)
 
     addAnimation(button, () => animateButton(button))
     return button
@@ -110,20 +110,21 @@ const animateBotsButton = button => {
     button.getChildAt(2).text = 'Bots: ' + getBotCount()
 }
 
-const addButtons = app => {
-    Object.entries(buttonDefinition()).forEach(([id, button]) => {buttons[id] = addButton(button)})
+const addButtons = (app, lobbyContainer) => {
+    Object.entries(buttonDefinition()).forEach(([id, button]) => {buttons[id] = createButton(button, lobbyContainer)})
 
     app.ticker.add(() => animateStartButton(buttons.start))
     app.ticker.add(() => animateMuteButton(buttons.mute))
     app.ticker.add(() => animateBotsButton(buttons.bots))
 }
 
-const animateMenuItems = menuItem => {
-    menuItem.visible = !isGameStarted
+const animateLobbyItems = lobbyContainer => {
+    lobbyContainer.visible = !isGameStarted
 }
 
-const addMenuItems = app => {
-    addButtons(app)
+const addLobbyItems = app => {
+    const lobbyContainer = new PIXI.Container()
+    addButtons(app, lobbyContainer)
 
     const fontHeight = level.width*0.017  
     const howToPlay = new PIXI.Text({
@@ -138,13 +139,14 @@ const addMenuItems = app => {
         }
     });
 
-    howToPlay.anchor.set(0.5, 0);
-    howToPlay.x = level.width*0.22+fontHeight;
-    howToPlay.y = level.height*0.1;
+    howToPlay.anchor.set(0.5, 0)
+    howToPlay.x = level.width*0.22+fontHeight
+    howToPlay.y = level.height*0.1
 
-    levelContainer.addChild(howToPlay);
+    lobbyContainer.addChild(howToPlay)
+    levelContainer.addChild(lobbyContainer)
 
-    app.ticker.add(() => animateMenuItems(howToPlay))
+    app.ticker.add(() => animateLobbyItems(lobbyContainer))
 }
 
 const botCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: 0x000000}).stroke({alpha: 0.5, color: 0xFF0000, width: 2})
