@@ -31,15 +31,12 @@
             }
 
             #settingsDialog {
-                width: 75%;
-                height: 75%;
-                min-width: 250px;
-                min-height:250px;
+                width: 95%;
+                height: 95%;
             }
         </style>
         <script src="./peerjs.min.js"></script>
         <script src="./pixi.js"></script>
-        <script src="./qrious.min.js"></script>
         <script src="./jsQR.js"></script>
     </head>
     <body>
@@ -53,8 +50,6 @@
             <button id="btnAccept">Accept</button><br /><br />
 		    <canvas id="canvasCamera" hidden></canvas>
             <div id="loadingMessage" hidden>Unable to access video stream (please make sure you have a webcam enabled)</div>
-            Example QR:<br />
-            <canvas id="qr" style="width: auto; height: 70%"></canvas>
         </dialog>
         
     </body>

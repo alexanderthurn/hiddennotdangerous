@@ -1,28 +1,4 @@
-var qrCode = null
 
-var showQRCode = function(app, elem) {
-  let c = new PIXI.Color(app.color)
-
-  var url = window.location.protocol + '//' + window.location.host + window.location.pathname + '?id=' + app.serverId + '&color=' + c.toHex().replace('/^#/', '')
-  if (!qrCode) {
-    qrCode = new QRious({
-      element: elem,
-      value: url,
-      background: 'green',
-      backgroundAlpha: 1.0,
-      foreground: 'brown',
-      foregroundAlpha: 0.8,
-      level: 'H',
-      padding: 100,
-      size: 1024, 
-    });
-  } else {
-    qrCode.value = url
-  }
-
-  return qrCode
-
-}
 
 var initDialog = (app) => {
   app.settingsDialog = document.getElementById('settingsDialog')

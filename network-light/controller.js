@@ -161,9 +161,6 @@ window.addEventListener("load", (event) => {
 
 function main(app) {
     touchControl.update(app)
-
-    showQRCode(app, document.getElementById('qr'))
-
 }
 
 class NetworkGamepad {
