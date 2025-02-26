@@ -104,21 +104,28 @@ var startQRCode = function(app, callbackCode) {
       canvas.stroke();
     }
 
+    loadingMessage.innerText = "Loading video..."
+    loadingMessage.hidden = false;
+    
     var qrCodeReaderStream = null
     // Use facingMode: environment to attemt to get the front camera on phones
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
+      loadingMessage.innerText = "Access granted";
       video.srcObject = stream;
       video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
       video.play();
       qrCodeReaderStream = stream
       requestAnimationFrame(tick);
+    }).catch(function(error) {
+      console.error("Error accessing media devices.", error);
+     
+      loadingMessage.innerText = "Error accessing camera. Please ensure you are using HTTPS.";
     });
 
     let isClosed = false
 
     function tick() {
     
-      loadingMessage.innerText = "⌛ Loading video..."
       if (video.readyState === video.HAVE_ENOUGH_DATA) {
         loadingMessage.hidden = true;
         canvasElement.hidden = false;

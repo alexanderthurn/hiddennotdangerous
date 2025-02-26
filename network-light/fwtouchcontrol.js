@@ -183,15 +183,15 @@ class FWTouchControl extends PIXI.Container{
             axisContainer.stick = axisStick
             axisContainer.stickShadow = axisStickShadow
             switch(i) {
-                case 0: axisContainer.rPos = [0.05, 0.95, 0.2]; break;
-                case 1: axisContainer.rPos = [0.5, 0.95, 0.1, 0.0]; break;
+                case 0: axisContainer.rPos = [0.05, 0.95, 0.2]; axisContainer.clickIndex = 10; break;
+                case 1: axisContainer.rPos = [0.5, 0.95, 0.1, 0.0]; axisContainer.clickIndex = 11; break;
             }
 
             axisContainer.interactive = true
             axisContainer.addEventListener('pointerdown', {
                 handleEvent: function(event) {
                     if (axisContainer.lastTimeClicked && ( Date.now() - axisContainer.lastTimeClicked < 500)) {
-                        self.buttonContainers[10+i].pressed= true
+                        self.buttonContainers[axisContainer.clickIndex].pressed= true
                     }
                     axisContainer.lastTimeClicked = Date.now()
                     axisContainer.pointerdown = event
@@ -204,7 +204,7 @@ class FWTouchControl extends PIXI.Container{
                     axisContainer.yAxis = 0
                     axisContainer.xAxisShadow = 0
                     axisContainer.yAxisShadow = 0
-                    self.buttonContainers[10+i].pressed= false
+                    self.buttonContainers[axisContainer.clickIndex].pressed= false
                     axisContainer.pointerdown = null
                 }
             }) 
@@ -215,7 +215,7 @@ class FWTouchControl extends PIXI.Container{
                     axisContainer.yAxis = 0
                     axisContainer.xAxisShadow = 0
                     axisContainer.yAxisShadow = 0
-                    self.buttonContainers[10+i].pressed= false
+                    self.buttonContainers[axisContainer.clickIndex].pressed= false
                     axisContainer.pointerdown = null
                 }
             }) 
@@ -307,8 +307,8 @@ class FWTouchControl extends PIXI.Container{
             container.y = (distanceToBorderY + container.radius) + container.rPos[1]*(app.containerGame.screenHeight - distanceToBorderY*2 -container.radius*2) + (container.rPos.length > 4 ? container.rPos[4]*container.radius*2 : 0)
             container.stickShadow.position.set(container.xAxisShadow * (container.startRadius), container.yAxisShadow * (container.startRadius))
             container.stick.position.set(container.xAxis * (container.startRadius), container.yAxis * (container.startRadius))
-            container.stick.tint = (this.buttonContainers[10+index].pressed ? 0x000000 : 0xffffff) 
-            container.stick.alpha = (this.buttonContainers[10+index].pressed ? 0.5 : 1.0)
+            container.stick.tint = (this.buttonContainers[container.clickIndex].pressed ? 0x000000 : 0xffffff) 
+            container.stick.alpha = (this.buttonContainers[container.clickIndex].pressed ? 0.5 : 1.0)
         })
 
         this.buttonContainers.forEach((container, index) => {
