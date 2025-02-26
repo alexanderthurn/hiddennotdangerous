@@ -77,7 +77,7 @@ class FWTouchControl extends PIXI.Container{
                 
                 buttonContainer.addEventListener('pointerdown', {
                     handleEvent: function(event) {
-                        app.settingsDialog.showModal()
+                        app.settingsDialog.show()
                     }
                 }) 
             }

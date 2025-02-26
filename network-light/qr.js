@@ -24,12 +24,76 @@ var showQRCode = function(app, elem) {
 
 }
 
-var startQRCode = function(callbackCode) {
-		  			
+var initDialog = (app) => {
+  app.settingsDialog = document.getElementById('settingsDialog')
+
+  let input = app.settingsDialog.querySelector('#inputServerId')
+  let btnAccept = app.settingsDialog.querySelector('#btnAccept')
+  let btnClose = app.settingsDialog.querySelector('#btnClose')
+  var canvasElement = document.getElementById("canvasCamera");
+  var loadingMessage = document.getElementById("loadingMessage"); 
+  var canvas = canvasElement.getContext("2d");
+
+  app.settingsDialog.addEventListener("close", () => {
+          console.log("Dialog wurde geschlossen")
+          if (app.qrCodeReader) {
+              app.qrCodeReader.onClose()
+          }
+          setUrlParams(app.serverId)
+      }
+  );
+
+
+  
+  app.settingsDialog.show =() => {
+      input.value = app.serverId
+
+      canvasElement.hidden = true;
+      loadingMessage.hidden = true
+      canvasElement.height = 0;
+      canvasElement.width = 0;
+
+
+      app.settingsDialog.showModal()
+  }
+
+  btnAccept.addEventListener('click', {   
+      handleEvent: function(event) {
+          app.serverId = input.value
+          app.settingsDialog.close()
+      }
+  })
+
+  btnClose.addEventListener('click', {   
+      handleEvent: function(event) {
+          app.settingsDialog.close()
+      }
+  })
+
+  document.getElementById('btnScan').onclick = () => {
+      app.qrCodeReader = startQRCode(app, (code) => {
+          if (code) {
+              app.serverId = code
+              input.value = code
+              app.settingsDialog.close()
+              return true
+          }
+      })
+  }
+  
+}
+
+var startQRCode = function(app, callbackCode) {
+  var canvasElement = document.getElementById("canvasCamera");
+  var loadingMessage = document.getElementById("loadingMessage"); 
+  var canvas = canvasElement.getContext("2d");
+
+    if (app.qrCodeReader) {
+      app.qrCodeReader.onClose()
+    }
+
     var video = document.createElement("video");
-    var canvasElement = document.getElementById("canvasCamera");
-    var canvas = canvasElement.getContext("2d");
-    var loadingMessage = document.getElementById("loadingMessage");
+   
 
     function drawLine(begin, end, color) {
       canvas.beginPath();
@@ -40,20 +104,20 @@ var startQRCode = function(callbackCode) {
       canvas.stroke();
     }
 
+    var qrCodeReaderStream = null
     // Use facingMode: environment to attemt to get the front camera on phones
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
       video.srcObject = stream;
       video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
       video.play();
-     
+      qrCodeReaderStream = stream
       requestAnimationFrame(tick);
     });
 
     let isClosed = false
 
     function tick() {
-      
-
+    
       loadingMessage.innerText = "⌛ Loading video..."
       if (video.readyState === video.HAVE_ENOUGH_DATA) {
         loadingMessage.hidden = true;
@@ -81,18 +145,16 @@ var startQRCode = function(callbackCode) {
               if (id.indexOf('&') > -1) {
                   id = id.split('&')[0]
               }
-          } else {
+          } else if (code.data.indexOf('fw://') === 0) {
               id = code.data
               if (callbackCode(id)) {
                 return
               }
+          } else {
+            loadingMessage.hidden = false
+            loadingMessage.innerText = 'QR-Code not recognized'
           }
-          
-          
-          if (callbackCode(id)) {
-            return
-          }
-
+        
         }
       }
 
@@ -102,7 +164,14 @@ var startQRCode = function(callbackCode) {
 
     return {
         onClose: function() {
+            console.log('close reader', qrCodeReaderStream)
             isClosed = true
+            qrCodeReaderStream && qrCodeReaderStream.getTracks().forEach(track => track.stop());
+            app.qrCodeReader = null
+            canvasElement.hidden = true;
+            loadingMessage.hidden = true
+            canvasElement.height = 0;
+            canvasElement.width = 0;
         }
     }
 }

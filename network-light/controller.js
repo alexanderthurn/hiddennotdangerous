@@ -102,45 +102,9 @@ async function init() {
         resizeTo: window
     });
 
-    app.settingsDialog = document.getElementById('settingsDialog')
-    app.settingsDialog.addEventListener("close", () => console.log("Dialog wurde geschlossen"));
-    app.settingsDialog.addEventListener("cancel", () => console.log("Dialog wurde durch ESC oder Klick außerhalb geschlossen"));
-    app.settingsDialog.addEventListener("show", () => console.log("Dialog wurde geöffnet"));
-    app.settingsDialog.addEventListener("toggle", () => console.log("Dialog wurde geöffnet oder geschlossen"));
-    
 
-    let btnAccept = app.settingsDialog.querySelector('#btnAccept')
-    let btnClose = app.settingsDialog.querySelector('#btnClose')
-    let input = app.settingsDialog.querySelector('#inputServerId')
-    btnAccept.addEventListener('click', {   
-        handleEvent: function(event) {
-            app.serverId = input.value
-            setUrlParams(app.serverId)
-            app.settingsDialog.close()
-        }
-    })
-
-    btnClose.addEventListener('click', {   
-        handleEvent: function(event) {
-            app.settingsDialog.close()
-        }
-    })
-
-    document.getElementById('btnScan').onclick = () => {
-        let qrCodeReader
-        
-        qrCodeReader = startQRCode((code) => {
-            if (code) {
-                app.serverId = code
-                setUrlParams(app.serverId)
-                app.settingsDialog.close()
-                qrCodeReader.onClose()
-                return true
-            }
-        })
-    }
-    
-
+    // sets app.settingsDialog
+    initDialog(app)
 
     app.setLoading(0.0, 'Loading')
     touchControl = new FWTouchControl(app)
