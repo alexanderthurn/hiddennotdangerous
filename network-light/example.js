@@ -110,9 +110,9 @@ async function init() {
         resizeTo: window
     });
 
-    app.serverId = getQueryParam('id') || '1234'
+    app.serverId = getQueryParam('id') || '666'
     app.color =  color
-    app.url = window.location.protocol + '//' + window.location.host + window.location.pathname + '?id=' + app.serverId + '&color=' + app.color.toHex().replace('/^#/', '')
+    app.url = window.location.protocol + '//' + window.location.host.replace('localhost', '7.7.7.66') + window.location.pathname.replace('example.html', 'controller.html') + '?id=' + app.serverId + '&color=' + app.color.toHex().replace('/^#/', '')
  
     app.setLoading(0.0, 'Loading')
    
