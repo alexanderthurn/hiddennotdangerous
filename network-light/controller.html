@@ -31,9 +31,48 @@
             }
 
             #settingsDialog {
-                width: 95%;
-                height: 95%;
+                width: 80%;
+                height: 80%;
+                border-radius: 25px;
+                opacity: 1.0;
             }
+
+            #btnClose {
+                float:right;
+                background: white;
+                border: 2px solid black;
+                width: 30px;
+                height: 30px;
+                border-radius: 15px;
+            }
+
+            #btnScan {
+                width: 100%;
+                height: 30px;
+                background: white;
+                border: 2px solid black;
+                border-radius: 15px;
+            }
+
+            #inputServerId {
+                width: 100%;
+                height: 30px;
+                background: white;
+                border: 2px solid black;
+            }
+
+            
+            #btnAccept {
+                width: 50%;
+                height: 30px;
+                background: white;
+                border: 2px solid black;
+                border-radius: 15px;
+                margin: auto;
+                margin-top: 5px;
+
+            }
+
         </style>
         <script src="./peerjs.min.js"></script>
         <script src="./pixi.js"></script>
@@ -44,12 +83,16 @@
         <script type="text/javascript" src="./fwtouchcontrol.js"></script>
         <script type="text/javascript" src="./qr.js"></script>
         <dialog id="settingsDialog">
-            <button id="btnClose">Close</button><br />
-            <button id="btnScan">Scan QR with camera</button> or<br />  
-            Code: <input type="text" id="inputServerId" autofocus>
-            <button id="btnAccept">Accept</button><br /><br />
-		    <canvas id="canvasCamera" hidden></canvas>
+            <button id="btnClose">X</button>
+            <h1>Connect</h1>
+            <button id="btnScan">Scan QR with camera</button>
             <div id="loadingMessage" hidden>Unable to access video stream (please make sure you have a webcam enabled)</div>
+            <canvas id="canvasCamera" hidden></canvas>
+
+            <h2>or type code</h2>
+            <input type="text" id="inputServerId"><br /> 
+            <button id="btnAccept">Accept</button><br /><br />
+		   
         </dialog>
         
     </body>

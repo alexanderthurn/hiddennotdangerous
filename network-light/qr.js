@@ -27,7 +27,7 @@ var initDialog = (app) => {
       loadingMessage.hidden = true
       canvasElement.height = 0;
       canvasElement.width = 0;
-
+      btnScan.hidden = false
 
       app.settingsDialog.showModal()
   }
@@ -81,7 +81,8 @@ var startQRCode = function(app, callbackCode) {
 
     loadingMessage.innerText = "Loading video..."
     loadingMessage.hidden = false;
-    
+    btnScan.hidden = true
+
     var qrCodeReaderStream = null
     // Use facingMode: environment to attemt to get the front camera on phones
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
