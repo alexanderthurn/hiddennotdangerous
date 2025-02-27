@@ -243,10 +243,6 @@ function cropXY(x,y,level) {
     return [x,y]
 }
 
-function isInRect(x,y,rx,ry,rw,rh) {
-    return x >= rx && x <= rx+rw && y >= ry && y < ry+rh
-}
-
 const figureIsBot = figure => figure.playerId?.includes('b')
 
 createFigureAtlasData = () => {

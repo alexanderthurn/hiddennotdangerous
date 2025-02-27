@@ -50,18 +50,58 @@ const addHeadline = () => {
     levelContainer.addChild(authors);
 }
 
-const animateButton = button => {
+const animateCircleButton = button => {
+    button.visible = figures.filter(f => f.playerId && f.type === 'fighter').length > 0
+
+    const loadingCircle = button.getChildAt(1)
+    loadingCircle.scale = button.loadingPercentage
+}
+
+const createStartButton = (props, lobbyContainer) => {
+    const {x, y, innerRadius, outerRadius, loadingPercentage, loadingSpeed, execute} = props
+
+    let button = new PIXI.Container()
+    button = Object.assign(button, {x, y, loadingPercentage, loadingSpeed, execute})
+    button.isInArea = f => new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y+f.height*0.5) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y+f.height*0.5)
+
+    const area = new PIXI.Graphics()
+    .circle(0, 0, innerRadius)
+    .fill({alpha: 0.5, color: 0x57412F})
+
+    const loadingCircle = new PIXI.Graphics()
+    .circle(0, 0, innerRadius)
+    .fill({alpha: 0.5, color: 0x787878})
+
+    const buttonText = new PIXI.Text({
+        style: {
+            align: 'center',
+            fontSize: level.width*0.017,
+            fill: 0xFFFFFF,
+            stroke: 0xFFFFFF
+        }
+    });
+    buttonText.anchor.set(0.5)
+
+    button.addChild(area, loadingCircle, buttonText)
+    lobbyContainer.addChild(button)
+
+    addAnimation(button, () => animateCircleButton(button))
+    return button
+}
+
+const animateRectangleButton = button => {
     button.visible = figures.filter(f => f.playerId && f.type === 'fighter').length > 0
 
     const loadingBar = button.getChildAt(1)
     loadingBar.width = button.width*button.loadingPercentage
 }
 
-const createButton = (props, lobbyContainer) => {
+const createRectangleButton = (props, lobbyContainer) => {
     const {x, y, width, height, loadingPercentage, loadingSpeed, execute} = props
 
     let button = new PIXI.Container()
     button = Object.assign(button, {x, y, loadingPercentage, loadingSpeed, execute})
+    button.isInArea = f => new PIXI.Rectangle(x, y, width, height).contains(f.x, f.y+f.height*0.5)
 
     const area = new PIXI.Graphics()
     .rect(0, 0, width, height)
@@ -86,7 +126,7 @@ const createButton = (props, lobbyContainer) => {
     button.addChild(area, loadingBar, buttonText)
     lobbyContainer.addChild(button)
 
-    addAnimation(button, () => animateButton(button))
+    addAnimation(button, () => animateRectangleButton(button))
     return button
 }
 
@@ -110,10 +150,15 @@ const animateBotsButton = button => {
     button.getChildAt(2).text = 'Bots: ' + getBotCount()
 }
 
-const addButtons = (app, lobbyContainer) => {
-    Object.entries(buttonDefinition()).forEach(([id, button]) => {buttons[id] = createButton(button, lobbyContainer)})
+const addLevelSelection = (app, lobbyContainer) => {
+    buttons.start = createStartButton(levelSelectionDefinition(), lobbyContainer)
 
     app.ticker.add(() => animateStartButton(buttons.start))
+}
+
+const addButtons = (app, lobbyContainer) => {
+    Object.entries(buttonDefinition()).forEach(([id, button]) => {buttons[id] = createRectangleButton(button, lobbyContainer)})
+
     app.ticker.add(() => animateMuteButton(buttons.mute))
     app.ticker.add(() => animateBotsButton(buttons.bots))
 }
@@ -124,6 +169,7 @@ const animateLobbyItems = lobbyContainer => {
 
 const addLobbyItems = app => {
     const lobbyContainer = new PIXI.Container()
+    addLevelSelection(app, lobbyContainer)
     addButtons(app, lobbyContainer)
 
     const fontHeight = level.width*0.017  
