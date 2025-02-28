@@ -46,15 +46,6 @@ async function init() {
     touchControl = new FWTouchControl(app)
     app.containerGame.addChild(touchControl)
 
-    app.canvas.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-    });
-
-    app.canvas.addEventListener('touchstart', (e) => {
-       e.preventDefault();
-    });
-
-
     app.serverId = getQueryParam('id') || '1234'
     app.color =  new PIXI.Color(getQueryParam('color') || 'ff0000').toNumber()
     app.connectedToServer = false

@@ -1,29 +1,8 @@
-var qrCode = null
+
 const version = '1.0.0'
 const getQueryParam = (key) => {
     const params = new URLSearchParams(window.location.search);
     return params.get(key); // Gibt den Wert des Parameters oder null zurück
-}
-
-var getQRCodeTexture = function(url, backgroundColor) {
-
-   if (!qrCode) {
-    qrCode = new QRious({
-      value: url,
-      background: backgroundColor.toHex(),
-      backgroundAlpha: 1.0,
-      foreground: 'brown',
-      foregroundAlpha: 0.8,
-      level: 'H',
-      padding: 100,
-      size: 1024, 
-    });
-  } else {
-    qrCode.value = url
-  }
-
-  return qrCode
-
 }
 
 // Funktion, um den Graphen mit Pixi.js zu zeichnen
@@ -50,23 +29,13 @@ async function init() {
     app.color =  color
     app.url = window.location.protocol + '//' + window.location.host.replace('localhost', '7.7.7.66') + window.location.pathname.replace('example.html', 'controller.html') + '?id=' + app.serverId + '&color=' + app.color.toHex().replace('/^#/', '')
  
-    app.setLoading(0.0, 'Loading')
-   
-    app.canvas.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-    });
-
-    app.canvas.addEventListener('touchstart', (e) => {
-       e.preventDefault();
-    });
-
     app.textUrl = new PIXI.Text({text: app.url, style: {fontFamily: 'Arial', fontSize: 32, fill: 0xffffff, align: 'center'}})
     app.textServerId = new PIXI.Text({text: app.serverId, style: {fontFamily: 'Arial', fontSize: 32, fill: 0xffffff, align: 'center'}})
     app.textNetwork = new PIXI.Text({text:'', style: {fontFamily: 'Arial', fontSize: 32, fill: 0xffffff, align: 'center'}})
     app.textNetwork.anchor.set(1.0,0.0)
     app.textUrl.anchor.set(0.5,1.0)
     app.textServerId.anchor.set(0.5,0.0)    
-    let dataUrl = getQRCodeTexture(app.url, app.color).toDataURL()
+    let dataUrl = fwGetQRCodeTexture(app.url, app.color).toDataURL()
     let texture = await PIXI.Assets.load(dataUrl)
     app.qrCodeSprite = new PIXI.Sprite(texture)
     app.qrCodeSprite.anchor.set(0.5)
@@ -132,7 +101,7 @@ function main(app) {
     })
 
 
-    navigator.getGamepads().forEach((x,index) => {
+    fwGetNetworkAndLocalGamepads().forEach((x,index) => {
         if (x && x.connected) {
             if (!app.figures['l' + x.index]) {
                 let f = new PIXI.Container() 
