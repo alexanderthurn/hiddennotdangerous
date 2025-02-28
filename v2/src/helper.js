@@ -32,6 +32,17 @@ function clampStick(x, y) {
 
 const mod = (n, m) => ((n % m) + m) % m;
 const getRandomInt = max => Math.floor(Math.random() * max);
+const getRandomIndex = intArray => {
+    const randomInt = getRandomInt(intArray.reduce((sum, entry) => sum + entry), 0)
+    let sum = 0;
+    for (let index = 0; index < intArray.length; index++) {
+        sum += intArray[index]
+        if (randomInt <= sum) {
+            return index
+        }
+    }
+}
+
 const shuffle = (arr) => arr
     .map(value => ({ value, sort: Math.random() }))
     .sort((a, b) => a.sort - b.sort)
