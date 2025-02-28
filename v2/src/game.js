@@ -131,15 +131,24 @@ const foodAtlasData = {
     }
 };
 
+const levelSelectionDefinition = () => ({
+    x: level.width*0.5,
+    y: level.height*0.65,
+    innerRadius: level.width*0.1,
+    outerRadius: level.width*0.15,
+    loadingSpeed: 1/3000,
+    execute: () => {restartGame = true}
+})
+
 const buttonDefinition = () => ({
-    start: {
+    /*start: {
         x: level.width*(0.5-0.1),
         y: level.height*0.55,
         width: level.width*0.2,
         height: level.width*0.2,
         loadingSpeed: 1/3000,
         execute: () => {restartGame = true}
-    },
+    },*/
     mute: {
         x: level.width*(1.0 - 0.05 -0.15),
         y: level.height*0.12,
@@ -268,7 +277,7 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, scoreLayer, overlayLayer, debugLayer)
         addGrass(Object.keys(atlasData.grass.frames), spriteSheets.grass);
         addHeadline();
-        addMenuItems(app);
+        addLobbyItems(app);
         addFoods(app, spriteSheets.food);
         addLevelBoundary(app);
         addFigures(app, spriteSheets.figure);
@@ -427,7 +436,7 @@ function updateGame(figures, dt, dtProcessed) {
     if (!isGameStarted) {
         Object.values(buttons).forEach(btn => {
             btn.playersPossible = figures.filter(f => f.playerId && f.type === 'fighter')
-            btn.playersNear = btn.playersPossible.filter(f => isInRect(f.x,f.y+f.height*0.5,btn.x,btn.y,btn.width,btn.height))
+            btn.playersNear = btn.playersPossible.filter(btn.isInArea)
             
             let aimLoadingPercentage
             if (btn === buttons.start) {
@@ -440,7 +449,7 @@ function updateGame(figures, dt, dtProcessed) {
 
         figuresDead.forEach(f => {if (dtProcessed-f.killTime > deadDuration) {
             f.isDead = false
-            f.y-=f.height*0.25
+            //f.y-=f.height*0.25
             f.killTime = 0
         }})
     }
