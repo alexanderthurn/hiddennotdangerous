@@ -131,7 +131,7 @@ const foodAtlasData = {
     }
 };
 
-const levelSelectionDefinition = () => ({
+const gameSelectionDefinition = () => ({
     x: level.width*0.5,
     y: level.height*0.65,
     innerRadius: level.width*0.1,
@@ -202,15 +202,15 @@ const stages = {
     startLobby: 'startLobby',
 }
 
-const levels = {
+const games = {
     food: {
         stage: stages.foodGame,
         text: 'FOOD'
-    },
+    }/*,
     vip: {
         stage: stages.vipGame,
         text: 'VIP'
-    }
+    }*/
 }
 
 const grassAtlasData = {
@@ -457,10 +457,11 @@ function updateGame(figures, dt, dtProcessed) {
             let aimLoadingPercentage
             if (btn === buttons.start) {
                 aimLoadingPercentage = btn.playersNear.length / Math.max(btn.playersPossible.length, 2);
+            } else if (btn.level) {
+                aimLoadingPercentage = btn.playersNear.length / Math.max(btn.playersPossible.length, 2)
+                btn.level.votes = btn.playersNear.length
             } else {
                 aimLoadingPercentage = btn.playersNear.length > 0 ? 1 : 0;
-            }
-            if (btn === buttons.A) {
             }
             
             loadButton(btn, aimLoadingPercentage)

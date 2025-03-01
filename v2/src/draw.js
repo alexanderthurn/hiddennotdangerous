@@ -118,12 +118,12 @@ const animateRingPartButton = button => {
 }
 
 const createRingPartButton = (props, lobbyContainer) => {
-    const {x, y, startAngle, endAngle, innerRadius, outerRadius, color, loadingPercentage, loadingSpeed, text, execute} = props
+    const {x, y, startAngle, endAngle, innerRadius, outerRadius, game, color, loadingPercentage, loadingSpeed, execute} = props
     const width = distanceAnglesRad(startAngle, endAngle)
     const centerAngle = startAngle + width/2
 
     let button = new PIXI.Container()
-    button = Object.assign(button, {x, y, startAngle, endAngle, innerRadius, outerRadius, color, loadingPercentage, loadingSpeed, execute})
+    button = Object.assign(button, {x, y, startAngle, endAngle, innerRadius, outerRadius, level, color, loadingPercentage, loadingSpeed, execute})
     button.isInArea = f => new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y+f.height*0.5) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y+f.height*0.5) && (distanceAnglesRad(angle(x, y, f.x, f.y+f.height*0.5), centerAngle) < width/2)
 
     const area = new PIXI.Graphics()
@@ -135,7 +135,7 @@ const createRingPartButton = (props, lobbyContainer) => {
     const loadingArea = new PIXI.Graphics()
 
     const buttonText = new PIXI.Text({
-        text,
+        text: game.text,
         style: {
             align: 'center',
             fontSize: level.width*0.017,
@@ -154,14 +154,16 @@ const createRingPartButton = (props, lobbyContainer) => {
     return button
 }
 
-const addLevelRing = (lobbyContainer) => {
-    const button = createRingPartButton({...levelSelectionDefinition(), startAngle: 0, endAngle: Math.PI/4, color: 0xFFFFFF, text: 'A', execute: undefined}, lobbyContainer);
-    buttons.A = button
+const addGameRing = (lobbyContainer) => {
+    Object.entries(games).forEach(([id, game]) => {
+        const button = createRingPartButton({...gameSelectionDefinition(), startAngle: 0, endAngle: Math.PI/4, game, color: 0xFFFFFF, execute: undefined}, lobbyContainer);
+        buttons['vote_' + id] = button
+    })
 }
 
-const addLevelSelection = (app, lobbyContainer) => {
-    buttons.start = createStartButton(levelSelectionDefinition(), lobbyContainer)
-    addLevelRing(lobbyContainer)
+const addGameSelection = (app, lobbyContainer) => {
+    buttons.start = createStartButton(gameSelectionDefinition(), lobbyContainer)
+    addGameRing(lobbyContainer)
 
     app.ticker.add(() => animateStartButton(buttons.start))
 }
@@ -228,7 +230,7 @@ const animateLobbyItems = lobbyContainer => {
 
 const addLobbyItems = app => {
     const lobbyContainer = new PIXI.Container()
-    addLevelSelection(app, lobbyContainer)
+    addGameSelection(app, lobbyContainer)
     addButtons(app, lobbyContainer)
 
     const fontHeight = level.width*0.017  
