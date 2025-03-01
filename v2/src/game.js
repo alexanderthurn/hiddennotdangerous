@@ -196,6 +196,22 @@ const foodDefinition = completeRestart => ({
     }
 })
 
+const stages = {
+    foodGame: 'foodGame',
+    vipGame: 'vipGame',
+    startLobby: 'startLobby',
+}
+
+const levels = {
+    food: {
+        stage: stages.foodGame,
+        text: 'FOOD'
+    },
+    vip: {
+        stage: stages.vipGame,
+        text: 'VIP'
+    }
+}
 
 const grassAtlasData = {
     frames: {
@@ -444,6 +460,9 @@ function updateGame(figures, dt, dtProcessed) {
             } else {
                 aimLoadingPercentage = btn.playersNear.length > 0 ? 1 : 0;
             }
+            if (btn === buttons.A) {
+            }
+            
             loadButton(btn, aimLoadingPercentage)
         })
 

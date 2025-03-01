@@ -60,6 +60,7 @@ const rad2deg = rad => (rad * 180.0) / Math.PI;
 // Function ]-∞;∞[ -> [0;360[
 const rad2limiteddeg = rad => mod(rad2deg(rad),360);
 
+const distanceAnglesRad = (a1, a2) => {let d = Math.abs(a1 - a2) % (2*Math.PI); return Math.min(d, 2*Math.PI-d)};
 const distanceAngles = (a1, a2) => {let d = Math.abs(a1 - a2) % 360; return Math.min(d, 360-d)};
 
 const getNextDiscreteAngle = (angle, numberDiscreteAngles) => deg2rad(Math.round(rad2deg(angle)*numberDiscreteAngles/360)*360/numberDiscreteAngles);
@@ -201,8 +202,10 @@ const loadButton = (btn, aimLoadingPercentage) => {
     }
     
     if (btn.loadingPercentage >= 1) {
-        btn.loadingPercentage = 0
-        btn.execute()
+        if (btn.execute) {
+            btn.loadingPercentage = 0
+            btn.execute()
+        }
     }
 }
 

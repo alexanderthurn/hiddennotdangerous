@@ -57,6 +57,18 @@ const animateCircleButton = button => {
     loadingCircle.scale = button.loadingPercentage
 }
 
+const animateStartButton = button => {
+    let text = 'Walk here to\nSTART\n\n'+button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
+    if (button.playersPossible?.length === 1) {
+        text = 'Walk here to\nSTART\n\nmin 2 players\nor 1 player +1 bot'
+    } else if (button.playersPossible?.length > 1 && button.playersNear?.length === button.playersPossible?.length ) {
+        text ='Prepare your\nbellies'
+    } else if (button.playersNear?.length > 0) {
+        text = 'Walk here to\nSTART\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
+    }
+    button.getChildAt(2).text = text
+}
+
 const createStartButton = (props, lobbyContainer) => {
     const {x, y, innerRadius, outerRadius, loadingPercentage, loadingSpeed, execute} = props
 
@@ -87,6 +99,71 @@ const createStartButton = (props, lobbyContainer) => {
 
     addAnimation(button, () => animateCircleButton(button))
     return button
+}
+
+const animateRingPartButton = button => {
+    button.visible = figures.filter(f => f.playerId && f.type === 'fighter').length > 0
+
+    if (button.oldloadingPercentage != button.loadingPercentage) {
+        button.oldloadingPercentage = button.loadingPercentage
+
+        const height = button.outerRadius - button.innerRadius
+        const outerRadius = (button.innerRadius+button.loadingPercentage*height)
+        const loadingArea = button.getChildAt(1)
+        loadingArea.clear().arc(0, 0, button.innerRadius, button.startAngle, button.endAngle)
+        .lineTo(Math.cos(button.endAngle)*outerRadius, Math.sin(button.endAngle)*outerRadius)
+        .arc(0, 0, outerRadius, button.endAngle, button.startAngle, true)
+        .fill({alpha: 0.5, color: button.color})
+    }
+}
+
+const createRingPartButton = (props, lobbyContainer) => {
+    const {x, y, startAngle, endAngle, innerRadius, outerRadius, color, loadingPercentage, loadingSpeed, text, execute} = props
+    const width = distanceAngles(startAngle, endAngle)
+    const centerAngle = startAngle + width/2
+
+    let button = new PIXI.Container()
+    button = Object.assign(button, {x, y, startAngle, endAngle, innerRadius, outerRadius, color, loadingPercentage, loadingSpeed, execute})
+    button.isInArea = f => new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y+f.height*0.5) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y+f.height*0.5) && (distanceAnglesRad(angle(x, y, f.x, f.y+f.height*0.5), centerAngle) < width/2)
+
+    const area = new PIXI.Graphics()
+    .arc(0, 0, innerRadius, startAngle, endAngle)
+    .lineTo(Math.cos(endAngle)*outerRadius, Math.sin(endAngle)*outerRadius)
+    .arc(0, 0, outerRadius, endAngle, startAngle, true)
+    .fill({alpha: 0.5, color})
+
+    const loadingArea = new PIXI.Graphics()
+
+    const buttonText = new PIXI.Text({
+        text,
+        style: {
+            align: 'center',
+            fontSize: level.width*0.017,
+            fill: 0xFFFFFF,
+            stroke: 0xFFFFFF
+        }
+    });
+    buttonText.x = Math.cos(centerAngle)*((innerRadius+outerRadius)/2)
+    buttonText.y = Math.sin(centerAngle)*((innerRadius+outerRadius)/2)
+    buttonText.anchor.set(0.5)
+
+    button.addChild(area, loadingArea, buttonText)
+    lobbyContainer.addChild(button)
+
+    addAnimation(button, () => animateRingPartButton(button))
+    return button
+}
+
+const addLevelRing = (lobbyContainer) => {
+    const button = createRingPartButton({...levelSelectionDefinition(), startAngle: 0, endAngle: Math.PI/4, color: 0xFFFFFF, text: 'A', execute: undefined}, lobbyContainer);
+    buttons.A = button
+}
+
+const addLevelSelection = (app, lobbyContainer) => {
+    buttons.start = createStartButton(levelSelectionDefinition(), lobbyContainer)
+    addLevelRing(lobbyContainer)
+
+    app.ticker.add(() => animateStartButton(buttons.start))
 }
 
 const animateRectangleButton = button => {
@@ -130,30 +207,12 @@ const createRectangleButton = (props, lobbyContainer) => {
     return button
 }
 
-const animateStartButton = button => {
-    let text = 'Walk here to\nSTART\n\n'+button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
-    if (button.playersPossible?.length === 1) {
-        text = 'Walk here to\nSTART\n\nmin 2 players\nor 1 player +1 bot'
-    } else if (button.playersPossible?.length > 1 && button.playersNear?.length === button.playersPossible?.length ) {
-        text ='Prepare your\nbellies'
-    } else if (button.playersNear?.length > 0) {
-        text = 'Walk here to\nSTART\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
-    }
-    button.getChildAt(2).text = text
-}
-
 const animateMuteButton = button => {
     button.getChildAt(2).text = isMusicMuted() ? 'Music: OFF' : 'Music: ON'
 }
 
 const animateBotsButton = button => {
     button.getChildAt(2).text = 'Bots: ' + getBotCount()
-}
-
-const addLevelSelection = (app, lobbyContainer) => {
-    buttons.start = createStartButton(levelSelectionDefinition(), lobbyContainer)
-
-    app.ticker.add(() => animateStartButton(buttons.start))
 }
 
 const addButtons = (app, lobbyContainer) => {
