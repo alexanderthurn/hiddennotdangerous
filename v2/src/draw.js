@@ -527,11 +527,11 @@ const animateFigure = (figure, spritesheet) => {
     const shadow = figure.getChildByLabel('shadow')
     let animation
 
-    if (distanceAngles(deg, 0) < 45) {
+    if (distanceAnglesDeg(deg, 0) < 45) {
         animation = 'right'
-    } else if (distanceAngles(deg, 90) <= 45) {
+    } else if (distanceAnglesDeg(deg, 90) <= 45) {
         animation = 'down'
-    } else if (distanceAngles(deg, 180) < 45) {
+    } else if (distanceAnglesDeg(deg, 180) < 45) {
         animation = 'left'
     } else {
         animation = 'up'
@@ -542,11 +542,11 @@ const animateFigure = (figure, spritesheet) => {
         figureLayer.detach(body)
     } else {
         if (figure.isAttacking) {
-            if (distanceAngles(deg, 0) < 45) {
+            if (distanceAnglesDeg(deg, 0) < 45) {
                 body.angle = 20
-            } else if (distanceAngles(deg, 90) <= 45) {
+            } else if (distanceAnglesDeg(deg, 90) <= 45) {
                 body.angle = -20
-            } else if (distanceAngles(deg, 180) < 45) {
+            } else if (distanceAnglesDeg(deg, 180) < 45) {
                 body.angle = -20
             } else {
                 body.angle = 20
