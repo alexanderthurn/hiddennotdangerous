@@ -118,12 +118,12 @@ const animateRingPartButton = button => {
 }
 
 const createRingPartButton = (props, lobbyContainer) => {
-    const {x, y, startAngle, endAngle, innerRadius, outerRadius, game, color, loadingPercentage, loadingSpeed, execute} = props
+    const {x, y, startAngle, endAngle, innerRadius, outerRadius, game, color, loadingPercentage, execute} = props
     const width = distanceAnglesRad(startAngle, endAngle)
     const centerAngle = startAngle + width/2
 
     let button = new PIXI.Container()
-    button = Object.assign(button, {x, y, startAngle, endAngle, innerRadius, outerRadius, level, color, loadingPercentage, loadingSpeed, execute})
+    button = Object.assign(button, {x, y, startAngle, endAngle, innerRadius, outerRadius, level, color, loadingPercentage, execute})
     button.isInArea = f => new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y+f.height*0.5) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y+f.height*0.5) && (distanceAnglesRad(angle(x, y, f.x, f.y+f.height*0.5), centerAngle) < width/2)
 
     const area = new PIXI.Graphics()

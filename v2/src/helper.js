@@ -194,12 +194,16 @@ function toggleMusic() {
 }
 
 const loadButton = (btn, aimLoadingPercentage) => {
-    if (btn.loadingPercentage < aimLoadingPercentage) {
-        btn.loadingPercentage += btn.loadingSpeed * dt;
-        btn.loadingPercentage = Math.min(btn.loadingPercentage, aimLoadingPercentage);
-    } else if (btn.loadingPercentage > aimLoadingPercentage) {
-        btn.loadingPercentage -= btn.loadingSpeed * dt;
-        btn.loadingPercentage = Math.max(btn.loadingPercentage, aimLoadingPercentage);
+    if (btn.loadingSpeed) {
+        if (btn.loadingPercentage < aimLoadingPercentage) {
+            btn.loadingPercentage += btn.loadingSpeed * dt;
+            btn.loadingPercentage = Math.min(btn.loadingPercentage, aimLoadingPercentage);
+        } else if (btn.loadingPercentage > aimLoadingPercentage) {
+            btn.loadingPercentage -= btn.loadingSpeed * dt;
+            btn.loadingPercentage = Math.max(btn.loadingPercentage, aimLoadingPercentage);
+        }
+    } else {
+        btn.loadingPercentage = aimLoadingPercentage
     }
     
     if (btn.loadingPercentage >= 1) {
