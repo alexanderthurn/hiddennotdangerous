@@ -119,7 +119,7 @@ const animateRingPartButton = button => {
 
 const createRingPartButton = (props, lobbyContainer) => {
     const {x, y, startAngle, endAngle, innerRadius, outerRadius, color, loadingPercentage, loadingSpeed, text, execute} = props
-    const width = distanceAngles(startAngle, endAngle)
+    const width = distanceAnglesRad(startAngle, endAngle)
     const centerAngle = startAngle + width/2
 
     let button = new PIXI.Container()
