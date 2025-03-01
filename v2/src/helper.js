@@ -60,8 +60,7 @@ const rad2deg = rad => (rad * 180.0) / Math.PI;
 // Function ]-∞;∞[ -> [0;360[
 const rad2limiteddeg = rad => mod(rad2deg(rad),360);
 
-const distanceAngles = (a1, a2) => {let d = mod(Math.abs(a1 - a2),360); return Math.min(d, 360-d)};
-const distanceAngles2 = (a1, a2) => Math.abs(a1 - a2) % 360;
+const distanceAngles = (a1, a2) => {let d = Math.abs(a1 - a2) % 360; return Math.min(d, 360-d)};
 
 const getNextDiscreteAngle = (angle, numberDiscreteAngles) => deg2rad(Math.round(rad2deg(angle)*numberDiscreteAngles/360)*360/numberDiscreteAngles);
 
