@@ -344,7 +344,10 @@ class FWTouchControl extends PIXI.Container{
 
         if (app.connectedToServer) {
             this.connectionContainers[2].status = 2 
+        } else {
+            this.connectionContainers[2].status = 0 
         }
+        
         this.connectionContainers.forEach((container, index) => {
             container.radius = container.rPos[2]*minHeightWidth
             container.scale = container.radius/container.startRadius
