@@ -204,13 +204,15 @@ const stages = {
 
 const games = {
     food: {
+        color: 0xFF0000,
         stage: stages.foodGame,
         text: 'FOOD'
-    }/*,
+    },
     vip: {
+        color: 0x0000FF,
         stage: stages.vipGame,
         text: 'VIP'
-    }*/
+    }
 }
 
 const grassAtlasData = {
@@ -457,9 +459,9 @@ function updateGame(figures, dt, dtProcessed) {
             let aimLoadingPercentage
             if (btn === buttons.start) {
                 aimLoadingPercentage = btn.playersNear.length / Math.max(btn.playersPossible.length, 2);
-            } else if (btn.level) {
+            } else if (btn.game) {
                 aimLoadingPercentage = btn.playersNear.length / Math.max(btn.playersPossible.length, 2)
-                btn.level.votes = btn.playersNear.length
+                btn.game.votes = btn.playersNear.length
             } else {
                 aimLoadingPercentage = btn.playersNear.length > 0 ? 1 : 0;
             }

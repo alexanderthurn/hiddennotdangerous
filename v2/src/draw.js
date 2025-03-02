@@ -107,30 +107,35 @@ const animateRingPartButton = button => {
     if (button.oldloadingPercentage != button.loadingPercentage) {
         button.oldloadingPercentage = button.loadingPercentage
 
-        const height = button.outerRadius - button.innerRadius
-        const outerRadius = (button.innerRadius+button.loadingPercentage*height)
         const loadingArea = button.getChildAt(1)
-        loadingArea.clear().arc(0, 0, button.innerRadius, button.startAngle, button.endAngle)
-        .lineTo(Math.cos(button.endAngle)*outerRadius, Math.sin(button.endAngle)*outerRadius)
-        .arc(0, 0, outerRadius, button.endAngle, button.startAngle, true)
-        .fill({alpha: 0.5, color: button.color})
+        loadingArea.clear()
+        
+        if (button.loadingPercentage > 0) {
+            const height = button.outerRadius - button.innerRadius
+            const outerRadius = (button.innerRadius+button.loadingPercentage*height)
+
+            loadingArea.arc(0, 0, button.innerRadius, button.startAngle, button.endAngle)
+            .lineTo(Math.cos(button.endAngle)*outerRadius, Math.sin(button.endAngle)*outerRadius)
+            .arc(0, 0, outerRadius, button.endAngle, button.startAngle, true)
+            .fill({alpha: 0.5, color: button.game.color})
+        }
     }
 }
 
 const createRingPartButton = (props, lobbyContainer) => {
-    const {x, y, startAngle, endAngle, innerRadius, outerRadius, game, color, loadingPercentage, execute} = props
+    const {x, y, startAngle, endAngle, innerRadius, outerRadius, game, loadingPercentage, execute} = props
     const width = distanceAnglesRad(startAngle, endAngle)
     const centerAngle = startAngle + width/2
 
     let button = new PIXI.Container()
-    button = Object.assign(button, {x, y, startAngle, endAngle, innerRadius, outerRadius, level, color, loadingPercentage, execute})
+    button = Object.assign(button, {x, y, startAngle, endAngle, innerRadius, outerRadius, game, loadingPercentage, execute})
     button.isInArea = f => new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y+f.height*0.5) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y+f.height*0.5) && (distanceAnglesRad(angle(x, y, f.x, f.y+f.height*0.5), centerAngle) < width/2)
 
     const area = new PIXI.Graphics()
     .arc(0, 0, innerRadius, startAngle, endAngle)
     .lineTo(Math.cos(endAngle)*outerRadius, Math.sin(endAngle)*outerRadius)
     .arc(0, 0, outerRadius, endAngle, startAngle, true)
-    .fill({alpha: 0.5, color})
+    .fill({alpha: 0.5, color: game.color})
 
     const loadingArea = new PIXI.Graphics()
 
@@ -155,8 +160,12 @@ const createRingPartButton = (props, lobbyContainer) => {
 }
 
 const addGameRing = (lobbyContainer) => {
-    Object.entries(games).forEach(([id, game]) => {
-        const button = createRingPartButton({...gameSelectionDefinition(), startAngle: 0, endAngle: Math.PI/4, game, color: 0xFFFFFF, execute: undefined}, lobbyContainer);
+    const gameEntries = Object.entries(games)
+    const startAngle = 270
+    const diffAngle = 360/gameEntries.length
+
+    gameEntries.forEach(([id, game], index) => {
+        const button = createRingPartButton({...gameSelectionDefinition(), startAngle: deg2limitedrad(startAngle+index*diffAngle), endAngle:deg2limitedrad(startAngle+(index+1)*diffAngle), game, execute: undefined}, lobbyContainer);
         buttons['vote_' + id] = button
     })
 }
