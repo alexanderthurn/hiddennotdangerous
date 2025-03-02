@@ -146,8 +146,8 @@ function collectInputs() {
             var yTarget = -1000
     
             if (!isGameStarted) {
-                xTarget = buttons.start.x + buttons.start.width*0.5
-                yTarget = buttons.start.y + buttons.start.height*0.5
+                xTarget = buttons.start.x
+                yTarget = buttons.start.y
             } else {
                 var beans = figures.filter(b => b.type === 'bean')
                 if (f.beans.size === beans.length) {
