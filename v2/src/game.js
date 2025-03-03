@@ -350,7 +350,6 @@ function roundInit() {
             direction: angle(x,y,xTarget,yTarget),
             isAttacking: false,
             lastAttackTime: undefined,
-            playerJoinedTime: undefined,
             beans: new Set(),
             beansFarted: new Set()
         })
@@ -385,7 +384,6 @@ function gameLoop() {
     figures.filter(f => f.playerId).forEach((f) => {
         if (!players.some(p => p.playerId === f.playerId)) {
             destroyContainer(app, f.score)
-            f.playerJoinedTime = undefined
             f.playerId = null
         }
     })
@@ -523,13 +521,13 @@ function handleInput(players, figures, dtProcessed) {
     var joinedFighters = figures.filter(f => f.playerId)
     // join by doing anything
     players.filter(p => p.isAnyButtonPressed || p.isAttackButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
+        p.joinedTime = dtProcessed
         var figure = figures.find(f => f.playerId === p.playerId && f.type === 'fighter')
         if (!figure) {
             if (p.type === 'bot' && joinedFighters.length === 0) {
                 return
             }
             var figure = figures.find(f => !f.playerId && f.type === 'fighter')
-            figure.playerJoinedTime = dtProcessed
             addPlayerScore(figure, p)
             figure.isDead = false
             figure.playerId = p.playerId

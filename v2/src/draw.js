@@ -270,9 +270,9 @@ const playerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({al
 const botWinnerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: 0xB29146}).stroke({alpha: 0.5, color: 0xFF0000, width: 2})
 const playerWinnerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: 0xB29146}).stroke({alpha: 0.5, color: 0x000000, width: 1})
 
-const animatePlayerScore = figure => {
+const animatePlayerScore = (figure, player) => {
     if (!restartGame) {
-        var lp = Math.min((dtProcessed - figure.playerJoinedTime) / moveNewPlayerDuration, 1)
+        var lp = Math.min((dtProcessed - player.joinedTime) / moveNewPlayerDuration, 1)
         var lpi = 1-lp
 
         figure.score.x = lpi * (level.width*0.5) + lp*figure.score.xDefault
@@ -318,7 +318,7 @@ const addPlayerScore = (figure, player) => {
     levelContainer.addChild(playerScore)
     scoreLayer.attach(playerScore)
 
-    addAnimation(playerScore, () => animatePlayerScore(figure))
+    addAnimation(playerScore, () => animatePlayerScore(figure, player))
 }
 
 const animateWinningCeremony = winnerText => {
