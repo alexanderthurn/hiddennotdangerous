@@ -1,4 +1,4 @@
-class NetworkGamepad {
+class FWNetworkGamepad {
     constructor() {
         this.axes = [0, 0, 0, 0];
         this.buttons = new Array(17).fill({pressed: false, touched: false, value: 0.0});
@@ -52,5 +52,85 @@ class NetworkGamepad {
 
     toJSON() {
         return JSON.stringify(this.getState());
+    }
+
+    toByteArray() {
+        // Größe: 4 (axes) + 3 (buttons+connected) = 7 bytes
+        const buffer = new ArrayBuffer(7);
+        const view = new DataView(buffer);
+
+        let offset = 0;
+
+        // Schreibe die 4 Achsen als 8-bit signed
+        this.axes.forEach((axis) => {
+            // Mappe -1..1 zu -127..127 (relativ zu 128 als Mitte)
+            const byteValue = Math.floor((axis * 127) + 128); // -1 -> 1, 0 -> 128, 1 -> 255
+            view.setUint8(offset, Math.max(0, Math.min(255, byteValue)));
+            offset += 1;
+        });
+
+        // Schreibe Button-States und connected Flag (17 button bits + 1 connected bit)
+        let byte0 = 0; // Bits 0-7 (Buttons 0-7)
+        let byte1 = 0; // Bits 8-15 (Buttons 8-15)
+        let byte2 = 0; // Bits 16-23 (Button 16 + connected + 6 unused)
+
+        // Buttons
+        this.buttons.forEach((button, index) => {
+            const bitValue = button.pressed ? 1 : 0;
+            if (index < 8) {
+                byte0 |= bitValue << index;
+            } else if (index < 16) {
+                byte1 |= bitValue << (index - 8);
+            } else if (index < 17) {
+                byte2 |= bitValue << (index - 16);
+            }
+        });
+
+        // Connected Flag an Bit 1 von byte2 (nach Button 16)
+        byte2 |= (this.connected ? 1 : 0) << 1;
+
+        view.setUint8(offset, byte0); offset += 1;
+        view.setUint8(offset, byte1); offset += 1;
+        view.setUint8(offset, byte2); offset += 1;
+
+        return new Uint8Array(buffer);
+    }
+
+    fromByteArray(bytes) {
+        const view = new DataView(bytes.buffer);
+
+        let offset = 0;
+
+        // Lese Achsen
+        for (let i = 0; i < 4; i++) {
+            const byteValue = view.getUint8(offset);
+            this.axes[i] = (byteValue - 128) / 127; // Mappe zurück von 0..255 zu -1..1
+            offset += 1;
+        }
+
+        // Lese Buttons und connected
+        const byte0 = view.getUint8(offset); offset += 1;
+        const byte1 = view.getUint8(offset); offset += 1;
+        const byte2 = view.getUint8(offset); offset += 1;
+
+        // Buttons
+        for (let i = 0; i < 17; i++) {
+            let pressed = false;
+            if (i < 8) {
+                pressed = (byte0 & (1 << i)) !== 0;
+            } else if (i < 16) {
+                pressed = (byte1 & (1 << (i - 8))) !== 0;
+            } else {
+                pressed = (byte2 & (1 << (i - 16))) !== 0;
+            }
+            this.setButton(i, pressed);
+        }
+
+        // Connected Flag (Bit 1 von byte2)
+        this.connected = (byte2 & (1 << 1)) !== 0;
+
+        // Setze timestamp auf aktuelle Zeit
+        this.timestamp = Date.now();
+
     }
 }

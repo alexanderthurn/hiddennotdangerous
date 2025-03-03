@@ -35,7 +35,7 @@ async function init() {
     app.textNetwork.anchor.set(1.0,0.0)
     app.textUrl.anchor.set(0.5,1.0)
     app.textServerId.anchor.set(0.5,0.0)    
-    let dataUrl = fwGetQRCodeTexture(app.url, app.color).toDataURL()
+    let dataUrl = FWNetwork.getInstance().getQRCodeTexture(app.url, app.color).toDataURL()
     let texture = await PIXI.Assets.load(dataUrl)
     app.qrCodeSprite = new PIXI.Sprite(texture)
     app.qrCodeSprite.anchor.set(0.5)
@@ -72,7 +72,7 @@ window.addEventListener("load", (event) => {
 function main(app) {
 
     let gamepadsLocal = navigator.getGamepads().filter(x => x && x.connected)
-    let gamepadsNetwork = fwGetNetworkGamepads()
+    let gamepadsNetwork = FWNetwork.getInstance().getNetworkGamepads()
 
     app.textUrl.width = app.containerGame.screenWidth*0.95
     app.textUrl.scale.y = app.textUrl.scale.x
