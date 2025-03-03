@@ -623,14 +623,14 @@ createFigureMarker = figure => {
 }
 
 const animateAttackArc = (attackArc, figure) => {
-    attackArc.rotation = figure.direction
+    attackArc.rotation = figure.direction + Math.PI
     attackArc.visible = showDebug && figure.isAttacking
 }
 
 const createAttackArc = figure => {
     const attackArcContainer = new PIXI.Container()
     
-    let startAngle = deg2rad(45+figure.attackAngle)
+    let startAngle = deg2rad(-figure.attackAngle/2)
     let endAngle = startAngle + deg2rad(figure.attackAngle)
     const attackArc = new PIXI.Graphics().moveTo(0, 0).arc(0, 0, figure.attackDistance, startAngle, endAngle).fill({alpha: 0.2, color: 0x000000})
     attackArcContainer.addChild(attackArc)
@@ -804,7 +804,6 @@ const createTouchControl = app => {
     const touchControl = new PIXI.Container()
 
     let minHeightWidth = Math.min(app.screen.width, app.screen.height)
-    const distanceToBorder = 0.3*minHeightWidth
     const radius = 0.18*minHeightWidth
 
     const moveControl = new PIXI.Container()
