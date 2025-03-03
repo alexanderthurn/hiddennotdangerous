@@ -234,7 +234,7 @@ const addButtons = (app, lobbyContainer) => {
 }
 
 const animateLobbyItems = lobbyContainer => {
-    lobbyContainer.visible = !isGameStarted
+    lobbyContainer.visible = stage === stages.startLobby
 }
 
 const addLobbyItems = app => {
@@ -706,7 +706,7 @@ const animatePauseOverlay = (app, overlay) => {
     background.height = app.screen.height/2
     background.width = app.screen.width
     background.y = app.screen.height/4
-    text.text = isGameStarted ? 'Pause' : 'Welcome to Knirps und Knall'
+    text.text = (stage !== stages.startLobby) ? 'Pause' : 'Welcome to Knirps und Knall'
     text.style.fontSize = 0.05*app.screen.width
     text.x = app.screen.width/2
     text.y = app.screen.height/2

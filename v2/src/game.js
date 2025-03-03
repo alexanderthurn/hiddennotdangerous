@@ -27,7 +27,7 @@ var keyboards = [{bindings: {
     'ShiftRight': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var isGameStarted = false, restartGame = false, lastWinnerPlayerIds = new Set(), lastRoundEndThen, lastFinalWinnerPlayerId;
+var restartGame = false, lastWinnerPlayerIds = new Set(), lastRoundEndThen, lastFinalWinnerPlayerId;
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figures = [], maxPlayerFigures = 32, pointsToWin = 1, deadDuration = 5000, beanAttackDuration = 800, fartGrowDuration = 2000
@@ -41,7 +41,7 @@ const stages = {
     startLobby: 'startLobby',
 }
 
-let stage = stages.startLobby
+let stage
 let nextStage = stages.startLobby
 
 const games = {
@@ -161,7 +161,10 @@ const gameSelectionDefinition = () => ({
     innerRadius: level.width*0.1,
     outerRadius: level.width*0.15,
     loadingSpeed: 1/3000,
-    execute: () => {restartGame = true}
+    execute: () => {
+        restartGame = true;
+        nextStage = stages.foodGame
+    }
 })
 
 const buttonDefinition = () => ({
@@ -189,26 +192,26 @@ const buttons = {
     bots: {}
 }
 
-const foodDefinition = completeRestart => ({
+const foodDefinition = () => ({
     bean: {
-        x: completeRestart ? level.width*3.4/5 : level.width*4/5,
-        y: completeRestart ? level.height*1.6/5 : level.height*4/5,
+        x: stage === stages.startLobby ? level.width*3.4/5 : level.width*4/5,
+        y: stage === stages.startLobby ? level.height*1.6/5 : level.height*4/5,
     },
     brokkoli: {
-        x: completeRestart ? level.width*2.6/5 : level.width/5,
-        y: completeRestart ? level.height*0.8/5 : level.height/5,
+        x: stage === stages.startLobby ? level.width*2.6/5 : level.width/5,
+        y: stage === stages.startLobby ? level.height*0.8/5 : level.height/5,
     },
     onion: {
-        x: completeRestart ? level.width*2.6/5 : level.width/5,
-        y: completeRestart ? level.height*1.6/5 : level.height*4/5,
+        x: stage === stages.startLobby ? level.width*2.6/5 : level.width/5,
+        y: stage === stages.startLobby ? level.height*1.6/5 : level.height*4/5,
     },
     salad: {
-        x: completeRestart ? level.width*3.4/5 : level.width*4/5,
-        y: completeRestart ? level.height*0.8/5 : level.height/5,
+        x: stage === stages.startLobby ? level.width*3.4/5 : level.width*4/5,
+        y: stage === stages.startLobby ? level.height*0.8/5 : level.height/5,
     },
     taco: {
-        x: completeRestart ? level.width*3.0/5 : level.width/2,
-        y: completeRestart ? level.height*1.2/5 : level.height/2,
+        x: stage === stages.startLobby ? level.width*3.0/5 : level.width/2,
+        y: stage === stages.startLobby ? level.height*1.2/5 : level.height/2,
     }
 })
 
@@ -305,9 +308,10 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
     }
 )();
 
-function roundInit(completeRestart) {
+function roundInit() {
     then = Date.now();
     startTime = then;
+    stage = nextStage
     lastFinalWinnerPlayerId = undefined
     fpsTime = then
     lastKillTime = undefined;
@@ -315,11 +319,19 @@ function roundInit(completeRestart) {
     lastTotalkillAudio = 0;
     totalkillCounter = 0;
     var activePlayerIds = figures.filter(f => f.playerId && f.type === 'fighter').map(f => f.playerId)
-    if (completeRestart) {
+    if (stage === stages.startLobby) {
         gamepadPlayers = []
         mousePlayers = []
         keyboardPlayers = []
     }
+    if (!isMusicMuted()) {
+        if (nextStage === stages.startLobby) {
+            stopMusicPlaylist();
+        } else {
+            playMusicPlaylist(musicGame, true);
+        }
+    }
+
     Object.values(buttons).forEach(button => button.loadingPercentage = 0);
     figures.filter(figure => figure.type === 'fighter').forEach((figure, i) => {
         const [x, y] = getRandomXY(level)
@@ -343,13 +355,13 @@ function roundInit(completeRestart) {
             beansFarted: new Set()
         })
 
-        if (completeRestart && figure.score) {
+        if ((stage === stages.startLobby) && figure.score) {
             destroyContainer(app, figure.score)
         }
     })
 
     figures.filter(figure => figure.type === 'bean').forEach(figure => {
-        const {x, y} = foodDefinition(completeRestart)[figure.id]
+        const {x, y} = foodDefinition()[figure.id]
         Object.assign(figure, {
             x,
             y,
@@ -398,7 +410,7 @@ function gameLoop() {
 
     if (!restartGame) {
         var survivors = figuresPlayer.filter(f => !f.isDead)
-        if (isGameStarted && survivors.length < 2) {
+        if ((stage !== stages.startLobby) && survivors.length < 2) {
             lastWinnerPlayerIds.clear();
             if (survivors.length == 1) {
                 figuresPlayer.forEach(f => f.score.oldPoints = f.score.points);
@@ -424,22 +436,10 @@ function gameLoop() {
     const gameBreakDuration = (figuresPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
     if (restartGame && (!lastRoundEndThen || dtProcessed - lastRoundEndThen > gameBreakDuration)) {
         restartGame = false;
-        const wasGameStarted = isGameStarted;
-        isGameStarted = !lastFinalWinnerPlayerId;
         if (lastFinalWinnerPlayerId) {
-            stage = stages.startLobby
+            nextStage = stages.startLobby
         }
-        if (isGameStarted && !wasGameStarted) {
-            if (!isMusicMuted()) {
-                playMusicPlaylist(musicGame, true);
-            }
-            
-        } else if(!isGameStarted) {
-            if (!isMusicMuted()) {
-                stopMusicPlaylist();
-            }
-        }
-        roundInit(!!lastFinalWinnerPlayerId);
+        roundInit();
     }
     
     then = now
@@ -450,7 +450,7 @@ function updateGame(figures, dt, dtProcessed) {
     let figuresAlive = figures.filter(f => !f.isDead);
     let figuresDead = figures.filter(f => f.isDead);
 
-    if (!isGameStarted) {
+    if (stage === stages.startLobby) {
             const minimumPlayers = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
             const playersPossible = figures.filter(f => f.playerId && f.playerId[0] !== 'b' && f.type === 'fighter')
         Object.values(buttons).forEach(btn => {
@@ -533,7 +533,7 @@ function handleInput(players, figures, dtProcessed) {
             addPlayerScore(figure, p)
             figure.isDead = false
             figure.playerId = p.playerId
-            if (!isGameStarted) {
+            if (stage === stages.startLobby) {
                 figure.x = level.width*0.04+ Math.random() * level.width*0.4
                 figure.y = level.height*0.05+Math.random() * level.height*0.42
             }
