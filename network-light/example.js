@@ -71,14 +71,14 @@ window.addEventListener("load", (event) => {
 
 function main(app) {
 
+    let gamepadsLocal = navigator.getGamepads().filter(x => x && x.connected)
+    let gamepadsNetwork = fwGetNetworkGamepads()
+
     app.textUrl.width = app.containerGame.screenWidth*0.95
     app.textUrl.scale.y = app.textUrl.scale.x
     app.textUrl.position.set(app.containerGame.screenWidth*0.5, app.containerGame.screenHeight*1.0)
 
-
-    let countLocalGamepads = navigator.getGamepads().filter(x => x && x.connected).length
-    let countFigures = Object.keys(app.figures).length
-    app.textNetwork.text = `L: ${countLocalGamepads}, R: 0, F: ${countFigures}`
+    app.textNetwork.text = `L: ${gamepadsLocal.length}, R: ${gamepadsNetwork.length}, F: ${Object.keys(app.figures).length}`
     app.textNetwork.position.set(app.containerGame.screenWidth, app.containerGame.screenHeight*0.0)
     app.textServerId.position.set(app.containerGame.screenWidth*0.5, app.containerGame.screenHeight*0.0)
     app.qrCodeSprite.position.set(app.containerGame.screenWidth*0.5, app.containerGame.screenHeight*0.5)
@@ -97,11 +97,12 @@ function main(app) {
         f.y += app.ticker.deltaTime*f.gamepad.axes[1]*2
         f.body.tint = f.gamepad.buttons.some(b => b.pressed) ? 0x000000 : 0xffffff
 
-        
+        f.gamepadFoundInCurrentLoop = false
     })
 
 
-    fwGetNetworkAndLocalGamepads().forEach((x,index) => {
+
+    gamepadsLocal.concat(gamepadsNetwork).forEach((x) => {
         if (x && x.connected) {
             if (!app.figures['l' + x.index]) {
                 let f = new PIXI.Container() 
@@ -112,15 +113,17 @@ function main(app) {
                 app.containerFigures.addChild(f)
                 app.figures['l' + x.index] = f
             }
-
+            app.figures['l' + x.index].gamepadFoundInCurrentLoop = true
             app.figures['l' + x.index].gamepad = x
-            
+        }
+    })
 
-        } else {
-            if (app.figures['l' + index]) {
-                app.containerFigures.removeChild(app.figures['l' + index])
-                delete app.figures['l' + index]
-            }
+
+    Object.keys(app.figures).forEach((key) => {
+        let f = app.figures[key]
+        if (!f.gamepadFoundInCurrentLoop) {
+            app.containerFigures.removeChild(app.figures['l' + index])
+            delete app.figures['l' + index]
         }
     })
 }

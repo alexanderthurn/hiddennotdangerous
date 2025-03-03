@@ -23,16 +23,19 @@ var fwGetQRCodeTexture = function(url, backgroundColor) {
  }
 
  var fwGetNetworkGamepads = function() {
-    return navigator.getGamepads().forEach(g => {
-        if (!fwNetworkGamepads['l' + x.index]) {
+    return navigator.getGamepads().filter(x => x && x.connected).map((g) => {
+        let index = 'n' + g.index
+        if (!fwNetworkGamepads[index]) {
             let pad = new NetworkGamepad()
-            fwNetworkGamepads['l' + x.index] = pad
+            fwNetworkGamepads[index] = pad
+            fwNetworkGamepads[index].index = index
         }
-        fwNetworkGamepads['l' + x.index].setFromRealGamepad(g)
+        fwNetworkGamepads[index].setFromRealGamepad(g)
+        fwNetworkGamepads[index].index = index
+        fwNetworkGamepads[index].axes[0] *= -1 
+        fwNetworkGamepads[index].axes[1] *= -1 
+        return fwNetworkGamepads[index]
     })
  }
 
- var fwGetNetworkAndLocalGamepads = function() {
-    return navigator.getGamepads().concat(fwGetNetworkGamepads)
- }
  
