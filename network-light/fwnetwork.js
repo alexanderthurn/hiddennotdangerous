@@ -1,16 +1,19 @@
-
 class FWNetwork {
   static #instance = null;
 
   constructor() {
-      this.qrCode = null;
-      this.networkGamepads = {}
-
       if (FWNetwork.#instance) {
           throw new Error("Use FWNetwork.getInstance() to get the singleton instance.");
       }
-      // Initialisierung
+      this.qrCode = null;
+      this.peer = null;
+      this.connection = null;
+      this.roomId = null;
+      this.isHost = false;
       this.initialized = false;
+      this.networkGamepads = [];
+      this.clientGamepadIndices = new Map();
+      this.status = 'disconnected';
   }
 
   static getInstance() {
@@ -20,49 +23,248 @@ class FWNetwork {
       return FWNetwork.#instance;
   }
 
-  // Platzhalter-Methode für spätere peer.js-Integration
-  initialize() {
-      this.initialized = true;
-      console.log("FWNetwork initialized");
+  // Initialisiert die PeerJS-Verbindung mit optionalen Konfigurationen
+  initialize(options = {}) {
+      if (this.initialized) {
+          console.log("FWNetwork already initialized");
+          return;
+      }
+
+      // Standard-ICE-Server (Fallback, falls keine übergeben werden)
+      const defaultIceServers = [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+      ];
+
+      const defaultOptions = {
+          
+          debug: 3,
+          config: {
+              iceServers: defaultIceServers
+          }
+      };
+
+      const peerOptions = {
+          ...defaultOptions,
+          ...options,
+          config: {
+              ...defaultOptions.config,
+              ...(options.config || {}),
+              iceServers: options.config?.iceServers || defaultIceServers
+          }
+      };
+
+      this.peer = new Peer(peerOptions);
+
+      this.peer.on('open', (id) => {
+          this.initialized = true;
+          this.roomId = id;
+          this.status = this.isHost ? 'hosting' : 'connecting';
+          console.log(`PeerJS initialized with ID: ${id}`);
+          if (this.isHost) {
+              console.log(`Hosting room: ${id}`);
+          }
+      });
+
+      this.peer.on('error', (err) => {
+          console.error('PeerJS error:', err);
+          this.status = 'error';
+      });
+
+      this.peer.on('disconnected', () => {
+          console.log('Disconnected from PeerJS server');
+          this.initialized = false;
+          this.status = 'disconnected';
+      });
   }
 
+  // Erstellt oder aktualisiert einen QR-Code für die Netzwerkverbindung
   getQRCodeTexture(url, backgroundColor) {
-
-    if (!this.qrCode) {
-      this.qrCode = new QRious({
-      value: url,
-      background: backgroundColor.toHex(),
-      backgroundAlpha: 1.0,
-      foreground: 'brown',
-      foregroundAlpha: 0.8,
-      level: 'H',
-      padding: 100,
-      size: 1024, 
-    });
-    } else {
-      this.qrCode.value = url
-    }
-
-    return this.qrCode
- 
+      if (!url) {
+          console.error('URL for QR code is required');
+          return null;
+      }
+      if (!this.qrCode) {
+          this.qrCode = new QRious({
+              value: url,
+              background: backgroundColor.toHex(),
+              backgroundAlpha: 1.0,
+              foreground: 'brown',
+              foregroundAlpha: 0.8,
+              level: 'H',
+              padding: 100,
+              size: 1024,
+          });
+      } else {
+          this.qrCode.value = url;
+      }
+      return this.qrCode;
   }
 
- getNetworkGamepads() {
-    return navigator.getGamepads().filter(x => x && x.connected).map((g) => {
-        let index = 'n' + g.index
-        if (!this.networkGamepads[index]) {
-            let pad = new FWNetworkGamepad()
-            this.networkGamepads[index] = pad
-            this.networkGamepads[index].index = index
-        }
-        this.networkGamepads[index].setFromRealGamepad(g)
-        this.networkGamepads[index].index = index
-        this.networkGamepads[index].axes[0] *= -1 
-        this.networkGamepads[index].axes[1] *= -1 
-        return this.networkGamepads[index]
-    })
- }
+  // Hostet einen Raum und cached den QR-Code
+  hostRoom(roomName, baseUrl, backgroundColor, options = {}) {
+      if (!this.peer) {
+          this.initialize(options);
+      }
+
+      this.isHost = true;
+      this.roomId = roomName;
+
+      this.peer.on('connection', (conn) => {
+          console.log(`Client connected: ${conn.peer}`);
+          this.#setupHostConnection(conn);
+          this.status = `hosting (${this.getConnectedClients()} clients)`;
+      });
+
+      this.peer.on('open', (id) => {
+          const url = `${baseUrl}?id=${id}`;
+          this.getQRCodeTexture(url, backgroundColor);
+          this.status = 'hosting (0 clients)';
+      });
+  }
+
+  // Verbindet sich zu einem bestehenden Raum
+  connectToRoom(roomId, options = {}) {
+      if (!this.peer) {
+          this.initialize(options);
+      }
+
+      this.isHost = false;
+      this.roomId = roomId;
+
+      this.peer.on('open', (myId) => {
+          console.log(`Connecting to room: ${roomId} as ${myId}`);
+          this.connection = this.peer.connect(roomId);
+
+          this.connection.on('open', () => {
+              console.log(`Connected to host: ${roomId}`);
+              this.status = 'connected';
+          });
+
+          this.#setupConnectionHandlers(this.connection);
+      });
+  }
+
+  // Client: Sendet Gamepads manuell mit touchGamepad als Parameter
+  sendGamepads(touchGamepad) {
+      if (!this.connection || !this.connection.open) {
+          console.log('No active connection to send gamepads');
+          return;
+      }
+      if (!(touchGamepad instanceof NetworkGamepad)) {
+          console.error('touchGamepad must be a NetworkGamepad instance');
+          return;
+      }
+
+      const realGamepads = navigator.getGamepads();
+      const gamepads = [touchGamepad];
+      for (let i = 0; i < 4 && i < realGamepads.length; i++) {
+          if (realGamepads[i]) {
+              const netGamepad = new NetworkGamepad();
+              netGamepad.setFromRealGamepad(realGamepads[i]);
+              gamepads.push(netGamepad);
+          }
+      }
+
+      const gamepadData = gamepads.map((gp, index) => ({
+          index: index,
+          bytes: gp.toByteArray()
+      }));
+
+      this.sendData(gamepadData);
+  }
+
+  // Host: Verarbeitet eingehende Gamepad-Daten
+  #setupHostConnection(conn) {
+      const clientId = conn.peer;
+      const indices = [];
+      for (let i = 0; i < 5; i++) {
+          indices.push(this.networkGamepads.length);
+          this.networkGamepads.push(new NetworkGamepad());
+      }
+      this.clientGamepadIndices.set(clientId, indices);
+
+      conn.on('data', (data) => {
+          if (Array.isArray(data)) {
+              data.forEach(({ index, bytes }) => {
+                  if (index >= 0 && index < 5) {
+                      const gpIndex = this.clientGamepadIndices.get(clientId)[index];
+                      this.networkGamepads[gpIndex].fromByteArray(bytes);
+                  }
+              });
+          }
+      });
+
+      conn.on('close', () => {
+          console.log(`Client disconnected: ${clientId}`);
+          const indices = this.clientGamepadIndices.get(clientId);
+          indices.forEach((idx) => {
+              this.networkGamepads[idx] = undefined;
+          });
+          this.clientGamepadIndices.delete(clientId);
+          this.status = `hosting (${this.getConnectedClients()} clients)`;
+      });
+
+      conn.on('error', (err) => {
+          console.error(`Connection error with ${clientId}:`, err);
+      });
+  }
+
+  // Universelle Verbindungs-Handler (für Client)
+  #setupConnectionHandlers(conn) {
+      conn.on('data', (data) => {
+          console.log('Received data:', data);
+      });
+
+      conn.on('close', () => {
+          console.log('Connection closed');
+          this.connection = null;
+          this.status = 'disconnected';
+      });
+
+      conn.on('error', (err) => {
+          console.error('Connection error:', err);
+          this.status = 'error';
+      });
+  }
+
+  // Sendet Daten über die aktive Verbindung
+  sendData(data) {
+      if (this.connection && this.connection.open) {
+          this.connection.send(data);
+      } else {
+          console.log('No active connection to send data');
+      }
+  }
+
+  // Host: Gibt alle Gamepads zurück (lokal + Netzwerk), Client: nur lokal
+  getAllGamepads() {
+      if (!this.isHost) {
+          console.log('Full gamepad list only available on host; returning local gamepads');
+          return this.getLocalGamepads();
+      }
+      const localGamepads = Array.from(navigator.getGamepads());
+      const allGamepads = [...localGamepads, ...this.networkGamepads];
+      return allGamepads;
+  }
+
+  // Gibt nur die Netzwerk-Gamepads zurück (nur relevant für Host)
+  getNetworkGamepads() {
+      return this.networkGamepads;
+  }
+
+  // Gibt nur die lokalen Gamepads zurück
+  getLocalGamepads() {
+      return Array.from(navigator.getGamepads());
+  }
+
+  // Gibt die Anzahl der verbundenen Clients zurück
+  getConnectedClients() {
+      return this.clientGamepadIndices.size;
+  }
+
+  // Gibt den aktuellen Status der Verbindung zurück
+  getStatus() {
+      return this.status;
+  }
 }
-
-
- 
