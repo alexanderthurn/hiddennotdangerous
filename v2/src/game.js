@@ -35,6 +35,28 @@ var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = createLevel()
 
+const stages = {
+    foodGame: 'foodGame',
+    vipGame: 'vipGame',
+    startLobby: 'startLobby',
+}
+
+let stage = stages.startLobby
+let nextStage = stages.startLobby
+
+const games = {
+    food: {
+        color: 0xFF0000,
+        stage: stages.foodGame,
+        text: 'FOOD'
+    },
+    vip: {
+        color: 0x0000FF,
+        stage: stages.vipGame,
+        text: 'VIP'
+    }
+}
+
 var btnTouchController = {
     radius: 0,
 }
@@ -93,13 +115,15 @@ var soundAttack2Pool = loadAudioPool(audio.attack2, 10);
 var soundDeathPool = loadAudioPool(audio.death, 10);
 var soundEatPool = audio.eat.map(audio => loadAudioPool(audio, 4));
 
-var musicGame = shuffle(audio.musicGame.map(audio => getAudio(audio)));
+var musicGame = audio.musicGame.map(audio => getAudio(audio));
 var musicLobby = audio.musicLobby.map(audio => getAudio(audio));
 var soundJoin = getAudio(audio.join);
 var soundFirstBlood = getAudio(audio.firstBlood);
 var soundMultiKill = audio.multiKill.map(audio => getAudio(audio));
 var soundTotalKill = audio.totalKill.map(audio => getAudio(audio));
 var soundWin = getAudio(audio.win);
+
+var actualMusicPlaylist;
 
 const foodAtlasData = {
     frames: {
@@ -141,14 +165,6 @@ const gameSelectionDefinition = () => ({
 })
 
 const buttonDefinition = () => ({
-    /*start: {
-        x: level.width*(0.5-0.1),
-        y: level.height*0.55,
-        width: level.width*0.2,
-        height: level.width*0.2,
-        loadingSpeed: 1/3000,
-        execute: () => {restartGame = true}
-    },*/
     mute: {
         x: level.width*(1.0 - 0.05 -0.15),
         y: level.height*0.12,
@@ -195,25 +211,6 @@ const foodDefinition = completeRestart => ({
         y: completeRestart ? level.height*1.2/5 : level.height/2,
     }
 })
-
-const stages = {
-    foodGame: 'foodGame',
-    vipGame: 'vipGame',
-    startLobby: 'startLobby',
-}
-
-const games = {
-    food: {
-        color: 0xFF0000,
-        stage: stages.foodGame,
-        text: 'FOOD'
-    },
-    vip: {
-        color: 0x0000FF,
-        stage: stages.vipGame,
-        text: 'VIP'
-    }
-}
 
 const grassAtlasData = {
     frames: {
@@ -429,15 +426,17 @@ function gameLoop() {
         restartGame = false;
         const wasGameStarted = isGameStarted;
         isGameStarted = !lastFinalWinnerPlayerId;
+        if (lastFinalWinnerPlayerId) {
+            stage = stages.startLobby
+        }
         if (isGameStarted && !wasGameStarted) {
             if (!isMusicMuted()) {
-                stopPlaylist(musicLobby);
-                playPlaylist(musicGame);
+                playMusicPlaylist(musicGame, true);
             }
             
         } else if(!isGameStarted) {
             if (!isMusicMuted()) {
-                stopPlaylist(musicGame);
+                stopMusicPlaylist();
             }
         }
         roundInit(!!lastFinalWinnerPlayerId);
@@ -457,7 +456,6 @@ function updateGame(figures, dt, dtProcessed) {
         Object.values(buttons).forEach(btn => {
             btn.playersPossible = playersPossible
             btn.playersNear = playersPossible.filter(btn.isInArea)
-
             
             let aimLoadingPercentage
             if (btn === buttons.start) {
@@ -543,7 +541,7 @@ function handleInput(players, figures, dtProcessed) {
 
             if (joinedFighters.length === 0) {
                 if (!isMusicMuted()) {
-                    playPlaylist(musicLobby);
+                    playMusicPlaylist(musicLobby);
                 }
             }  
         }

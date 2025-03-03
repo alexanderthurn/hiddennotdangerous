@@ -125,13 +125,33 @@ const isMusicMuted = () => {
 
 const getPlayAudio = (audio) => () => playAudio(audio)
 
-const playPlaylist = (playlist) => {
-    playlist.forEach((track, index, list) => track.file.addEventListener("ended", getPlayAudio(playlist[(index+1)%list.length])));
-    playAudio(playlist[0]);
+const playPlaylist = (playlist, isShuffled) => {
+    if (playlist) {
+        if (isShuffled) {
+            playlist = shuffle(playlist)
+        }
+        playlist.forEach((track, index, list) => track.file.addEventListener("ended", getPlayAudio(playlist[(index+1)%list.length])));
+        playAudio(playlist[0]);
+    }
 }
 
 const stopPlaylist = (playlist) => {
-    playlist.forEach(track => track.file.load());
+    if (playlist) {
+        playlist.forEach(track => track.file.load());
+    }
+}
+
+const stopMusicPlaylist = () => {
+    stopPlaylist(actualMusicPlaylist)
+    actualMusicPlaylist = undefined
+}
+
+const playMusicPlaylist = (musicPlaylist, shuffle) => {
+    if (actualMusicPlaylist != musicPlaylist) {
+        stopMusicPlaylist()
+    }
+    playPlaylist(musicPlaylist, shuffle)
+    actualMusicPlaylist = musicPlaylist
 }
 
 const playKillingSounds = (numberKilledFigures, killTime) => {
@@ -178,18 +198,10 @@ const toggleBots = () => {
 function toggleMusic() {
     if (isMusicMuted()) {
         unmuteAudio()
-        if (isGameStarted) {
-            playPlaylist(shuffle(musicGame))
-        } else {
-            playPlaylist(musicLobby)
-        }
+        playMusicPlaylist(musicLobby)
     } else {
         muteAudio()
-        if (isGameStarted) {
-            stopPlaylist(musicGame)
-        } else {
-            stopPlaylist(musicLobby)
-        }
+        stopMusicPlaylist()
     }
 }
 
