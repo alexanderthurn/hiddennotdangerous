@@ -353,7 +353,7 @@ function roundInit() {
             beansFarted: new Set()
         })
 
-        if ((stage === stages.startLobby)) {
+        if (stage === stages.startLobby) {
             destroyContainer(app, figure.score)
             figure.playerId = null
         }
