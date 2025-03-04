@@ -34,6 +34,18 @@ class FWApplication extends PIXI.Application {
         this.containerGame.visible = false
         this.containerLoading.visible = true
         this.ticker.add(this.onUpdateLoader, this)
+
+
+        this.setLoading(0.0, 'Loading')
+   
+        this.canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+    
+        this.canvas.addEventListener('touchstart', (e) => {
+           e.preventDefault();
+        });
+    
     }
 
     onUpdateLoader(ticker) {

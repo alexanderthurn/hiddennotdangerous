@@ -1,30 +1,37 @@
-
+// ICE-Server-Konfiguration für PeerJS
+const iceServers = [
+    { urls: 'stun:stun.relay.metered.ca:80' },
+    { urls: 'turn:global.relay.metered.ca:80', username: 'edd2a0f22e4c5a5f1ccc546a', credential: 'bW5ZvhYwl1tPH6o0' },
+    { urls: 'turn:global.relay.metered.ca:80?transport=tcp', username: 'edd2a0f22e4c5a5f1ccc546a', credential: 'bW5ZvhYwl1tPH6o0' },
+    { urls: 'turn:global.relay.metered.ca:443', username: 'edd2a0f22e4c5a5f1ccc546a', credential: 'bW5ZvhYwl1tPH6o0' },
+    { urls: 'turns:global.relay.metered.ca:443?transport=tcp', username: 'edd2a0f22e4c5a5f1ccc546a', credential: 'bW5ZvhYwl1tPH6o0' },
+];
 
 const angle = (x1, y1, x2, y2) => Math.atan2(y2 - y1, x2 - x1); 
-const version = '1.0.0'
+const version = '1.0.0';
 const getQueryParam = (key) => {
     const params = new URLSearchParams(window.location.search);
-    return params.get(key); // Gibt den Wert des Parameters oder null zurück
+    return params.get(key);
 }
 
-var touchControl = null
+var touchControl = null;
+var gamepad = new FWNetworkGamepad();
+var prevGamepadState = null; // Vorheriger Zustand des Gamepads
+const maxMessagesPerSecond = 20; // Maximal 20 Nachrichten pro Sekunde
+const minDelay = 50; // Mindestabstand zwischen zwei Nachrichten in Millisekunden (z. B. 50ms)
+var messageCount = 0; // Zähler für gesendete Nachrichten in der aktuellen Sekunde
+var currentSecond = Math.floor(Date.now() / 1000); // Aktuelle Sekunde
+var lastSentTime = 0; // Zeitpunkt des letzten Sendens
 
 function setUrlParams(id) {
     let url = new URL(window.location.href);
     let params = new URLSearchParams(url.search);
-
-    if (id) {
-        params.set('id', id);
-    }
-
+    if (id) params.set('id', id);
     url.search = params.toString();
     window.history.replaceState({}, '', url);
 }
 
-
-// Funktion, um den Graphen mit Pixi.js zu zeichnen
 async function init() {
-
     const app = new FWApplication();
     await app.init({
         title: 'F-Mote',  
@@ -38,65 +45,89 @@ async function init() {
         resizeTo: window
     });
 
+    initDialog(app);
+    app.setLoading(0.0, 'Loading');
+    touchControl = new FWTouchControl(app);
+    app.containerGame.addChild(touchControl);
 
-    // sets app.settingsDialog
-    initDialog(app)
+    app.serverId = getQueryParam('id') || '1234';
+    app.color = new PIXI.Color(getQueryParam('color') || 'ff0000').toNumber();
+    app.connectedToServer = false;
 
-    app.setLoading(0.0, 'Loading')
-    touchControl = new FWTouchControl(app)
-    app.containerGame.addChild(touchControl)
-
-    app.canvas.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
+    const network = FWNetwork.getInstance();
+    network.connectToRoom(app.serverId, {
+        config: { iceServers: iceServers }
     });
 
-    app.canvas.addEventListener('touchstart', (e) => {
-       e.preventDefault();
+    network.peer.on('open', () => {
+        console.log(`Connected to server: ${app.serverId}`);
+        app.connectedToServer = true;
     });
 
+    network.peer.on('error', (err) => {
+        console.error('Connection error:', err);
+        app.connectedToServer = false;
+    });
 
-    app.serverId = getQueryParam('id') || '1234'
-    app.color =  new PIXI.Color(getQueryParam('color') || 'ff0000').toNumber()
-    app.connectedToServer = false
-    app.finishLoading()
-   
+    app.finishLoading();
 
     app.ticker.add((ticker) => {
-
         app.isPortrait = app.screen.width < app.screen.height;
-        app.ticker = ticker
-
-       // app.containerGame.y = app.screen.height*0.25;
-        //app.containerGame.pivot.set(app.screen.width*0.5, app.screen.height*0.5);
-
+        app.ticker = ticker;
 
         if (app.isPortrait) {
-            app.containerGame.angle = -270 - ticker.lastTime*0.0;
-            app.containerGame.x = app.screen.width
-            //app.containerGame.scale.set( app.screen.width / app.screen.height, app.screen.width / app.screen.height);
+            app.containerGame.angle = -270 - ticker.lastTime * 0.0;
+            app.containerGame.x = app.screen.width;
             app.containerGame.screenWidth = app.screen.height;
             app.containerGame.screenHeight = app.screen.width;    
         } else {
             app.containerGame.angle = 0;
-            app.containerGame.x = 0
+            app.containerGame.x = 0;
             app.containerGame.scale.set(1, 1);
             app.containerGame.screenWidth = app.screen.width;
             app.containerGame.screenHeight = app.screen.height;
         }
 
-        main(app)
-    })
-
-
+        main(app);
+    });
 }
 
 window.addEventListener("load", (event) => {
     init();
-})
+});
 
-
-function main(app) {
-    touchControl.update(app)
+function serializeGamepad(gamepad) {
+    return JSON.stringify({
+        axes: gamepad.axes,
+        buttons: gamepad.buttons.map(b => b.pressed)
+    });
 }
 
+function main(app) {
+    touchControl.update(app);
+    touchControl.updateGamepad(gamepad);
 
+    const currentState = serializeGamepad(gamepad);
+    const now = Date.now();
+    const second = Math.floor(now / 1000);
+
+    // Neue Sekunde? Zähler zurücksetzen
+    if (second > currentSecond) {
+        currentSecond = second;
+        messageCount = 0;
+    }
+
+    // Senden, wenn Zustand geändert, Limit nicht erreicht und Mindestdelay eingehalten
+    if (prevGamepadState !== currentState && 
+        messageCount < maxMessagesPerSecond && 
+        now - lastSentTime >= minDelay) {
+        if (app.connectedToServer) {
+            console.log(prevGamepadState, currentState);
+            const network = FWNetwork.getInstance();
+            network.sendGamepads(gamepad);
+            messageCount++; // Zähler erhöhen
+            lastSentTime = now; // Zeitpunkt des Sendens aktualisieren
+            prevGamepadState = currentState; // Zustand speichern
+        }
+    }
+}
