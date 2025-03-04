@@ -232,8 +232,10 @@ const addAnimation = (container, callback) => {
 }
 
 const destroyContainer = (app, container) => {
-    app.ticker.remove(container.tickerCallback)
-    container.destroy()
+    if (container) {
+        app.ticker.remove(container.tickerCallback)
+        container.destroy()
+    }
 }
 
 const createLevelContainer = (app, level) => {

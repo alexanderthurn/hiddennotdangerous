@@ -318,7 +318,7 @@ function roundInit() {
     multikillCounter = 0;
     lastTotalkillAudio = 0;
     totalkillCounter = 0;
-    var activePlayerIds = figures.filter(f => f.playerId && f.type === 'fighter').map(f => f.playerId)
+
     if (stage === stages.startLobby) {
         gamepadPlayers = []
         mousePlayers = []
@@ -345,7 +345,6 @@ function roundInit() {
             startWalkTime: Math.random() * 5000 + dtProcessed,
             speed: 0,
             isDead: false, 
-            playerId: activePlayerIds[i] || null,
             killTime: 0,
             direction: angle(x,y,xTarget,yTarget),
             isAttacking: false,
@@ -354,8 +353,9 @@ function roundInit() {
             beansFarted: new Set()
         })
 
-        if ((stage === stages.startLobby) && figure.score) {
+        if ((stage === stages.startLobby)) {
             destroyContainer(app, figure.score)
+            figure.playerId = null
         }
     })
 
