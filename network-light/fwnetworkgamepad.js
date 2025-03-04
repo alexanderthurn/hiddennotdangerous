@@ -1,7 +1,10 @@
 class FWNetworkGamepad {
     constructor() {
         this.axes = [0, 0, 0, 0];
-        this.buttons = new Array(17).fill({pressed: false, touched: false, value: 0.0});
+        this.buttons = new Array()
+        for (let i=0;i<17;i++) {
+            this.buttons.push({pressed: false, touched: false, value: 0.0})
+        }
         this.connected = false
         this.id = 'FW Network Game Controller (STANDARD GAMEPAD)'
         this.index = 0
