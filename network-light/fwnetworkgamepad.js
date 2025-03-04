@@ -97,7 +97,7 @@ class FWNetworkGamepad {
     }
 
     fromByteArray(bytes) {
-        const view = new DataView(bytes.buffer);
+        const view = new DataView(bytes);
 
         let offset = 0;
 

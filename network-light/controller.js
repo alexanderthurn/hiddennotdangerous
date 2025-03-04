@@ -35,7 +35,7 @@ const getQueryParam = (key) => {
 var touchControl = null;
 var gamepad = new FWNetworkGamepad();
 var prevGamepadState = null; // Vorheriger Zustand des Gamepads
-const maxMessagesPerSecond = 60; // Maximal 60 Nachrichten pro Sekunde
+const maxMessagesPerSecond = 20; // Maximal 60 Nachrichten pro Sekunde
 var messageCount = 0; // Zähler für gesendete Nachrichten in der aktuellen Sekunde
 var currentSecond = Math.floor(Date.now() / 1000); // Aktuelle Sekunde
 
@@ -71,7 +71,9 @@ async function init() {
     app.connectedToServer = false;
 
     const network = FWNetwork.getInstance();
-    network.connectToRoom(app.serverId, { config: { iceServers: iceServers } });
+    network.connectToRoom(app.serverId, {
+        config: { iceServers: iceServers }
+    });
 
     network.peer.on('open', () => {
         console.log(`Connected to server: ${app.serverId}`);
@@ -134,6 +136,7 @@ function main(app) {
     // Senden, wenn Zustand geändert und Limit nicht erreicht
     if (prevGamepadState !== currentState && messageCount < maxMessagesPerSecond) {
         if (app.connectedToServer) {
+            console.log(prevGamepadState, currentState)
             const network = FWNetwork.getInstance();
             network.sendGamepads(gamepad);
             messageCount++; // Zähler erhöhen

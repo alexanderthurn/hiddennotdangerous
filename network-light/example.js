@@ -124,7 +124,7 @@ function main(app) {
     app.textUrl.scale.y = app.textUrl.scale.x;
     app.textUrl.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 1.0);
 
-    app.textNetwork.text = `${network.getStatus()} | G: ${network.getLocalGamepads().length}, R: ${network.getNetworkGamepads().length}, F: ${Object.keys(app.figures).length}`;
+    app.textNetwork.text = `${network.getStatus()} | G: ${network.getLocalGamepads().filter(x => x && x.connected).length}, R: ${network.getNetworkGamepads().filter(x => x && x.connected).length}, F: ${Object.keys(app.figures).length}`;
     app.textNetwork.position.set(app.containerGame.screenWidth, app.containerGame.screenHeight * 0.0);
     app.textServerId.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 0.0);
 
