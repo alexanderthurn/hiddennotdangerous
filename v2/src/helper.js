@@ -2,7 +2,7 @@
  * Set a value based on the deadzone
  */
 function setDeadzone(x, y, deadzone=0.2) {
-    let m = Math.sqrt(x*x + y*y);
+    let m = Math.hypot(x, y);
 
     if (m < deadzone)
         return [0, 0];
@@ -18,7 +18,7 @@ function setDeadzone(x, y, deadzone=0.2) {
 
 function clampStick(x, y) {
     // Compute magnitude (length) of vector
-    let m = Math.sqrt(x*x + y*y);
+    let m = Math.hypot(x, y);
 
     // If the length greater than 1, normalize it (set it to 1)
     if (m > 1) {
@@ -65,10 +65,6 @@ const distanceAnglesRad = distanceAngles(2*Math.PI);
 const distanceAnglesDeg = distanceAngles(360);
 
 const getNextDiscreteAngle = (angle, numberDiscreteAngles) => deg2rad(Math.round(rad2deg(angle)*numberDiscreteAngles/360)*360/numberDiscreteAngles);
-
-const getHeightInTiles = () => Math.ceil(level.height/tileWidth);
-const getWidthInTiles = () => Math.ceil(level.width/tileWidth);
-const getLastAttackTime = (lastAttackTime, time) => lastAttackTime && time-lastAttackTime < 500 ? lastAttackTime : time;
 
 const getAudio = (audio) => {
     const {title, ...props} = audio;
