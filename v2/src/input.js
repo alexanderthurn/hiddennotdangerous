@@ -132,7 +132,7 @@ function collectInputs() {
         var bot = {
             type: 'bot',
             isAttackButtonPressed: false,
-            isAnyButtonPressed: !isGameStarted,
+            isAnyButtonPressed: stage === stages.startLobby,
             xAxis: 0,
             yAxis: 0,
             isMoving: true,
@@ -145,9 +145,9 @@ function collectInputs() {
             var xTarget = -1000
             var yTarget = -1000
     
-            if (!isGameStarted) {
-                xTarget = buttons.start.x + buttons.start.width*0.5
-                yTarget = buttons.start.y + buttons.start.height*0.5
+            if (stage === stages.startLobby) {
+                xTarget = buttons.start.x
+                yTarget = buttons.start.y
             } else {
                 var beans = figures.filter(b => b.type === 'bean')
                 if (f.beans.size === beans.length) {

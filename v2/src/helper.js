@@ -60,8 +60,9 @@ const rad2deg = rad => (rad * 180.0) / Math.PI;
 // Function ]-∞;∞[ -> [0;360[
 const rad2limiteddeg = rad => mod(rad2deg(rad),360);
 
-const distanceAngles = (a1, a2) => {let d = mod(Math.abs(a1 - a2),360); return Math.min(d, 360-d)};
-const distanceAngles2 = (a1, a2) => Math.abs(a1 - a2) % 360;
+const distanceAngles = base => (a1, a2) => {let d = Math.abs(a1 - a2) % base; return Math.min(d, base-d)};
+const distanceAnglesRad = distanceAngles(2*Math.PI);
+const distanceAnglesDeg = distanceAngles(360);
 
 const getNextDiscreteAngle = (angle, numberDiscreteAngles) => deg2rad(Math.round(rad2deg(angle)*numberDiscreteAngles/360)*360/numberDiscreteAngles);
 
@@ -124,13 +125,33 @@ const isMusicMuted = () => {
 
 const getPlayAudio = (audio) => () => playAudio(audio)
 
-const playPlaylist = (playlist) => {
-    playlist.forEach((track, index, list) => track.file.addEventListener("ended", getPlayAudio(playlist[(index+1)%list.length])));
-    playAudio(playlist[0]);
+const playPlaylist = (playlist, isShuffled) => {
+    if (playlist) {
+        if (isShuffled) {
+            playlist = shuffle(playlist)
+        }
+        playlist.forEach((track, index, list) => track.file.addEventListener("ended", getPlayAudio(playlist[(index+1)%list.length])));
+        playAudio(playlist[0]);
+    }
 }
 
 const stopPlaylist = (playlist) => {
-    playlist.forEach(track => track.file.load());
+    if (playlist) {
+        playlist.forEach(track => track.file.load());
+    }
+}
+
+const stopMusicPlaylist = () => {
+    stopPlaylist(actualMusicPlaylist)
+    actualMusicPlaylist = undefined
+}
+
+const playMusicPlaylist = (musicPlaylist, shuffle) => {
+    if (actualMusicPlaylist != musicPlaylist) {
+        stopMusicPlaylist()
+    }
+    playPlaylist(musicPlaylist, shuffle)
+    actualMusicPlaylist = musicPlaylist
 }
 
 const playKillingSounds = (numberKilledFigures, killTime) => {
@@ -177,33 +198,31 @@ const toggleBots = () => {
 function toggleMusic() {
     if (isMusicMuted()) {
         unmuteAudio()
-        if (isGameStarted) {
-            playPlaylist(shuffle(musicGame))
-        } else {
-            playPlaylist(musicLobby)
-        }
+        playMusicPlaylist(musicLobby)
     } else {
         muteAudio()
-        if (isGameStarted) {
-            stopPlaylist(musicGame)
-        } else {
-            stopPlaylist(musicLobby)
-        }
+        stopMusicPlaylist()
     }
 }
 
 const loadButton = (btn, aimLoadingPercentage) => {
-    if (btn.loadingPercentage < aimLoadingPercentage) {
-        btn.loadingPercentage += btn.loadingSpeed * dt;
-        btn.loadingPercentage = Math.min(btn.loadingPercentage, aimLoadingPercentage);
-    } else if (btn.loadingPercentage > aimLoadingPercentage) {
-        btn.loadingPercentage -= btn.loadingSpeed * dt;
-        btn.loadingPercentage = Math.max(btn.loadingPercentage, aimLoadingPercentage);
+    if (btn.loadingSpeed) {
+        if (btn.loadingPercentage < aimLoadingPercentage) {
+            btn.loadingPercentage += btn.loadingSpeed * dt;
+            btn.loadingPercentage = Math.min(btn.loadingPercentage, aimLoadingPercentage);
+        } else if (btn.loadingPercentage > aimLoadingPercentage) {
+            btn.loadingPercentage -= btn.loadingSpeed * dt;
+            btn.loadingPercentage = Math.max(btn.loadingPercentage, aimLoadingPercentage);
+        }
+    } else {
+        btn.loadingPercentage = aimLoadingPercentage
     }
     
     if (btn.loadingPercentage >= 1) {
-        btn.loadingPercentage = 0
-        btn.execute()
+        if (btn.execute) {
+            btn.loadingPercentage = 0
+            btn.execute()
+        }
     }
 }
 
@@ -213,8 +232,10 @@ const addAnimation = (container, callback) => {
 }
 
 const destroyContainer = (app, container) => {
-    app.ticker.remove(container.tickerCallback)
-    container.destroy()
+    if (container) {
+        app.ticker.remove(container.tickerCallback)
+        container.destroy()
+    }
 }
 
 const createLevelContainer = (app, level) => {

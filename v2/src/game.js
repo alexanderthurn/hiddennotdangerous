@@ -27,13 +27,35 @@ var keyboards = [{bindings: {
     'ShiftRight': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var isGameStarted = false, restartGame = false, lastWinnerPlayerIds = new Set(), lastRoundEndThen, lastFinalWinnerPlayerId;
+var restartGame = false, lastWinnerPlayerIds = new Set(), lastRoundEndThen, lastFinalWinnerPlayerId;
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figures = [], maxPlayerFigures = 32, pointsToWin = 1, deadDuration = 5000, beanAttackDuration = 800, fartGrowDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = createLevel()
+
+const stages = {
+    foodGame: 'foodGame',
+    vipGame: 'vipGame',
+    startLobby: 'startLobby',
+}
+
+let stage
+let nextStage = stages.startLobby
+
+const games = {
+    food: {
+        color: 0xFF0000,
+        stage: stages.foodGame,
+        text: 'FOOD'
+    },
+    vip: {
+        color: 0x0000FF,
+        stage: stages.vipGame,
+        text: 'VIP'
+    }
+}
 
 var btnTouchController = {
     radius: 0,
@@ -93,13 +115,15 @@ var soundAttack2Pool = loadAudioPool(audio.attack2, 10);
 var soundDeathPool = loadAudioPool(audio.death, 10);
 var soundEatPool = audio.eat.map(audio => loadAudioPool(audio, 4));
 
-var musicGame = shuffle(audio.musicGame.map(audio => getAudio(audio)));
+var musicGame = audio.musicGame.map(audio => getAudio(audio));
 var musicLobby = audio.musicLobby.map(audio => getAudio(audio));
 var soundJoin = getAudio(audio.join);
 var soundFirstBlood = getAudio(audio.firstBlood);
 var soundMultiKill = audio.multiKill.map(audio => getAudio(audio));
 var soundTotalKill = audio.totalKill.map(audio => getAudio(audio));
 var soundWin = getAudio(audio.win);
+
+var actualMusicPlaylist;
 
 const foodAtlasData = {
     frames: {
@@ -131,24 +155,19 @@ const foodAtlasData = {
     }
 };
 
-const levelSelectionDefinition = () => ({
+const gameSelectionDefinition = () => ({
     x: level.width*0.5,
     y: level.height*0.65,
     innerRadius: level.width*0.1,
     outerRadius: level.width*0.15,
     loadingSpeed: 1/3000,
-    execute: () => {restartGame = true}
+    execute: () => {
+        restartGame = true;
+        nextStage = stages.foodGame
+    }
 })
 
 const buttonDefinition = () => ({
-    /*start: {
-        x: level.width*(0.5-0.1),
-        y: level.height*0.55,
-        width: level.width*0.2,
-        height: level.width*0.2,
-        loadingSpeed: 1/3000,
-        execute: () => {restartGame = true}
-    },*/
     mute: {
         x: level.width*(1.0 - 0.05 -0.15),
         y: level.height*0.12,
@@ -173,29 +192,28 @@ const buttons = {
     bots: {}
 }
 
-const foodDefinition = completeRestart => ({
+const foodDefinition = () => ({
     bean: {
-        x: completeRestart ? level.width*3.4/5 : level.width*4/5,
-        y: completeRestart ? level.height*1.6/5 : level.height*4/5,
+        x: stage === stages.startLobby ? level.width*3.4/5 : level.width*4/5,
+        y: stage === stages.startLobby ? level.height*1.6/5 : level.height*4/5,
     },
     brokkoli: {
-        x: completeRestart ? level.width*2.6/5 : level.width/5,
-        y: completeRestart ? level.height*0.8/5 : level.height/5,
+        x: stage === stages.startLobby ? level.width*2.6/5 : level.width/5,
+        y: stage === stages.startLobby ? level.height*0.8/5 : level.height/5,
     },
     onion: {
-        x: completeRestart ? level.width*2.6/5 : level.width/5,
-        y: completeRestart ? level.height*1.6/5 : level.height*4/5,
+        x: stage === stages.startLobby ? level.width*2.6/5 : level.width/5,
+        y: stage === stages.startLobby ? level.height*1.6/5 : level.height*4/5,
     },
     salad: {
-        x: completeRestart ? level.width*3.4/5 : level.width*4/5,
-        y: completeRestart ? level.height*0.8/5 : level.height/5,
+        x: stage === stages.startLobby ? level.width*3.4/5 : level.width*4/5,
+        y: stage === stages.startLobby ? level.height*0.8/5 : level.height/5,
     },
     taco: {
-        x: completeRestart ? level.width*3.0/5 : level.width/2,
-        y: completeRestart ? level.height*1.2/5 : level.height/2,
+        x: stage === stages.startLobby ? level.width*3.0/5 : level.width/2,
+        y: stage === stages.startLobby ? level.height*1.2/5 : level.height/2,
     }
 })
-
 
 const grassAtlasData = {
     frames: {
@@ -290,21 +308,30 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
     }
 )();
 
-function roundInit(completeRestart) {
+function roundInit() {
     then = Date.now();
     startTime = then;
+    stage = nextStage
     lastFinalWinnerPlayerId = undefined
     fpsTime = then
     lastKillTime = undefined;
     multikillCounter = 0;
     lastTotalkillAudio = 0;
     totalkillCounter = 0;
-    var activePlayerIds = figures.filter(f => f.playerId && f.type === 'fighter').map(f => f.playerId)
-    if (completeRestart) {
+
+    if (stage === stages.startLobby) {
         gamepadPlayers = []
         mousePlayers = []
         keyboardPlayers = []
     }
+    if (!isMusicMuted()) {
+        if (nextStage === stages.startLobby) {
+            stopMusicPlaylist();
+        } else {
+            playMusicPlaylist(musicGame, true);
+        }
+    }
+
     Object.values(buttons).forEach(button => button.loadingPercentage = 0);
     figures.filter(figure => figure.type === 'fighter').forEach((figure, i) => {
         const [x, y] = getRandomXY(level)
@@ -318,23 +345,22 @@ function roundInit(completeRestart) {
             startWalkTime: Math.random() * 5000 + dtProcessed,
             speed: 0,
             isDead: false, 
-            playerId: activePlayerIds[i] || null,
             killTime: 0,
             direction: angle(x,y,xTarget,yTarget),
             isAttacking: false,
             lastAttackTime: undefined,
-            playerJoinedTime: undefined,
             beans: new Set(),
             beansFarted: new Set()
         })
 
-        if (completeRestart && figure.score) {
+        if (stage === stages.startLobby) {
             destroyContainer(app, figure.score)
+            figure.playerId = null
         }
     })
 
     figures.filter(figure => figure.type === 'bean').forEach(figure => {
-        const {x, y} = foodDefinition(completeRestart)[figure.id]
+        const {x, y} = foodDefinition()[figure.id]
         Object.assign(figure, {
             x,
             y,
@@ -358,7 +384,6 @@ function gameLoop() {
     figures.filter(f => f.playerId).forEach((f) => {
         if (!players.some(p => p.playerId === f.playerId)) {
             destroyContainer(app, f.score)
-            f.playerJoinedTime = undefined
             f.playerId = null
         }
     })
@@ -383,7 +408,7 @@ function gameLoop() {
 
     if (!restartGame) {
         var survivors = figuresPlayer.filter(f => !f.isDead)
-        if (isGameStarted && survivors.length < 2) {
+        if ((stage !== stages.startLobby) && survivors.length < 2) {
             lastWinnerPlayerIds.clear();
             if (survivors.length == 1) {
                 figuresPlayer.forEach(f => f.score.oldPoints = f.score.points);
@@ -409,20 +434,10 @@ function gameLoop() {
     const gameBreakDuration = (figuresPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
     if (restartGame && (!lastRoundEndThen || dtProcessed - lastRoundEndThen > gameBreakDuration)) {
         restartGame = false;
-        const wasGameStarted = isGameStarted;
-        isGameStarted = !lastFinalWinnerPlayerId;
-        if (isGameStarted && !wasGameStarted) {
-            if (!isMusicMuted()) {
-                stopPlaylist(musicLobby);
-                playPlaylist(musicGame);
-            }
-            
-        } else if(!isGameStarted) {
-            if (!isMusicMuted()) {
-                stopPlaylist(musicGame);
-            }
+        if (lastFinalWinnerPlayerId) {
+            nextStage = stages.startLobby
         }
-        roundInit(!!lastFinalWinnerPlayerId);
+        roundInit();
     }
     
     then = now
@@ -433,17 +448,23 @@ function updateGame(figures, dt, dtProcessed) {
     let figuresAlive = figures.filter(f => !f.isDead);
     let figuresDead = figures.filter(f => f.isDead);
 
-    if (!isGameStarted) {
+    if (stage === stages.startLobby) {
+            const minimumPlayers = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
+            const playersPossible = figures.filter(f => f.playerId && f.playerId[0] !== 'b' && f.type === 'fighter')
         Object.values(buttons).forEach(btn => {
-            btn.playersPossible = figures.filter(f => f.playerId && f.type === 'fighter')
-            btn.playersNear = btn.playersPossible.filter(btn.isInArea)
+            btn.playersPossible = playersPossible
+            btn.playersNear = playersPossible.filter(btn.isInArea)
             
             let aimLoadingPercentage
             if (btn === buttons.start) {
-                aimLoadingPercentage = btn.playersNear.length / Math.max(btn.playersPossible.length, 2);
+                aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers);
+            } else if (btn.game) {
+                aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers)
+                btn.game.votes = btn.playersNear.length
             } else {
                 aimLoadingPercentage = btn.playersNear.length > 0 ? 1 : 0;
             }
+            
             loadButton(btn, aimLoadingPercentage)
         })
 
@@ -480,7 +501,7 @@ function updateGame(figures, dt, dtProcessed) {
         figures.filter(fig => fig !== f && fig.playerId !== f.playerId && !fig.isDead && fig.type === 'fighter').forEach(fig => {
             const attackDistance = f.attackDistanceMultiplier ? f.attackDistanceMultiplier*f.attackDistance : f.attackDistance
             if (distance(f.x,f.y,fig.x,fig.y) < attackDistance) {
-                if (2*distanceAngles(rad2deg(f.direction), rad2deg(angle(f.x,f.y,fig.x,fig.y))+180) <= f.attackAngle) {
+                if (2*distanceAnglesDeg(rad2deg(f.direction), rad2deg(angle(f.x,f.y,fig.x,fig.y))+180) <= f.attackAngle) {
                     fig.isDead = true;
                     fig.speed = 0;
                     playAudioPool(soundDeathPool);
@@ -500,17 +521,17 @@ function handleInput(players, figures, dtProcessed) {
     var joinedFighters = figures.filter(f => f.playerId)
     // join by doing anything
     players.filter(p => p.isAnyButtonPressed || p.isAttackButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
+        p.joinedTime = dtProcessed
         var figure = figures.find(f => f.playerId === p.playerId && f.type === 'fighter')
         if (!figure) {
             if (p.type === 'bot' && joinedFighters.length === 0) {
                 return
             }
             var figure = figures.find(f => !f.playerId && f.type === 'fighter')
-            figure.playerJoinedTime = dtProcessed
             addPlayerScore(figure, p)
             figure.isDead = false
             figure.playerId = p.playerId
-            if (!isGameStarted) {
+            if (stage === stages.startLobby) {
                 figure.x = level.width*0.04+ Math.random() * level.width*0.4
                 figure.y = level.height*0.05+Math.random() * level.height*0.42
             }
@@ -518,7 +539,7 @@ function handleInput(players, figures, dtProcessed) {
 
             if (joinedFighters.length === 0) {
                 if (!isMusicMuted()) {
-                    playPlaylist(musicLobby);
+                    playMusicPlaylist(musicLobby);
                 }
             }  
         }

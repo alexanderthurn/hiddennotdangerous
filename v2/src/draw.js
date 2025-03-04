@@ -57,6 +57,18 @@ const animateCircleButton = button => {
     loadingCircle.scale = button.loadingPercentage
 }
 
+const animateStartButton = button => {
+    let text = 'Vote to\nSTART\n\n'+button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
+    if (button.playersPossible?.length === 1) {
+        text = 'Vote to\nSTART\n\nmin 2 players\nor 1 player +1 bot'
+    } else if (button.playersPossible?.length > 1 && button.playersNear?.length === button.playersPossible?.length ) {
+        text ='Prepare your\nbellies'
+    } else if (button.playersNear?.length > 0) {
+        text = 'Vote to\nSTART\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
+    }
+    button.getChildAt(2).text = text
+}
+
 const createStartButton = (props, lobbyContainer) => {
     const {x, y, innerRadius, outerRadius, loadingPercentage, loadingSpeed, execute} = props
 
@@ -87,6 +99,82 @@ const createStartButton = (props, lobbyContainer) => {
 
     addAnimation(button, () => animateCircleButton(button))
     return button
+}
+
+const animateRingPartButton = button => {
+    button.visible = figures.filter(f => f.playerId && f.type === 'fighter').length > 0
+
+    if (button.oldloadingPercentage != button.loadingPercentage) {
+        button.oldloadingPercentage = button.loadingPercentage
+
+        const loadingArea = button.getChildAt(1)
+        loadingArea.clear()
+        
+        if (button.loadingPercentage > 0) {
+            const height = button.outerRadius - button.innerRadius
+            const outerRadius = (button.innerRadius+button.loadingPercentage*height)
+
+            loadingArea.arc(0, 0, button.innerRadius, button.startAngle, button.endAngle)
+            .lineTo(Math.cos(button.endAngle)*outerRadius, Math.sin(button.endAngle)*outerRadius)
+            .arc(0, 0, outerRadius, button.endAngle, button.startAngle, true)
+            .fill({alpha: 0.5, color: button.game.color})
+        }
+    }
+}
+
+const createRingPartButton = (props, lobbyContainer) => {
+    const {x, y, startAngle, endAngle, innerRadius, outerRadius, game, loadingPercentage, execute} = props
+    const width = distanceAnglesRad(startAngle, endAngle)
+    const centerAngle = startAngle + width/2
+
+    let button = new PIXI.Container()
+    button = Object.assign(button, {x, y, startAngle, endAngle, innerRadius, outerRadius, game, loadingPercentage, execute})
+    button.isInArea = f => new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y+f.height*0.5) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y+f.height*0.5) && (distanceAnglesRad(angle(x, y, f.x, f.y+f.height*0.5), centerAngle) < width/2)
+
+    const area = new PIXI.Graphics()
+    .arc(0, 0, innerRadius, startAngle, endAngle)
+    .lineTo(Math.cos(endAngle)*outerRadius, Math.sin(endAngle)*outerRadius)
+    .arc(0, 0, outerRadius, endAngle, startAngle, true)
+    .fill({alpha: 0.5, color: game.color})
+
+    const loadingArea = new PIXI.Graphics()
+
+    const buttonText = new PIXI.Text({
+        text: game.text,
+        style: {
+            align: 'center',
+            fontSize: level.width*0.017,
+            fill: 0xFFFFFF,
+            stroke: 0xFFFFFF
+        }
+    });
+    buttonText.x = Math.cos(centerAngle)*((innerRadius+outerRadius)/2)
+    buttonText.y = Math.sin(centerAngle)*((innerRadius+outerRadius)/2)
+    buttonText.anchor.set(0.5)
+
+    button.addChild(area, loadingArea, buttonText)
+    lobbyContainer.addChild(button)
+
+    addAnimation(button, () => animateRingPartButton(button))
+    return button
+}
+
+const addGameRing = (lobbyContainer) => {
+    const gameEntries = Object.entries(games)
+    const startAngle = 270
+    const diffAngle = 360/gameEntries.length
+
+    gameEntries.forEach(([id, game], index) => {
+        const button = createRingPartButton({...gameSelectionDefinition(), startAngle: deg2limitedrad(startAngle+index*diffAngle), endAngle:deg2limitedrad(startAngle+(index+1)*diffAngle), game, execute: undefined}, lobbyContainer);
+        buttons['vote_' + id] = button
+    })
+}
+
+const addGameSelection = (app, lobbyContainer) => {
+    buttons.start = createStartButton(gameSelectionDefinition(), lobbyContainer)
+    addGameRing(lobbyContainer)
+
+    app.ticker.add(() => animateStartButton(buttons.start))
 }
 
 const animateRectangleButton = button => {
@@ -130,30 +218,12 @@ const createRectangleButton = (props, lobbyContainer) => {
     return button
 }
 
-const animateStartButton = button => {
-    let text = 'Walk here to\nSTART\n\n'+button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
-    if (button.playersPossible?.length === 1) {
-        text = 'Walk here to\nSTART\n\nmin 2 players\nor 1 player +1 bot'
-    } else if (button.playersPossible?.length > 1 && button.playersNear?.length === button.playersPossible?.length ) {
-        text ='Prepare your\nbellies'
-    } else if (button.playersNear?.length > 0) {
-        text = 'Walk here to\nSTART\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
-    }
-    button.getChildAt(2).text = text
-}
-
 const animateMuteButton = button => {
     button.getChildAt(2).text = isMusicMuted() ? 'Music: OFF' : 'Music: ON'
 }
 
 const animateBotsButton = button => {
     button.getChildAt(2).text = 'Bots: ' + getBotCount()
-}
-
-const addLevelSelection = (app, lobbyContainer) => {
-    buttons.start = createStartButton(levelSelectionDefinition(), lobbyContainer)
-
-    app.ticker.add(() => animateStartButton(buttons.start))
 }
 
 const addButtons = (app, lobbyContainer) => {
@@ -164,12 +234,12 @@ const addButtons = (app, lobbyContainer) => {
 }
 
 const animateLobbyItems = lobbyContainer => {
-    lobbyContainer.visible = !isGameStarted
+    lobbyContainer.visible = stage === stages.startLobby
 }
 
 const addLobbyItems = app => {
     const lobbyContainer = new PIXI.Container()
-    addLevelSelection(app, lobbyContainer)
+    addGameSelection(app, lobbyContainer)
     addButtons(app, lobbyContainer)
 
     const fontHeight = level.width*0.017  
@@ -200,9 +270,9 @@ const playerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({al
 const botWinnerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: 0xB29146}).stroke({alpha: 0.5, color: 0xFF0000, width: 2})
 const playerWinnerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: 0xB29146}).stroke({alpha: 0.5, color: 0x000000, width: 1})
 
-const animatePlayerScore = figure => {
+const animatePlayerScore = (figure, player) => {
     if (!restartGame) {
-        var lp = Math.min((dtProcessed - figure.playerJoinedTime) / moveNewPlayerDuration, 1)
+        var lp = Math.min((dtProcessed - player.joinedTime) / moveNewPlayerDuration, 1)
         var lpi = 1-lp
 
         figure.score.x = lpi * (level.width*0.5) + lp*figure.score.xDefault
@@ -248,7 +318,7 @@ const addPlayerScore = (figure, player) => {
     levelContainer.addChild(playerScore)
     scoreLayer.attach(playerScore)
 
-    addAnimation(playerScore, () => animatePlayerScore(figure))
+    addAnimation(playerScore, () => animatePlayerScore(figure, player))
 }
 
 const animateWinningCeremony = winnerText => {
@@ -468,11 +538,11 @@ const animateFigure = (figure, spritesheet) => {
     const shadow = figure.getChildByLabel('shadow')
     let animation
 
-    if (distanceAngles(deg, 0) < 45) {
+    if (distanceAnglesDeg(deg, 0) < 45) {
         animation = 'right'
-    } else if (distanceAngles(deg, 90) <= 45) {
+    } else if (distanceAnglesDeg(deg, 90) <= 45) {
         animation = 'down'
-    } else if (distanceAngles(deg, 180) < 45) {
+    } else if (distanceAnglesDeg(deg, 180) < 45) {
         animation = 'left'
     } else {
         animation = 'up'
@@ -483,11 +553,11 @@ const animateFigure = (figure, spritesheet) => {
         figureLayer.detach(body)
     } else {
         if (figure.isAttacking) {
-            if (distanceAngles(deg, 0) < 45) {
+            if (distanceAnglesDeg(deg, 0) < 45) {
                 body.angle = 20
-            } else if (distanceAngles(deg, 90) <= 45) {
+            } else if (distanceAnglesDeg(deg, 90) <= 45) {
                 body.angle = -20
-            } else if (distanceAngles(deg, 180) < 45) {
+            } else if (distanceAnglesDeg(deg, 180) < 45) {
                 body.angle = -20
             } else {
                 body.angle = 20
@@ -553,14 +623,14 @@ createFigureMarker = figure => {
 }
 
 const animateAttackArc = (attackArc, figure) => {
-    attackArc.rotation = figure.direction
+    attackArc.rotation = figure.direction + Math.PI
     attackArc.visible = showDebug && figure.isAttacking
 }
 
 const createAttackArc = figure => {
     const attackArcContainer = new PIXI.Container()
     
-    let startAngle = deg2rad(45+figure.attackAngle)
+    let startAngle = deg2rad(-figure.attackAngle/2)
     let endAngle = startAngle + deg2rad(figure.attackAngle)
     const attackArc = new PIXI.Graphics().moveTo(0, 0).arc(0, 0, figure.attackDistance, startAngle, endAngle).fill({alpha: 0.2, color: 0x000000})
     attackArcContainer.addChild(attackArc)
@@ -636,7 +706,7 @@ const animatePauseOverlay = (app, overlay) => {
     background.height = app.screen.height/2
     background.width = app.screen.width
     background.y = app.screen.height/4
-    text.text = isGameStarted ? 'Pause' : 'Welcome to Knirps und Knall'
+    text.text = (stage !== stages.startLobby) ? 'Pause' : 'Welcome to Knirps und Knall'
     text.style.fontSize = 0.05*app.screen.width
     text.x = app.screen.width/2
     text.y = app.screen.height/2
@@ -734,7 +804,6 @@ const createTouchControl = app => {
     const touchControl = new PIXI.Container()
 
     let minHeightWidth = Math.min(app.screen.width, app.screen.height)
-    const distanceToBorder = 0.3*minHeightWidth
     const radius = 0.18*minHeightWidth
 
     const moveControl = new PIXI.Container()
