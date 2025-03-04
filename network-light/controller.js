@@ -1,28 +1,10 @@
 // ICE-Server-Konfiguration für PeerJS
 const iceServers = [
-    {
-        urls: 'stun:stun.relay.metered.ca:80',
-    },
-    {
-        urls: 'turn:global.relay.metered.ca:80',
-        username: 'edd2a0f22e4c5a5f1ccc546a',
-        credential: 'bW5ZvhYwl1tPH6o0',
-    },
-    {
-        urls: 'turn:global.relay.metered.ca:80?transport=tcp',
-        username: 'edd2a0f22e4c5a5f1ccc546a',
-        credential: 'bW5ZvhYwl1tPH6o0',
-    },
-    {
-        urls: 'turn:global.relay.metered.ca:443',
-        username: 'edd2a0f22e4c5a5f1ccc546a',
-        credential: 'bW5ZvhYwl1tPH6o0',
-    },
-    {
-        urls: 'turns:global.relay.metered.ca:443?transport=tcp',
-        username: 'edd2a0f22e4c5a5f1ccc546a',
-        credential: 'bW5ZvhYwl1tPH6o0',
-    },
+    { urls: 'stun:stun.relay.metered.ca:80' },
+    { urls: 'turn:global.relay.metered.ca:80', username: 'edd2a0f22e4c5a5f1ccc546a', credential: 'bW5ZvhYwl1tPH6o0' },
+    { urls: 'turn:global.relay.metered.ca:80?transport=tcp', username: 'edd2a0f22e4c5a5f1ccc546a', credential: 'bW5ZvhYwl1tPH6o0' },
+    { urls: 'turn:global.relay.metered.ca:443', username: 'edd2a0f22e4c5a5f1ccc546a', credential: 'bW5ZvhYwl1tPH6o0' },
+    { urls: 'turns:global.relay.metered.ca:443?transport=tcp', username: 'edd2a0f22e4c5a5f1ccc546a', credential: 'bW5ZvhYwl1tPH6o0' },
 ];
 
 const angle = (x1, y1, x2, y2) => Math.atan2(y2 - y1, x2 - x1); 
@@ -35,9 +17,11 @@ const getQueryParam = (key) => {
 var touchControl = null;
 var gamepad = new FWNetworkGamepad();
 var prevGamepadState = null; // Vorheriger Zustand des Gamepads
-const maxMessagesPerSecond = 20; // Maximal 60 Nachrichten pro Sekunde
+const maxMessagesPerSecond = 20; // Maximal 20 Nachrichten pro Sekunde
+const minDelay = 50; // Mindestabstand zwischen zwei Nachrichten in Millisekunden (z. B. 50ms)
 var messageCount = 0; // Zähler für gesendete Nachrichten in der aktuellen Sekunde
 var currentSecond = Math.floor(Date.now() / 1000); // Aktuelle Sekunde
+var lastSentTime = 0; // Zeitpunkt des letzten Sendens
 
 function setUrlParams(id) {
     let url = new URL(window.location.href);
@@ -133,13 +117,16 @@ function main(app) {
         messageCount = 0;
     }
 
-    // Senden, wenn Zustand geändert und Limit nicht erreicht
-    if (prevGamepadState !== currentState && messageCount < maxMessagesPerSecond) {
+    // Senden, wenn Zustand geändert, Limit nicht erreicht und Mindestdelay eingehalten
+    if (prevGamepadState !== currentState && 
+        messageCount < maxMessagesPerSecond && 
+        now - lastSentTime >= minDelay) {
         if (app.connectedToServer) {
-            console.log(prevGamepadState, currentState)
+            console.log(prevGamepadState, currentState);
             const network = FWNetwork.getInstance();
             network.sendGamepads(gamepad);
             messageCount++; // Zähler erhöhen
+            lastSentTime = now; // Zeitpunkt des Sendens aktualisieren
             prevGamepadState = currentState; // Zustand speichern
         }
     }
