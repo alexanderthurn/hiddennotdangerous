@@ -37,6 +37,7 @@ var level = createLevel()
 
 const stages = {
     foodGame: 'foodGame',
+    battleRoyaleGame: 'battleRoyaleGame',
     vipGame: 'vipGame',
     startLobby: 'startLobby',
 }
@@ -46,12 +47,17 @@ let nextStage = stages.startLobby
 
 const games = {
     food: {
-        color: 0xFF0000,
+        color: colors.darkgreen,
         stage: stages.foodGame,
         text: 'FOOD'
     },
+    battleRoyale: {
+        color: colors.red,
+        stage: stages.battleRoyaleGame,
+        text: 'BATTLE ROYALE'
+    },
     vip: {
-        color: 0x0000FF,
+        color: colors.blue,
         stage: stages.vipGame,
         text: 'VIP'
     }
@@ -163,7 +169,9 @@ const gameSelectionDefinition = () => ({
     loadingSpeed: 1/3000,
     execute: () => {
         restartGame = true;
-        nextStage = stages.foodGame
+        const gamesValues = Object.values(games)
+        const votedgame = gamesValues[getRandomIndex(gamesValues.map(game => game.votes))]
+        nextStage = votedgame.stage
     }
 })
 
@@ -303,14 +311,14 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         addOverlay(app)
         addDebug(app);
        
-        roundInit(true);
+        roundInit();
         window.requestAnimationFrame(gameLoop);
     }
 )();
 
 function roundInit() {
     then = Date.now();
-    startTime = then;
+    startTime = dtProcessed;
     stage = nextStage
     lastFinalWinnerPlayerId = undefined
     fpsTime = then

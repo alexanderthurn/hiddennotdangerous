@@ -1,3 +1,15 @@
+const colors = {
+    black: 0x000000,
+    blue: 0x0000FF,
+    darkbrown: 0x57412F,
+    darkgreen: 0x008000,
+    gold: 0xB29146,
+    grey: 0x787878,
+    lightbrown: 0x8B4513,
+    red: 0xFF0000,
+    white: 0xFFFFFF
+}
+
 /**
  * Set a value based on the deadzone
  */
@@ -33,11 +45,11 @@ function clampStick(x, y) {
 const mod = (n, m) => ((n % m) + m) % m;
 const getRandomInt = max => Math.floor(Math.random() * max);
 const getRandomIndex = intArray => {
-    const randomInt = getRandomInt(intArray.reduce((sum, entry) => sum + entry), 0)
+    const randomInt = getRandomInt(intArray.reduce((sum, entry) => sum + entry, 0))
     let sum = 0;
     for (let index = 0; index < intArray.length; index++) {
         sum += intArray[index]
-        if (randomInt <= sum) {
+        if (randomInt < sum) {
             return index
         }
     }
