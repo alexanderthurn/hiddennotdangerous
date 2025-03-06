@@ -200,6 +200,16 @@ const buttons = {
     bots: {}
 }
 
+const circleOfDeathDefinition = () => ({
+    x: level.width/2,
+    y: level.height/2,
+    duration: 180000,
+    radius: Math.hypot(level.width/2, level.height/2),
+    startRadius: Math.hypot(level.width/2, level.height/2)
+})
+
+var circleOfDeath
+
 const foodDefinition = () => ({
     bean: {
         x: stage === stages.startLobby ? level.width*3.4/5 : level.width*4/5,
@@ -490,31 +500,48 @@ function updateGame(figures, dt, dtProcessed) {
         }
     })
     
-    let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter');
-    figures.filter(b => b.type === 'bean').forEach(b => {
-        playerFigures.forEach(fig => {
-            if (distance(b.x,b.y,fig.x,fig.y + b.height*0.5) < b.attackDistance) {
-                if (!fig.beans.has(b.id)) {                    
-                    playAudioPool(soundEatPool[fig.beans.size]);
-                    fig.beans.add(b.id);
-                    b.lastAttackTime = dtProcessed
+    // eat beans
+    if (stage === stages.foodGame) {
+        let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter');
+        figures.filter(b => b.type === 'bean').forEach(b => {
+            playerFigures.forEach(fig => {
+                if (distance(b.x,b.y,fig.x,fig.y + b.height*0.5) < b.attackDistance) {
+                    if (!fig.beans.has(b.id)) {                    
+                        playAudioPool(soundEatPool[fig.beans.size]);
+                        fig.beans.add(b.id);
+                        b.lastAttackTime = dtProcessed
+                    }
                 }
+            })
+        })
+    }
+
+    // circle of death
+    if (stage === stages.battleRoyaleGame) {
+        const scale =  1 - (dtProcessed - startTime)/circleOfDeath.duration
+        circleOfDeath.radius = scale*circleOfDeath.startRadius
+        figuresAlive.filter(f => f.type === 'fighter' ).forEach(f => {
+            if (distance(f.x, f.y, level.width/2, level.height/2) > circleOfDeath.radius) {
+                f.isDead = true
+                f.killTime = dtProcessed
+                f.speed = 0
+                playAudioPool(soundDeathPool)
             }
         })
-    })
+    }
 
     let numberKilledFigures = 0;
     let killTime;
-    figuresAlive.filter(f => f.isAttacking).forEach((f,i) => {
+    figuresAlive.filter(f => f.isAttacking).forEach(f => {
         figures.filter(fig => fig !== f && fig.playerId !== f.playerId && !fig.isDead && fig.type === 'fighter').forEach(fig => {
             const attackDistance = f.attackDistanceMultiplier ? f.attackDistanceMultiplier*f.attackDistance : f.attackDistance
             if (distance(f.x,f.y,fig.x,fig.y) < attackDistance) {
                 if (2*distanceAnglesDeg(rad2deg(f.direction), rad2deg(angle(f.x,f.y,fig.x,fig.y))+180) <= f.attackAngle) {
                     fig.isDead = true;
+                    fig.killTime = dtProcessed
                     fig.speed = 0;
                     playAudioPool(soundDeathPool);
                     numberKilledFigures++;
-                    fig.killTime = dtProcessed
                     killTime = dtProcessed;
                 }
             }

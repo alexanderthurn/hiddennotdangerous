@@ -418,6 +418,8 @@ const addWinningCeremony = app => {
 }
 
 const animateFood = figure => {
+    figure.visible = stage === stages.foodGame
+
     const plate = figure.getChildByLabel('plate')
     let durationLastAttack = dtProcessed-figure.lastAttackTime
     if (figure.lastAttackTime && durationLastAttack < figure.attackDuration) {
@@ -691,29 +693,30 @@ const addFigures = (app, spritesheet) => {
 }
 
 const addOverlay = app => {
-    const circleOfDeath = createCircleOfDeath(app)
+    const circleOfDeathGraphic = createCircleOfDeath(app)
     const mouseControl = createMouseControl(app)
     const touchControl = createTouchControl(app)
     const fpsText = createFpsText(app)
     const pauseOverlay = createPauseOverlay(app)
 
-    levelContainer.addChild(circleOfDeath)
+    circleOfDeath = circleOfDeathGraphic
+    levelContainer.addChild(circleOfDeathGraphic)
     app.stage.addChild(mouseControl, touchControl, fpsText, pauseOverlay)
-    overlayLayer.attach(circleOfDeath, mouseControl, touchControl, fpsText, pauseOverlay)
+    overlayLayer.attach(circleOfDeathGraphic, mouseControl, touchControl, fpsText, pauseOverlay)
 }
 
 const animateCircleOfDeath = circle => {
     circle.visible = stage === stages.battleRoyaleGame
 
     if (stage === stages.battleRoyaleGame) {
-        const scale =  1 - (dtProcessed - startTime)/180000
-        circle.clear().circle(level.width/2, level.height/2, scale*Math.hypot(level.width/2, level.height/2))
+        circle.clear().circle(0, 0, circle.radius)
         .stroke({alpha: 0.8, color: colors.darkbrown, width: 30})
     }
 }
 
 const createCircleOfDeath = app => {
-    const circle = new PIXI.Graphics()
+    let circle = new PIXI.Graphics()
+    Object.assign(circle, circleOfDeathDefinition())
 
     app.ticker.add(() => animateCircleOfDeath(circle))
     return circle
