@@ -418,7 +418,7 @@ const addWinningCeremony = app => {
 }
 
 const animateFood = figure => {
-    figure.visible = stage === stages.foodGame
+    figure.visible = stage === stages.foodGame || stage === stages.lobbyContainer
 
     const plate = figure.getChildByLabel('plate')
     let durationLastAttack = dtProcessed-figure.lastAttackTime

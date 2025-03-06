@@ -413,7 +413,7 @@ function gameLoop() {
             if (!restartGame) {
                 handleInput(players, figures, dtProcessed) 
                 handleAi(figures, dtProcessed, oldNumberJoinedKeyboardPlayers, dtFix)
-                updateGame(figures, dtFix,dtProcessed)
+                updateGame(figures, dtFix, dtProcessed)
             }
             dtToProcess-=dtFix
             dtProcessed+=dtFix
@@ -465,13 +465,30 @@ function gameLoop() {
 function updateGame(figures, dt, dtProcessed) {
     let figuresAlive = figures.filter(f => !f.isDead);
     let figuresDead = figures.filter(f => f.isDead);
+    let figuresRevived = []
+
+    switch (stage) {
+        case stages.foodGame:
+            figuresRevived = figuresDead.filter(f => !f.playerId)
+            break;
+        case stages.startLobby:
+            figuresRevived = figuresDead
+            break;
+        default:
+            break;
+    }
+
+    figuresRevived.forEach(f => {if (dtProcessed-f.killTime > deadDuration) {
+        f.isDead = false
+        f.killTime = 0
+    }})
 
     if (stage === stages.startLobby) {
             const minimumPlayers = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
             const playersPossible = figures.filter(f => f.playerId && f.playerId[0] !== 'b' && f.type === 'fighter')
         Object.values(buttons).forEach(btn => {
             btn.playersPossible = playersPossible
-            btn.playersNear = playersPossible.filter(btn.isInArea)
+            btn.playersNear = playersPossible.filter(f => !f.isDead && btn.isInArea(f))
             
             let aimLoadingPercentage
             if (btn === buttons.start) {
