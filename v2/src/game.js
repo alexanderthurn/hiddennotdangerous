@@ -37,6 +37,7 @@ var level = createLevel()
 
 const stages = {
     foodGame: 'foodGame',
+    battleRoyaleGame: 'battleRoyaleGame',
     vipGame: 'vipGame',
     startLobby: 'startLobby',
 }
@@ -46,12 +47,17 @@ let nextStage = stages.startLobby
 
 const games = {
     food: {
-        color: 0xFF0000,
+        color: colors.darkgreen,
         stage: stages.foodGame,
         text: 'FOOD'
     },
+    battleRoyale: {
+        color: colors.red,
+        stage: stages.battleRoyaleGame,
+        text: 'BATTLE ROYALE'
+    },
     vip: {
-        color: 0x0000FF,
+        color: colors.blue,
         stage: stages.vipGame,
         text: 'VIP'
     }
@@ -163,7 +169,9 @@ const gameSelectionDefinition = () => ({
     loadingSpeed: 1/3000,
     execute: () => {
         restartGame = true;
-        nextStage = stages.foodGame
+        const gamesValues = Object.values(games)
+        const votedgame = gamesValues[getRandomIndex(gamesValues.map(game => game.votes))]
+        nextStage = votedgame.stage
     }
 })
 
@@ -191,6 +199,16 @@ const buttons = {
     mute: {},
     bots: {}
 }
+
+const circleOfDeathDefinition = () => ({
+    x: level.width/2,
+    y: level.height/2,
+    duration: 180000,
+    radius: Math.hypot(level.width/2, level.height/2),
+    startRadius: Math.hypot(level.width/2, level.height/2)
+})
+
+var circleOfDeath
 
 const foodDefinition = () => ({
     bean: {
@@ -303,14 +321,14 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         addOverlay(app)
         addDebug(app);
        
-        roundInit(true);
+        roundInit();
         window.requestAnimationFrame(gameLoop);
     }
 )();
 
 function roundInit() {
     then = Date.now();
-    startTime = then;
+    startTime = dtProcessed;
     stage = nextStage
     lastFinalWinnerPlayerId = undefined
     fpsTime = then
@@ -395,7 +413,7 @@ function gameLoop() {
             if (!restartGame) {
                 handleInput(players, figures, dtProcessed) 
                 handleAi(figures, dtProcessed, oldNumberJoinedKeyboardPlayers, dtFix)
-                updateGame(figures, dtFix,dtProcessed)
+                updateGame(figures, dtFix, dtProcessed)
             }
             dtToProcess-=dtFix
             dtProcessed+=dtFix
@@ -447,13 +465,30 @@ function gameLoop() {
 function updateGame(figures, dt, dtProcessed) {
     let figuresAlive = figures.filter(f => !f.isDead);
     let figuresDead = figures.filter(f => f.isDead);
+    let figuresRevived = []
+
+    switch (stage) {
+        case stages.foodGame:
+            figuresRevived = figuresDead.filter(f => !f.playerId)
+            break;
+        case stages.startLobby:
+            figuresRevived = figuresDead
+            break;
+        default:
+            break;
+    }
+
+    figuresRevived.forEach(f => {if (dtProcessed-f.killTime > deadDuration) {
+        f.isDead = false
+        f.killTime = 0
+    }})
 
     if (stage === stages.startLobby) {
             const minimumPlayers = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
             const playersPossible = figures.filter(f => f.playerId && f.playerId[0] !== 'b' && f.type === 'fighter')
         Object.values(buttons).forEach(btn => {
             btn.playersPossible = playersPossible
-            btn.playersNear = playersPossible.filter(btn.isInArea)
+            btn.playersNear = playersPossible.filter(f => !f.isDead && btn.isInArea(f))
             
             let aimLoadingPercentage
             if (btn === buttons.start) {
@@ -482,31 +517,48 @@ function updateGame(figures, dt, dtProcessed) {
         }
     })
     
-    let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter');
-    figures.filter(b => b.type === 'bean').forEach(b => {
-        playerFigures.forEach(fig => {
-            if (distance(b.x,b.y,fig.x,fig.y + b.height*0.5) < b.attackDistance) {
-                if (!fig.beans.has(b.id)) {                    
-                    playAudioPool(soundEatPool[fig.beans.size]);
-                    fig.beans.add(b.id);
-                    b.lastAttackTime = dtProcessed
+    // eat beans
+    if (stage === stages.foodGame) {
+        let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter');
+        figures.filter(b => b.type === 'bean').forEach(b => {
+            playerFigures.forEach(fig => {
+                if (distance(b.x,b.y,fig.x,fig.y + b.height*0.5) < b.attackDistance) {
+                    if (!fig.beans.has(b.id)) {                    
+                        playAudioPool(soundEatPool[fig.beans.size]);
+                        fig.beans.add(b.id);
+                        b.lastAttackTime = dtProcessed
+                    }
                 }
+            })
+        })
+    }
+
+    // circle of death
+    if (stage === stages.battleRoyaleGame) {
+        const scale =  1 - (dtProcessed - startTime)/circleOfDeath.duration
+        circleOfDeath.radius = scale*circleOfDeath.startRadius
+        figuresAlive.filter(f => f.type === 'fighter' ).forEach(f => {
+            if (distance(f.x, f.y, level.width/2, level.height/2) > circleOfDeath.radius) {
+                f.isDead = true
+                f.killTime = dtProcessed
+                f.speed = 0
+                playAudioPool(soundDeathPool)
             }
         })
-    })
+    }
 
     let numberKilledFigures = 0;
     let killTime;
-    figuresAlive.filter(f => f.isAttacking).forEach((f,i) => {
+    figuresAlive.filter(f => f.isAttacking).forEach(f => {
         figures.filter(fig => fig !== f && fig.playerId !== f.playerId && !fig.isDead && fig.type === 'fighter').forEach(fig => {
             const attackDistance = f.attackDistanceMultiplier ? f.attackDistanceMultiplier*f.attackDistance : f.attackDistance
             if (distance(f.x,f.y,fig.x,fig.y) < attackDistance) {
                 if (2*distanceAnglesDeg(rad2deg(f.direction), rad2deg(angle(f.x,f.y,fig.x,fig.y))+180) <= f.attackAngle) {
                     fig.isDead = true;
+                    fig.killTime = dtProcessed
                     fig.speed = 0;
                     playAudioPool(soundDeathPool);
                     numberKilledFigures++;
-                    fig.killTime = dtProcessed
                     killTime = dtProcessed;
                 }
             }

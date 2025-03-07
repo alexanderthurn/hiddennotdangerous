@@ -12,7 +12,7 @@ const createLoadingText = app => {
         style: {
             fontFamily: 'Serif',
             fontSize: app.screen.height*0.1,
-            fill: 0xFFFFFF
+            fill: colors.white
         }
     })
 
@@ -25,7 +25,7 @@ const addHeadline = () => {
         text: 'KNIRPS UND KNALL',
         style: {
             fontSize: level.width*0.02,
-            fill: 0xFFFFFF
+            fill: colors.white
         }
     });
 
@@ -39,7 +39,7 @@ const addHeadline = () => {
         text: 'made by TORSTEN STELLJES & ALEXANDER THURN',
         style: {
             fontSize: level.width*0.012,
-            fill: 0xFFFFFF
+            fill: colors.white
         }
     });
 
@@ -78,18 +78,18 @@ const createStartButton = (props, lobbyContainer) => {
 
     const area = new PIXI.Graphics()
     .circle(0, 0, innerRadius)
-    .fill({alpha: 0.5, color: 0x57412F})
+    .fill({alpha: 0.5, color: colors.darkbrown})
 
     const loadingCircle = new PIXI.Graphics()
     .circle(0, 0, innerRadius)
-    .fill({alpha: 0.5, color: 0x787878})
+    .fill({alpha: 0.5, color: colors.grey})
 
     const buttonText = new PIXI.Text({
         style: {
             align: 'center',
             fontSize: level.width*0.017,
-            fill: 0xFFFFFF,
-            stroke: 0xFFFFFF
+            fill: colors.white,
+            stroke: colors.white
         }
     });
     buttonText.anchor.set(0.5)
@@ -144,8 +144,8 @@ const createRingPartButton = (props, lobbyContainer) => {
         style: {
             align: 'center',
             fontSize: level.width*0.017,
-            fill: 0xFFFFFF,
-            stroke: 0xFFFFFF
+            fill: colors.white,
+            stroke: colors.white
         }
     });
     buttonText.x = Math.cos(centerAngle)*((innerRadius+outerRadius)/2)
@@ -193,18 +193,18 @@ const createRectangleButton = (props, lobbyContainer) => {
 
     const area = new PIXI.Graphics()
     .rect(0, 0, width, height)
-    .fill({alpha: 0.5, color: 0x57412F})
+    .fill({alpha: 0.5, color: colors.darkbrown})
 
     const loadingBar = new PIXI.Graphics()
     .rect(0, 0, 0.1, height)
-    .fill({alpha: 0.5, color: 0x787878})
+    .fill({alpha: 0.5, color: colors.grey})
 
     const buttonText = new PIXI.Text({
         style: {
             align: 'center',
             fontSize: level.width*0.017,
-            fill: 0xFFFFFF,
-            stroke: 0xFFFFFF
+            fill: colors.white,
+            stroke: colors.white
         }
     });
     buttonText.anchor.set(0.5)
@@ -251,7 +251,7 @@ const addLobbyItems = app => {
         style: {
             align: 'center',
             fontSize: fontHeight,
-            fill: 0xFFFFFF
+            fill: colors.white
         }
     });
 
@@ -265,10 +265,10 @@ const addLobbyItems = app => {
     app.ticker.add(() => animateLobbyItems(lobbyContainer))
 }
 
-const botCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: 0x000000}).stroke({alpha: 0.5, color: 0xFF0000, width: 2})
-const playerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: 0x000000}).stroke({alpha: 0.5, color: 0x000000, width: 1})
-const botWinnerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: 0xB29146}).stroke({alpha: 0.5, color: 0xFF0000, width: 2})
-const playerWinnerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: 0xB29146}).stroke({alpha: 0.5, color: 0x000000, width: 1})
+const botCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: colors.black}).stroke({alpha: 0.5, color: colors.red, width: 2})
+const playerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: colors.black}).stroke({alpha: 0.5, color: colors.black, width: 1})
+const botWinnerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: colors.gold}).stroke({alpha: 0.5, color: colors.red, width: 2})
+const playerWinnerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: colors.gold}).stroke({alpha: 0.5, color: colors.black, width: 1})
 
 const animatePlayerScore = (figure, player) => {
     if (!restartGame) {
@@ -308,7 +308,7 @@ const addPlayerScore = (figure, player) => {
         text: 0,
         style: {
             fontSize: 36,
-            fill: 0xFFFFFF
+            fill: colors.white
         }
     });
     text.anchor.set(0.5)
@@ -399,10 +399,10 @@ const addWinningCeremony = app => {
             fontSize: level.width*0.1,
             fill: {
                 alpha: 0.8,
-                color: 0x8B4513
+                color: colors.lightbrown,
             },
             stroke: {
-                color: 0xFFFFFF,
+                color: colors.white,
                 width: 6,
             }
         }
@@ -418,6 +418,8 @@ const addWinningCeremony = app => {
 }
 
 const animateFood = figure => {
+    figure.visible = stage === stages.foodGame || stage === stages.lobbyContainer
+
     const plate = figure.getChildByLabel('plate')
     let durationLastAttack = dtProcessed-figure.lastAttackTime
     if (figure.lastAttackTime && durationLastAttack < figure.attackDuration) {
@@ -434,9 +436,9 @@ const addFood = (app, texture, props) => {
     food = Object.assign(food, props)
 
     const plate = new PIXI.Graphics().circle(0, 0 , food.attackDistance)
-    .fill({color: 0xFFFFFF})
+    .fill({color: colors.white})
     .circle(0, 0 , 0.8*food.attackDistance)
-    .stroke({color: 0x000000, width: 2})
+    .stroke({color: colors.black, width: 2})
     plate.label = 'plate'
 
     const meal = new PIXI.Sprite(texture)
@@ -444,7 +446,7 @@ const addFood = (app, texture, props) => {
     meal.scale = 1.2
 
     const marker = new PIXI.Graphics(figureMarker)
-    marker.tint = 0x0000FF
+    marker.tint = colors.blue
     marker.label = 'marker'
 
     food.addChild(plate, meal, marker)
@@ -493,7 +495,7 @@ const createHorizontalFence = level => {
     return new PIXI.GraphicsContext().rect(0,0,level.width,level.padding*0.6)
     .fill({color: 0x969696})
     .rect(level.padding*0.5,level.padding*0.8,level.width-level.padding,level.padding*0.6)
-    .fill({color: 0x787878})
+    .fill({color: colors.grey})
     .rect(level.padding*0.5,level.padding*1.6,level.width-level.padding,level.padding*0.6)
     .fill({color: 0x5A5A5A})
 }
@@ -607,7 +609,7 @@ createFigureMarker = figure => {
     const markerText = new PIXI.Text({
         style: {
             fontSize: 16,
-            fill: 0xFFFFFF
+            fill: colors.white
         }
     })
     markerText.anchor.set(0, 1)
@@ -615,7 +617,7 @@ createFigureMarker = figure => {
     markerContainer.addChild(marker, markerText)
 
     app.ticker.add(() => {
-        marker.tint = figure.playerId ? 0xFF0000 : 0x008000
+        marker.tint = figure.playerId ? colors.red : colors.darkgreen
         markerText.text = figure.playerId ? figure.playerId + ' ' + figure.beans.size : ''
         markerContainer.visible = showDebug
     })
@@ -632,7 +634,7 @@ const createAttackArc = figure => {
     
     let startAngle = deg2rad(-figure.attackAngle/2)
     let endAngle = startAngle + deg2rad(figure.attackAngle)
-    const attackArc = new PIXI.Graphics().moveTo(0, 0).arc(0, 0, figure.attackDistance, startAngle, endAngle).fill({alpha: 0.2, color: 0x000000})
+    const attackArc = new PIXI.Graphics().moveTo(0, 0).arc(0, 0, figure.attackDistance, startAngle, endAngle).fill({alpha: 0.2, color: colors.black})
     attackArcContainer.addChild(attackArc)
 
     app.ticker.add(() => animateAttackArc(attackArcContainer, figure))
@@ -691,13 +693,33 @@ const addFigures = (app, spritesheet) => {
 }
 
 const addOverlay = app => {
+    const circleOfDeathGraphic = createCircleOfDeath(app)
     const mouseControl = createMouseControl(app)
     const touchControl = createTouchControl(app)
     const fpsText = createFpsText(app)
     const pauseOverlay = createPauseOverlay(app)
 
+    circleOfDeath = circleOfDeathGraphic
+    levelContainer.addChild(circleOfDeathGraphic)
     app.stage.addChild(mouseControl, touchControl, fpsText, pauseOverlay)
-    overlayLayer.attach(mouseControl, touchControl, fpsText, pauseOverlay)
+    overlayLayer.attach(circleOfDeathGraphic, mouseControl, touchControl, fpsText, pauseOverlay)
+}
+
+const animateCircleOfDeath = circle => {
+    circle.visible = stage === stages.battleRoyaleGame
+
+    if (stage === stages.battleRoyaleGame) {
+        circle.clear().circle(0, 0, circle.radius)
+        .stroke({alpha: 0.8, color: colors.darkbrown, width: 30})
+    }
+}
+
+const createCircleOfDeath = app => {
+    let circle = new PIXI.Graphics()
+    Object.assign(circle, circleOfDeathDefinition())
+
+    app.ticker.add(() => animateCircleOfDeath(circle))
+    return circle
 }
 
 const animatePauseOverlay = (app, overlay) => {
@@ -717,12 +739,12 @@ const createPauseOverlay = app => {
     const overlay = new PIXI.Container();
 
     const background = new PIXI.Graphics().rect(0, 0, app.screen.width, app.screen.height/2)
-    .fill({alpha: 0.9, color: 0x57412f})
+    .fill({alpha: 0.9, color: colors.darkbrown})
     background.label = 'background'
 
     const text = new PIXI.Text({
         style: {
-            fill: 0xFFFFFF
+            fill: colors.white
         }
     })
     text.anchor.set(0.5)
@@ -744,7 +766,7 @@ const createFpsText = app => {
     const fpsText = new PIXI.Text({
         style: {
             fontSize: 16,
-            fill: 0xFFFFFF
+            fill: colors.white
         }
     })
     fpsText.anchor.set(1, 0)
@@ -766,7 +788,7 @@ const createPlayersText = app => {
     const playersText = new PIXI.Text({
         style: {
             fontSize: 16,
-            fill: 0xFFFFFF
+            fill: colors.white
         }
     })
     playersText.anchor.set(0)
@@ -790,7 +812,7 @@ const createFiguresText = app => {
     const figuresText = new PIXI.Text({
         style: {
             fontSize: 16,
-            fill: 0xFFFFFF
+            fill: colors.white
         }
     })
     figuresText.anchor.set(0, 1)
@@ -807,13 +829,13 @@ const createTouchControl = app => {
     const radius = 0.18*minHeightWidth
 
     const moveControl = new PIXI.Container()
-    const moveControlBackground = new PIXI.Graphics().circle(0, 0, radius).fill({alpha: 0.3, color: 0xFFFFFF})
-    const moveControlStick = new PIXI.Graphics().circle(0, 0, radius/2).fill({alpha: 0.3, color: 0xFFFFFF})
+    const moveControlBackground = new PIXI.Graphics().circle(0, 0, radius).fill({alpha: 0.3, color: colors.white})
+    const moveControlStick = new PIXI.Graphics().circle(0, 0, radius/2).fill({alpha: 0.3, color: colors.white})
     moveControl.addChild(moveControlBackground, moveControlStick)
     moveControl.startRadius = radius
 
     const attackControl = new PIXI.Container()
-    const attackControlButton = new PIXI.Graphics().circle(0, 0, radius).fill({alpha: 0.4, color: 0xFFFFFF})
+    const attackControlButton = new PIXI.Graphics().circle(0, 0, radius).fill({alpha: 0.4, color: colors.white})
     attackControl.addChild(attackControlButton)
     attackControl.startRadius = radius
 
@@ -854,15 +876,15 @@ const createMouseControl = app => {
 
     mp = mousePlayers.length > 0 ? mousePlayers[0] : mouses[0]
     const circle = new PIXI.Graphics().circle(0, 0,level.width*0.03)
-    .stroke({color: 0xFFFFFF, width:8})
+    .stroke({color: colors.white, width:8})
 
     const arrow = new PIXI.Container()
-    const arrowBody = new PIXI.Graphics().rect(0, -4, 1, 8).fill(0xFFFFFF)
-    const arrowHead = new PIXI.Graphics().moveTo(0, -12).lineTo(12, 0).lineTo(0,12).fill(0xFFFFFF)
+    const arrowBody = new PIXI.Graphics().rect(0, -4, 1, 8).fill(colors.white)
+    const arrowHead = new PIXI.Graphics().moveTo(0, -12).lineTo(12, 0).lineTo(0,12).fill(colors.white)
     arrow.addChild(arrowBody, arrowHead)
 
     const circlePointer = new PIXI.Graphics().circle(0, 0, 12)
-    .fill(0xFFFFFF)
+    .fill(colors.white)
 
     app.ticker.add(() => {
         const mp = mousePlayers.length > 0 ? mousePlayers[0] : mouses[0]

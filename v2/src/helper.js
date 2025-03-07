@@ -1,8 +1,20 @@
+const colors = {
+    black: 0x000000,
+    blue: 0x0000FF,
+    darkbrown: 0x57412F,
+    darkgreen: 0x008000,
+    gold: 0xB29146,
+    grey: 0x787878,
+    lightbrown: 0x8B4513,
+    red: 0xFF0000,
+    white: 0xFFFFFF
+}
+
 /**
  * Set a value based on the deadzone
  */
 function setDeadzone(x, y, deadzone=0.2) {
-    let m = Math.sqrt(x*x + y*y);
+    let m = Math.hypot(x, y);
 
     if (m < deadzone)
         return [0, 0];
@@ -18,7 +30,7 @@ function setDeadzone(x, y, deadzone=0.2) {
 
 function clampStick(x, y) {
     // Compute magnitude (length) of vector
-    let m = Math.sqrt(x*x + y*y);
+    let m = Math.hypot(x, y);
 
     // If the length greater than 1, normalize it (set it to 1)
     if (m > 1) {
@@ -33,11 +45,11 @@ function clampStick(x, y) {
 const mod = (n, m) => ((n % m) + m) % m;
 const getRandomInt = max => Math.floor(Math.random() * max);
 const getRandomIndex = intArray => {
-    const randomInt = getRandomInt(intArray.reduce((sum, entry) => sum + entry), 0)
+    const randomInt = getRandomInt(intArray.reduce((sum, entry) => sum + entry, 0))
     let sum = 0;
     for (let index = 0; index < intArray.length; index++) {
         sum += intArray[index]
-        if (randomInt <= sum) {
+        if (randomInt < sum) {
             return index
         }
     }
@@ -65,10 +77,6 @@ const distanceAnglesRad = distanceAngles(2*Math.PI);
 const distanceAnglesDeg = distanceAngles(360);
 
 const getNextDiscreteAngle = (angle, numberDiscreteAngles) => deg2rad(Math.round(rad2deg(angle)*numberDiscreteAngles/360)*360/numberDiscreteAngles);
-
-const getHeightInTiles = () => Math.ceil(level.height/tileWidth);
-const getWidthInTiles = () => Math.ceil(level.width/tileWidth);
-const getLastAttackTime = (lastAttackTime, time) => lastAttackTime && time-lastAttackTime < 500 ? lastAttackTime : time;
 
 const getAudio = (audio) => {
     const {title, ...props} = audio;
