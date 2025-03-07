@@ -418,7 +418,7 @@ const addWinningCeremony = app => {
 }
 
 const animateFood = figure => {
-    figure.visible = stage === stages.foodGame || stage === stages.lobbyContainer
+    figure.visible = stage !== stages.startLobby && game === games.food
 
     const plate = figure.getChildByLabel('plate')
     let durationLastAttack = dtProcessed-figure.lastAttackTime
@@ -706,9 +706,9 @@ const addOverlay = app => {
 }
 
 const animateCircleOfDeath = circle => {
-    circle.visible = stage === stages.battleRoyaleGame
-
-    if (stage === stages.battleRoyaleGame) {
+    circle.visible = stage === stages.game && game === games.battleRoyale
+    
+    if (circle.visible) {
         circle.clear().circle(0, 0, circle.radius)
         .stroke({alpha: 0.8, color: colors.darkbrown, width: 30})
     }

@@ -36,9 +36,8 @@ var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAud
 var level = createLevel()
 
 const stages = {
-    foodGame: 'foodGame',
-    battleRoyaleGame: 'battleRoyaleGame',
-    vipGame: 'vipGame',
+    game: 'game',
+    gameLobby: 'gameLobby',
     startLobby: 'startLobby',
 }
 
@@ -48,20 +47,19 @@ let nextStage = stages.startLobby
 const games = {
     food: {
         color: colors.darkgreen,
-        stage: stages.foodGame,
         text: 'FOOD'
     },
     battleRoyale: {
         color: colors.red,
-        stage: stages.battleRoyaleGame,
         text: 'BATTLE ROYALE'
     },
     vip: {
         color: colors.blue,
-        stage: stages.vipGame,
         text: 'VIP'
     }
 }
+
+let game
 
 var btnTouchController = {
     radius: 0,
@@ -170,8 +168,8 @@ const gameSelectionDefinition = () => ({
     execute: () => {
         restartGame = true;
         const gamesValues = Object.values(games)
-        const votedgame = gamesValues[getRandomIndex(gamesValues.map(game => game.votes))]
-        nextStage = votedgame.stage
+        game = gamesValues[getRandomIndex(gamesValues.map(game => game.votes))]
+        nextStage = stages.game
     }
 })
 
@@ -343,7 +341,7 @@ function roundInit() {
         keyboardPlayers = []
     }
     if (!isMusicMuted()) {
-        if (nextStage === stages.startLobby) {
+        if (stage === stages.startLobby) {
             stopMusicPlaylist();
         } else {
             playMusicPlaylist(musicGame, true);
@@ -426,7 +424,7 @@ function gameLoop() {
 
     if (!restartGame) {
         var survivors = figuresPlayer.filter(f => !f.isDead)
-        if ((stage !== stages.startLobby) && survivors.length < 2) {
+        if ((stage === stages.game) && survivors.length < 2) {
             lastWinnerPlayerIds.clear();
             if (survivors.length == 1) {
                 figuresPlayer.forEach(f => f.score.oldPoints = f.score.points);
@@ -467,15 +465,17 @@ function updateGame(figures, dt, dtProcessed) {
     let figuresDead = figures.filter(f => f.isDead);
     let figuresRevived = []
 
-    switch (stage) {
-        case stages.foodGame:
-            figuresRevived = figuresDead.filter(f => !f.playerId)
-            break;
-        case stages.startLobby:
-            figuresRevived = figuresDead
-            break;
-        default:
-            break;
+
+    if (stage === stages.startLobby || stage === stages.gameLobby) {
+        figuresRevived = figuresDead
+    } else {
+        switch (game) {
+            case games.food:
+                figuresRevived = figuresDead.filter(f => !f.playerId)
+                break;
+            default:
+                break;
+        }
     }
 
     figuresRevived.forEach(f => {if (dtProcessed-f.killTime > deadDuration) {
@@ -518,7 +518,7 @@ function updateGame(figures, dt, dtProcessed) {
     })
     
     // eat beans
-    if (stage === stages.foodGame) {
+    if (stage !== stages.startLobby && game === games.food) {
         let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter');
         figures.filter(b => b.type === 'bean').forEach(b => {
             playerFigures.forEach(fig => {
@@ -534,7 +534,7 @@ function updateGame(figures, dt, dtProcessed) {
     }
 
     // circle of death
-    if (stage === stages.battleRoyaleGame) {
+    if (stage !== stages.startLobby && game === games.battleRoyale) {
         const scale =  1 - (dtProcessed - startTime)/circleOfDeath.duration
         circleOfDeath.radius = scale*circleOfDeath.startRadius
         figuresAlive.filter(f => f.type === 'fighter' ).forEach(f => {
