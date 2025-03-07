@@ -142,13 +142,7 @@ class FWTouchControl extends PIXI.Container {
             connectionContainer.radius = radius;
             connectionContainer.index = i;
             connectionContainer.rPos = [0,0];
-            connectionContainer.status = 0;
-            if (i < 3) {
-                connectionContainer.status = 1;
-            } 
-            if (i == 2) {
-                connectionContainer.status = 2;
-            } 
+            connectionContainer.status = CONNECTION_STATUS_OFF;
             switch(i) {
                 case 0: connectionContainer.rPos = [0.5, 0.0, 0.01, -3, 0.0]; break;
                 case 1: connectionContainer.rPos = [0.5, 0.0, 0.01, -1.5, 0.0]; break;
@@ -319,19 +313,19 @@ class FWTouchControl extends PIXI.Container {
 
         this.title.position.set(app.containerGame.screenWidth * 0.65, app.containerGame.screenHeight * 0.95);
         this.title.scale.set(app.containerGame.screenWidth / 1500);
+        this.connectionContainers[2].status = app.connectionStatus;
 
-        if (app.connectedToServer) {
-            this.connectionContainers[2].status = 2;
-        } else {
-            this.connectionContainers[2].status = 0;
-        }
-        
         this.connectionContainers.forEach((container, index) => {
             container.radius = container.rPos[2] * minHeightWidth;
             container.scale = container.radius / container.startRadius;
-            if (container.status === 1) container.tint = 0xffffff;
-            else if (container.status === 2) container.tint = 0x00ff00;
-            else container.tint = 0x5555ff;
+
+
+            if (container.status === CONNECTION_STATUS_OFF) container.tint = 0x000000;
+            else if (container.status === CONNECTION_STATUS_INITIALIZNG) container.tint = app.ticker.lastTime % 1000 < 500 ? 0xffff00 : 0x000000;
+            else if (container.status === CONNECTION_STATUS_WORKING) container.tint = 0x00ff00;
+            else if (container.status === CONNECTION_STATUS_ERROR) container.tint = 0xaa0000;
+            else container.tint = 0x0f00ff;
+            
             container.x = (distanceToBorderX + container.radius) + container.rPos[0] * (app.containerGame.screenWidth - distanceToBorderX * 2 - container.radius * 2) + (container.rPos.length > 3 ? container.rPos[3] * container.radius * 2 : 0);
             container.y = (distanceToBorderY + container.radius) + container.rPos[1] * (app.containerGame.screenHeight - distanceToBorderY * 2 - container.radius * 2) + (container.rPos.length > 4 ? container.rPos[4] * container.radius * 2 : 0);
         });

@@ -112,13 +112,13 @@ class FWNetwork {
         this.peer.on('connection', (conn) => {
             console.log(`Client connected: ${conn.peer}`);
             this.#setupHostConnection(conn);
-            this.status = `hosting (${this.getConnectedClients()} clients)`;
+            this.status = `hosting`;
         });
 
         this.peer.on('open', (id) => {
             const url = `${baseUrl}?id=${id}`;
             this.getQRCodeTexture(url, backgroundColor);
-            this.status = 'hosting (0 clients)';
+            this.status = 'open';
         });
     }
 
@@ -134,6 +134,8 @@ class FWNetwork {
         this.peer.on('open', (myId) => {
             console.log(`Connecting to room: ${roomId} as ${myId}`);
             this.connection = this.peer.connect(roomId);
+
+            this.status = 'open';
 
             this.connection.on('open', () => {
                 console.log(`Connected to host: ${roomId}`);
@@ -201,7 +203,7 @@ class FWNetwork {
                 this.networkGamepads[idx] = undefined;
             });
             this.clientGamepadIndices.delete(clientId);
-            this.status = `hosting (${this.getConnectedClients()} clients)`;
+            this.status = `hosting`;
         });
 
         conn.on('error', (err) => {
