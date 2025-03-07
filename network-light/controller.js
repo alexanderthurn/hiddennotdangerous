@@ -7,6 +7,11 @@ const iceServers = [
     { urls: 'turns:global.relay.metered.ca:443?transport=tcp', username: 'edd2a0f22e4c5a5f1ccc546a', credential: 'bW5ZvhYwl1tPH6o0' },
 ];
 
+const CONNECTION_STATUS_OFF = 0
+const CONNECTION_STATUS_INITIALIZNG = 1
+const CONNECTION_STATUS_WORKING = 2
+const CONNECTION_STATUS_ERROR = 3
+
 const angle = (x1, y1, x2, y2) => Math.atan2(y2 - y1, x2 - x1); 
 const version = '1.0.0';
 const getQueryParam = (key) => {
@@ -50,23 +55,20 @@ async function init() {
     touchControl = new FWTouchControl(app);
     app.containerGame.addChild(touchControl);
 
+    app.serverPrefix = 'hidden'
     app.serverId = getQueryParam('id') || '1234';
     app.color = new PIXI.Color(getQueryParam('color') || 'ff0000').toNumber();
-    app.connectedToServer = false;
+    app.connectionStatus = CONNECTION_STATUS_OFF;
 
     const network = FWNetwork.getInstance();
-    network.connectToRoom(app.serverId, {
-        config: { iceServers: iceServers }
-    });
 
-    network.peer.on('open', () => {
-        console.log(`Connected to server: ${app.serverId}`);
-        app.connectedToServer = true;
+    app.connectionStatus = CONNECTION_STATUS_INITIALIZNG;
+    network.connectToRoom(app.serverPrefix + app.serverId, {
+        config: { iceServers: iceServers }
     });
 
     network.peer.on('error', (err) => {
         console.error('Connection error:', err);
-        app.connectedToServer = false;
     });
 
     app.finishLoading();
@@ -104,6 +106,30 @@ function serializeGamepad(gamepad) {
 }
 
 function main(app) {
+    let networkStatus= FWNetwork.getInstance().getStatus()
+
+    switch (networkStatus) {
+        case 'connected':
+            app.connectionStatus = CONNECTION_STATUS_WORKING
+            break;
+        case 'disconnected':
+            app.connectionStatus = CONNECTION_STATUS_OFF
+            break;
+        case 'connecting':
+            app.connectionStatus = CONNECTION_STATUS_INITIALIZNG
+            break;
+        case 'error': 
+            app.connectionStatus = CONNECTION_STATUS_ERROR
+            break;
+        case 'open':
+            app.connectionStatus = CONNECTION_STATUS_INITIALIZNG
+            break;  
+        case 'hosting':
+            app.connectionStatus = CONNECTION_STATUS_WORKING
+            break;       
+    }
+
+
     touchControl.update(app);
     touchControl.updateGamepad(gamepad);
 
@@ -121,7 +147,7 @@ function main(app) {
     if (prevGamepadState !== currentState && 
         messageCount < maxMessagesPerSecond && 
         now - lastSentTime >= minDelay) {
-        if (app.connectedToServer) {
+        if (app.connectionStatus === CONNECTION_STATUS_WORKING) {
             console.log(prevGamepadState, currentState);
             const network = FWNetwork.getInstance();
             network.sendGamepads(gamepad);

@@ -50,14 +50,15 @@ async function init() {
         resizeTo: window
     });
 
-    app.serverId = getQueryParam('id') || '666';
+    app.serverPrefix = 'hidden'
+    app.serverId = getQueryParam('id') || '1234';
     app.color = color;
     const baseUrl = `${window.location.protocol}//${window.location.host.replace('localhost', '7.7.7.66')}${window.location.pathname.replace('example.html', 'controller.html')}`;
     app.url = `${baseUrl}?id=${app.serverId}&color=${app.color.toHex().replace(/^#/, '')}`;
 
     // FWNetwork als Host initialisieren mit iceServers
     const network = FWNetwork.getInstance();
-    network.hostRoom(app.serverId, baseUrl, app.color, {
+    network.hostRoom(app.serverPrefix + app.serverId, baseUrl, app.color, {
         config: { iceServers: iceServers }
     });
 
