@@ -14,6 +14,17 @@ class FWNetwork {
         this.networkGamepads = [];
         this.clientGamepadIndices = new Map();
         this.status = 'disconnected';
+        this.stats = {
+            bytesReceived: 0,
+            bytesSent: 0,
+            messagesReceived: 0,
+            messagesSent: 0
+        }
+        this.reconnectAttempts = Number.parseInt(sessionStorage.getItem('reconnectAttempts') || '0');
+        sessionStorage.setItem('reconnectAttempts',0) // will be set only by retry mechanism
+        this.maxReconnectAttempts = 5;
+        this.reconnectDelay = 2000;
+        this.reconnectTimeout = null;
     }
 
     static getInstance() {
@@ -57,6 +68,7 @@ class FWNetwork {
 
         this.peer.on('open', (id) => {
             this.initialized = true;
+            
             this.roomId = id;
             this.status = this.isHost ? 'hosting' : 'connecting';
             console.log(`PeerJS initialized with ID: ${id}`);
@@ -68,13 +80,58 @@ class FWNetwork {
         this.peer.on('error', (err) => {
             console.error('PeerJS error:', err);
             this.status = 'error';
+            if (err.type === 'unavailable-id') {
+                sessionStorage.removeItem('clientId')
+                if (!this.initialized && !options.initializedBefore) {
+                    options.initializedBefore = true
+                    this.initialize(peerId, options)
+                }
+            } else {
+                this.attemptReconnect(options);
+            }
         });
 
         this.peer.on('disconnected', () => {
             console.log('Disconnected from PeerJS server');
             this.initialized = false;
             this.status = 'disconnected';
+            this.attemptReconnect(options);
         });
+    }
+
+    attemptReconnect(options) {
+        if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+            console.log('Maxi retry connections reached');
+             this.status = 'error'
+            return;
+        }
+
+        if (this.reconnectTimeout) {
+            clearTimeout(this.reconnectTimeout); // Vorherigen Timeout löschen
+        }
+
+        this.reconnectAttempts++;
+        let delay =  Math.pow(2, this.reconnectAttempts)* this.reconnectDelay
+        this.status = 'connecting'
+        console.log(`Trying to connect again (${this.reconnectAttempts}/${this.maxReconnectAttempts}) with delay ${delay/1000}s...`);
+
+        this.reconnectTimeout = setTimeout(() => {
+           // this.peer.destroy(); // Alte Peer-Instanz aufräumen
+        //    this.peer = null;
+           // this.initialized = false;
+
+            if (this.isHost) {
+                this.hostRoom(this.roomId, options.baseUrl, options.backgroundColor, options);
+            } else {
+                //this.connectToRoom(this.roomId, options);
+                //this.#connectAsClient(this.roomId, options)
+                sessionStorage.setItem('reconnectAttempts',this.reconnectAttempts)
+                window.location.reload()
+            }
+
+            
+            
+        },delay);
     }
 
     // Erstellt oder aktualisiert einen QR-Code für die Netzwerkverbindung
@@ -116,61 +173,98 @@ class FWNetwork {
         });
 
         this.peer.on('open', (id) => {
-            const url = `${baseUrl}?id=${id}`;
-            this.getQRCodeTexture(url, backgroundColor);
             this.status = 'open';
         });
     }
 
+    #connectAsClient(roomId, options) {
+        this.status = 'open';
+        this.connection = this.peer.connect(roomId);
+        this.connection.on('open', () => {
+            console.log(`Connected to host: ${roomId}`); 
+            this.reconnectAttempts = 0;
+            this.status = 'connected';
+        });
+
+        this.connection.on('data', (data) => {
+            this.stats.messagesReceived++
+            let uint8array = new Uint8Array(data)
+            this.stats.bytesReceived+=uint8array.length
+
+            console.log('Received data:', data);
+        });
+
+        this.connection.on('close', () => {
+            console.log('Connection closed');
+            this.connection = null;
+            this.status = 'disconnected';
+            this.attemptReconnect(options)
+        });
+
+        this.connection.on('error', (err) => {
+            console.error('Connection error:', err);
+            this.status = 'error';
+            this.attemptReconnect(options)
+        });
+    }
     // Verbindet sich zu einem bestehenden Raum
     connectToRoom(roomId, options = {}) {
         if (!this.peer) {
-            this.initialize(null, options); // Keine feste ID für Client
+            this.initialize(sessionStorage.getItem('clientId'), options); // Keine feste ID für Client
         }
 
         this.isHost = false;
         this.roomId = roomId;
 
         this.peer.on('open', (myId) => {
+            sessionStorage.setItem('clientId', myId)
             console.log(`Connecting to room: ${roomId} as ${myId}`);
-            this.connection = this.peer.connect(roomId);
-
-            this.status = 'open';
-
-            this.connection.on('open', () => {
-                console.log(`Connected to host: ${roomId}`);
-                this.status = 'connected';
-            });
-
-            this.#setupConnectionHandlers(this.connection);
+       
+            this.#connectAsClient(roomId, options)
+            
         });
     }
 
-    // Client: Sendet Gamepads manuell mit touchGamepad als Parameter
-    sendGamepads(touchGamepad) {
+    
+    getJSONGamepadsButtonsOnlyState(touchGamepad) {
+        
+        const realGamepads = navigator.getGamepads();
+        const gamepads = [touchGamepad, undefined, undefined, undefined, undefined];
+        for (let i = 0; i < 4 && i < realGamepads.length; i++) {
+            if (realGamepads[i] && realGamepads[i].connected) {
+                const netGamepad = new FWNetworkGamepad();
+                netGamepad.setFromRealGamepad(realGamepads[i]);
+                gamepads[1+i] = netGamepad;
+            }
+        }
+
+            return JSON.stringify(gamepads.map(gamepad => gamepad?.buttons.map(b => b.pressed)
+        ));
+    }
+
+    getGamepadData(touchGamepad) {
+        const realGamepads = navigator.getGamepads();
+        const gamepads = [touchGamepad, undefined, undefined, undefined, undefined];
+        for (let i = 0; i < 4 && i < realGamepads.length; i++) {
+            if (realGamepads[i] && realGamepads[i].connected ) {
+                const netGamepad = new FWNetworkGamepad();
+                netGamepad.setFromRealGamepad(realGamepads[i]);
+                gamepads[1+i] = netGamepad;
+            }
+        }
+
+        const gamepadData = FWFixedSizeByteArray.merge(
+            gamepads.map((gp) => gp && gp.toByteArray()));
+
+
+        return gamepadData
+    }
+
+    sendGamepadData(gamepadData) {
         if (!this.connection || !this.connection.open) {
             console.log('No active connection to send gamepads');
             return;
         }
-        if (!(touchGamepad instanceof FWNetworkGamepad)) {
-            console.error('touchGamepad must be a NetworkGamepad instance');
-            return;
-        }
-
-        const realGamepads = navigator.getGamepads();
-        const gamepads = [touchGamepad];
-        for (let i = 0; i < 4 && i < realGamepads.length; i++) {
-            if (realGamepads[i]) {
-                const netGamepad = new FWNetworkGamepad();
-                netGamepad.setFromRealGamepad(realGamepads[i]);
-                gamepads.push(netGamepad);
-            }
-        }
-
-        const gamepadData = gamepads.map((gp, index) => ({
-            index: index,
-            bytes: gp.toByteArray()
-        }));
 
         this.sendData(gamepadData);
     }
@@ -178,22 +272,39 @@ class FWNetwork {
     // Host: Verarbeitet eingehende Gamepad-Daten
     #setupHostConnection(conn) {
         const clientId = conn.peer;
-        const indices = [];
-        for (let i = 0; i < 5; i++) {
-            indices.push(this.networkGamepads.length);
-            this.networkGamepads.push(new FWNetworkGamepad());
+        if (this.clientGamepadIndices.get(clientId)) {
+            console.log('reconnecting client found, reusing indices')
+            const indices = this.clientGamepadIndices.get(clientId)
+            indices.forEach((idx) => {
+                this.networkGamepads[idx] = new FWNetworkGamepad();
+            });
+        } else {
+            const indices = [];
+            for (let i = 0; i < 5; i++) {
+                indices.push(this.networkGamepads.length);
+                this.networkGamepads.push(new FWNetworkGamepad());
+            }
+            this.clientGamepadIndices.set(clientId, indices);
         }
-        this.clientGamepadIndices.set(clientId, indices);
+
 
         conn.on('data', (data) => {
-            if (Array.isArray(data)) {
-                data.forEach(({ index, bytes }) => {
-                    if (index >= 0 && index < 5) {
-                        const gpIndex = this.clientGamepadIndices.get(clientId)[index];
-                        this.networkGamepads[gpIndex].fromByteArray(bytes);
-                    }
-                });
+            
+            let uint8array = new Uint8Array(data)
+            this.stats.messagesReceived++
+            this.stats.bytesReceived+=uint8array.length
+
+            let arr = FWFixedSizeByteArray.extract(uint8array)
+            for (let i=0;i<5;i++) {
+                const gpIndex = this.clientGamepadIndices.get(clientId)[i];
+                if (arr[i]) {
+                    this.networkGamepads[gpIndex].fromByteArray(arr[i].buffer);
+                } else {
+                    this.networkGamepads[gpIndex].connected = false
+                }
+               
             }
+            
         });
 
         conn.on('close', () => {
@@ -202,7 +313,6 @@ class FWNetwork {
             indices.forEach((idx) => {
                 this.networkGamepads[idx] = undefined;
             });
-            this.clientGamepadIndices.delete(clientId);
             this.status = `hosting`;
         });
 
@@ -211,27 +321,15 @@ class FWNetwork {
         });
     }
 
-    // Universelle Verbindungs-Handler (für Client)
-    #setupConnectionHandlers(conn) {
-        conn.on('data', (data) => {
-            console.log('Received data:', data);
-        });
-
-        conn.on('close', () => {
-            console.log('Connection closed');
-            this.connection = null;
-            this.status = 'disconnected';
-        });
-
-        conn.on('error', (err) => {
-            console.error('Connection error:', err);
-            this.status = 'error';
-        });
-    }
-
+    
     // Sendet Daten über die aktive Verbindung
     sendData(data) {
+
         if (this.connection && this.connection.open) {
+            this.stats.messagesSent++
+            let uint8array = new Uint8Array(data)
+            this.stats.bytesSent+=uint8array.length
+
             this.connection.send(data);
         } else {
             console.log('No active connection to send data');
@@ -267,5 +365,10 @@ class FWNetwork {
     // Gibt den aktuellen Status der Verbindung zurück
     getStatus() {
         return this.status;
+    }
+
+    // Statistiken
+    getStats() {
+        return this.stats;
     }
 }

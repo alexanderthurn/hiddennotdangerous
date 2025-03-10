@@ -137,3 +137,78 @@ class FWNetworkGamepad {
 
     }
 }
+
+
+class FWFixedSizeByteArray {
+    static merge(arrays) {
+        if (arrays.length !== 5) throw new Error("Es müssen genau 5 Arrays sein!");
+
+        let header = new Uint8Array(1); // 1 Byte für Statusflags (5 Bits genutzt)
+        let parts = [];
+        parts.push(header)
+        for (let i = 0; i < 5; i++) {
+            if (arrays[i] instanceof Uint8Array) {
+                header[0] |= (1 << i); // Setze das i-te Bit
+                parts.push(arrays[i]);
+            }
+        }
+        parts[0] = header
+        const totalLength = parts.reduce((sum, arr) => sum + arr.length, 0);
+        const combined = new Uint8Array(totalLength);
+        let offset = 0;
+        for (const part of parts) {
+            combined.set(part, offset);
+            offset += part.length;
+        }
+
+        return combined;
+    }
+
+    static extract(mergedArray) {
+        let header = mergedArray[0]; // Erstes Byte enthält Statusflags
+        let result = new Array(5).fill(null);
+        let offset = 1;
+
+        for (let i = 0; i < 5; i++) {
+            if ((header & (1 << i)) !== 0) { // Prüfe, ob das i-te Bit gesetzt ist
+                result[i] = mergedArray.slice(offset, offset + 7);
+                offset += 7;
+            }
+        }
+
+        return result;
+    }
+
+    static mergeUint8Arrays(arrays) {
+        let totalLength = arrays.reduce((sum, arr) => sum + (arr ? arr.length : 0), 0);
+        let mergedArray = new Uint8Array(totalLength);
+        
+        let offset = 0;
+        arrays.forEach(arr => {
+            if (arr) {
+                mergedArray.set(arr, offset);
+                offset += arr.length;
+            }
+        });
+    
+        return mergedArray;
+    }
+
+    static areUint8ArraysEqual(arr1, arr2) {
+
+        if (!arr1 || !arr2) {
+            return false
+        }
+        
+        if (arr1.length !== arr2.length) {
+            return false;
+        }
+        
+        for (let i = 0; i < arr1.length; i++) {
+            if (arr1[i] !== arr2[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+}

@@ -53,12 +53,13 @@ async function init() {
     app.serverPrefix = 'hidden'
     app.serverId = getQueryParam('id') || '1234';
     app.color = color;
-    const baseUrl = `${window.location.protocol}//${window.location.host.replace('localhost', '7.7.7.66')}${window.location.pathname.replace('example.html', 'controller.html')}`;
-    app.url = `${baseUrl}?id=${app.serverId}&color=${app.color.toHex().replace(/^#/, '')}`;
+    const baseUrl = `pad.feuerware.com`;
+    app.url = `https://${baseUrl}?id=${app.serverId}`;
 
     // FWNetwork als Host initialisieren mit iceServers
     const network = FWNetwork.getInstance();
     network.hostRoom(app.serverPrefix + app.serverId, baseUrl, app.color, {
+        debug: getQueryParam('debug') && Number.parseInt(getQueryParam('debug')) || 0,
         config: { iceServers: iceServers }
     });
 
@@ -68,16 +69,17 @@ async function init() {
         style: { fontFamily: 'Arial', fontSize: 32, fill: 0xffffff, align: 'center' }
     });
     app.textServerId = new PIXI.Text({
-        text: app.serverId,
+        text: 'Code: ' + app.serverId,
         style: { fontFamily: 'Arial', fontSize: 32, fill: 0xffffff, align: 'center' }
     });
     app.textNetwork = new PIXI.Text({
         text: '',
         style: { fontFamily: 'Arial', fontSize: 32, fill: 0xffffff, align: 'center' }
     });
+    
     app.textNetwork.anchor.set(1.0, 0.0);
     app.textUrl.anchor.set(0.5, 1.0);
-    app.textServerId.anchor.set(0.5, 0.0);
+    app.textServerId.anchor.set(0.0, 0.0);
 
     app.containerQrCode = new PIXI.Container();
     // QR-Code laden
@@ -89,6 +91,14 @@ async function init() {
         app.qrCodeSprite.anchor.set(0.5);
         app.containerQrCode.addChild(app.qrCodeSprite);
     });
+
+    network.peer.on('error', async (err) => {
+        console.log(err)
+
+        if (err.type === 'unavailable-id') {
+            alert(`ServerId ${app.serverId} is already taken`)
+        }
+    })
 
     // Container für Figuren
     app.figures = {};
@@ -121,20 +131,24 @@ function main(app) {
     const gamepads = network.getAllGamepads();
 
     // UI-Positionierung und Status
-    app.textUrl.width = app.containerGame.screenWidth * 0.95;
-    app.textUrl.scale.y = app.textUrl.scale.x;
-    app.textUrl.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 1.0);
 
-    app.textNetwork.text = `${network.getStatus()} | G: ${network.getLocalGamepads().filter(x => x && x.connected).length}, R: ${network.getNetworkGamepads().filter(x => x && x.connected).length}, F: ${Object.keys(app.figures).length}`;
+    app.textNetwork.text = `${network.getStatus()} | G: ${network.getLocalGamepads().filter(x => x && x.connected).length}, R: ${network.getNetworkGamepads().filter(x => x && x.connected).length}, F: ${Object.keys(app.figures).length} M: ${FWNetwork.getInstance().getStats().messagesReceived} BR: ${FWNetwork.getInstance().getStats().bytesReceived}`;
     app.textNetwork.position.set(app.containerGame.screenWidth, app.containerGame.screenHeight * 0.0);
-    app.textServerId.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 0.0);
+    app.textServerId.position.set(app.containerGame.screenWidth * 0.0, app.containerGame.screenHeight * 0.0);
 
     if (app.qrCodeSprite) {
         app.qrCodeSprite.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 0.5);
         const qrWidth = Math.min(app.containerGame.screenHeight, app.containerGame.screenWidth) * 0.95;
         app.qrCodeSprite.width = qrWidth;
         app.qrCodeSprite.height = qrWidth;
+
+        app.textUrl.width =  app.qrCodeSprite.width;
+        app.textUrl.scale.y = app.textUrl.scale.x;
+        app.textUrl.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 1.0);
+    
     }
+
+   
 
     // Figuren aktualisieren
     Object.keys(app.figures).forEach((key) => {
@@ -144,6 +158,10 @@ function main(app) {
         figure.x += app.tickerInstance.deltaTime * figure.gamepad.axes[0] * 2;
         figure.y += app.tickerInstance.deltaTime * figure.gamepad.axes[1] * 2;
         figure.body.tint = figure.gamepad.buttons.some(b => b.pressed) ? 0x000000 : 0xffffff;
+
+        figure.arm.scale.set(app.containerGame.screenWidth * 0.01);
+        figure.arm.position.set(figure.gamepad.axes[2]*figure.body.scale.x, figure.gamepad.axes[3]*figure.body.scale.y)
+        figure.arm.tint = figure.gamepad.buttons.some(b => b.pressed) ? 0x444444 : 0xffffff;
         figure.gamepadFoundInCurrentLoop = false;
     });
 
@@ -154,8 +172,15 @@ function main(app) {
             if (!app.figures[key]) {
                 const figure = new PIXI.Container();
                 figure.body = new PIXI.Graphics().circle(0, 0, 1).fill({ alpha: 1.0, color: 0xffffff });
-                figure.addChild(figure.body);
+                figure.arm = new PIXI.Graphics().circle(0, 0, 1).fill({ alpha: 1.0, color: 0xffffff });
+                figure.playerName = new PIXI.Text( {
+                    text: Math.floor(Math.random()*1000), 
+                    style: { fontFamily: 'Arial', fontSize: 32, fill: 0x0f00f0, align: 'center' }
+                    })
+                figure.playerName.anchor.set(0.5, 0.5)
+                figure.addChild(figure.body, figure.arm, figure.playerName);
                 figure.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 0.5);
+                
                 app.containerFigures.addChild(figure);
                 app.figures[key] = figure;
             }
@@ -168,8 +193,8 @@ function main(app) {
     Object.keys(app.figures).forEach((key) => {
         const figure = app.figures[key];
         if (!figure.gamepadFoundInCurrentLoop) {
-            app.containerFigures.removeChild(figure);
-            delete app.figures[key];
+          //  app.containerFigures.removeChild(figure);
+          //  delete app.figures[key];
         }
     });
 }

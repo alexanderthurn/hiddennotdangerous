@@ -22,6 +22,7 @@ const getQueryParam = (key) => {
 var touchControl = null;
 var gamepad = new FWNetworkGamepad();
 var prevGamepadState = null; // Vorheriger Zustand des Gamepads
+var prevGamepadStateMustSent = null
 const maxMessagesPerSecond = 20; // Maximal 20 Nachrichten pro Sekunde
 const minDelay = 50; // Mindestabstand zwischen zwei Nachrichten in Millisekunden (z. B. 50ms)
 var messageCount = 0; // Zähler für gesendete Nachrichten in der aktuellen Sekunde
@@ -56,20 +57,27 @@ async function init() {
     app.containerGame.addChild(touchControl);
 
     app.serverPrefix = 'hidden'
-    app.serverId = getQueryParam('id') || '1234';
+    app.serverId = getQueryParam('id') || '';
     app.color = new PIXI.Color(getQueryParam('color') || 'ff0000').toNumber();
     app.connectionStatus = CONNECTION_STATUS_OFF;
 
     const network = FWNetwork.getInstance();
 
     app.connectionStatus = CONNECTION_STATUS_INITIALIZNG;
-    network.connectToRoom(app.serverPrefix + app.serverId, {
-        config: { iceServers: iceServers }
-    });
 
-    network.peer.on('error', (err) => {
-        console.error('Connection error:', err);
-    });
+    if (app.serverId && app.serverId !== '') {
+        network.connectToRoom(app.serverPrefix + app.serverId, {
+            debug: getQueryParam('debug') && Number.parseInt(getQueryParam('debug')) || 0,
+            config: { iceServers: iceServers }
+        });
+    
+        network.peer.on('error', (err) => {
+            console.error('Connection error:', err);
+        });
+    } else {
+        app.settingsDialog.show();
+    }
+   
 
     app.finishLoading();
 
@@ -97,13 +105,6 @@ async function init() {
 window.addEventListener("load", (event) => {
     init();
 });
-
-function serializeGamepad(gamepad) {
-    return JSON.stringify({
-        axes: gamepad.axes,
-        buttons: gamepad.buttons.map(b => b.pressed)
-    });
-}
 
 function main(app) {
     let networkStatus= FWNetwork.getInstance().getStatus()
@@ -133,7 +134,8 @@ function main(app) {
     touchControl.update(app);
     touchControl.updateGamepad(gamepad);
 
-    const currentState = serializeGamepad(gamepad);
+    const currentState = FWNetwork.getInstance().getGamepadData(gamepad);
+    const currentStateMustSent =  FWNetwork.getInstance().getJSONGamepadsButtonsOnlyState(gamepad);
     const now = Date.now();
     const second = Math.floor(now / 1000);
 
@@ -144,16 +146,18 @@ function main(app) {
     }
 
     // Senden, wenn Zustand geändert, Limit nicht erreicht und Mindestdelay eingehalten
-    if (prevGamepadState !== currentState && 
+    if ((currentStateMustSent !== currentStateMustSent) || 
+        (!FWFixedSizeByteArray.areUint8ArraysEqual(prevGamepadState,currentState) && 
         messageCount < maxMessagesPerSecond && 
-        now - lastSentTime >= minDelay) {
+        now - lastSentTime >= minDelay)
+        ) {
         if (app.connectionStatus === CONNECTION_STATUS_WORKING) {
-            console.log(prevGamepadState, currentState);
             const network = FWNetwork.getInstance();
-            network.sendGamepads(gamepad);
+            network.sendGamepadData(currentState);
             messageCount++; // Zähler erhöhen
             lastSentTime = now; // Zeitpunkt des Sendens aktualisieren
             prevGamepadState = currentState; // Zustand speichern
+            prevGamepadStateMustSent = currentStateMustSent
         }
     }
 }
