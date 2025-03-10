@@ -53,12 +53,13 @@ async function init() {
     app.serverPrefix = 'hidden'
     app.serverId = getQueryParam('id') || '1234';
     app.color = color;
-    const baseUrl = `${window.location.protocol}//${window.location.host.replace('localhost', '7.7.7.66')}${window.location.pathname.replace('example.html', 'controller.html')}`;
-    app.url = `${baseUrl}?id=${app.serverId}&color=${app.color.toHex().replace(/^#/, '')}`;
+    const baseUrl = `pad.feuerware.com`;
+    app.url = `https://${baseUrl}?id=${app.serverId}`;
 
     // FWNetwork als Host initialisieren mit iceServers
     const network = FWNetwork.getInstance();
     network.hostRoom(app.serverPrefix + app.serverId, baseUrl, app.color, {
+        debug: getQueryParam('debug') && Number.parseInt(getQueryParam('debug')) || 0,
         config: { iceServers: iceServers }
     });
 
@@ -68,7 +69,7 @@ async function init() {
         style: { fontFamily: 'Arial', fontSize: 32, fill: 0xffffff, align: 'center' }
     });
     app.textServerId = new PIXI.Text({
-        text: app.serverId,
+        text: 'Code: ' + app.serverId,
         style: { fontFamily: 'Arial', fontSize: 32, fill: 0xffffff, align: 'center' }
     });
     app.textNetwork = new PIXI.Text({
@@ -78,7 +79,7 @@ async function init() {
     
     app.textNetwork.anchor.set(1.0, 0.0);
     app.textUrl.anchor.set(0.5, 1.0);
-    app.textServerId.anchor.set(0.5, 0.0);
+    app.textServerId.anchor.set(0.0, 0.0);
 
     app.containerQrCode = new PIXI.Container();
     // QR-Code laden
@@ -130,20 +131,24 @@ function main(app) {
     const gamepads = network.getAllGamepads();
 
     // UI-Positionierung und Status
-    app.textUrl.width = app.containerGame.screenWidth * 0.95;
-    app.textUrl.scale.y = app.textUrl.scale.x;
-    app.textUrl.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 1.0);
 
     app.textNetwork.text = `${network.getStatus()} | G: ${network.getLocalGamepads().filter(x => x && x.connected).length}, R: ${network.getNetworkGamepads().filter(x => x && x.connected).length}, F: ${Object.keys(app.figures).length} M: ${FWNetwork.getInstance().getStats().messagesReceived} BR: ${FWNetwork.getInstance().getStats().bytesReceived}`;
     app.textNetwork.position.set(app.containerGame.screenWidth, app.containerGame.screenHeight * 0.0);
-    app.textServerId.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 0.0);
+    app.textServerId.position.set(app.containerGame.screenWidth * 0.0, app.containerGame.screenHeight * 0.0);
 
     if (app.qrCodeSprite) {
         app.qrCodeSprite.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 0.5);
         const qrWidth = Math.min(app.containerGame.screenHeight, app.containerGame.screenWidth) * 0.95;
         app.qrCodeSprite.width = qrWidth;
         app.qrCodeSprite.height = qrWidth;
+
+        app.textUrl.width =  app.qrCodeSprite.width;
+        app.textUrl.scale.y = app.textUrl.scale.x;
+        app.textUrl.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 1.0);
+    
     }
+
+   
 
     // Figuren aktualisieren
     Object.keys(app.figures).forEach((key) => {

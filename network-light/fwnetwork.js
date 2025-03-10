@@ -21,6 +21,7 @@ class FWNetwork {
             messagesSent: 0
         }
         this.reconnectAttempts = Number.parseInt(sessionStorage.getItem('reconnectAttempts') || '0');
+        sessionStorage.setItem('reconnectAttempts',0) // will be set only by retry mechanism
         this.maxReconnectAttempts = 5;
         this.reconnectDelay = 2000;
         this.reconnectTimeout = null;
@@ -67,8 +68,6 @@ class FWNetwork {
 
         this.peer.on('open', (id) => {
             this.initialized = true;
-            this.reconnectAttempts = 0;
-            sessionStorage.setItem('reconnectAttempts',this.reconnectAttempts)
             
             this.roomId = id;
             this.status = this.isHost ? 'hosting' : 'connecting';
@@ -103,6 +102,7 @@ class FWNetwork {
     attemptReconnect(options) {
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
             console.log('Maxi retry connections reached');
+             this.status = 'error'
             return;
         }
 
@@ -173,8 +173,6 @@ class FWNetwork {
         });
 
         this.peer.on('open', (id) => {
-            const url = `${baseUrl}?id=${id}`;
-            this.getQRCodeTexture(url, backgroundColor);
             this.status = 'open';
         });
     }
@@ -185,7 +183,6 @@ class FWNetwork {
         this.connection.on('open', () => {
             console.log(`Connected to host: ${roomId}`); 
             this.reconnectAttempts = 0;
-            sessionStorage.setItem('reconnectAttempts',this.reconnectAttempts)
             this.status = 'connected';
         });
 

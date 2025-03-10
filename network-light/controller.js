@@ -57,20 +57,27 @@ async function init() {
     app.containerGame.addChild(touchControl);
 
     app.serverPrefix = 'hidden'
-    app.serverId = getQueryParam('id') || '1234';
+    app.serverId = getQueryParam('id') || '';
     app.color = new PIXI.Color(getQueryParam('color') || 'ff0000').toNumber();
     app.connectionStatus = CONNECTION_STATUS_OFF;
 
     const network = FWNetwork.getInstance();
 
     app.connectionStatus = CONNECTION_STATUS_INITIALIZNG;
-    network.connectToRoom(app.serverPrefix + app.serverId, {
-        config: { iceServers: iceServers }
-    });
 
-    network.peer.on('error', (err) => {
-        console.error('Connection error:', err);
-    });
+    if (app.serverId && app.serverId !== '') {
+        network.connectToRoom(app.serverPrefix + app.serverId, {
+            debug: getQueryParam('debug') && Number.parseInt(getQueryParam('debug')) || 0,
+            config: { iceServers: iceServers }
+        });
+    
+        network.peer.on('error', (err) => {
+            console.error('Connection error:', err);
+        });
+    } else {
+        app.settingsDialog.show();
+    }
+   
 
     app.finishLoading();
 
