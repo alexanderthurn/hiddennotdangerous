@@ -20,6 +20,10 @@ class FWNetwork {
             messagesReceived: 0,
             messagesSent: 0
         }
+        this.reconnectAttempts = Number.parseInt(sessionStorage.getItem('reconnectAttempts') || '0');
+        this.maxReconnectAttempts = 5;
+        this.reconnectDelay = 2000;
+        this.reconnectTimeout = null;
     }
 
     static getInstance() {
@@ -63,6 +67,9 @@ class FWNetwork {
 
         this.peer.on('open', (id) => {
             this.initialized = true;
+            this.reconnectAttempts = 0;
+            sessionStorage.setItem('reconnectAttempts',this.reconnectAttempts)
+            
             this.roomId = id;
             this.status = this.isHost ? 'hosting' : 'connecting';
             console.log(`PeerJS initialized with ID: ${id}`);
@@ -80,6 +87,8 @@ class FWNetwork {
                     options.initializedBefore = true
                     this.initialize(peerId, options)
                 }
+            } else {
+                this.attemptReconnect(options);
             }
         });
 
@@ -87,7 +96,42 @@ class FWNetwork {
             console.log('Disconnected from PeerJS server');
             this.initialized = false;
             this.status = 'disconnected';
+            this.attemptReconnect(options);
         });
+    }
+
+    attemptReconnect(options) {
+        if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+            console.log('Maxi retry connections reached');
+            return;
+        }
+
+        if (this.reconnectTimeout) {
+            clearTimeout(this.reconnectTimeout); // Vorherigen Timeout löschen
+        }
+
+        this.reconnectAttempts++;
+        let delay =  Math.pow(2, this.reconnectAttempts)* this.reconnectDelay
+        this.status = 'connecting'
+        console.log(`Trying to connect again (${this.reconnectAttempts}/${this.maxReconnectAttempts}) with delay ${delay/1000}s...`);
+
+        this.reconnectTimeout = setTimeout(() => {
+           // this.peer.destroy(); // Alte Peer-Instanz aufräumen
+        //    this.peer = null;
+           // this.initialized = false;
+
+            if (this.isHost) {
+                this.hostRoom(this.roomId, options.baseUrl, options.backgroundColor, options);
+            } else {
+                //this.connectToRoom(this.roomId, options);
+                //this.#connectAsClient(this.roomId, options)
+                sessionStorage.setItem('reconnectAttempts',this.reconnectAttempts)
+                window.location.reload()
+            }
+
+            
+            
+        },delay);
     }
 
     // Erstellt oder aktualisiert einen QR-Code für die Netzwerkverbindung
@@ -135,6 +179,37 @@ class FWNetwork {
         });
     }
 
+    #connectAsClient(roomId, options) {
+        this.status = 'open';
+        this.connection = this.peer.connect(roomId);
+        this.connection.on('open', () => {
+            console.log(`Connected to host: ${roomId}`); 
+            this.reconnectAttempts = 0;
+            sessionStorage.setItem('reconnectAttempts',this.reconnectAttempts)
+            this.status = 'connected';
+        });
+
+        this.connection.on('data', (data) => {
+            this.stats.messagesReceived++
+            let uint8array = new Uint8Array(data)
+            this.stats.bytesReceived+=uint8array.length
+
+            console.log('Received data:', data);
+        });
+
+        this.connection.on('close', () => {
+            console.log('Connection closed');
+            this.connection = null;
+            this.status = 'disconnected';
+            this.attemptReconnect(options)
+        });
+
+        this.connection.on('error', (err) => {
+            console.error('Connection error:', err);
+            this.status = 'error';
+            this.attemptReconnect(options)
+        });
+    }
     // Verbindet sich zu einem bestehenden Raum
     connectToRoom(roomId, options = {}) {
         if (!this.peer) {
@@ -145,17 +220,11 @@ class FWNetwork {
         this.roomId = roomId;
 
         this.peer.on('open', (myId) => {
-            console.log(`Connecting to room: ${roomId} as ${myId}`);
-            this.connection = this.peer.connect(roomId);
             sessionStorage.setItem('clientId', myId)
-            this.status = 'open';
-
-            this.connection.on('open', () => {
-                console.log(`Connected to host: ${roomId}`);
-                this.status = 'connected';
-            });
-
-            this.#setupConnectionHandlers(this.connection);
+            console.log(`Connecting to room: ${roomId} as ${myId}`);
+       
+            this.#connectAsClient(roomId, options)
+            
         });
     }
 
@@ -255,28 +324,7 @@ class FWNetwork {
         });
     }
 
-    // Universelle Verbindungs-Handler (für Client)
-    #setupConnectionHandlers(conn) {
-        conn.on('data', (data) => {
-            this.stats.messagesReceived++
-            let uint8array = new Uint8Array(data)
-            this.stats.bytesReceived+=uint8array.length
-
-            console.log('Received data:', data);
-        });
-
-        conn.on('close', () => {
-            console.log('Connection closed');
-            this.connection = null;
-            this.status = 'disconnected';
-        });
-
-        conn.on('error', (err) => {
-            console.error('Connection error:', err);
-            this.status = 'error';
-        });
-    }
-
+    
     // Sendet Daten über die aktive Verbindung
     sendData(data) {
 
