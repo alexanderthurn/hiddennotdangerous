@@ -511,7 +511,7 @@ function updateGame(figures, dt, dtProcessed) {
         }})
     }
 
-    figuresAlive.filter(f => f.speed).forEach(f => {
+    figuresAlive.filter(f => f.speed > 0).forEach(f => {
         let xyNew = move(f.x, f.y, f.direction,f.speed, dt)
         if (xyNew) {
             [f.x, f.y] = cropXY(xyNew.x, xyNew.y, level)
