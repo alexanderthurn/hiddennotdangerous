@@ -15,6 +15,7 @@ var initDialog = (app) => {
               app.qrCodeReader.onClose()
           }
           setUrlParams(app.serverId)
+          window.location.reload()
       }
   );
 

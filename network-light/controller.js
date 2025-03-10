@@ -148,7 +148,6 @@ function main(app) {
         messageCount < maxMessagesPerSecond && 
         now - lastSentTime >= minDelay) {
         if (app.connectionStatus === CONNECTION_STATUS_WORKING) {
-            console.log(prevGamepadState, currentState);
             const network = FWNetwork.getInstance();
             network.sendGamepads(gamepad);
             messageCount++; // Zähler erhöhen

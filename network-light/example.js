@@ -167,7 +167,12 @@ function main(app) {
                 const figure = new PIXI.Container();
                 figure.body = new PIXI.Graphics().circle(0, 0, 1).fill({ alpha: 1.0, color: 0xffffff });
                 figure.arm = new PIXI.Graphics().circle(0, 0, 1).fill({ alpha: 1.0, color: 0xffffff });
-                figure.addChild(figure.body, figure.arm);
+                figure.playerName = new PIXI.Text( {
+                    text: Math.floor(Math.random()*1000), 
+                    style: { fontFamily: 'Arial', fontSize: 32, fill: 0x0f00f0, align: 'center' }
+                    })
+                figure.playerName.anchor.set(0.5, 0.5)
+                figure.addChild(figure.body, figure.arm, figure.playerName);
                 figure.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 0.5);
                 
                 app.containerFigures.addChild(figure);
@@ -182,8 +187,8 @@ function main(app) {
     Object.keys(app.figures).forEach((key) => {
         const figure = app.figures[key];
         if (!figure.gamepadFoundInCurrentLoop) {
-            app.containerFigures.removeChild(figure);
-            delete app.figures[key];
+          //  app.containerFigures.removeChild(figure);
+          //  delete app.figures[key];
         }
     });
 }

@@ -165,19 +165,17 @@ class FWNetwork {
         }
 
         const realGamepads = navigator.getGamepads();
-        const gamepads = [touchGamepad];
+        const gamepads = [touchGamepad, undefined, undefined, undefined, undefined];
         for (let i = 0; i < 4 && i < realGamepads.length; i++) {
             if (realGamepads[i]) {
                 const netGamepad = new FWNetworkGamepad();
                 netGamepad.setFromRealGamepad(realGamepads[i]);
-                gamepads.push(netGamepad);
+                gamepads[1+i] = netGamepad;
             }
         }
 
-        const gamepadData = gamepads.map((gp, index) => ({
-            index: index,
-            bytes: gp.toByteArray()
-        }));
+        const gamepadData = FWFixedSizeByteArray.merge(
+            gamepads.map((gp) => gp && gp.toByteArray()));
 
         this.sendData(gamepadData);
     }
@@ -202,14 +200,18 @@ class FWNetwork {
 
 
         conn.on('data', (data) => {
-            if (Array.isArray(data)) {
-                data.forEach(({ index, bytes }) => {
-                    if (index >= 0 && index < 5) {
-                        const gpIndex = this.clientGamepadIndices.get(clientId)[index];
-                        this.networkGamepads[gpIndex].fromByteArray(bytes);
-                    }
-                });
+
+            let arr = FWFixedSizeByteArray.extract(new Uint8Array(data))
+            for (let i=0;i<5;i++) {
+                const gpIndex = this.clientGamepadIndices.get(clientId)[i];
+                if (arr[i]) {
+                    this.networkGamepads[gpIndex].fromByteArray(arr[i].buffer);
+                } else {
+                    this.networkGamepads[gpIndex].connected = false
+                }
+               
             }
+            
         });
 
         conn.on('close', () => {
