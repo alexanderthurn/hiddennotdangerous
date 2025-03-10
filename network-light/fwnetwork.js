@@ -68,6 +68,13 @@ class FWNetwork {
         this.peer.on('error', (err) => {
             console.error('PeerJS error:', err);
             this.status = 'error';
+            if (err.type === 'unavailable-id') {
+                sessionStorage.removeItem('clientId')
+                if (!this.initialized && !options.initializedBefore) {
+                    options.initializedBefore = true
+                    this.initialize(peerId, options)
+                }
+            }
         });
 
         this.peer.on('disconnected', () => {
@@ -125,7 +132,7 @@ class FWNetwork {
     // Verbindet sich zu einem bestehenden Raum
     connectToRoom(roomId, options = {}) {
         if (!this.peer) {
-            this.initialize(null, options); // Keine feste ID für Client
+            this.initialize(sessionStorage.getItem('clientId'), options); // Keine feste ID für Client
         }
 
         this.isHost = false;
@@ -134,7 +141,7 @@ class FWNetwork {
         this.peer.on('open', (myId) => {
             console.log(`Connecting to room: ${roomId} as ${myId}`);
             this.connection = this.peer.connect(roomId);
-
+            sessionStorage.setItem('clientId', myId)
             this.status = 'open';
 
             this.connection.on('open', () => {
@@ -178,12 +185,21 @@ class FWNetwork {
     // Host: Verarbeitet eingehende Gamepad-Daten
     #setupHostConnection(conn) {
         const clientId = conn.peer;
-        const indices = [];
-        for (let i = 0; i < 5; i++) {
-            indices.push(this.networkGamepads.length);
-            this.networkGamepads.push(new FWNetworkGamepad());
+        if (this.clientGamepadIndices.get(clientId)) {
+            console.log('reconnecting client found, reusing indices')
+            const indices = this.clientGamepadIndices.get(clientId)
+            indices.forEach((idx) => {
+                this.networkGamepads[idx] = new FWNetworkGamepad();
+            });
+        } else {
+            const indices = [];
+            for (let i = 0; i < 5; i++) {
+                indices.push(this.networkGamepads.length);
+                this.networkGamepads.push(new FWNetworkGamepad());
+            }
+            this.clientGamepadIndices.set(clientId, indices);
         }
-        this.clientGamepadIndices.set(clientId, indices);
+
 
         conn.on('data', (data) => {
             if (Array.isArray(data)) {
@@ -202,7 +218,6 @@ class FWNetwork {
             indices.forEach((idx) => {
                 this.networkGamepads[idx] = undefined;
             });
-            this.clientGamepadIndices.delete(clientId);
             this.status = `hosting`;
         });
 

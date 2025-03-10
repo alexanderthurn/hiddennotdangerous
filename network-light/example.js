@@ -90,6 +90,14 @@ async function init() {
         app.containerQrCode.addChild(app.qrCodeSprite);
     });
 
+    network.peer.on('error', async (err) => {
+        console.log(err)
+
+        if (err.type === 'unavailable-id') {
+            alert(`ServerId ${app.serverId} is already taken`)
+        }
+    })
+
     // Container für Figuren
     app.figures = {};
     app.containerFigures = new PIXI.Container();
@@ -144,6 +152,10 @@ function main(app) {
         figure.x += app.tickerInstance.deltaTime * figure.gamepad.axes[0] * 2;
         figure.y += app.tickerInstance.deltaTime * figure.gamepad.axes[1] * 2;
         figure.body.tint = figure.gamepad.buttons.some(b => b.pressed) ? 0x000000 : 0xffffff;
+
+        figure.arm.scale.set(app.containerGame.screenWidth * 0.01);
+        figure.arm.position.set(figure.gamepad.axes[2]*figure.body.scale.x, figure.gamepad.axes[3]*figure.body.scale.y)
+        figure.arm.tint = figure.gamepad.buttons.some(b => b.pressed) ? 0x444444 : 0xffffff;
         figure.gamepadFoundInCurrentLoop = false;
     });
 
@@ -154,8 +166,10 @@ function main(app) {
             if (!app.figures[key]) {
                 const figure = new PIXI.Container();
                 figure.body = new PIXI.Graphics().circle(0, 0, 1).fill({ alpha: 1.0, color: 0xffffff });
-                figure.addChild(figure.body);
+                figure.arm = new PIXI.Graphics().circle(0, 0, 1).fill({ alpha: 1.0, color: 0xffffff });
+                figure.addChild(figure.body, figure.arm);
                 figure.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 0.5);
+                
                 app.containerFigures.addChild(figure);
                 app.figures[key] = figure;
             }
