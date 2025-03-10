@@ -14,6 +14,12 @@ class FWNetwork {
         this.networkGamepads = [];
         this.clientGamepadIndices = new Map();
         this.status = 'disconnected';
+        this.stats = {
+            bytesReceived: 0,
+            bytesSent: 0,
+            messagesReceived: 0,
+            messagesSent: 0
+        }
     }
 
     static getInstance() {
@@ -153,21 +159,28 @@ class FWNetwork {
         });
     }
 
-    // Client: Sendet Gamepads manuell mit touchGamepad als Parameter
-    sendGamepads(touchGamepad) {
-        if (!this.connection || !this.connection.open) {
-            console.log('No active connection to send gamepads');
-            return;
-        }
-        if (!(touchGamepad instanceof FWNetworkGamepad)) {
-            console.error('touchGamepad must be a NetworkGamepad instance');
-            return;
-        }
-
+    
+    getJSONGamepadsButtonsOnlyState(touchGamepad) {
+        
         const realGamepads = navigator.getGamepads();
         const gamepads = [touchGamepad, undefined, undefined, undefined, undefined];
         for (let i = 0; i < 4 && i < realGamepads.length; i++) {
-            if (realGamepads[i]) {
+            if (realGamepads[i] && realGamepads[i].connected) {
+                const netGamepad = new FWNetworkGamepad();
+                netGamepad.setFromRealGamepad(realGamepads[i]);
+                gamepads[1+i] = netGamepad;
+            }
+        }
+
+            return JSON.stringify(gamepads.map(gamepad => gamepad?.buttons.map(b => b.pressed)
+        ));
+    }
+
+    getGamepadData(touchGamepad) {
+        const realGamepads = navigator.getGamepads();
+        const gamepads = [touchGamepad, undefined, undefined, undefined, undefined];
+        for (let i = 0; i < 4 && i < realGamepads.length; i++) {
+            if (realGamepads[i] && realGamepads[i].connected ) {
                 const netGamepad = new FWNetworkGamepad();
                 netGamepad.setFromRealGamepad(realGamepads[i]);
                 gamepads[1+i] = netGamepad;
@@ -176,6 +189,16 @@ class FWNetwork {
 
         const gamepadData = FWFixedSizeByteArray.merge(
             gamepads.map((gp) => gp && gp.toByteArray()));
+
+
+        return gamepadData
+    }
+
+    sendGamepadData(gamepadData) {
+        if (!this.connection || !this.connection.open) {
+            console.log('No active connection to send gamepads');
+            return;
+        }
 
         this.sendData(gamepadData);
     }
@@ -200,8 +223,12 @@ class FWNetwork {
 
 
         conn.on('data', (data) => {
+            
+            let uint8array = new Uint8Array(data)
+            this.stats.messagesReceived++
+            this.stats.bytesReceived+=uint8array.length
 
-            let arr = FWFixedSizeByteArray.extract(new Uint8Array(data))
+            let arr = FWFixedSizeByteArray.extract(uint8array)
             for (let i=0;i<5;i++) {
                 const gpIndex = this.clientGamepadIndices.get(clientId)[i];
                 if (arr[i]) {
@@ -231,6 +258,10 @@ class FWNetwork {
     // Universelle Verbindungs-Handler (für Client)
     #setupConnectionHandlers(conn) {
         conn.on('data', (data) => {
+            this.stats.messagesReceived++
+            let uint8array = new Uint8Array(data)
+            this.stats.bytesReceived+=uint8array.length
+
             console.log('Received data:', data);
         });
 
@@ -248,7 +279,12 @@ class FWNetwork {
 
     // Sendet Daten über die aktive Verbindung
     sendData(data) {
+
         if (this.connection && this.connection.open) {
+            this.stats.messagesSent++
+            let uint8array = new Uint8Array(data)
+            this.stats.bytesSent+=uint8array.length
+
             this.connection.send(data);
         } else {
             console.log('No active connection to send data');
@@ -284,5 +320,10 @@ class FWNetwork {
     // Gibt den aktuellen Status der Verbindung zurück
     getStatus() {
         return this.status;
+    }
+
+    // Statistiken
+    getStats() {
+        return this.stats;
     }
 }

@@ -75,6 +75,7 @@ async function init() {
         text: '',
         style: { fontFamily: 'Arial', fontSize: 32, fill: 0xffffff, align: 'center' }
     });
+    
     app.textNetwork.anchor.set(1.0, 0.0);
     app.textUrl.anchor.set(0.5, 1.0);
     app.textServerId.anchor.set(0.5, 0.0);
@@ -133,7 +134,7 @@ function main(app) {
     app.textUrl.scale.y = app.textUrl.scale.x;
     app.textUrl.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 1.0);
 
-    app.textNetwork.text = `${network.getStatus()} | G: ${network.getLocalGamepads().filter(x => x && x.connected).length}, R: ${network.getNetworkGamepads().filter(x => x && x.connected).length}, F: ${Object.keys(app.figures).length}`;
+    app.textNetwork.text = `${network.getStatus()} | G: ${network.getLocalGamepads().filter(x => x && x.connected).length}, R: ${network.getNetworkGamepads().filter(x => x && x.connected).length}, F: ${Object.keys(app.figures).length} M: ${FWNetwork.getInstance().getStats().messagesReceived} BR: ${FWNetwork.getInstance().getStats().bytesReceived}`;
     app.textNetwork.position.set(app.containerGame.screenWidth, app.containerGame.screenHeight * 0.0);
     app.textServerId.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 0.0);
 

@@ -57,7 +57,6 @@ class FWNetworkGamepad {
         return JSON.stringify(this.getState());
     }
 
-
     toByteArray() {
         // Größe: 4 (axes) + 3 (buttons+connected) = 7 bytes
         const buffer = new ArrayBuffer(7);
@@ -193,5 +192,23 @@ class FWFixedSizeByteArray {
         });
     
         return mergedArray;
+    }
+
+    static areUint8ArraysEqual(arr1, arr2) {
+
+        if (!arr1 || !arr2) {
+            return false
+        }
+        
+        if (arr1.length !== arr2.length) {
+            return false;
+        }
+        
+        for (let i = 0; i < arr1.length; i++) {
+            if (arr1[i] !== arr2[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 }
