@@ -169,7 +169,7 @@ const gameSelectionDefinition = () => ({
         restartGame = true;
         const gamesValues = Object.values(games)
         game = gamesValues[getRandomIndex(gamesValues.map(game => game.votes))]
-        nextStage = stages.game
+        nextStage = stages.gameLobby
     }
 })
 
@@ -356,13 +356,11 @@ function roundInit() {
         Object.assign(figure, {
             x,
             y,
-            xTarget,
-            yTarget,
+            direction: angle(x,y,xTarget,yTarget),
             startWalkTime: Math.random() * 5000 + dtProcessed,
             speed: 0,
             isDead: false, 
             killTime: 0,
-            direction: angle(x,y,xTarget,yTarget),
             isAttacking: false,
             lastAttackTime: undefined,
             beans: new Set(),
@@ -473,6 +471,9 @@ function updateGame(figures, dt, dtProcessed) {
             case games.food:
                 figuresRevived = figuresDead.filter(f => !f.playerId)
                 break;
+            case games.food:
+                figuresRevived = figuresDead.filter(f => !f.playerId && !f.teamId === 'vip' || f.playerId && f.teamId === 'guard')
+                break;
             default:
                 break;
         }
@@ -510,7 +511,7 @@ function updateGame(figures, dt, dtProcessed) {
         }})
     }
 
-    figuresAlive.filter(f => f.type === 'fighter').forEach(f => {
+    figuresAlive.filter(f => f.speed).forEach(f => {
         let xyNew = move(f.x, f.y, f.direction,f.speed, dt)
         if (xyNew) {
             [f.x, f.y] = cropXY(xyNew.x, xyNew.y, level)
@@ -550,17 +551,10 @@ function updateGame(figures, dt, dtProcessed) {
     let numberKilledFigures = 0;
     let killTime;
     figuresAlive.filter(f => f.isAttacking).forEach(f => {
-        figures.filter(fig => fig !== f && fig.playerId !== f.playerId && !fig.isDead && fig.type === 'fighter').forEach(fig => {
-            const attackDistance = f.attackDistanceMultiplier ? f.attackDistanceMultiplier*f.attackDistance : f.attackDistance
-            if (distance(f.x,f.y,fig.x,fig.y) < attackDistance) {
-                if (2*distanceAnglesDeg(rad2deg(f.direction), rad2deg(angle(f.x,f.y,fig.x,fig.y))+180) <= f.attackAngle) {
-                    fig.isDead = true;
-                    fig.killTime = dtProcessed
-                    fig.speed = 0;
-                    playAudioPool(soundDeathPool);
-                    numberKilledFigures++;
-                    killTime = dtProcessed;
-                }
+        figuresAlive.filter(fig => fig !== f && fig.playerId !== f.playerId && fig.type === 'fighter').forEach(fig => {
+            if (attackFigure(f, fig)) {
+                numberKilledFigures++
+                killTime = dtProcessed
             }
         });
     })
@@ -570,11 +564,11 @@ function updateGame(figures, dt, dtProcessed) {
 function handleInput(players, figures, dtProcessed) {
     
     // player join first
-    var joinedFighters = figures.filter(f => f.playerId)
+    var joinedFighters = figures.filter(f => f.playerId && f.type === 'fighter')
     // join by doing anything
     players.filter(p => p.isAnyButtonPressed || p.isAttackButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
         p.joinedTime = dtProcessed
-        var figure = figures.find(f => f.playerId === p.playerId && f.type === 'fighter')
+        var figure = joinedFighters.find(f => f.playerId === p.playerId)
         if (!figure) {
             if (p.type === 'bot' && joinedFighters.length === 0) {
                 return

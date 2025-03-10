@@ -67,13 +67,19 @@ const animateStartButton = button => {
         text = 'Vote to\nSTART\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
     }
     button.getChildAt(2).text = text
+
+    if (stage === stages.startLobby) {
+        button.isInArea = f => new PIXI.Circle(button.x, button.y, button.outerRadius).contains(f.x, f.y+f.height*0.5) && !(new PIXI.Circle(button.x, button.y, button.innerRadius)).contains(f.x, f.y+f.height*0.5)
+    } else {
+        button.isInArea = f => new PIXI.Circle(button.x, button.y, button.innerRadius).contains(f.x, f.y+f.height*0.5)
+    }
 }
 
 const createStartButton = (props, lobbyContainer) => {
     const {x, y, innerRadius, outerRadius, loadingPercentage, loadingSpeed, execute} = props
 
     let button = new PIXI.Container()
-    button = Object.assign(button, {x, y, loadingPercentage, loadingSpeed, execute})
+    button = Object.assign(button, props)
     button.isInArea = f => new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y+f.height*0.5) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y+f.height*0.5)
 
     const area = new PIXI.Graphics()
@@ -102,7 +108,7 @@ const createStartButton = (props, lobbyContainer) => {
 }
 
 const animateRingPartButton = button => {
-    button.visible = figures.filter(f => f.playerId && f.type === 'fighter').length > 0
+    button.visible = stage === stages.startLobby && figures.filter(f => f.playerId && f.type === 'fighter').length > 0
 
     if (button.oldloadingPercentage != button.loadingPercentage) {
         button.oldloadingPercentage = button.loadingPercentage
@@ -234,7 +240,7 @@ const addButtons = (app, lobbyContainer) => {
 }
 
 const animateLobbyItems = lobbyContainer => {
-    lobbyContainer.visible = stage === stages.startLobby
+    lobbyContainer.visible = stage === stages.startLobby || stage === stages.gameLobby
 }
 
 const addLobbyItems = app => {
