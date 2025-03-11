@@ -582,9 +582,9 @@ function handleInput(players, figures, dtProcessed) {
     var joinedFighters = figures.filter(f => f.playerId && f.type === 'fighter')
     // join by doing anything
     players.filter(p => p.isAnyButtonPressed || p.isAttackButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
-        p.joinedTime = dtProcessed
         var figure = joinedFighters.find(f => f.playerId === p.playerId)
         if (!figure) {
+            p.joinedTime = dtProcessed
             if (p.type === 'bot' && joinedFighters.length === 0) {
                 return
             }
