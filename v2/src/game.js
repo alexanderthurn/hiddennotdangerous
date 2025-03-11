@@ -30,7 +30,8 @@ var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var restartGame = false, lastWinnerPlayerIds = new Set(), lastRoundEndThen, lastFinalWinnerPlayerId;
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
-var figures = [], maxPlayerFigures = 32, pointsToWin = 1, deadDuration = 5000, beanAttackDuration = 800, fartGrowDuration = 2000
+var figuresPool = []
+var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = 1, deadDuration = 5000, beanAttackDuration = 800, fartGrowDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = createLevel()
@@ -362,7 +363,10 @@ function roundInit() {
     }
 
     Object.values(buttons).forEach(button => button.loadingPercentage = 0);
-    figures.filter(figure => figure.type === 'fighter').forEach((figure, i) => {
+
+    figures = []
+  //figures.filter(figure => figure.type === 'fighter').forEach((figure, i) => {
+    figuresPool.filter(figure => figure.type === 'fighter' && figure.team !== 'vip').forEach(figure => {
 
         if (stage !== stages.gameLobby) {
             const [x, y] = getRandomXY(level)
@@ -387,15 +391,19 @@ function roundInit() {
             destroyContainer(app, figure.score)
             figure.playerId = null
         }
+
+        figures.push(figure)
     })
 
-    figures.filter(figure => figure.type === 'bean').forEach(figure => {
+    figuresPool.filter(figure => figure.type === 'bean').forEach(figure => {
         const {x, y} = foodDefinition()[figure.id]
         Object.assign(figure, {
             x,
             y,
             lastAttackTime: undefined
         })
+
+        figures.push(figure)
     })
 }
 
