@@ -193,7 +193,8 @@ const buttonDefinition = () => ({
 })
 
 const buttons = {
-    start: {},
+    selectGame: {},
+    startGame: {},
     mute: {},
     bots: {}
 }
@@ -484,7 +485,7 @@ function updateGame(figures, dt, dtProcessed) {
         f.killTime = 0
     }})
 
-    if (stage === stages.startLobby) {
+    if (stage === stages.startLobby || stage === stages.gameLobby) {
             const minimumPlayers = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
             const playersPossible = figures.filter(f => f.playerId && f.playerId[0] !== 'b' && f.type === 'fighter')
         Object.values(buttons).forEach(btn => {
@@ -492,7 +493,7 @@ function updateGame(figures, dt, dtProcessed) {
             btn.playersNear = playersPossible.filter(f => !f.isDead && btn.isInArea(f))
             
             let aimLoadingPercentage
-            if (btn === buttons.start) {
+            if (btn === buttons.startGame || buttons.selectGame) {
                 aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers);
             } else if (btn.game) {
                 aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers)
