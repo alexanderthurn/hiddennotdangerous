@@ -148,7 +148,8 @@ function collectInputs() {
             if (stage === stages.startLobby) {
                 xTarget = buttons.selectGame.x
                 yTarget = buttons.selectGame.y
-            } if (stage === stages.gameLobby) {
+                console.log(xTarget, yTarget)
+            } else if (stage === stages.gameLobby) {
                 xTarget = buttons.startGame.x
                 yTarget = buttons.startGame.y
             } else {

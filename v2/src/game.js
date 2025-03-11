@@ -166,10 +166,22 @@ const gameSelectionDefinition = () => ({
     outerRadius: level.width*0.15,
     loadingSpeed: 1/3000,
     execute: () => {
-        restartGame = true;
+        restartGame = true
         const gamesValues = Object.values(games)
         game = gamesValues[getRandomIndex(gamesValues.map(game => game.votes))]
         nextStage = stages.gameLobby
+    }
+})
+
+const gameStartButtonDefinition = () => ({
+    x: level.width*0.5,
+    y: level.height*0.65,
+    innerRadius: level.width*0.1,
+    outerRadius: level.width*0.15,
+    loadingSpeed: 1/3000,
+    execute: () => {
+        restartGame = true
+        nextStage = stages.game
     }
 })
 
@@ -211,24 +223,24 @@ var circleOfDeath
 
 const foodDefinition = () => ({
     bean: {
-        x: stage === stages.startLobby ? level.width*3.4/5 : level.width*4/5,
-        y: stage === stages.startLobby ? level.height*1.6/5 : level.height*4/5,
+        x: stage === stages.gameLobby ? level.width*3.4/5 : level.width*4/5,
+        y: stage === stages.gameLobby ? level.height*1.6/5 : level.height*4/5,
     },
     brokkoli: {
-        x: stage === stages.startLobby ? level.width*2.6/5 : level.width/5,
-        y: stage === stages.startLobby ? level.height*0.8/5 : level.height/5,
+        x: stage === stages.gameLobby ? level.width*2.6/5 : level.width/5,
+        y: stage === stages.gameLobby ? level.height*0.8/5 : level.height/5,
     },
     onion: {
-        x: stage === stages.startLobby ? level.width*2.6/5 : level.width/5,
-        y: stage === stages.startLobby ? level.height*1.6/5 : level.height*4/5,
+        x: stage === stages.gameLobby ? level.width*2.6/5 : level.width/5,
+        y: stage === stages.gameLobby ? level.height*1.6/5 : level.height*4/5,
     },
     salad: {
-        x: stage === stages.startLobby ? level.width*3.4/5 : level.width*4/5,
-        y: stage === stages.startLobby ? level.height*0.8/5 : level.height/5,
+        x: stage === stages.gameLobby ? level.width*3.4/5 : level.width*4/5,
+        y: stage === stages.gameLobby ? level.height*0.8/5 : level.height/5,
     },
     taco: {
-        x: stage === stages.startLobby ? level.width*3.0/5 : level.width/2,
-        y: stage === stages.startLobby ? level.height*1.2/5 : level.height/2,
+        x: stage === stages.gameLobby ? level.width*3.0/5 : level.width/2,
+        y: stage === stages.gameLobby ? level.height*1.2/5 : level.height/2,
     }
 })
 
@@ -344,29 +356,32 @@ function roundInit() {
     if (!isMusicMuted()) {
         if (stage === stages.startLobby) {
             stopMusicPlaylist();
-        } else {
+        } else if (stage === stages.game) {
             playMusicPlaylist(musicGame, true);
         }
     }
 
     Object.values(buttons).forEach(button => button.loadingPercentage = 0);
     figures.filter(figure => figure.type === 'fighter').forEach((figure, i) => {
-        const [x, y] = getRandomXY(level)
-        const [xTarget, yTarget] = getRandomXY(level)
 
-        Object.assign(figure, {
-            x,
-            y,
-            direction: angle(x,y,xTarget,yTarget),
-            startWalkTime: Math.random() * 5000 + dtProcessed,
-            speed: 0,
-            isDead: false, 
-            killTime: 0,
-            isAttacking: false,
-            lastAttackTime: undefined,
-            beans: new Set(),
-            beansFarted: new Set()
-        })
+        if (stage !== stages.gameLobby) {
+            const [x, y] = getRandomXY(level)
+            const [xTarget, yTarget] = getRandomXY(level)
+
+            Object.assign(figure, {
+                x,
+                y,
+                direction: angle(x,y,xTarget,yTarget),
+                startWalkTime: Math.random() * 5000 + dtProcessed,
+                speed: 0,
+                isDead: false, 
+                killTime: 0,
+                isAttacking: false,
+                lastAttackTime: undefined,
+                beans: new Set(),
+                beansFarted: new Set()
+            })
+        }
 
         if (stage === stages.startLobby) {
             destroyContainer(app, figure.score)
@@ -493,7 +508,7 @@ function updateGame(figures, dt, dtProcessed) {
             btn.playersNear = playersPossible.filter(f => !f.isDead && btn.isInArea(f))
             
             let aimLoadingPercentage
-            if (btn === buttons.startGame || buttons.selectGame) {
+            if (btn === buttons.startGame || btn === buttons.selectGame) {
                 aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers);
             } else if (btn.game) {
                 aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers)

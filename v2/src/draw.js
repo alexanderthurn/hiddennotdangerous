@@ -194,7 +194,7 @@ const addGameSelection = (app, lobbyContainer) => {
 }
 
 const addGameStartButton = (app, lobbyContainer) => {
-    const circleButton = createCircleButton(gameSelectionDefinition(), lobbyContainer)
+    const circleButton = createCircleButton(gameStartButtonDefinition(), lobbyContainer)
     circleButton.isInArea = f => stage === stages.gameLobby && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius).contains(f.x, f.y+f.height*0.5)
 
     buttons.startGame = circleButton
