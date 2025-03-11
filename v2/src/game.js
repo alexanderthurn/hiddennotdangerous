@@ -488,7 +488,7 @@ function updateGame(figures, dt, dtProcessed) {
                 figuresRevived = figuresDead.filter(f => !f.playerId)
                 break;
             case games.food:
-                figuresRevived = figuresDead.filter(f => !f.playerId && !f.teamId === 'vip' || f.playerId && f.teamId === 'guard')
+                figuresRevived = figuresDead.filter(f => !f.playerId && !f.team === 'vip' || f.playerId && f.team === 'guard')
                 break;
             default:
                 break;
@@ -565,14 +565,34 @@ function updateGame(figures, dt, dtProcessed) {
 
     let numberKilledFigures = 0;
     let killTime;
-    figuresAlive.filter(f => f.isAttacking).forEach(f => {
-        figuresAlive.filter(fig => fig !== f && fig.playerId !== f.playerId && fig.type === 'fighter').forEach(fig => {
-            if (attackFigure(f, fig)) {
-                numberKilledFigures++
-                killTime = dtProcessed
-            }
-        });
-    })
+
+    if (stage === stages.startLobby || game === games.battleRoyale || game === games.food) {
+        figuresAlive.filter(f => f.isAttacking).forEach(f => {
+            figuresAlive.filter(fig => fig.playerId !== f.playerId && fig.type === 'fighter').forEach(fig => {
+                if (attackFigure(f, fig)) {
+                    numberKilledFigures++
+                    killTime = dtProcessed
+                }
+            });
+        })
+    } else {
+        const assassinsAlive = figuresAlive.filter(f => f.team === 'assassin')
+        const guardsAlive = figuresAlive.filter(f => f.team === 'guard')
+        const vipsAlive = figuresAlive.filter(f => f.team === 'vip')
+
+        guardsAlive.filter(f => f.isAttacking).forEach(f => {
+            assassinsAlive.forEach(fig => {
+                attackFigure(f, fig)
+            });
+        })
+
+        assassinsAlive.filter(f => f.isAttacking).forEach(f => {
+            [...guardsAlive, ...vipsAlive].forEach(fig => {
+                attackFigure(f, fig)
+            });
+        })
+    }
+    
     playKillingSounds(numberKilledFigures, killTime);
 }
 
