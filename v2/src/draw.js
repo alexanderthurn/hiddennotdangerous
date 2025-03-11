@@ -51,13 +51,13 @@ const addHeadline = () => {
 }
 
 const animateCircleButton = button => {
-    button.visible = figures.filter(f => f.playerId && f.type === 'fighter').length > 0
-
     const loadingCircle = button.getChildAt(1)
     loadingCircle.scale = button.loadingPercentage
 }
 
-const animateStartButton = button => {
+const animateLobbyStartButton = button => {
+    button.visible = stage === stages.startLobby && figures.filter(f => f.playerId && f.type === 'fighter').length > 0
+
     let text = 'Vote to\nSTART\n\n'+button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
     if (button.playersPossible?.length === 1) {
         text = 'Vote to\nSTART\n\nmin 2 players\nor 1 player +1 bot'
@@ -67,20 +67,27 @@ const animateStartButton = button => {
         text = 'Vote to\nSTART\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
     }
     button.getChildAt(2).text = text
-
-    if (stage === stages.startLobby) {
-        button.isInArea = f => new PIXI.Circle(button.x, button.y, button.outerRadius).contains(f.x, f.y+f.height*0.5) && !(new PIXI.Circle(button.x, button.y, button.innerRadius)).contains(f.x, f.y+f.height*0.5)
-    } else {
-        button.isInArea = f => new PIXI.Circle(button.x, button.y, button.innerRadius).contains(f.x, f.y+f.height*0.5)
-    }
 }
 
-const createStartButton = (props, lobbyContainer) => {
+const animateGameStartButton = button => {
+    button.visible = stage === stages.gameLobby
+
+    let text = 'Walk here to\nSTART\n\n'+button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
+    if (button.playersPossible?.length === 1) {
+        text = 'Walk here to\nSTART\n\nmin 2 players\nor 1 player +1 bot'
+    } else if (button.playersPossible?.length > 1 && button.playersNear?.length === button.playersPossible?.length ) {
+        text ='Prepare your\nbellies'
+    } else if (button.playersNear?.length > 0) {
+        text = 'Walk here to\nSTART\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
+    }
+    button.getChildAt(2).text = text
+}
+
+const createCircleButton = (props, lobbyContainer) => {
     const {x, y, innerRadius, outerRadius, loadingPercentage, loadingSpeed, execute} = props
 
     let button = new PIXI.Container()
     button = Object.assign(button, props)
-    button.isInArea = f => new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y+f.height*0.5) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y+f.height*0.5)
 
     const area = new PIXI.Graphics()
     .circle(0, 0, innerRadius)
@@ -177,10 +184,22 @@ const addGameRing = (lobbyContainer) => {
 }
 
 const addGameSelection = (app, lobbyContainer) => {
-    buttons.start = createStartButton(gameSelectionDefinition(), lobbyContainer)
+    const circleButton = createCircleButton(gameSelectionDefinition(), lobbyContainer)
+    circleButton.isInArea = f => stage === stages.startLobby && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.outerRadius).contains(f.x, f.y+f.height*0.5) && !(new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius)).contains(f.x, f.y+f.height*0.5)
     addGameRing(lobbyContainer)
 
-    app.ticker.add(() => animateStartButton(buttons.start))
+    buttons.selectGame = circleButton
+
+    app.ticker.add(() => animateLobbyStartButton(circleButton))
+}
+
+const addGameStartButton = (app, lobbyContainer) => {
+    const circleButton = createCircleButton(gameSelectionDefinition(), lobbyContainer)
+    circleButton.isInArea = f => stage === stages.gameLobby && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius).contains(f.x, f.y+f.height*0.5)
+
+    buttons.startGame = circleButton
+
+    app.ticker.add(() => animateGameStartButton(circleButton))
 }
 
 const animateRectangleButton = button => {
@@ -246,6 +265,7 @@ const animateLobbyItems = lobbyContainer => {
 const addLobbyItems = app => {
     const lobbyContainer = new PIXI.Container()
     addGameSelection(app, lobbyContainer)
+    addGameStartButton(app, lobbyContainer)
     addButtons(app, lobbyContainer)
 
     const fontHeight = level.width*0.017  
