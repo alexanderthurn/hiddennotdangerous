@@ -14,8 +14,11 @@ var initDialog = (app) => {
           if (app.qrCodeReader) {
               app.qrCodeReader.onClose()
           }
-          setUrlParams(app.serverId)
-          window.location.reload()
+          if (app.serverId !== '' && getQueryParam('id') !== app.serverId) {
+            setUrlParams(app.serverId)
+            window.location.reload()
+          }
+
       }
   );
 

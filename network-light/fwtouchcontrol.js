@@ -315,6 +315,13 @@ class FWTouchControl extends PIXI.Container {
         this.title.scale.set(app.containerGame.screenWidth / 1500);
         this.connectionContainers[2].status = app.connectionStatus;
 
+        let localGamepads = FWNetwork.getInstance().getLocalGamepads();
+  
+        [0, 1, 3, 4].forEach(i => {
+            let j = i > 2 ? i-1 : i
+            this.connectionContainers[i].status = localGamepads[j] && localGamepads[j].connected && this.connectionContainers[2].status || CONNECTION_STATUS_OFF
+        })
+        
         this.connectionContainers.forEach((container, index) => {
             container.radius = container.rPos[2] * minHeightWidth;
             container.scale = container.radius / container.startRadius;

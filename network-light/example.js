@@ -51,7 +51,7 @@ async function init() {
     });
 
     app.serverPrefix = 'hidden'
-    app.serverId = getQueryParam('id') || '1234';
+    app.serverId = getQueryParam('id') || Math.floor(1000+Math.random()*9000);
     app.color = color;
     const baseUrl = `pad.feuerware.com`;
     app.url = `https://${baseUrl}?id=${app.serverId}`;
@@ -65,7 +65,7 @@ async function init() {
 
     // UI-Elemente erstellen
     app.textUrl = new PIXI.Text({
-        text: app.url,
+        text: baseUrl + "\n" +  app.serverId,
         style: { fontFamily: 'Arial', fontSize: 32, fill: 0xffffff, align: 'center' }
     });
     app.textServerId = new PIXI.Text({
@@ -85,6 +85,7 @@ async function init() {
     // QR-Code laden
     network.peer.on('open', async () => {
         const qrCode = network.getQRCodeTexture(app.url, app.color);
+        console.log(qrCode)
         const dataUrl = qrCode.toDataURL();
         const qrTexture = await PIXI.Assets.load(dataUrl);
         app.qrCodeSprite = new PIXI.Sprite(qrTexture);
@@ -138,11 +139,11 @@ function main(app) {
 
     if (app.qrCodeSprite) {
         app.qrCodeSprite.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 0.5);
-        const qrWidth = Math.min(app.containerGame.screenHeight, app.containerGame.screenWidth) * 0.95;
+        const qrWidth = Math.min(app.containerGame.screenHeight, app.containerGame.screenWidth) * 0.5;
         app.qrCodeSprite.width = qrWidth;
         app.qrCodeSprite.height = qrWidth;
 
-        app.textUrl.width =  app.qrCodeSprite.width;
+        app.textUrl.width =  app.qrCodeSprite.width*0.8;
         app.textUrl.scale.y = app.textUrl.scale.x;
         app.textUrl.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 1.0);
     
