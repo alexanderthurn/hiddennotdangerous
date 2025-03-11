@@ -142,7 +142,7 @@ const createRingPartButton = (props, lobbyContainer) => {
 
     let button = new PIXI.Container()
     button = Object.assign(button, {x, y, startAngle, endAngle, innerRadius, outerRadius, game, loadingPercentage, execute})
-    button.isInArea = f => new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y+f.height*0.5) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y+f.height*0.5) && (distanceAnglesRad(angle(x, y, f.x, f.y+f.height*0.5), centerAngle) < width/2)
+    button.isInArea = f => new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y+f.bodyHeight*0.5) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y+f.bodyHeight*0.5) && (distanceAnglesRad(angle(x, y, f.x, f.y+f.bodyHeight*0.5), centerAngle) < width/2)
 
     const area = new PIXI.Graphics()
     .arc(0, 0, innerRadius, startAngle, endAngle)
@@ -185,7 +185,7 @@ const addGameRing = (lobbyContainer) => {
 
 const addGameSelection = (app, lobbyContainer) => {
     const circleButton = createCircleButton(gameSelectionDefinition(), lobbyContainer)
-    circleButton.isInArea = f => stage === stages.startLobby && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.outerRadius).contains(f.x, f.y+f.height*0.5) && !(new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius)).contains(f.x, f.y+f.height*0.5)
+    circleButton.isInArea = f => stage === stages.startLobby && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.outerRadius).contains(f.x, f.y+f.bodyHeight*0.5) && !(new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius)).contains(f.x, f.y+f.bodyHeight*0.5)
     addGameRing(lobbyContainer)
 
     buttons.selectGame = circleButton
@@ -195,7 +195,7 @@ const addGameSelection = (app, lobbyContainer) => {
 
 const addGameStartButton = (app, lobbyContainer) => {
     const circleButton = createCircleButton(gameStartButtonDefinition(), lobbyContainer)
-    circleButton.isInArea = f => stage === stages.gameLobby && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius).contains(f.x, f.y+f.height*0.5)
+    circleButton.isInArea = f => stage === stages.gameLobby && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius).contains(f.x, f.y+f.bodyHeight*0.5)
 
     buttons.startGame = circleButton
 
@@ -214,7 +214,7 @@ const createRectangleButton = (props, lobbyContainer) => {
 
     let button = new PIXI.Container()
     button = Object.assign(button, {x, y, loadingPercentage, loadingSpeed, execute})
-    button.isInArea = f => new PIXI.Rectangle(x, y, width, height).contains(f.x, f.y+f.height*0.5)
+    button.isInArea = f => new PIXI.Rectangle(x, y, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
 
     const area = new PIXI.Graphics()
     .rect(0, 0, width, height)
@@ -691,6 +691,7 @@ const createFigure = (app, spritesheet, props) => {
     const attackArc = createAttackArc(figure)
     const marker = createFigureMarker(figure)
 
+    figure.bodyHeight = body.height
     figure.addChild(body, attackArc, marker, shadow)
     figures.push(figure)
     figureShadowLayer.attach(shadow)

@@ -522,7 +522,6 @@ function updateGame(figures, dt, dtProcessed) {
 
         figuresDead.forEach(f => {if (dtProcessed-f.killTime > deadDuration) {
             f.isDead = false
-            //f.y-=f.height*0.25
             f.killTime = 0
         }})
     }
