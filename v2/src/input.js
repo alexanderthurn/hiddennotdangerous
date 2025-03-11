@@ -146,8 +146,11 @@ function collectInputs() {
             var yTarget = -1000
     
             if (stage === stages.startLobby) {
-                xTarget = buttons.start.x
-                yTarget = buttons.start.y
+                xTarget = buttons.selectGame.x
+                yTarget = buttons.selectGame.y
+            } else if (stage === stages.gameLobby) {
+                xTarget = buttons.startGame.x
+                yTarget = buttons.startGame.y
             } else {
                 var beans = figures.filter(b => b.type === 'bean')
                 if (f.beans.size === beans.length) {
@@ -160,7 +163,7 @@ function collectInputs() {
                 } else {
                     beans.forEach((b, i, beans) => {
                         if (!f.beans.has(b.id) && (i < beans.length-1 || f.beans.size !== 1)) {
-                            const beanTarget = {x: b.x, y: b.y-f.height*0.5}
+                            const beanTarget = {x: b.x, y: b.y-f.bodyHeight*0.5}
                             let d1 = distance(f.x,f.y,beanTarget.x,beanTarget.y);
                             let d2 = distance(f.x,f.y,xTarget,yTarget);
                             if (f.beans.size === 0 && i === beans.length-1) {

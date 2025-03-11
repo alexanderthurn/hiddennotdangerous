@@ -166,9 +166,21 @@ const gameSelectionDefinition = () => ({
     outerRadius: level.width*0.15,
     loadingSpeed: 1/3000,
     execute: () => {
-        restartGame = true;
+        restartGame = true
         const gamesValues = Object.values(games)
         game = gamesValues[getRandomIndex(gamesValues.map(game => game.votes))]
+        nextStage = stages.gameLobby
+    }
+})
+
+const gameStartButtonDefinition = () => ({
+    x: level.width*0.5,
+    y: level.height*0.65,
+    innerRadius: level.width*0.1,
+    outerRadius: level.width*0.15,
+    loadingSpeed: 1/3000,
+    execute: () => {
+        restartGame = true
         nextStage = stages.game
     }
 })
@@ -193,7 +205,8 @@ const buttonDefinition = () => ({
 })
 
 const buttons = {
-    start: {},
+    selectGame: {},
+    startGame: {},
     mute: {},
     bots: {}
 }
@@ -210,24 +223,24 @@ var circleOfDeath
 
 const foodDefinition = () => ({
     bean: {
-        x: stage === stages.startLobby ? level.width*3.4/5 : level.width*4/5,
-        y: stage === stages.startLobby ? level.height*1.6/5 : level.height*4/5,
+        x: stage === stages.gameLobby ? level.width*3.4/5 : level.width*4/5,
+        y: stage === stages.gameLobby ? level.height*1.6/5 : level.height*4/5,
     },
     brokkoli: {
-        x: stage === stages.startLobby ? level.width*2.6/5 : level.width/5,
-        y: stage === stages.startLobby ? level.height*0.8/5 : level.height/5,
+        x: stage === stages.gameLobby ? level.width*2.6/5 : level.width/5,
+        y: stage === stages.gameLobby ? level.height*0.8/5 : level.height/5,
     },
     onion: {
-        x: stage === stages.startLobby ? level.width*2.6/5 : level.width/5,
-        y: stage === stages.startLobby ? level.height*1.6/5 : level.height*4/5,
+        x: stage === stages.gameLobby ? level.width*2.6/5 : level.width/5,
+        y: stage === stages.gameLobby ? level.height*1.6/5 : level.height*4/5,
     },
     salad: {
-        x: stage === stages.startLobby ? level.width*3.4/5 : level.width*4/5,
-        y: stage === stages.startLobby ? level.height*0.8/5 : level.height/5,
+        x: stage === stages.gameLobby ? level.width*3.4/5 : level.width*4/5,
+        y: stage === stages.gameLobby ? level.height*0.8/5 : level.height/5,
     },
     taco: {
-        x: stage === stages.startLobby ? level.width*3.0/5 : level.width/2,
-        y: stage === stages.startLobby ? level.height*1.2/5 : level.height/2,
+        x: stage === stages.gameLobby ? level.width*3.0/5 : level.width/2,
+        y: stage === stages.gameLobby ? level.height*1.2/5 : level.height/2,
     }
 })
 
@@ -343,31 +356,32 @@ function roundInit() {
     if (!isMusicMuted()) {
         if (stage === stages.startLobby) {
             stopMusicPlaylist();
-        } else {
+        } else if (stage === stages.game) {
             playMusicPlaylist(musicGame, true);
         }
     }
 
     Object.values(buttons).forEach(button => button.loadingPercentage = 0);
     figures.filter(figure => figure.type === 'fighter').forEach((figure, i) => {
-        const [x, y] = getRandomXY(level)
-        const [xTarget, yTarget] = getRandomXY(level)
 
-        Object.assign(figure, {
-            x,
-            y,
-            xTarget,
-            yTarget,
-            startWalkTime: Math.random() * 5000 + dtProcessed,
-            speed: 0,
-            isDead: false, 
-            killTime: 0,
-            direction: angle(x,y,xTarget,yTarget),
-            isAttacking: false,
-            lastAttackTime: undefined,
-            beans: new Set(),
-            beansFarted: new Set()
-        })
+        if (stage !== stages.gameLobby) {
+            const [x, y] = getRandomXY(level)
+            const [xTarget, yTarget] = getRandomXY(level)
+
+            Object.assign(figure, {
+                x,
+                y,
+                direction: angle(x,y,xTarget,yTarget),
+                startWalkTime: Math.random() * 5000 + dtProcessed,
+                speed: 0,
+                isDead: false, 
+                killTime: 0,
+                isAttacking: false,
+                lastAttackTime: undefined,
+                beans: new Set(),
+                beansFarted: new Set()
+            })
+        }
 
         if (stage === stages.startLobby) {
             destroyContainer(app, figure.score)
@@ -473,6 +487,9 @@ function updateGame(figures, dt, dtProcessed) {
             case games.food:
                 figuresRevived = figuresDead.filter(f => !f.playerId)
                 break;
+            case games.food:
+                figuresRevived = figuresDead.filter(f => !f.playerId && !f.team === 'vip' || f.playerId && f.team === 'guard')
+                break;
             default:
                 break;
         }
@@ -483,7 +500,7 @@ function updateGame(figures, dt, dtProcessed) {
         f.killTime = 0
     }})
 
-    if (stage === stages.startLobby) {
+    if (stage === stages.startLobby || stage === stages.gameLobby) {
             const minimumPlayers = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
             const playersPossible = figures.filter(f => f.playerId && f.playerId[0] !== 'b' && f.type === 'fighter')
         Object.values(buttons).forEach(btn => {
@@ -491,7 +508,7 @@ function updateGame(figures, dt, dtProcessed) {
             btn.playersNear = playersPossible.filter(f => !f.isDead && btn.isInArea(f))
             
             let aimLoadingPercentage
-            if (btn === buttons.start) {
+            if (btn === buttons.startGame || btn === buttons.selectGame) {
                 aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers);
             } else if (btn.game) {
                 aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers)
@@ -505,12 +522,11 @@ function updateGame(figures, dt, dtProcessed) {
 
         figuresDead.forEach(f => {if (dtProcessed-f.killTime > deadDuration) {
             f.isDead = false
-            //f.y-=f.height*0.25
             f.killTime = 0
         }})
     }
 
-    figuresAlive.filter(f => f.type === 'fighter').forEach(f => {
+    figuresAlive.filter(f => f.speed > 0).forEach(f => {
         let xyNew = move(f.x, f.y, f.direction,f.speed, dt)
         if (xyNew) {
             [f.x, f.y] = cropXY(xyNew.x, xyNew.y, level)
@@ -549,33 +565,46 @@ function updateGame(figures, dt, dtProcessed) {
 
     let numberKilledFigures = 0;
     let killTime;
-    figuresAlive.filter(f => f.isAttacking).forEach(f => {
-        figures.filter(fig => fig !== f && fig.playerId !== f.playerId && !fig.isDead && fig.type === 'fighter').forEach(fig => {
-            const attackDistance = f.attackDistanceMultiplier ? f.attackDistanceMultiplier*f.attackDistance : f.attackDistance
-            if (distance(f.x,f.y,fig.x,fig.y) < attackDistance) {
-                if (2*distanceAnglesDeg(rad2deg(f.direction), rad2deg(angle(f.x,f.y,fig.x,fig.y))+180) <= f.attackAngle) {
-                    fig.isDead = true;
-                    fig.killTime = dtProcessed
-                    fig.speed = 0;
-                    playAudioPool(soundDeathPool);
-                    numberKilledFigures++;
-                    killTime = dtProcessed;
+
+    if (stage === stages.startLobby || game === games.battleRoyale || game === games.food) {
+        figuresAlive.filter(f => f.isAttacking).forEach(f => {
+            figuresAlive.filter(fig => fig.playerId !== f.playerId && fig.type === 'fighter').forEach(fig => {
+                if (attackFigure(f, fig)) {
+                    numberKilledFigures++
+                    killTime = dtProcessed
                 }
-            }
-        });
-    })
+            });
+        })
+    } else {
+        const assassinsAlive = figuresAlive.filter(f => f.team === 'assassin')
+        const guardsAlive = figuresAlive.filter(f => f.team === 'guard')
+        const vipsAlive = figuresAlive.filter(f => f.team === 'vip')
+
+        guardsAlive.filter(f => f.isAttacking).forEach(f => {
+            assassinsAlive.forEach(fig => {
+                attackFigure(f, fig)
+            });
+        })
+
+        assassinsAlive.filter(f => f.isAttacking).forEach(f => {
+            [...guardsAlive, ...vipsAlive].forEach(fig => {
+                attackFigure(f, fig)
+            });
+        })
+    }
+    
     playKillingSounds(numberKilledFigures, killTime);
 }
 
 function handleInput(players, figures, dtProcessed) {
     
     // player join first
-    var joinedFighters = figures.filter(f => f.playerId)
+    var joinedFighters = figures.filter(f => f.playerId && f.type === 'fighter')
     // join by doing anything
     players.filter(p => p.isAnyButtonPressed || p.isAttackButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
-        p.joinedTime = dtProcessed
-        var figure = figures.find(f => f.playerId === p.playerId && f.type === 'fighter')
+        var figure = joinedFighters.find(f => f.playerId === p.playerId)
         if (!figure) {
+            p.joinedTime = dtProcessed
             if (p.type === 'bot' && joinedFighters.length === 0) {
                 return
             }

@@ -338,3 +338,17 @@ createCloudAtlasData = () => {
 
     return atlasData
 }
+
+const attackFigure = (figureAttacker, figureAttacked) => {
+    const attackDistance = figureAttacker.attackDistanceMultiplier ? figureAttacker.attackDistanceMultiplier*figureAttacker.attackDistance : figureAttacker.attackDistance
+    if (distance(figureAttacker.x,figureAttacker.y,figureAttacked.x,figureAttacked.y) < attackDistance) {
+        if (2*distanceAnglesDeg(rad2deg(figureAttacker.direction), rad2deg(angle(figureAttacker.x,figureAttacker.y,figureAttacked.x,figureAttacked.y))+180) <= figureAttacker.attackAngle) {
+            figureAttacked.isDead = true;
+            figureAttacked.killTime = dtProcessed
+            figureAttacked.speed = 0;
+            playAudioPool(soundDeathPool);
+            return true
+        }
+    }
+    return false
+}
