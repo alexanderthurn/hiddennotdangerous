@@ -350,6 +350,7 @@ function roundInit() {
     totalkillCounter = 0;
 
     if (stage === stages.startLobby) {
+        game = undefined
         gamepadPlayers = []
         mousePlayers = []
         keyboardPlayers = []
@@ -364,25 +365,32 @@ function roundInit() {
 
     Object.values(buttons).forEach(button => button.loadingPercentage = 0);
 
-    figures = []
-    figuresPool.filter(figure => figure.type === 'fighter' && figure.team !== 'vip').forEach(figure => {
-
-        if (stage !== stages.gameLobby) {
-            initRandomPositionFigure(figure)
-        }
-
+    figures.filter(figure => figure.type === 'fighter').forEach(figure => {
         if (stage === stages.startLobby) {
             destroyContainer(app, figure.score)
             figure.playerId = null
         }
-
-        figures.push(figure)
     })
 
+    figures = []
+
     if (game === games.vip) {
-        figuresPool.filter(figure => figure.type === 'fighter' && figure.team === 'vip').forEach(figure => {
+        figures = figures.concat(figuresPool.filter(figure => figure.type === 'fighter'))
+    } else {
+        figures = figures.concat(figuresPool.filter(figure => figure.type === 'fighter' && figure.team !== 'vip'))
+    }
+
+    if (game === games.vip) {
+        if (stage === stages.gameLobby) {
+            figures.filter(figure => figure.team === 'vip').forEach(figure => {
+                initRandomPositionFigure(figure)
+            })
+        } else {
+
+        }
+    } else if (stage !== stages.gameLobby) {
+        figures.forEach(figure => {
             initRandomPositionFigure(figure)
-            figures.push(figure)
         })
     }
 
