@@ -205,6 +205,21 @@ const buttonDefinition = () => ({
     }
 })
 
+const teamSwitchersDefinition = () => ({
+    assassin: {
+        x: level.width*0.25,
+        y: level.height*0.65,
+        color: colors.red,
+        team: 'assassin'
+    },
+    guard: {
+        x: level.width*0.75,
+        y: level.height*0.65,
+        color: colors.blue,
+        team: 'guard'
+    }
+})
+
 const buttons = {
     selectGame: {},
     startGame: {},
