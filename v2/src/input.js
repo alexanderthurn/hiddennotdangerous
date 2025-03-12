@@ -132,7 +132,7 @@ function collectInputs() {
         var bot = {
             type: 'bot',
             isAttackButtonPressed: false,
-            isAnyButtonPressed: stage === stages.startLobby,
+            isAnyButtonPressed: stage !== stages.game,
             xAxis: 0,
             yAxis: 0,
             isMoving: true,
