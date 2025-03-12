@@ -309,7 +309,7 @@ class FWTouchControl extends PIXI.Container {
             this.border.screenHeight = app.containerGame.screenHeight;
         }
         
-        this.border.tint = app.color;
+        this.border.tint = app.color.toNumber();
 
         this.title.position.set(app.containerGame.screenWidth * 0.65, app.containerGame.screenHeight * 0.95);
         this.title.scale.set(app.containerGame.screenWidth / 1500);

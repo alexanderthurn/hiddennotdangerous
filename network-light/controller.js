@@ -58,7 +58,7 @@ async function init() {
 
     app.serverPrefix = 'hidden'
     app.serverId = getQueryParam('id') || '';
-    app.color = new PIXI.Color(getQueryParam('color') || 'ff0000').toNumber();
+    app.color = new PIXI.Color(getQueryParam('color') || 'ff0000');
     app.connectionStatus = CONNECTION_STATUS_OFF;
 
     const network = FWNetwork.getInstance();

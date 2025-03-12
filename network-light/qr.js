@@ -23,6 +23,13 @@ var initDialog = (app) => {
   );
 
 
+input.addEventListener("keyup", function(event) {
+    if (event.key === "Enter") {
+      app.serverId = input.value
+      app.settingsDialog.close()
+    }
+});
+
   
   app.settingsDialog.show =() => {
       input.value = app.serverId
@@ -32,7 +39,8 @@ var initDialog = (app) => {
       canvasElement.height = 0;
       canvasElement.width = 0;
       btnScan.hidden = false
-
+      //let dialogColor = new PIXI.Color([app.color.red*0.5, app.color.green*0.5, app.color.blue*0.5])
+      //app.settingsDialog.style.backgroundColor = app.color.toHex();
       app.settingsDialog.showModal()
   }
 

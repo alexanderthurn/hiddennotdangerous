@@ -27,14 +27,16 @@
             }
 
             #canvasCamera {
-                width:100%; 
+                height:70%; 
+                max-height: 256px;
             }
 
             #settingsDialog {
                 width: 80%;
                 height: 80%;
-                border-radius: 25px;
+                border-radius: 0px;
                 opacity: 1.0;
+                background-color: orange;
             }
 
             #btnClose {
@@ -46,30 +48,32 @@
                 border-radius: 15px;
             }
 
-            #btnScan {
-                width: 100%;
-                height: 30px;
-                background: white;
-                border: 2px solid black;
-                border-radius: 15px;
+            #dialog-footer {
+                position: absolute;
+                bottom: 10px;
+                right: 10px;
+                font-size: 14px;
             }
 
             #inputServerId {
                 width: 100%;
                 height: 30px;
+                max-width: 256px;
                 background: white;
                 border: 2px solid black;
             }
 
             
-            #btnAccept {
-                width: 50%;
+            button {
+                width: 100%;
+                max-width: 256px;
                 height: 30px;
                 background: white;
                 border: 2px solid black;
                 border-radius: 15px;
                 margin: auto;
                 margin-top: 5px;
+                display: inline;
 
             }
 
@@ -91,15 +95,16 @@
         <script type="text/javascript" src="./controller.js"></script>
         <dialog id="settingsDialog">
             <button id="btnClose">X</button>
-            <h1>By Camera</h1>
-            <button id="btnScan">Scan QR with camera</button>
-            <div id="loadingMessage" hidden>Unable to access video stream (please make sure you have a webcam enabled)</div>
             <canvas id="canvasCamera" hidden></canvas>
-
-            <h2>By code</h2>
+          
+            <h2>Enter code</h2>
             <input type="text" id="inputServerId"><br /> 
-            <button id="btnAccept">Accept</button><br /><br />
-		   
+           <button id="btnAccept">Accept</button><br /><br />
+          
+           <h2>Or...</h2>
+            <button id="btnScan">Have a QR-Code?</button>
+           <div id="loadingMessage" hidden>Unable to access video stream (please make sure you have a webcam enabled)</div>
+          <div id="dialog-footer">F-Mote 1.0.0 by Alexander Thurn <a href="https://github.com/alexanderthurn/hiddennotdangerous/tree/main/network-light">Sourcecode</a></div>
         </dialog>
         
     </body>

@@ -69,7 +69,7 @@ async function init() {
         style: { fontFamily: 'Arial', fontSize: 32, fill: 0xffffff, align: 'center' }
     });
     app.textServerId = new PIXI.Text({
-        text: 'Code: ' + app.serverId,
+        text: '',//Code: ' + app.serverId,
         style: { fontFamily: 'Arial', fontSize: 32, fill: 0xffffff, align: 'center' }
     });
     app.textNetwork = new PIXI.Text({
@@ -85,7 +85,6 @@ async function init() {
     // QR-Code laden
     network.peer.on('open', async () => {
         const qrCode = network.getQRCodeTexture(app.url, app.color);
-        console.log(qrCode)
         const dataUrl = qrCode.toDataURL();
         const qrTexture = await PIXI.Assets.load(dataUrl);
         app.qrCodeSprite = new PIXI.Sprite(qrTexture);

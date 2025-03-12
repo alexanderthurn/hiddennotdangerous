@@ -22,7 +22,7 @@ class FWNetwork {
         }
         this.reconnectAttempts = Number.parseInt(sessionStorage.getItem('reconnectAttempts') || '0');
         sessionStorage.setItem('reconnectAttempts',0) // will be set only by retry mechanism
-        this.maxReconnectAttempts = 5;
+        this.maxReconnectAttempts = 10;
         this.reconnectDelay = 2000;
         this.reconnectTimeout = null;
     }
@@ -46,25 +46,9 @@ class FWNetwork {
             { urls: 'stun:stun1.l.google.com:19302' }
         ];
 
-        const defaultOptions = {
-            debug: 3,
-            config: {
-                iceServers: defaultIceServers
-            }
-        };
-
-        const peerOptions = {
-            ...defaultOptions,
-            ...options,
-            config: {
-                ...defaultOptions.config,
-                ...(options.config || {}),
-                iceServers: options.config?.iceServers || defaultIceServers
-            }
-        };
 
         // Wenn peerId angegeben ist (für Host), nutze es; sonst lass PeerJS eine ID generieren (für Client)
-        this.peer = peerId ? new Peer(peerId, peerOptions) : new Peer(peerOptions);
+        this.peer = peerId ? new Peer(peerId, options) : new Peer(options);
 
         this.peer.on('open', (id) => {
             this.initialized = true;
@@ -80,12 +64,19 @@ class FWNetwork {
         this.peer.on('error', (err) => {
             console.error('PeerJS error:', err);
             this.status = 'error';
+
+
             if (err.type === 'unavailable-id') {
-                sessionStorage.removeItem('clientId')
-                if (!this.initialized && !options.initializedBefore) {
-                    options.initializedBefore = true
-                    this.initialize(peerId, options)
+                if (this.isHost) {
+                    console.log('unavailable-id', peerId)
+                } else {
+                    sessionStorage.removeItem('clientId')
+                    if (!this.initialized && !options.initializedBefore) {
+                        options.initializedBefore = true
+                        this.initialize(peerId, options)
+                    }
                 }
+              
             } else {
                 this.attemptReconnect(options);
             }
@@ -110,18 +101,18 @@ class FWNetwork {
             clearTimeout(this.reconnectTimeout); // Vorherigen Timeout löschen
         }
 
+        let delay =  Math.pow(1.5, this.reconnectAttempts)* this.reconnectDelay
         this.reconnectAttempts++;
-        let delay =  Math.pow(2, this.reconnectAttempts)* this.reconnectDelay
         this.status = 'connecting'
         console.log(`Trying to connect again (${this.reconnectAttempts}/${this.maxReconnectAttempts}) with delay ${delay/1000}s...`);
 
         this.reconnectTimeout = setTimeout(() => {
-           // this.peer.destroy(); // Alte Peer-Instanz aufräumen
-        //    this.peer = null;
-           // this.initialized = false;
+            this.peer.destroy(); // Alte Peer-Instanz aufräumen
+            this.peer = null;
+            this.initialized = false;
 
             if (this.isHost) {
-                this.hostRoom(this.roomId, options.baseUrl, options.backgroundColor, options);
+                this.hostRoom(this.roomId, options);
             } else {
                 //this.connectToRoom(this.roomId, options);
                 //this.#connectAsClient(this.roomId, options)
@@ -158,7 +149,7 @@ class FWNetwork {
     }
 
     // Hostet einen Raum mit der angegebenen roomName als feste Peer-ID
-    hostRoom(roomName, baseUrl, backgroundColor, options = {}) {
+    hostRoom(roomName, options = {}) {
         if (!this.peer) {
             this.initialize(roomName, options); // Übergib roomName als Peer-ID
         }
