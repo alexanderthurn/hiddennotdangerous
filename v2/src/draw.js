@@ -728,6 +728,7 @@ const addFigures = (app, spritesheet) => {
             team: 'vip',
             type: 'fighter',
         })
+        figure.tint = colors.darkgreen
         app.ticker.add(() => {
             figure.visible = game === games.vip
         })
