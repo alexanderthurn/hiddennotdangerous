@@ -58,10 +58,11 @@ async function init() {
 
     // FWNetwork als Host initialisieren mit iceServers
     const network = FWNetwork.getInstance();
-    network.hostRoom(app.serverPrefix + app.serverId, baseUrl, app.color, {
+    network.init({
         debug: getQueryParam('debug') && Number.parseInt(getQueryParam('debug')) || 0,
         config: { iceServers: iceServers }
-    });
+    })
+    network.hostRoom(app.serverPrefix + app.serverId);
 
     // UI-Elemente erstellen
     app.textUrl = new PIXI.Text({

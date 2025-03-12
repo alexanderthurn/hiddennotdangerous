@@ -62,14 +62,14 @@ async function init() {
     app.connectionStatus = CONNECTION_STATUS_OFF;
 
     const network = FWNetwork.getInstance();
-
+    network.init({
+        debug: getQueryParam('debug') && Number.parseInt(getQueryParam('debug')) || 0,
+        config: { iceServers: iceServers }
+    })
     app.connectionStatus = CONNECTION_STATUS_INITIALIZNG;
 
     if (app.serverId && app.serverId !== '') {
-        network.connectToRoom(app.serverPrefix + app.serverId, {
-            debug: getQueryParam('debug') && Number.parseInt(getQueryParam('debug')) || 0,
-            config: { iceServers: iceServers }
-        });
+        network.connectToRoom(app.serverPrefix + app.serverId);
     
         network.peer.on('error', (err) => {
             console.error('Connection error:', err);

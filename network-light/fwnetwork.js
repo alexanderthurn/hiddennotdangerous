@@ -10,7 +10,6 @@ class FWNetwork {
         this.connection = null;
         this.roomId = null;
         this.isHost = false;
-        this.initialized = false;
         this.networkGamepads = [];
         this.clientGamepadIndices = new Map();
         this.status = 'disconnected';
@@ -20,8 +19,7 @@ class FWNetwork {
             messagesReceived: 0,
             messagesSent: 0
         }
-        this.reconnectAttempts = Number.parseInt(sessionStorage.getItem('reconnectAttempts') || '0');
-        sessionStorage.setItem('reconnectAttempts',0) // will be set only by retry mechanism
+        this.reconnectAttempts = 0
         this.maxReconnectAttempts = 10;
         this.reconnectDelay = 2000;
         this.reconnectTimeout = null;
@@ -34,142 +32,73 @@ class FWNetwork {
         return FWNetwork.#instance;
     }
 
-    // Initialisiert die PeerJS-Verbindung mit optionalen Konfigurationen
-    initialize(peerId = null, options = {}) {
-        if (this.initialized) {
-            console.log("FWNetwork already initialized");
-            return;
-        }
-
-        const defaultIceServers = [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' }
-        ];
-
-
-        // Wenn peerId angegeben ist (für Host), nutze es; sonst lass PeerJS eine ID generieren (für Client)
-        this.peer = peerId ? new Peer(peerId, options) : new Peer(options);
-
-        this.peer.on('open', (id) => {
-            this.initialized = true;
-            
-            this.roomId = id;
-            this.status = this.isHost ? 'hosting' : 'connecting';
-            console.log(`PeerJS initialized with ID: ${id}`);
-            if (this.isHost) {
-                console.log(`Hosting room: ${id}`);
-            }
-        });
-
-        this.peer.on('error', (err) => {
-            console.error('PeerJS error:', err);
-            this.status = 'error';
-
-
-            if (err.type === 'unavailable-id') {
-                if (this.isHost) {
-                    console.log('unavailable-id', peerId)
-                } else {
-                    sessionStorage.removeItem('clientId')
-                    if (!this.initialized && !options.initializedBefore) {
-                        options.initializedBefore = true
-                        this.initialize(peerId, options)
-                    }
-                }
-              
-            } else {
-                this.attemptReconnect(options);
-            }
-        });
-
-        this.peer.on('disconnected', () => {
-            console.log('Disconnected from PeerJS server');
-            this.initialized = false;
-            this.status = 'disconnected';
-            this.attemptReconnect(options);
-        });
+    init(options) {
+        this.options = options
     }
-
-    attemptReconnect(options) {
-        if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-            console.log('Maxi retry connections reached');
-             this.status = 'error'
-            return;
-        }
-
-        if (this.reconnectTimeout) {
-            clearTimeout(this.reconnectTimeout); // Vorherigen Timeout löschen
-        }
-
-        let delay =  Math.pow(1.5, this.reconnectAttempts)* this.reconnectDelay
-        this.reconnectAttempts++;
-        this.status = 'connecting'
-        console.log(`Trying to connect again (${this.reconnectAttempts}/${this.maxReconnectAttempts}) with delay ${delay/1000}s...`);
-
-        this.reconnectTimeout = setTimeout(() => {
-            this.peer.destroy(); // Alte Peer-Instanz aufräumen
-            this.peer = null;
-            this.initialized = false;
-
-            if (this.isHost) {
-                this.hostRoom(this.roomId, options);
-            } else {
-                //this.connectToRoom(this.roomId, options);
-                //this.#connectAsClient(this.roomId, options)
-                sessionStorage.setItem('reconnectAttempts',this.reconnectAttempts)
-                window.location.reload()
-            }
-
-            
-            
-        },delay);
-    }
-
-    // Erstellt oder aktualisiert einen QR-Code für die Netzwerkverbindung
-    getQRCodeTexture(url, backgroundColor) {
-        if (!url) {
-            console.error('URL for QR code is required');
-            return null;
-        }
-        if (!this.qrCode) {
-            this.qrCode = new QRious({
-                value: url,
-                background: backgroundColor.toHex(),
-                backgroundAlpha: 1.0,
-                foreground: 'brown',
-                foregroundAlpha: 0.8,
-                level: 'H',
-                padding: 100,
-                size: 1024,
-            });
-        } else {
-            this.qrCode.value = url;
-        }
-        return this.qrCode;
-    }
-
-    // Hostet einen Raum mit der angegebenen roomName als feste Peer-ID
-    hostRoom(roomName, options = {}) {
-        if (!this.peer) {
-            this.initialize(roomName, options); // Übergib roomName als Peer-ID
-        }
-
+    hostRoom(roomName) {
         this.isHost = true;
         this.roomId = roomName;
+        
+        if (this.peer) {
+            if (this.peer.disconnected) {
+                this.peer.reconnect()
+                if (!this.peer.disconnected) {
+                    this.status = 'hosting';
+                    this.reconnectAttempts = 0;
+                } else {
+                    this.attemptReconnect();
+                }
+            } else {
+                console.log('host reconnecting but is not disconnected')
+            }
+        } else {
+            this.peer = new Peer(roomName, this.options);
 
-        this.peer.on('connection', (conn) => {
-            console.log(`Client connected: ${conn.peer}`);
-            this.#setupHostConnection(conn);
-            this.status = `hosting`;
-        });
+            this.peer.on('open', (id) => {
+                this.status = 'hosting';
+                this.reconnectAttempts = 0;
+                console.log(`PeerJS initialized with ID: ${id}`);
+                console.log(`Hosting room: ${id}`);
+            });
+    
+            this.peer.on('error', (err) => {
+                console.error('PeerJS error:', err);
+                this.status = 'error';
+                console.log(this.getPeerErrorMessage(err))
+                switch(err.type) {
+                    case 'network':
+                    case 'webrtc':
+                    case 'socket-closed':
+                    case 'socket-error':
+                    case 'server-error':
+                        this.attemptReconnect();
+                }
 
-        this.peer.on('open', (id) => {
-            this.status = 'open';
-        });
+            });
+    
+            this.peer.on('disconnected', () => {
+                console.log('Disconnected from PeerJS server');
+                this.status = 'disconnected';
+                this.attemptReconnect();
+            });
+            
+            this.peer.on('connection', (conn) => {
+                console.log(`Client connected: ${conn.peer}`);
+                this.#setupHostConnection(conn);
+                this.status = `hosting`;
+            });
+    
+            this.peer.on('open', (id) => {
+                this.status = 'open';
+            });
+        }
+        
     }
 
-    #connectAsClient(roomId, options) {
-        this.status = 'open';
+    #connectAsClient(roomId) {
+
+        console.log(`Connecting to room: ${roomId} as ${this.peer.id}`);
+        this.status = 'connecting';
         this.connection = this.peer.connect(roomId);
         this.connection.on('open', () => {
             console.log(`Connected to host: ${roomId}`); 
@@ -189,34 +118,92 @@ class FWNetwork {
             console.log('Connection closed');
             this.connection = null;
             this.status = 'disconnected';
-            this.attemptReconnect(options)
+            this.attemptReconnect()
         });
 
         this.connection.on('error', (err) => {
             console.error('Connection error:', err);
             this.status = 'error';
-            this.attemptReconnect(options)
+            this.attemptReconnect()
         });
     }
-    // Verbindet sich zu einem bestehenden Raum
-    connectToRoom(roomId, options = {}) {
-        if (!this.peer) {
-            this.initialize(sessionStorage.getItem('clientId'), options); // Keine feste ID für Client
-        }
 
+    connectToRoom(roomId) {
         this.isHost = false;
         this.roomId = roomId;
+        let peerId = sessionStorage.getItem('clientId') || null
 
-        this.peer.on('open', (myId) => {
-            sessionStorage.setItem('clientId', myId)
-            console.log(`Connecting to room: ${roomId} as ${myId}`);
-       
-            this.#connectAsClient(roomId, options)
+        if (this.peer) {
+            if (this.peer.disconnected) {
+                console.log('client reconnecting and is NOT connected to the network')
+                this.peer.reconnect()
+            } 
             
-        });
+            if (!this.peer.disconnected) {
+                console.log('connected to the network and trying to connect to the room now')
+                this.#connectAsClient(roomId)
+            } else {
+                console.log('reconnecting to the network did not work, trying it again ')
+                this.attemptReconnect();
+            }
+            
+        } else {
+            this.peer = new Peer(peerId, this.options)
+
+            this.peer.on('open', (id) => {
+                sessionStorage.setItem('clientId', id)
+                console.log(`PeerJS initialized with ID: ${id}`);
+                this.#connectAsClient(roomId)
+            });
+
+            this.peer.on('error', (err) => {
+                console.error('PeerJS error:', err);
+                this.status = 'error';
+                if (err.type === 'unavailable-id') {
+                    sessionStorage.removeItem('clientId')
+                    this.peer.destroy()
+                    this.peer = null 
+                    this.attemptReconnect();
+                } else {
+                    this.attemptReconnect();
+                }
+            });
+
+            this.peer.on('disconnected', () => {
+                console.log('Disconnected from PeerJS server');
+                this.status = 'disconnected';
+                this.attemptReconnect();
+            });
+
+        }
     }
 
-    
+    attemptReconnect() {
+        if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+            console.log('Maxi retry connections reached');
+             this.status = 'error'
+            return;
+        }
+
+        if (this.reconnectTimeout) {
+            clearTimeout(this.reconnectTimeout); // Vorherigen Timeout löschen
+        }
+
+        let delay =  Math.pow(1.5, this.reconnectAttempts)* this.reconnectDelay
+        this.reconnectAttempts++;
+        this.status = 'connecting'
+        console.log(`Trying to connect again (${this.reconnectAttempts}/${this.maxReconnectAttempts}) with delay ${delay/1000}s...`);
+
+        this.reconnectTimeout = setTimeout(() => {
+            if (this.isHost) {
+                this.hostRoom(this.roomId);
+            } else {
+                this.connectToRoom(this.roomId);
+            }
+
+        },delay);
+    }
+
     getJSONGamepadsButtonsOnlyState(touchGamepad) {
         
         const realGamepads = navigator.getGamepads();
@@ -361,5 +348,75 @@ class FWNetwork {
     // Statistiken
     getStats() {
         return this.stats;
+    }
+
+     // Erstellt oder aktualisiert einen QR-Code für die Netzwerkverbindung
+     getQRCodeTexture(url, backgroundColor) {
+        if (!url) {
+            console.error('URL for QR code is required');
+            return null;
+        }
+        if (!this.qrCode) {
+            this.qrCode = new QRious({
+                value: url,
+                background: backgroundColor.toHex(),
+                backgroundAlpha: 1.0,
+                foreground: 'brown',
+                foregroundAlpha: 0.8,
+                level: 'H',
+                padding: 100,
+                size: 1024,
+            });
+        } else {
+            this.qrCode.value = url;
+        }
+        return this.qrCode;
+    }
+
+    getPeerErrorMessage(err) {
+        let msg = ''
+        switch(err.type) {
+            case 'browser-incompatible':
+                msg = 'The client\'s browser does not support some or all WebRTC features that you are trying to use.'
+                break;
+            case 'disconnected':
+                msg = 'You\'ve already disconnected this peer from the server and can no longer make any new connections on it.'
+                break;
+            case 'invalid-id':
+                msg = 'The ID passed into the Peer constructor contains illegal characters.'
+                break;
+            case 'invalid-key':
+                msg = 'The API key passed into the Peer constructor contains illegal characters or is not in the system (cloud server only).'
+                break;
+            case 'network':
+                msg = 'Lost or cannot establish a connection to the signalling server.'
+                break;
+            case 'peer-unavailable':
+                msg = 'The peer you\'re trying to connect to does not exist.'
+                break;
+            case 'ssl-unavailable':
+                msg = 'PeerJS is being used securely, but the cloud server does not support SSL. Use a custom PeerServer.'
+                break;
+            case 'server-error':
+                msg = 'Unable to reach the server.'
+                break;
+            case 'socket-error':
+                msg = 'An error from the underlying socket.'
+                break;
+            case 'socket-closed':
+                msg = 'The underlying socket closed unexpectedly.'
+                break;
+            case 'unavailable-id':
+                msg = 'The ID passed into the Peer constructor is already taken.'
+                break;
+            case 'webrtc':
+                msg = 'Native WebRTC errors.'
+                break;
+            default: 
+                msg = 'unknown error'
+                break;
+        }
+
+        return msg
     }
 }
