@@ -55,6 +55,29 @@ const getRandomIndex = intArray => {
     }
 }
 
+const initRandomPositionFigure = figure => {
+    const [x, y] = getRandomXY(level)
+    const [xTarget, yTarget] = getRandomXY(level)
+
+    initFigure(figure, x, y, angle(x,y,xTarget,yTarget))
+}
+
+const initFigure = (figure, x, y, direction) => {
+    Object.assign(figure, {
+        x,
+        y,
+        direction,
+        startWalkTime: Math.random() * 5000 + dtProcessed,
+        speed: 0,
+        isDead: false, 
+        killTime: 0,
+        isAttacking: false,
+        lastAttackTime: undefined,
+        beans: new Set(),
+        beansFarted: new Set()
+    })
+}
+
 const shuffle = (arr) => arr
     .map(value => ({ value, sort: Math.random() }))
     .sort((a, b) => a.sort - b.sort)

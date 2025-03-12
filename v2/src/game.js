@@ -368,22 +368,7 @@ function roundInit() {
     figuresPool.filter(figure => figure.type === 'fighter' && figure.team !== 'vip').forEach(figure => {
 
         if (stage !== stages.gameLobby) {
-            const [x, y] = getRandomXY(level)
-            const [xTarget, yTarget] = getRandomXY(level)
-
-            Object.assign(figure, {
-                x,
-                y,
-                direction: angle(x,y,xTarget,yTarget),
-                startWalkTime: Math.random() * 5000 + dtProcessed,
-                speed: 0,
-                isDead: false, 
-                killTime: 0,
-                isAttacking: false,
-                lastAttackTime: undefined,
-                beans: new Set(),
-                beansFarted: new Set()
-            })
+            initRandomPositionFigure(figure)
         }
 
         if (stage === stages.startLobby) {
@@ -396,23 +381,7 @@ function roundInit() {
 
     if (game === games.vip) {
         figuresPool.filter(figure => figure.type === 'fighter' && figure.team === 'vip').forEach(figure => {
-            const [x, y] = getRandomXY(level)
-            const [xTarget, yTarget] = getRandomXY(level)
-    
-            Object.assign(figure, {
-                x,
-                y,
-                direction: angle(x,y,xTarget,yTarget),
-                startWalkTime: Math.random() * 5000 + dtProcessed,
-                speed: 0,
-                isDead: false, 
-                killTime: 0,
-                isAttacking: false,
-                lastAttackTime: undefined,
-                beans: new Set(),
-                beansFarted: new Set()
-            })
-
+            initRandomPositionFigure(figure)
             figures.push(figure)
         })
     }
