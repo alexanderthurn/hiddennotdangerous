@@ -476,7 +476,7 @@ const addFood = (app, texture, props) => {
     marker.label = 'marker'
 
     food.addChild(plate, meal, marker)
-    figures.push(food)
+    figuresPool.push(food)
     levelContainer.addChild(food)
     debugLayer.attach(marker)
 
@@ -693,7 +693,7 @@ const createFigure = (app, spritesheet, props) => {
 
     figure.bodyHeight = body.height
     figure.addChild(body, attackArc, marker, shadow)
-    figures.push(figure)
+    figuresPool.push(figure)
     figureShadowLayer.attach(shadow)
     figureLayer.attach(body)
     debugLayer.attach(attackArc, marker)
@@ -707,13 +707,30 @@ const addFigures = (app, spritesheet) => {
         const figure = createFigure(app, spritesheet, {
             maxBreakDuration: 5000,
             maxSpeed: 0.08,
-            index: i,
             attackDuration: 500,
             attackBreakDuration: 2000,
             points: 0,
             attackDistance: 80,
             attackAngle: 90,
             type: 'fighter',
+        })
+        levelContainer.addChild(figure)
+    }
+    for (var i = 0; i < numberVIPs; i++) {
+        const figure = createFigure(app, spritesheet, {
+            maxBreakDuration: 5000,
+            maxSpeed: 0.04,
+            attackDuration: 500,
+            attackBreakDuration: 2000,
+            points: 0,
+            attackDistance: 80,
+            attackAngle: 90,
+            team: 'vip',
+            type: 'fighter',
+        })
+        figure.tint = colors.darkgreen
+        app.ticker.add(() => {
+            figure.visible = game === games.vip
         })
         levelContainer.addChild(figure)
     }

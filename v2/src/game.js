@@ -30,7 +30,8 @@ var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var restartGame = false, lastWinnerPlayerIds = new Set(), lastRoundEndThen, lastFinalWinnerPlayerId;
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
-var figures = [], maxPlayerFigures = 32, pointsToWin = 1, deadDuration = 5000, beanAttackDuration = 800, fartGrowDuration = 2000
+var figuresPool = []
+var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = 1, deadDuration = 5000, beanAttackDuration = 800, fartGrowDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = createLevel()
@@ -349,6 +350,7 @@ function roundInit() {
     totalkillCounter = 0;
 
     if (stage === stages.startLobby) {
+        game = undefined
         gamepadPlayers = []
         mousePlayers = []
         keyboardPlayers = []
@@ -362,41 +364,48 @@ function roundInit() {
     }
 
     Object.values(buttons).forEach(button => button.loadingPercentage = 0);
-    figures.filter(figure => figure.type === 'fighter').forEach((figure, i) => {
 
-        if (stage !== stages.gameLobby) {
-            const [x, y] = getRandomXY(level)
-            const [xTarget, yTarget] = getRandomXY(level)
-
-            Object.assign(figure, {
-                x,
-                y,
-                direction: angle(x,y,xTarget,yTarget),
-                startWalkTime: Math.random() * 5000 + dtProcessed,
-                speed: 0,
-                isDead: false, 
-                killTime: 0,
-                isAttacking: false,
-                lastAttackTime: undefined,
-                beans: new Set(),
-                beansFarted: new Set()
-            })
-        }
-
+    figures.filter(figure => figure.type === 'fighter').forEach(figure => {
         if (stage === stages.startLobby) {
             destroyContainer(app, figure.score)
             figure.playerId = null
         }
     })
 
-    figures.filter(figure => figure.type === 'bean').forEach(figure => {
-        const {x, y} = foodDefinition()[figure.id]
-        Object.assign(figure, {
-            x,
-            y,
-            lastAttackTime: undefined
+    figures = []
+
+    if (game === games.vip) {
+        figures = figures.concat(figuresPool.filter(figure => figure.type === 'fighter'))
+    } else {
+        figures = figures.concat(figuresPool.filter(figure => figure.type === 'fighter' && figure.team !== 'vip'))
+    }
+
+    if (game === games.vip) {
+        if (stage === stages.gameLobby) {
+            figures.filter(figure => figure.team === 'vip').forEach(figure => {
+                initRandomPositionFigure(figure)
+            })
+        } else {
+
+        }
+    } else if (stage !== stages.gameLobby) {
+        figures.forEach(figure => {
+            initRandomPositionFigure(figure)
         })
-    })
+    }
+
+    if (game === games.food) {
+        figuresPool.filter(figure => figure.type === 'bean').forEach(figure => {
+            const {x, y} = foodDefinition()[figure.id]
+            Object.assign(figure, {
+                x,
+                y,
+                lastAttackTime: undefined
+            })
+    
+            figures.push(figure)
+        })
+    }
 }
 
 function gameLoop() {
@@ -579,17 +588,24 @@ function updateGame(figures, dt, dtProcessed) {
         const assassinsAlive = figuresAlive.filter(f => f.team === 'assassin')
         const guardsAlive = figuresAlive.filter(f => f.team === 'guard')
         const vipsAlive = figuresAlive.filter(f => f.team === 'vip')
+        const noTeamAlive = figuresAlive.filter(f => !f.team)
 
         guardsAlive.filter(f => f.isAttacking).forEach(f => {
-            assassinsAlive.forEach(fig => {
+            [...assassinsAlive, ...noTeamAlive].forEach(fig => {
                 attackFigure(f, fig)
-            });
+            })
         })
 
         assassinsAlive.filter(f => f.isAttacking).forEach(f => {
-            [...guardsAlive, ...vipsAlive].forEach(fig => {
+            [...guardsAlive, ...vipsAlive, ...noTeamAlive].forEach(fig => {
                 attackFigure(f, fig)
-            });
+            })
+        })
+
+        noTeamAlive.filter(f => f.isAttacking).forEach(f => {
+            figuresAlive.filter(fig => fig.playerId !== f.playerId && fig.type === 'fighter').forEach(fig => {
+                attackFigure(f, fig)
+            })
         })
     }
     
