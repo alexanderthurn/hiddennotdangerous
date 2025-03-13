@@ -403,7 +403,6 @@ function roundInit() {
         } else {
             // put neutrals in teams
             const numberMissingGuards = numberGuards - figures.filter(figure => figure.team === 'guard').length
-
             const neutralFigures = figures.filter(figure => !figure.team)
             for (let i = 0; i < numberMissingGuards; i++) {
                 switchTeam(neutralFigures[i], 'guard', colors.blue)
@@ -413,6 +412,19 @@ function roundInit() {
                 switchTeam(neutralFigures[i], 'assassin', colors.red)
             }
 
+            // assasin positions
+            const assassins = shuffle(figures.filter(figure => figure.team === 'assassin'))
+            const assassinPositions = []
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 5; j++) {
+                    assassinPositions.push({x: ((2*j+1)/10)*level.width, y: (2+(2*i+1)/6)/3*level.height})
+                }                
+            }
+            assassins.forEach((f, i) => {
+                initFigure(f, assassinPositions[i].x, assassinPositions[i].y, deg2rad(-90))
+            })
+
+            // guard positions
             const guards = shuffle(figures.filter(figure => figure.team === 'guard'))
             const guardPositions = []
             for (let i = 0; i < 4; i++) {
@@ -426,15 +438,14 @@ function roundInit() {
                 initFigure(f, guardPositions[i].x, guardPositions[i].y, deg2rad(90))
             })
 
-            const assassins = shuffle(figures.filter(figure => figure.team === 'assassin'))
-            const assassinPositions = []
+            // vip positions
+            const vips = figures.filter(figure => figure.team === 'vip')
+            const vipPositions = []
             for (let i = 0; i < 3; i++) {
-                for (let j = 0; j < 5; j++) {
-                    assassinPositions.push({x: ((2*j+1)/10)*level.width, y: (2+(2*i+1)/6)/3*level.height})
-                }                
+                vipPositions.push({x: (5+(i-1)/3)/10*level.width, y: (1/8)/2*level.height})            
             }
-            assassins.forEach((f, i) => {
-                initFigure(f, assassinPositions[i].x, assassinPositions[i].y, deg2rad(-90))
+            vips.forEach((f, i) => {
+                initFigure(f, vipPositions[i].x, vipPositions[i].y, deg2rad(90))
             })
         }
     } else if (stage !== stages.gameLobby) {
