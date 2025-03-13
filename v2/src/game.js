@@ -401,6 +401,30 @@ function roundInit() {
                 initRandomPositionFigure(figure)
             })
         } else {
+            // put neutrals in teams
+            const numberMissingGuards = numberGuards - figures.filter(figure => figure.team === 'guard').length
+
+            const neutralFigures = figures.filter(figure => !figure.team)
+            for (let i = 0; i < numberMissingGuards; i++) {
+                switchTeam(neutralFigures[i], 'guard', colors.blue)
+            }
+
+            for (let i = numberMissingGuards; i < neutralFigures.length; i++) {
+                switchTeam(neutralFigures[i], 'assassin', colors.red)
+            }
+
+            const guards = shuffle(figures.filter(figure => figure.team === 'guard'))
+            const guardPositions = []
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 5; j++) {
+                    if (i > 0 || j === 0 || j === 4) {
+                        guardPositions.push({x: ((2*j+1)/10)*level.width, y: ((2*i+1)/8)*level.height/2})
+                    }
+                }                
+            }
+            guards.forEach((f, i) => {
+                initFigure(f, guardPositions[i].x, guardPositions[i].y, deg2rad(90))
+            })
 
         }
     } else if (stage !== stages.gameLobby) {
