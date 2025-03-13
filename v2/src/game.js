@@ -418,7 +418,7 @@ function roundInit() {
             for (let i = 0; i < 4; i++) {
                 for (let j = 0; j < 5; j++) {
                     if (i > 0 || j === 0 || j === 4) {
-                        guardPositions.push({x: ((2*j+1)/10)*level.width, y: ((2*i+1)/8)*level.height/2})
+                        guardPositions.push({x: ((2*j+1)/10)*level.width, y: ((2*i+1)/8)/2*level.height})
                     }
                 }                
             }
@@ -426,6 +426,16 @@ function roundInit() {
                 initFigure(f, guardPositions[i].x, guardPositions[i].y, deg2rad(90))
             })
 
+            const assassins = shuffle(figures.filter(figure => figure.team === 'assassin'))
+            const assassinPositions = []
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 5; j++) {
+                    assassinPositions.push({x: ((2*j+1)/10)*level.width, y: (2+(2*i+1)/6)/3*level.height})
+                }                
+            }
+            assassins.forEach((f, i) => {
+                initFigure(f, assassinPositions[i].x, assassinPositions[i].y, deg2rad(-90))
+            })
         }
     } else if (stage !== stages.gameLobby) {
         figures.forEach(figure => {
