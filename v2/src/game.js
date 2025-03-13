@@ -403,7 +403,7 @@ function roundInit() {
         } else {
             // put neutrals in teams
             const numberMissingGuards = numberGuards - figures.filter(figure => figure.team === 'guard').length
-            const neutralFigures = figures.filter(figure => !figure.team)
+            const neutralFigures = shuffle(figures.filter(figure => !figure.team))
             for (let i = 0; i < numberMissingGuards; i++) {
                 switchTeam(neutralFigures[i], 'guard', colors.blue)
             }
@@ -412,7 +412,7 @@ function roundInit() {
                 switchTeam(neutralFigures[i], 'assassin', colors.red)
             }
 
-            // assasin positions
+            // assassin positions
             const assassins = shuffle(figures.filter(figure => figure.team === 'assassin'))
             const assassinPositions = []
             for (let i = 0; i < 3; i++) {
@@ -451,6 +451,7 @@ function roundInit() {
     } else if (stage !== stages.gameLobby) {
         figures.forEach(figure => {
             initRandomPositionFigure(figure)
+            switchTeam(figure, undefined, undefined)
         })
     }
 
