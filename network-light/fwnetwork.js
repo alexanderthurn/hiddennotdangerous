@@ -158,6 +158,7 @@ class FWNetwork {
 
             this.peer.on('error', (err) => {
                 console.error('PeerJS error:', err);
+                console.log(this.getPeerErrorMessage(err))
                 this.status = 'error';
                 if (err.type === 'unavailable-id') {
                     sessionStorage.removeItem('clientId')
@@ -371,6 +372,57 @@ class FWNetwork {
             this.qrCode.value = url;
         }
         return this.qrCode;
+    }
+
+    getAllIceConnectionStates() {
+        if (!this.peer || !this.peer.connections) {
+            return "no active peer connections";
+        }
+    
+        let states = {};
+        for (const [peerId, connections] of Object.entries(this.peer.connections)) {
+            if (connections.length > 0 && connections[0].peerConnection) {
+                states[peerId] = connections[0].peerConnection.iceConnectionState;
+            } else {
+                states[peerId] = "no connection";
+            }
+        }
+    
+        return states;
+    }
+
+    async getTurnUsage() {
+        if (!this.peer || !this.peer.connections) {
+            return "no active peer connections";
+        }
+    
+        let turnUsage = {};
+    
+        for (const [peerId, connections] of Object.entries(this.peer.connections)) {
+            if (connections.length > 0 && connections[0].peerConnection) {
+                const pc = connections[0].peerConnection;
+                turnUsage[peerId] = await this.#checkTurnUsage(pc);
+            } else {
+                turnUsage[peerId] = "no connection";
+            }
+        }
+    
+        return turnUsage;
+    }
+    
+    async #checkTurnUsage(peerConnection) {
+        let foundRelay = false;
+    
+        const stats = await peerConnection.getStats();
+        stats.forEach(report => {
+            if (report.type === "candidate-pair" && report.nominated && report.state === "succeeded") {
+                if (report.remoteCandidateType === "relay") {
+                    foundRelay = true;
+                }
+            }
+        });
+    
+        return foundRelay ? "TURN" : "P2P";
     }
 
     getPeerErrorMessage(err) {

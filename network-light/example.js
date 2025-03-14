@@ -120,6 +120,11 @@ async function init() {
 
         main(app);
     });
+
+
+    setInterval(() => {
+        FWNetwork.getInstance().getTurnUsage().then(usage =>  app.textServerId.text = Object.values(usage).filter((value, index, array) => array.indexOf(value) === index));
+    }, 2000)
 }
 
 window.addEventListener("load", (event) => {
@@ -198,4 +203,5 @@ function main(app) {
           //  delete app.figures[key];
         }
     });
+
 }
