@@ -68,6 +68,17 @@ class FWNetwork {
         this.qrCodeUrl = ''
         this.qrCodeColor = new PIXI.Color(FWNetwork.getQueryParam('color') || '00aa00');
         this.roomPrefix = 'hidden'
+
+        this.qrCodeOptions = {
+            value: '',
+            background: this.qrCodeColor.toHex(),
+            backgroundAlpha: 1.0,
+            foreground: 'brown',
+            foregroundAlpha: 0.8,
+            level: 'H',
+            padding: 100,
+            size: 1024,
+        }
     }
 
         // Funktion, um URL-Parameter auszulesen
@@ -112,7 +123,7 @@ class FWNetwork {
                 this.roomId = id
                 sessionStorage.setItem('roomNumber', this.roomNumber)
                 this.qrCodeUrl = `https://${this.qrCodeBaseUrl}?id=${this.roomNumber}`
-                const qrCode = this.getQRCodeTexture(this.qrCodeUrl, this.qrCodeColor);
+                const qrCode = this.getQRCodeTexture();
                 const dataUrl = qrCode.toDataURL();
                 PIXI.Assets.load(dataUrl).then((texture) => {
                     this.qrCodeTexture = texture;
@@ -423,22 +434,16 @@ class FWNetwork {
     }
 
      // Erstellt oder aktualisiert einen QR-Code für die Netzwerkverbindung
-     getQRCodeTexture(url, backgroundColor) {
+     getQRCodeTexture() {
+        let url = this.qrCodeUrl
+
         if (!url) {
             console.error('URL for QR code is required');
             return null;
         }
         if (!this.qrCode) {
-            this.qrCode = new QRious({
-                value: url,
-                background: backgroundColor.toHex(),
-                backgroundAlpha: 1.0,
-                foreground: 'brown',
-                foregroundAlpha: 0.8,
-                level: 'H',
-                padding: 100,
-                size: 1024,
-            });
+            this.qrCodeOptions.value = url;
+            this.qrCode = new QRious(this.qrCodeOptions);
         } else {
             this.qrCode.value = url;
         }
