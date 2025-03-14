@@ -1,5 +1,4 @@
 const version = '1.0.0';
-const baseUrlController = `pad.feuerware.com`;
 
 // Funktion, um die Anwendung mit Pixi.js zu initialisieren
 async function init() {
@@ -19,7 +18,7 @@ async function init() {
     });
     // FWNetwork als Host initialisieren mit iceServers
     const network = FWNetwork.getInstance();
-    network.hostRoom('hidden');
+    network.hostRoom();
 
     app.color = color;
     app.roomNumber = 0;
@@ -39,6 +38,9 @@ async function init() {
     app.textUrl.anchor.set(0.5, 1.0);
   
     app.containerQrCode = new PIXI.Container();
+    app.qrCodeSprite = new PIXI.Sprite();
+    app.qrCodeSprite.anchor.set(0.5);
+    app.containerQrCode.addChild(app.qrCodeSprite);
 
     // Container für Figuren
     app.figures = {};
@@ -72,52 +74,32 @@ window.addEventListener("load", (event) => {
 
 // Hauptlogik für jedes Frame
 function main(app) {
-    const network = FWNetwork.getInstance();
-    const gamepads = network.getAllGamepads();
 
     // UI-Positionierung und Status
     const nw = FWNetwork.getInstance()
+    const gamepads = nw.getAllGamepads();
     const nwStats = nw.getStats()
-    app.textNetwork.text = `Status: ${network.getStatus()} Relay: ${nwStats.reported.foundRelay}
-    G: ${network.getLocalGamepads().filter(x => x && x.connected).length}, R: ${network.getNetworkGamepads().filter(x => x && x.connected).length}, F: ${Object.keys(app.figures).length} M: ${nwStats.messagesReceived} 
+    app.textNetwork.text = `Status: ${nw.getStatus()} Relay: ${nwStats.reported.foundRelay}
+    G: ${nw.getLocalGamepads().filter(x => x && x.connected).length}, R: ${nw.getNetworkGamepads().filter(x => x && x.connected).length}, F: ${Object.keys(app.figures).length} M: ${nwStats.messagesReceived} 
     BR:  ${nwStats.reported.bytesReceived} / ${nwStats.bytesReceived} BS: ${nwStats.reported.bytesSent} / ${nwStats.bytesReceived}
     RT:  ${(1000*nwStats.reported.currentRoundTripTime).toFixed(4)} / ${(1000*nwStats.reported.totalRoundTripTime).toFixed(4)}
     `;
     app.textNetwork.position.set(app.containerGame.screenWidth, app.containerGame.screenHeight * 0.0);
 
-    if (app.roomNumber !== network.roomNumber) {
-        app.roomNumber = network.roomNumber;
-        app.url = `https://${baseUrlController}?id=${app.roomNumber}`;
+    app.textUrl.text = nw.qrCodeBaseUrl + "\n" + nw.roomNumber
+    app.qrCodeSprite.texture = nw.qrCodeTexture
 
-        if (app.roomNumber === 0) {
-            app.textUrl.text = 'status: ' + FWNetwork.getInstance().getStatus()
-            app.qrCodeSprite.removeChildren()
-        } else {
-            app.textUrl.text = baseUrlController + "\n" + app.roomNumber
-            const qrCode = network.getQRCodeTexture(app.url, app.color);
-            const dataUrl = qrCode.toDataURL();
-            PIXI.Assets.load(dataUrl).then((texture) => {
-                app.qrCodeSprite = new PIXI.Sprite(texture);
-                app.qrCodeSprite.anchor.set(0.5);
-                app.qrCodeSprite.removeChildren()
-                app.containerQrCode.addChild(app.qrCodeSprite);
-            })
-        }
-      
-       
-    }
 
-    if (app.qrCodeSprite) {
-        app.qrCodeSprite.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 0.5);
-        const qrWidth = Math.min(app.containerGame.screenHeight, app.containerGame.screenWidth) * 0.5;
-        app.qrCodeSprite.width = qrWidth;
-        app.qrCodeSprite.height = qrWidth;
+    app.qrCodeSprite.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 0.5);
+    const qrWidth = Math.min(app.containerGame.screenHeight, app.containerGame.screenWidth) * 0.5;
+    app.qrCodeSprite.width = qrWidth;
+    app.qrCodeSprite.height = qrWidth;
 
-        app.textUrl.width =  app.qrCodeSprite.width*0.8;
-        app.textUrl.scale.y = app.textUrl.scale.x;
-        app.textUrl.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 1.0);
+    app.textUrl.width =  app.qrCodeSprite.width*0.8;
+    app.textUrl.scale.y = app.textUrl.scale.x;
+    app.textUrl.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 1.0);
+
     
-    }
 
    
 

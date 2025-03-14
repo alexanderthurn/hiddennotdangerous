@@ -60,8 +60,14 @@ class FWNetwork {
 
         this.options = {
             debug: FWNetwork.getQueryParam('debug') && Number.parseInt(FWNetwork.getQueryParam('debug')) || 0,
-            config: { iceServers:  this.iceServers }
+            config: { iceServers:  this.iceServers },
         }
+
+        this.qrCodeTexture = null
+        this.qrCodeBaseUrl = 'pad.feuerware.com'
+        this.qrCodeUrl = ''
+        this.qrCodeColor = new PIXI.Color(FWNetwork.getQueryParam('color') || '00aa00');
+        this.roomPrefix = 'hidden'
     }
 
         // Funktion, um URL-Parameter auszulesen
@@ -77,9 +83,8 @@ class FWNetwork {
         return FWNetwork.#instance;
     }
 
-    hostRoom(roomPrefix) {
+    hostRoom() {
         this.isHost = true;
-        this.roomPrefix = roomPrefix;
         let wantedRoomNumber = FWNetwork.getQueryParam('id') || sessionStorage.getItem('roomNumber') || Math.floor(1000+Math.random()*9000)
         let wantedRoomId = this.roomPrefix + wantedRoomNumber
 
@@ -106,6 +111,12 @@ class FWNetwork {
                 this.roomNumber = wantedRoomNumber
                 this.roomId = id
                 sessionStorage.setItem('roomNumber', this.roomNumber)
+                this.qrCodeUrl = `https://${this.qrCodeBaseUrl}?id=${this.roomNumber}`
+                const qrCode = this.getQRCodeTexture(this.qrCodeUrl, this.qrCodeColor);
+                const dataUrl = qrCode.toDataURL();
+                PIXI.Assets.load(dataUrl).then((texture) => {
+                    this.qrCodeTexture = texture;
+                })
 
                 console.log(`PeerJS initialized with ID: ${id}`);
                 console.log(`Hosting room: ${id}`);
@@ -257,7 +268,7 @@ class FWNetwork {
 
         this.reconnectTimeout = setTimeout(() => {
             if (this.isHost) {
-                this.hostRoom(this.roomPrefix);
+                this.hostRoom();
             } else {
                 this.connectToRoom(this.roomId);
             }
