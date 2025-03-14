@@ -17,7 +17,16 @@ class FWNetwork {
             bytesReceived: 0,
             bytesSent: 0,
             messagesReceived: 0,
-            messagesSent: 0
+            messagesSent: 0,
+            reported: {
+                bytesReceived: 0,
+                bytesSent: 0,
+                messagesReceived: 0,
+                messagesSent: 0,
+                foundRelay: false,
+                currentRoundTripTime: 0,
+                totalRoundTripTime: 0,
+            }
         }
         this.reconnectAttempts = 0
         this.maxReconnectAttempts = 10;
@@ -414,14 +423,29 @@ class FWNetwork {
         let foundRelay = false;
     
         const stats = await peerConnection.getStats();
+
+        let bytesReceived = 0;
+        let bytesSent = 0;
+        let currentRoundTripTime = 0;  
+        let totalRoundTripTime = 0;
         stats.forEach(report => {
             if (report.type === "candidate-pair" && report.nominated && report.state === "succeeded") {
+                bytesReceived += report.bytesReceived;
+                bytesSent += report.bytesSent;  
+                currentRoundTripTime = report.currentRoundTripTime;
+                totalRoundTripTime = report.totalRoundTripTime;
+                //console.log(report)
                 if (report.remoteCandidateType === "relay") {
                     foundRelay = true;
                 }
             }
         });
-    
+        
+        this.stats.reported.bytesReceived = bytesReceived;
+        this.stats.reported.bytesSent = bytesSent;      
+        this.stats.reported.currentRoundTripTime = (currentRoundTripTime / stats.size);
+        this.stats.reported.totalRoundTripTime = (totalRoundTripTime / stats.size);
+        this.stats.reported.foundRelay = foundRelay;
         return foundRelay ? "TURN" : "P2P";
     }
 

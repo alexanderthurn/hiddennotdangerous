@@ -75,7 +75,7 @@ async function init() {
     });
     app.textNetwork = new PIXI.Text({
         text: '',
-        style: { fontFamily: 'Arial', fontSize: 32, fill: 0xffffff, align: 'center' }
+        style: { fontFamily: 'Arial', fontSize: 16, fill: 0xffffff, align: 'center' }
     });
     
     app.textNetwork.anchor.set(1.0, 0.0);
@@ -137,8 +137,13 @@ function main(app) {
     const gamepads = network.getAllGamepads();
 
     // UI-Positionierung und Status
-
-    app.textNetwork.text = `${network.getStatus()} | G: ${network.getLocalGamepads().filter(x => x && x.connected).length}, R: ${network.getNetworkGamepads().filter(x => x && x.connected).length}, F: ${Object.keys(app.figures).length} M: ${FWNetwork.getInstance().getStats().messagesReceived} BR: ${FWNetwork.getInstance().getStats().bytesReceived}`;
+    const nw = FWNetwork.getInstance()
+    const nwStats = nw.getStats()
+    app.textNetwork.text = `${network.getStatus()} | G: ${network.getLocalGamepads().filter(x => x && x.connected).length}, R: ${network.getNetworkGamepads().filter(x => x && x.connected).length}, F: ${Object.keys(app.figures).length} 
+    M: ${nwStats.messagesReceived} 
+    BR:  ${nwStats.reported.bytesReceived} / ${nwStats.bytesReceived} BS: ${nwStats.reported.bytesSent} / ${nwStats.bytesReceived}
+    RT:  ${(1000*nwStats.reported.currentRoundTripTime).toFixed(4)} / ${(1000*nwStats.reported.totalRoundTripTime).toFixed(4)}
+    `;
     app.textNetwork.position.set(app.containerGame.screenWidth, app.containerGame.screenHeight * 0.0);
     app.textServerId.position.set(app.containerGame.screenWidth * 0.0, app.containerGame.screenHeight * 0.0);
 
