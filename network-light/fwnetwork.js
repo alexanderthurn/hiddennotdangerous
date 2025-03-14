@@ -17,13 +17,75 @@ class FWNetwork {
             bytesReceived: 0,
             bytesSent: 0,
             messagesReceived: 0,
-            messagesSent: 0
+            messagesSent: 0,
+            reported: {
+                bytesReceived: 0,
+                bytesSent: 0,
+                messagesReceived: 0,
+                messagesSent: 0,
+                foundRelay: false,
+                currentRoundTripTime: 0,
+                totalRoundTripTime: 0,
+            }
         }
         this.reconnectAttempts = 0
         this.maxReconnectAttempts = 10;
         this.reconnectDelay = 2000;
         this.reconnectTimeout = null;
+        this.iceServers = [
+            {
+                urls: 'stun:stun.relay.metered.ca:80',
+            },
+            {
+                urls: 'turn:global.relay.metered.ca:80',
+                username: 'edd2a0f22e4c5a5f1ccc546a',
+                credential: 'bW5ZvhYwl1tPH6o0',
+            },
+            {
+                urls: 'turn:global.relay.metered.ca:80?transport=tcp',
+                username: 'edd2a0f22e4c5a5f1ccc546a',
+                credential: 'bW5ZvhYwl1tPH6o0',
+            },
+            {
+                urls: 'turn:global.relay.metered.ca:443',
+                username: 'edd2a0f22e4c5a5f1ccc546a',
+                credential: 'bW5ZvhYwl1tPH6o0',
+            },
+            {
+                urls: 'turns:global.relay.metered.ca:443?transport=tcp',
+                username: 'edd2a0f22e4c5a5f1ccc546a',
+                credential: 'bW5ZvhYwl1tPH6o0',
+            },
+        ];
+
+        this.options = {
+            debug: FWNetwork.getQueryParam('debug') && Number.parseInt(FWNetwork.getQueryParam('debug')) || 0,
+            config: { iceServers:  this.iceServers },
+        }
+
+        this.qrCodeTexture = null
+        this.qrCodeBaseUrl = 'pad.feuerware.com'
+        this.qrCodeUrl = ''
+        this.qrCodeColor = new PIXI.Color(FWNetwork.getQueryParam('color') || '00aa00');
+        this.roomPrefix = 'hidden'
+
+        this.qrCodeOptions = {
+            value: '',
+            background: this.qrCodeColor.toHex(),
+            backgroundAlpha: 1.0,
+            foreground: 'brown',
+            foregroundAlpha: 0.8,
+            level: 'H',
+            padding: 100,
+            size: 1024,
+        }
     }
+
+        // Funktion, um URL-Parameter auszulesen
+    static getQueryParam = (key) => {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(key);
+    };
 
     static getInstance() {
         if (!FWNetwork.#instance) {
@@ -32,13 +94,12 @@ class FWNetwork {
         return FWNetwork.#instance;
     }
 
-    init(options) {
-        this.options = options
-    }
-    hostRoom(roomName) {
+    hostRoom() {
         this.isHost = true;
-        this.roomId = roomName;
-        
+        let wantedRoomNumber = FWNetwork.getQueryParam('id') || sessionStorage.getItem('roomNumber') || Math.floor(1000+Math.random()*9000)
+        let wantedRoomId = this.roomPrefix + wantedRoomNumber
+
+        console.log(`Try Hosting room: ${wantedRoomId}`);
         if (this.peer) {
             if (this.peer.disconnected) {
                 this.peer.reconnect()
@@ -46,17 +107,28 @@ class FWNetwork {
                     this.status = 'hosting';
                     this.reconnectAttempts = 0;
                 } else {
+                    sessionStorage.removeItem('roomNumber')
                     this.attemptReconnect();
                 }
             } else {
                 console.log('host reconnecting but is not disconnected')
             }
         } else {
-            this.peer = new Peer(roomName, this.options);
+            this.peer = new Peer(wantedRoomId, this.options);
 
             this.peer.on('open', (id) => {
                 this.status = 'hosting';
                 this.reconnectAttempts = 0;
+                this.roomNumber = wantedRoomNumber
+                this.roomId = id
+                sessionStorage.setItem('roomNumber', this.roomNumber)
+                this.qrCodeUrl = `https://${this.qrCodeBaseUrl}?id=${this.roomNumber}`
+                const qrCode = this.getQRCodeTexture();
+                const dataUrl = qrCode.toDataURL();
+                PIXI.Assets.load(dataUrl).then((texture) => {
+                    this.qrCodeTexture = texture;
+                })
+
                 console.log(`PeerJS initialized with ID: ${id}`);
                 console.log(`Hosting room: ${id}`);
             });
@@ -72,10 +144,20 @@ class FWNetwork {
                     case 'socket-error':
                     case 'server-error':
                         this.attemptReconnect();
+                        break;
+                    case 'unavailable-id':
+                        sessionStorage.removeItem('roomNumber')
+  
+                        this.roomNumber = 0
+                        this.roomId = 0
+                        this.peer.destroy()
+                        this.peer = null 
+                        this.attemptReconnect();
+                        break;
                 }
 
             });
-    
+
             this.peer.on('disconnected', () => {
                 console.log('Disconnected from PeerJS server');
                 this.status = 'disconnected';
@@ -131,7 +213,7 @@ class FWNetwork {
     connectToRoom(roomId) {
         this.isHost = false;
         this.roomId = roomId;
-        let peerId = sessionStorage.getItem('clientId') || null
+        let peerId = sessionStorage.getItem('peerId') || null
 
         if (this.peer) {
             if (this.peer.disconnected) {
@@ -151,16 +233,17 @@ class FWNetwork {
             this.peer = new Peer(peerId, this.options)
 
             this.peer.on('open', (id) => {
-                sessionStorage.setItem('clientId', id)
+                sessionStorage.setItem('peerId', id)
                 console.log(`PeerJS initialized with ID: ${id}`);
                 this.#connectAsClient(roomId)
             });
 
             this.peer.on('error', (err) => {
                 console.error('PeerJS error:', err);
+                console.log(this.getPeerErrorMessage(err))
                 this.status = 'error';
                 if (err.type === 'unavailable-id') {
-                    sessionStorage.removeItem('clientId')
+                    sessionStorage.removeItem('peerId')
                     this.peer.destroy()
                     this.peer = null 
                     this.attemptReconnect();
@@ -196,7 +279,7 @@ class FWNetwork {
 
         this.reconnectTimeout = setTimeout(() => {
             if (this.isHost) {
-                this.hostRoom(this.roomId);
+                this.hostRoom();
             } else {
                 this.connectToRoom(this.roomId);
             }
@@ -351,26 +434,86 @@ class FWNetwork {
     }
 
      // Erstellt oder aktualisiert einen QR-Code für die Netzwerkverbindung
-     getQRCodeTexture(url, backgroundColor) {
+     getQRCodeTexture() {
+        let url = this.qrCodeUrl
+
         if (!url) {
             console.error('URL for QR code is required');
             return null;
         }
         if (!this.qrCode) {
-            this.qrCode = new QRious({
-                value: url,
-                background: backgroundColor.toHex(),
-                backgroundAlpha: 1.0,
-                foreground: 'brown',
-                foregroundAlpha: 0.8,
-                level: 'H',
-                padding: 100,
-                size: 1024,
-            });
+            this.qrCodeOptions.value = url;
+            this.qrCode = new QRious(this.qrCodeOptions);
         } else {
             this.qrCode.value = url;
         }
         return this.qrCode;
+    }
+
+    getAllIceConnectionStates() {
+        if (!this.peer || !this.peer.connections) {
+            return "no active peer connections";
+        }
+    
+        let states = {};
+        for (const [peerId, connections] of Object.entries(this.peer.connections)) {
+            if (connections.length > 0 && connections[0].peerConnection) {
+                states[peerId] = connections[0].peerConnection.iceConnectionState;
+            } else {
+                states[peerId] = "no connection";
+            }
+        }
+    
+        return states;
+    }
+
+    async getTurnUsage() {
+        if (!this.peer || !this.peer.connections) {
+            return "no active peer connections";
+        }
+    
+        let turnUsage = {};
+    
+        for (const [peerId, connections] of Object.entries(this.peer.connections)) {
+            if (connections.length > 0 && connections[0].peerConnection) {
+                const pc = connections[0].peerConnection;
+                turnUsage[peerId] = await this.#checkTurnUsage(pc);
+            } else {
+                turnUsage[peerId] = "no connection";
+            }
+        }
+    
+        return turnUsage;
+    }
+    
+    async #checkTurnUsage(peerConnection) {
+        let foundRelay = false;
+    
+        const stats = await peerConnection.getStats();
+
+        let bytesReceived = 0;
+        let bytesSent = 0;
+        let currentRoundTripTime = 0;  
+        let totalRoundTripTime = 0;
+        stats.forEach(report => {
+            if (report.type === "candidate-pair" && report.nominated && report.state === "succeeded") {
+                bytesReceived += report.bytesReceived;
+                bytesSent += report.bytesSent;  
+                currentRoundTripTime = report.currentRoundTripTime;
+                totalRoundTripTime = report.totalRoundTripTime;
+                //console.log(report)
+                if (report.remoteCandidateType === "relay") {
+                    foundRelay = true;
+                }
+            }
+        });
+        
+        this.stats.reported.bytesReceived = bytesReceived;
+        this.stats.reported.bytesSent = bytesSent;      
+        this.stats.reported.currentRoundTripTime = (currentRoundTripTime / stats.size);
+        this.stats.reported.totalRoundTripTime = (totalRoundTripTime / stats.size);
+        this.stats.reported.foundRelay = foundRelay;
+        return foundRelay ? "TURN" : "P2P";
     }
 
     getPeerErrorMessage(err) {

@@ -202,6 +202,43 @@ const addGameStartButton = (app, lobbyContainer) => {
     app.ticker.add(() => animateGameStartButton(circleButton))
 }
 
+const addNetworkQrCode = (app, lobbyContainer) => { 
+
+    const nw = FWNetwork.getInstance();
+    nw.qrCodeOptions.background = '0xffff00',
+    nw.qrCodeOptions.backgroundAlpha = 0.8,
+    nw.qrCodeOptions.foreground = 'red',
+    nw.qrCodeOptions.foregroundAlpha = 1.0,
+    nw.hostRoom();
+
+
+    const qrCodeContainer = new PIXI.Container()
+    qrCodeContainer.sprite = new PIXI.Sprite()
+    qrCodeContainer.sprite.anchor.set(0., 1.0)
+    qrCodeContainer.label = new PIXI.Text( {
+        text: '', 
+        style: {
+            align: 'center',
+            fontSize: 32,
+            fill: colors.white,
+            stroke: colors.white
+             }
+        })
+    qrCodeContainer.label.anchor.set(0.5, 1)
+    qrCodeContainer.addChild(qrCodeContainer.sprite, qrCodeContainer.label)
+    lobbyContainer.addChild(qrCodeContainer)
+    app.ticker.add(() => {
+        const qrWidth = Math.min(level.width,level.height) * 0.25;
+        qrCodeContainer.position.set(level.width*0.0, level.height*1)
+        qrCodeContainer.sprite.texture = nw.qrCodeTexture
+        qrCodeContainer.sprite.width = qrCodeContainer.sprite.height = qrWidth;
+
+        qrCodeContainer.label.text = nw.qrCodeBaseUrl + "\n" + nw.roomNumber
+        qrCodeContainer.label.position.set(qrCodeContainer.sprite.width*0.5, -qrCodeContainer.sprite.height)
+        qrCodeContainer.label.width =  qrCodeContainer.sprite.width*0.8;
+        qrCodeContainer.label.scale.y = qrCodeContainer.label.scale.x;
+    })
+}
 const animateRectangleButton = button => {
     button.visible = figures.filter(f => f.playerId && f.type === 'fighter').length > 0
 
@@ -300,6 +337,7 @@ const addLobbyItems = app => {
     addGameStartButton(app, lobbyContainer)
     addButtons(app, lobbyContainer)
     addTeamSwitchers(app, lobbyContainer)
+    addNetworkQrCode(app, lobbyContainer)
 
     const fontHeight = level.width*0.017  
     const howToPlay = new PIXI.Text({

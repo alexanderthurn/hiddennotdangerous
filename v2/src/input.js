@@ -188,7 +188,7 @@ function collectInputs() {
         botPlayers.push(bot)
     }
 
-    navigator.getGamepads().filter(x => x && x.connected).map(x => {
+    FWNetwork.getInstance().getAllGamepads().filter(x => x && x.connected).map(x => {
         var gamepadPlayerIndex = gamepadPlayers.findIndex(g => g.id === x.id && g.index === x.index)
         if (gamepadPlayerIndex < 0) {
             if (x.buttons.some(b => b.pressed)) {

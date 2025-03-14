@@ -1,12 +1,3 @@
-// ICE-Server-Konfiguration für PeerJS
-const iceServers = [
-    { urls: 'stun:stun.relay.metered.ca:80' },
-    { urls: 'turn:global.relay.metered.ca:80', username: 'edd2a0f22e4c5a5f1ccc546a', credential: 'bW5ZvhYwl1tPH6o0' },
-    { urls: 'turn:global.relay.metered.ca:80?transport=tcp', username: 'edd2a0f22e4c5a5f1ccc546a', credential: 'bW5ZvhYwl1tPH6o0' },
-    { urls: 'turn:global.relay.metered.ca:443', username: 'edd2a0f22e4c5a5f1ccc546a', credential: 'bW5ZvhYwl1tPH6o0' },
-    { urls: 'turns:global.relay.metered.ca:443?transport=tcp', username: 'edd2a0f22e4c5a5f1ccc546a', credential: 'bW5ZvhYwl1tPH6o0' },
-];
-
 const CONNECTION_STATUS_OFF = 0
 const CONNECTION_STATUS_INITIALIZNG = 1
 const CONNECTION_STATUS_WORKING = 2
@@ -62,10 +53,7 @@ async function init() {
     app.connectionStatus = CONNECTION_STATUS_OFF;
 
     const network = FWNetwork.getInstance();
-    network.init({
-        debug: getQueryParam('debug') && Number.parseInt(getQueryParam('debug')) || 0,
-        config: { iceServers: iceServers }
-    })
+   
     app.connectionStatus = CONNECTION_STATUS_INITIALIZNG;
 
     if (app.serverId && app.serverId !== '') {
