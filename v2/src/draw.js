@@ -262,13 +262,12 @@ const animateTeamSwitcher = button => {
     button.visible = game === games.vip
 }
 
-const switchTeam = (figure, team, color) => {
+const switchTeam = (figure, team) => {
     figure.team = team
-    figure.tint = color
 }
 
 const createTeamSwitcher = (app, props, lobbyContainer) => {
-    const {x, y, color, team} = props
+    const {x, y, team} = props
     const width = 128
     const height = 128
     const newX = x - width/2
@@ -276,8 +275,8 @@ const createTeamSwitcher = (app, props, lobbyContainer) => {
 
     const button = new PIXI.Graphics()
     .rect(newX, newY, width, height)
-    .fill({color})
-    button.execute = () => button.playersNear.forEach(f => switchTeam(f, team, color)) 
+    .fill({color: teams[team].color})
+    button.execute = () => button.playersNear.forEach(f => switchTeam(f, team)) 
     button.isInArea = f => stage === stages.gameLobby && game === games.vip && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
 
     lobbyContainer.addChild(button)
@@ -629,6 +628,8 @@ const animateFigure = (figure, spritesheet) => {
         }
         figureLayer.attach(body)
     }
+
+    body.tint = teams[figure.team]?.color
 
     if (body.currentAnimation != animation) {
         body.currentAnimation = animation

@@ -205,6 +205,18 @@ const buttonDefinition = () => ({
     }
 })
 
+const teams = {
+    assassin: {
+        color: colors.red
+    },
+    guard: {
+        color: colors.blue
+    },
+    vip: {
+        color: colors.green
+    }
+}
+
 const teamSwitchersDefinition = () => ({
     assassin: {
         x: level.width*0.25,
@@ -508,7 +520,7 @@ function gameLoop() {
 
     if (!restartGame) {
         var survivors = figuresPlayer.filter(f => !f.isDead)
-        if ((stage === stages.game) && survivors.length < 2) {
+        if (stage === stages.game && (game === games.battleRoyale || game === games.food) && survivors.length < 2) {
             lastWinnerPlayerIds.clear();
             if (survivors.length == 1) {
                 figuresPlayer.forEach(f => f.score.oldPoints = f.score.points);
