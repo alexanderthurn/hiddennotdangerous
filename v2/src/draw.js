@@ -258,6 +258,39 @@ const addButtons = (app, lobbyContainer) => {
     app.ticker.add(() => animateBotsButton(buttons.bots))
 }
 
+const animateTeamSwitcher = button => {
+    button.visible = game === games.vip
+}
+
+const switchTeam = (figure, team, color) => {
+    figure.team = team
+    figure.tint = color
+}
+
+const createTeamSwitcher = (app, props, lobbyContainer) => {
+    const {x, y, color, team} = props
+    const width = 128
+    const height = 128
+    const newX = x - width/2
+    const newY = y - height/2
+
+    const button = new PIXI.Graphics()
+    .rect(newX, newY, width, height)
+    .fill({color})
+    button.execute = () => button.playersNear.forEach(f => switchTeam(f, team, color)) 
+    button.isInArea = f => stage === stages.gameLobby && game === games.vip && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
+
+    lobbyContainer.addChild(button)
+
+    app.ticker.add(() => animateTeamSwitcher(button))
+
+    return button
+}
+
+const addTeamSwitchers = (app, lobbyContainer) => {
+    Object.entries(teamSwitchersDefinition()).forEach(([id, button]) => {buttons[id] = createTeamSwitcher(app, button, lobbyContainer)})
+}
+
 const animateLobbyItems = lobbyContainer => {
     lobbyContainer.visible = stage === stages.startLobby || stage === stages.gameLobby
 }
@@ -267,6 +300,7 @@ const addLobbyItems = app => {
     addGameSelection(app, lobbyContainer)
     addGameStartButton(app, lobbyContainer)
     addButtons(app, lobbyContainer)
+    addTeamSwitchers(app, lobbyContainer)
 
     const fontHeight = level.width*0.017  
     const howToPlay = new PIXI.Text({

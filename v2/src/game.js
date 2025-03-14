@@ -205,6 +205,21 @@ const buttonDefinition = () => ({
     }
 })
 
+const teamSwitchersDefinition = () => ({
+    assassin: {
+        x: level.width*0.25,
+        y: level.height*0.65,
+        color: colors.red,
+        team: 'assassin'
+    },
+    guard: {
+        x: level.width*0.75,
+        y: level.height*0.65,
+        color: colors.blue,
+        team: 'guard'
+    }
+})
+
 const buttons = {
     selectGame: {},
     startGame: {},
@@ -386,11 +401,57 @@ function roundInit() {
                 initRandomPositionFigure(figure)
             })
         } else {
+            // put neutrals in teams
+            const numberMissingGuards = numberGuards - figures.filter(figure => figure.team === 'guard').length
+            const neutralFigures = shuffle(figures.filter(figure => !figure.team))
+            for (let i = 0; i < numberMissingGuards; i++) {
+                switchTeam(neutralFigures[i], 'guard', colors.blue)
+            }
 
+            for (let i = numberMissingGuards; i < neutralFigures.length; i++) {
+                switchTeam(neutralFigures[i], 'assassin', colors.red)
+            }
+
+            // assassin positions
+            const assassins = shuffle(figures.filter(figure => figure.team === 'assassin'))
+            const assassinPositions = []
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 5; j++) {
+                    assassinPositions.push({x: ((2*j+1)/10)*level.width, y: (2+(2*i+1)/6)/3*level.height})
+                }                
+            }
+            assassins.forEach((f, i) => {
+                initFigure(f, assassinPositions[i].x, assassinPositions[i].y, deg2rad(-90))
+            })
+
+            // guard positions
+            const guards = shuffle(figures.filter(figure => figure.team === 'guard'))
+            const guardPositions = []
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 5; j++) {
+                    if (i > 0 || j === 0 || j === 4) {
+                        guardPositions.push({x: ((2*j+1)/10)*level.width, y: ((2*i+1)/8)/2*level.height})
+                    }
+                }                
+            }
+            guards.forEach((f, i) => {
+                initFigure(f, guardPositions[i].x, guardPositions[i].y, deg2rad(90))
+            })
+
+            // vip positions
+            const vips = figures.filter(figure => figure.team === 'vip')
+            const vipPositions = []
+            for (let i = 0; i < 3; i++) {
+                vipPositions.push({x: (5+(i-1)/3)/10*level.width, y: (1/8)/2*level.height})            
+            }
+            vips.forEach((f, i) => {
+                initFigure(f, vipPositions[i].x, vipPositions[i].y, deg2rad(90))
+            })
         }
     } else if (stage !== stages.gameLobby) {
         figures.forEach(figure => {
             initRandomPositionFigure(figure)
+            switchTeam(figure, undefined, undefined)
         })
     }
 
