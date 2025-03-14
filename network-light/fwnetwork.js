@@ -32,7 +32,43 @@ class FWNetwork {
         this.maxReconnectAttempts = 10;
         this.reconnectDelay = 2000;
         this.reconnectTimeout = null;
+        this.iceServers = [
+            {
+                urls: 'stun:stun.relay.metered.ca:80',
+            },
+            {
+                urls: 'turn:global.relay.metered.ca:80',
+                username: 'edd2a0f22e4c5a5f1ccc546a',
+                credential: 'bW5ZvhYwl1tPH6o0',
+            },
+            {
+                urls: 'turn:global.relay.metered.ca:80?transport=tcp',
+                username: 'edd2a0f22e4c5a5f1ccc546a',
+                credential: 'bW5ZvhYwl1tPH6o0',
+            },
+            {
+                urls: 'turn:global.relay.metered.ca:443',
+                username: 'edd2a0f22e4c5a5f1ccc546a',
+                credential: 'bW5ZvhYwl1tPH6o0',
+            },
+            {
+                urls: 'turns:global.relay.metered.ca:443?transport=tcp',
+                username: 'edd2a0f22e4c5a5f1ccc546a',
+                credential: 'bW5ZvhYwl1tPH6o0',
+            },
+        ];
+
+        this.options = {
+            debug: FWNetwork.getQueryParam('debug') && Number.parseInt(FWNetwork.getQueryParam('debug')) || 0,
+            config: { iceServers:  this.iceServers }
+        }
     }
+
+        // Funktion, um URL-Parameter auszulesen
+    static getQueryParam = (key) => {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(key);
+    };
 
     static getInstance() {
         if (!FWNetwork.#instance) {
@@ -41,13 +77,13 @@ class FWNetwork {
         return FWNetwork.#instance;
     }
 
-    init(options) {
-        this.options = options
-    }
-    hostRoom(roomName) {
+    hostRoom(roomPrefix) {
         this.isHost = true;
-        this.roomId = roomName;
-        
+        this.roomPrefix = roomPrefix;
+        let wantedRoomNumber = FWNetwork.getQueryParam('id') || sessionStorage.getItem('roomNumber') || Math.floor(1000+Math.random()*9000)
+        let wantedRoomId = this.roomPrefix + wantedRoomNumber
+
+        console.log(`Try Hosting room: ${wantedRoomId}`);
         if (this.peer) {
             if (this.peer.disconnected) {
                 this.peer.reconnect()
@@ -55,17 +91,22 @@ class FWNetwork {
                     this.status = 'hosting';
                     this.reconnectAttempts = 0;
                 } else {
+                    sessionStorage.removeItem('roomNumber')
                     this.attemptReconnect();
                 }
             } else {
                 console.log('host reconnecting but is not disconnected')
             }
         } else {
-            this.peer = new Peer(roomName, this.options);
+            this.peer = new Peer(wantedRoomId, this.options);
 
             this.peer.on('open', (id) => {
                 this.status = 'hosting';
                 this.reconnectAttempts = 0;
+                this.roomNumber = wantedRoomNumber
+                this.roomId = id
+                sessionStorage.setItem('roomNumber', this.roomNumber)
+
                 console.log(`PeerJS initialized with ID: ${id}`);
                 console.log(`Hosting room: ${id}`);
             });
@@ -81,10 +122,20 @@ class FWNetwork {
                     case 'socket-error':
                     case 'server-error':
                         this.attemptReconnect();
+                        break;
+                    case 'unavailable-id':
+                        sessionStorage.removeItem('roomNumber')
+  
+                        this.roomNumber = 0
+                        this.roomId = 0
+                        this.peer.destroy()
+                        this.peer = null 
+                        this.attemptReconnect();
+                        break;
                 }
 
             });
-    
+
             this.peer.on('disconnected', () => {
                 console.log('Disconnected from PeerJS server');
                 this.status = 'disconnected';
@@ -140,7 +191,7 @@ class FWNetwork {
     connectToRoom(roomId) {
         this.isHost = false;
         this.roomId = roomId;
-        let peerId = sessionStorage.getItem('clientId') || null
+        let peerId = sessionStorage.getItem('peerId') || null
 
         if (this.peer) {
             if (this.peer.disconnected) {
@@ -160,7 +211,7 @@ class FWNetwork {
             this.peer = new Peer(peerId, this.options)
 
             this.peer.on('open', (id) => {
-                sessionStorage.setItem('clientId', id)
+                sessionStorage.setItem('peerId', id)
                 console.log(`PeerJS initialized with ID: ${id}`);
                 this.#connectAsClient(roomId)
             });
@@ -170,7 +221,7 @@ class FWNetwork {
                 console.log(this.getPeerErrorMessage(err))
                 this.status = 'error';
                 if (err.type === 'unavailable-id') {
-                    sessionStorage.removeItem('clientId')
+                    sessionStorage.removeItem('peerId')
                     this.peer.destroy()
                     this.peer = null 
                     this.attemptReconnect();
@@ -206,7 +257,7 @@ class FWNetwork {
 
         this.reconnectTimeout = setTimeout(() => {
             if (this.isHost) {
-                this.hostRoom(this.roomId);
+                this.hostRoom(this.roomPrefix);
             } else {
                 this.connectToRoom(this.roomId);
             }

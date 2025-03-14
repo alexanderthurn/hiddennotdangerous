@@ -1,41 +1,9 @@
 const version = '1.0.0';
-
-// ICE-Server-Konfiguration für PeerJS
-const iceServers = [
-    {
-        urls: 'stun:stun.relay.metered.ca:80',
-    },
-    {
-        urls: 'turn:global.relay.metered.ca:80',
-        username: 'edd2a0f22e4c5a5f1ccc546a',
-        credential: 'bW5ZvhYwl1tPH6o0',
-    },
-    {
-        urls: 'turn:global.relay.metered.ca:80?transport=tcp',
-        username: 'edd2a0f22e4c5a5f1ccc546a',
-        credential: 'bW5ZvhYwl1tPH6o0',
-    },
-    {
-        urls: 'turn:global.relay.metered.ca:443',
-        username: 'edd2a0f22e4c5a5f1ccc546a',
-        credential: 'bW5ZvhYwl1tPH6o0',
-    },
-    {
-        urls: 'turns:global.relay.metered.ca:443?transport=tcp',
-        username: 'edd2a0f22e4c5a5f1ccc546a',
-        credential: 'bW5ZvhYwl1tPH6o0',
-    },
-];
-
-// Funktion, um URL-Parameter auszulesen
-const getQueryParam = (key) => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get(key);
-};
+const baseUrlController = `pad.feuerware.com`;
 
 // Funktion, um die Anwendung mit Pixi.js zu initialisieren
 async function init() {
-    const color = new PIXI.Color(getQueryParam('color') || '00aa00');
+    const color = new PIXI.Color(FWNetwork.getQueryParam('color') || '00aa00');
     const app = new FWApplication({});
 
     await app.init({
@@ -49,28 +17,17 @@ async function init() {
         autoDensity: true,
         resizeTo: window
     });
-
-    app.serverPrefix = 'hidden'
-    app.serverId = getQueryParam('id') || Math.floor(1000+Math.random()*9000);
-    app.color = color;
-    const baseUrl = `pad.feuerware.com`;
-    app.url = `https://${baseUrl}?id=${app.serverId}`;
-
     // FWNetwork als Host initialisieren mit iceServers
     const network = FWNetwork.getInstance();
-    network.init({
-        debug: getQueryParam('debug') && Number.parseInt(getQueryParam('debug')) || 0,
-        config: { iceServers: iceServers }
-    })
-    network.hostRoom(app.serverPrefix + app.serverId);
+    network.hostRoom('hidden');
+
+    app.color = color;
+    app.roomNumber = 0;
+    app.url = ''
 
     // UI-Elemente erstellen
     app.textUrl = new PIXI.Text({
-        text: baseUrl + "\n" +  app.serverId,
-        style: { fontFamily: 'Arial', fontSize: 32, fill: 0xffffff, align: 'center' }
-    });
-    app.textServerId = new PIXI.Text({
-        text: '',//Code: ' + app.serverId,
+        text: '',
         style: { fontFamily: 'Arial', fontSize: 32, fill: 0xffffff, align: 'center' }
     });
     app.textNetwork = new PIXI.Text({
@@ -80,26 +37,8 @@ async function init() {
     
     app.textNetwork.anchor.set(1.0, 0.0);
     app.textUrl.anchor.set(0.5, 1.0);
-    app.textServerId.anchor.set(0.0, 0.0);
-
+  
     app.containerQrCode = new PIXI.Container();
-    // QR-Code laden
-    network.peer.on('open', async () => {
-        const qrCode = network.getQRCodeTexture(app.url, app.color);
-        const dataUrl = qrCode.toDataURL();
-        const qrTexture = await PIXI.Assets.load(dataUrl);
-        app.qrCodeSprite = new PIXI.Sprite(qrTexture);
-        app.qrCodeSprite.anchor.set(0.5);
-        app.containerQrCode.addChild(app.qrCodeSprite);
-    });
-
-    network.peer.on('error', async (err) => {
-        console.log(err)
-
-        if (err.type === 'unavailable-id') {
-            alert(`ServerId ${app.serverId} is already taken`)
-        }
-    })
 
     // Container für Figuren
     app.figures = {};
@@ -107,7 +46,7 @@ async function init() {
 
     // Szene zusammensetzen
     app.containerGame.addChild(app.containerQrCode, app.containerFigures);
-    app.containerGame.addChild(app.textUrl, app.textServerId, app.textNetwork);
+    app.containerGame.addChild(app.textUrl, app.textNetwork);
 
     app.finishLoading();
 
@@ -123,7 +62,7 @@ async function init() {
 
 
     setInterval(() => {
-        FWNetwork.getInstance().getTurnUsage().then(usage =>  app.textServerId.text = Object.values(usage).filter((value, index, array) => array.indexOf(value) === index));
+        FWNetwork.getInstance().getTurnUsage();
     }, 2000)
 }
 
@@ -139,13 +78,34 @@ function main(app) {
     // UI-Positionierung und Status
     const nw = FWNetwork.getInstance()
     const nwStats = nw.getStats()
-    app.textNetwork.text = `${network.getStatus()} | G: ${network.getLocalGamepads().filter(x => x && x.connected).length}, R: ${network.getNetworkGamepads().filter(x => x && x.connected).length}, F: ${Object.keys(app.figures).length} 
-    M: ${nwStats.messagesReceived} 
+    app.textNetwork.text = `Status: ${network.getStatus()} Relay: ${nwStats.reported.foundRelay}
+    G: ${network.getLocalGamepads().filter(x => x && x.connected).length}, R: ${network.getNetworkGamepads().filter(x => x && x.connected).length}, F: ${Object.keys(app.figures).length} M: ${nwStats.messagesReceived} 
     BR:  ${nwStats.reported.bytesReceived} / ${nwStats.bytesReceived} BS: ${nwStats.reported.bytesSent} / ${nwStats.bytesReceived}
     RT:  ${(1000*nwStats.reported.currentRoundTripTime).toFixed(4)} / ${(1000*nwStats.reported.totalRoundTripTime).toFixed(4)}
     `;
     app.textNetwork.position.set(app.containerGame.screenWidth, app.containerGame.screenHeight * 0.0);
-    app.textServerId.position.set(app.containerGame.screenWidth * 0.0, app.containerGame.screenHeight * 0.0);
+
+    if (app.roomNumber !== network.roomNumber) {
+        app.roomNumber = network.roomNumber;
+        app.url = `https://${baseUrlController}?id=${app.roomNumber}`;
+
+        if (app.roomNumber === 0) {
+            app.textUrl.text = 'status: ' + FWNetwork.getInstance().getStatus()
+            app.qrCodeSprite.removeChildren()
+        } else {
+            app.textUrl.text = baseUrlController + "\n" + app.roomNumber
+            const qrCode = network.getQRCodeTexture(app.url, app.color);
+            const dataUrl = qrCode.toDataURL();
+            PIXI.Assets.load(dataUrl).then((texture) => {
+                app.qrCodeSprite = new PIXI.Sprite(texture);
+                app.qrCodeSprite.anchor.set(0.5);
+                app.qrCodeSprite.removeChildren()
+                app.containerQrCode.addChild(app.qrCodeSprite);
+            })
+        }
+      
+       
+    }
 
     if (app.qrCodeSprite) {
         app.qrCodeSprite.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 0.5);
