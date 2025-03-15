@@ -541,7 +541,7 @@ function gameLoop() {
                     winners = guards
                 }
                 winners.forEach(f => f.score.points++)
-                lastWinnerPlayerIds = new Set(assassins.map(f => f.playerId))
+                lastWinnerPlayerIds = new Set(winners.map(f => f.playerId))
                 lastRoundEndThen = dtProcessed
                 restartGame = true
             }
@@ -577,7 +577,6 @@ function updateGame(figures, dt, dtProcessed) {
     let figuresDead = figures.filter(f => f.isDead);
     let figuresRevived = []
 
-
     if (stage === stages.startLobby || stage === stages.gameLobby) {
         figuresRevived = figuresDead
     } else {
@@ -585,8 +584,8 @@ function updateGame(figures, dt, dtProcessed) {
             case games.food:
                 figuresRevived = figuresDead.filter(f => !f.playerId)
                 break;
-            case games.food:
-                figuresRevived = figuresDead.filter(f => !f.playerId && !f.team === 'vip' || f.playerId && f.team === 'guard')
+            case games.vip:
+                figuresRevived = figuresDead.filter(f => !f.playerId && f.team !== 'vip' || f.playerId && f.team === 'guard')
                 break;
             default:
                 break;

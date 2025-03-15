@@ -368,7 +368,7 @@ const playerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({al
 const animatePlayerScore = (figure, player) => {
     if (figure.team !== figure.oldTeam) {
         figure.score.getChildAt(0).tint = teams[figure.team] ? teams[figure.team].color : colors.black
-        figure.oldteam = figure.team
+        figure.oldTeam = figure.team
     }
 
     if (!restartGame) {
