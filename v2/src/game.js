@@ -27,7 +27,7 @@ var keyboards = [{bindings: {
     'ShiftRight': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var restartGame = false, lastWinnerPlayerIds = new Set(), lastRoundEndThen, lastFinalWinnerPlayerId;
+var restartGame = false, lastWinnerPlayerIds, lastRoundEndThen, lastFinalWinnerPlayerIds;
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figuresPool = []
@@ -367,7 +367,7 @@ function roundInit() {
     then = Date.now();
     startTime = dtProcessed;
     stage = nextStage
-    lastFinalWinnerPlayerId = undefined
+    lastFinalWinnerPlayerIds = undefined
     fpsTime = then
     lastKillTime = undefined;
     multikillCounter = 0;
@@ -550,11 +550,9 @@ function gameLoop() {
         const maxPoints = Math.max(...figuresPlayer.map(f => f.score.points));
         if (maxPoints >= pointsToWin) {
             const figuresWithMaxPoints = figuresPlayer.filter(f => f.score.points === maxPoints);
-            if (figuresWithMaxPoints.length === 1) {
-                if (!lastFinalWinnerPlayerId) {
+            if (!lastFinalWinnerPlayerIds) {
+                lastFinalWinnerPlayerIds = new Set(figuresWithMaxPoints.map(f => f.playerId))
                 playAudio(soundWin)
-                }
-                lastFinalWinnerPlayerId = figuresWithMaxPoints[0].playerId;
             }
         }
     }
@@ -562,7 +560,7 @@ function gameLoop() {
     const gameBreakDuration = (figuresPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
     if (restartGame && (!lastRoundEndThen || dtProcessed - lastRoundEndThen > gameBreakDuration)) {
         restartGame = false;
-        if (lastFinalWinnerPlayerId) {
+        if (lastFinalWinnerPlayerIds) {
             nextStage = stages.startLobby
         }
         roundInit();

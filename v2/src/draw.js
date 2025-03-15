@@ -425,7 +425,7 @@ const addPlayerScore = (figure, player) => {
 const animateWinningCeremony = winnerText => {
     const playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
     const playerFiguresSortedByNewPoints = playerFigures.toSorted((f1,f2) => (f1.score.points-f1.score.oldPoints) - (f2.score.points-f2.score.oldPoints))
-    const lastFinalWinnerIndex = playerFigures.findIndex(f => f.playerId === lastFinalWinnerPlayerId)
+    const lastFinalWinnerIndex = playerFigures.findIndex(f => lastFinalWinnerPlayerIds?.has(f.playerId))
     const lastFinalWinnerFigure = playerFigures[lastFinalWinnerIndex]
     const lastFinalWinnerNumber = lastFinalWinnerIndex+1
     const dt3 = dtProcessed - (lastRoundEndThen + playerFigures.length*moveScoreToPlayerDuration);
@@ -442,7 +442,7 @@ const animateWinningCeremony = winnerText => {
             f.score.x = lpi*f.score.xDefault + lp*f.x
             f.score.y = lpi*f.score.yDefault + lp*f.y
 
-            if (lastFinalWinnerPlayerId === f.playerId) {
+            if (lastFinalWinnerPlayerIds?.has(f.playerId)) {
                 f.score.scale = (lpi + 2*lp)*(lpi + 2*lp)
             } else {
                 f.score.scale = lpi + 2*lp
@@ -454,7 +454,7 @@ const animateWinningCeremony = winnerText => {
         } else if (lastRoundEndThen && dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
             f.score.x = f.x
             f.score.y = f.y
-            if (lastFinalWinnerPlayerId === f.playerId) {
+            if (lastFinalWinnerPlayerIds?.has(f.playerId)) {
                 f.score.scale = 4
             } else {
                 f.score.scale = 2
@@ -467,7 +467,7 @@ const animateWinningCeremony = winnerText => {
             f.score.x = lpi*f.x + lp*f.score.xDefault
             f.score.y = lpi*f.y + lp*f.score.yDefault
             f.score.scale = 2*lpi + lp
-            if (lastFinalWinnerPlayerId) {
+            if (lastFinalWinnerPlayerIds) {
                 f.score.shownPoints = 0
             }
 
