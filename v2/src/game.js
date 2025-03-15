@@ -31,7 +31,7 @@ var restartGame = false, lastWinnerPlayerIds = new Set(), lastRoundEndThen, last
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figuresPool = []
-var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = 1, deadDuration = 5000, beanAttackDuration = 800, fartGrowDuration = 2000
+var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = 2, deadDuration = 5000, beanAttackDuration = 800, fartGrowDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = createLevel()
@@ -221,13 +221,11 @@ const teamSwitchersDefinition = () => ({
     assassin: {
         x: level.width*0.25,
         y: level.height*0.65,
-        color: colors.red,
         team: 'assassin'
     },
     guard: {
         x: level.width*0.75,
         y: level.height*0.65,
-        color: colors.blue,
         team: 'guard'
     }
 })
@@ -518,17 +516,35 @@ function gameLoop() {
 
     const figuresPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
 
-    if (!restartGame) {
-        var survivors = figuresPlayer.filter(f => !f.isDead)
-        if (stage === stages.game && (game === games.battleRoyale || game === games.food) && survivors.length < 2) {
-            lastWinnerPlayerIds.clear();
-            if (survivors.length == 1) {
-                figuresPlayer.forEach(f => f.score.oldPoints = f.score.points);
-                survivors[0].score.points++
-                lastWinnerPlayerIds.add(survivors[0].playerId);
+    if (!restartGame && stage === stages.game) {
+        if (game === games.battleRoyale || game === games.food) {
+            const survivors = figuresPlayer.filter(f => !f.isDead)
+            if (survivors.length < 2) {
+                figuresPlayer.forEach(f => f.score.oldPoints = f.score.points)
+                survivors.forEach(f => f.score.points++)
+                lastWinnerPlayerIds = new Set(survivors.map(f => f.playerId))
                 lastRoundEndThen = dtProcessed
+                restartGame = true
             }
-            restartGame = true;
+        } else {
+            const assassins = figures.filter(f => f.playerId && f.team === 'assassin')
+            const guards = figures.filter(f => f.playerId && f.team === 'guard')
+            const vips = figures.filter(f => f.team === 'vip')
+            const assassinSurvivors = assassins.filter(f => !f.isDead)
+            const vipSurvivors = vips.filter(f => !f.isDead)
+            if (assassinSurvivors.length === 0 || vipSurvivors.length === 0) {
+                figuresPlayer.forEach(f => f.score.oldPoints = f.score.points)
+                let winners
+                if (vipSurvivors.length === 0) {
+                    winners = assassins
+                } else {
+                    winners = guards
+                }
+                winners.forEach(f => f.score.points++)
+                lastWinnerPlayerIds = new Set(assassins.map(f => f.playerId))
+                lastRoundEndThen = dtProcessed
+                restartGame = true
+            }
         }
 
         const maxPoints = Math.max(...figuresPlayer.map(f => f.score.points));
@@ -536,7 +552,7 @@ function gameLoop() {
             const figuresWithMaxPoints = figuresPlayer.filter(f => f.score.points === maxPoints);
             if (figuresWithMaxPoints.length === 1) {
                 if (!lastFinalWinnerPlayerId) {
-                   playAudio(soundWin)
+                playAudio(soundWin)
                 }
                 lastFinalWinnerPlayerId = figuresWithMaxPoints[0].playerId;
             }

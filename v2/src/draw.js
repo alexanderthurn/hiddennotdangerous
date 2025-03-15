@@ -386,8 +386,6 @@ const animatePlayerScore = (figure, player) => {
         figure.score.x += -5+10*Math.random()
         figure.score.y += -5+10*Math.random()
     }
-
-    
 }
 
 const addPlayerScore = (figure, player) => {
