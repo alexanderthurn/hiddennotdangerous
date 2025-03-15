@@ -417,11 +417,11 @@ function roundInit() {
             const numberMissingGuards = numberGuards - figures.filter(figure => figure.team === 'guard').length
             const neutralFigures = shuffle(figures.filter(figure => !figure.team))
             for (let i = 0; i < numberMissingGuards; i++) {
-                switchTeam(neutralFigures[i], 'guard', colors.blue)
+                switchTeam(neutralFigures[i], 'guard')
             }
 
             for (let i = numberMissingGuards; i < neutralFigures.length; i++) {
-                switchTeam(neutralFigures[i], 'assassin', colors.red)
+                switchTeam(neutralFigures[i], 'assassin')
             }
 
             // assassin positions
@@ -463,7 +463,7 @@ function roundInit() {
     } else if (stage !== stages.gameLobby) {
         figures.forEach(figure => {
             initRandomPositionFigure(figure)
-            switchTeam(figure, undefined, undefined)
+            switchTeam(figure, undefined)
         })
     }
 

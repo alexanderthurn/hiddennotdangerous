@@ -362,12 +362,15 @@ const addLobbyItems = app => {
     app.ticker.add(() => animateLobbyItems(lobbyContainer))
 }
 
-const botCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: colors.black}).stroke({alpha: 0.5, color: colors.red, width: 2})
-const playerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: colors.black}).stroke({alpha: 0.5, color: colors.black, width: 1})
-const botWinnerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: colors.gold}).stroke({alpha: 0.5, color: colors.red, width: 2})
-const playerWinnerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: colors.gold}).stroke({alpha: 0.5, color: colors.black, width: 1})
+const botCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: colors.white}).stroke({alpha: 0.5, color: colors.red, width: 2})
+const playerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: colors.white}).stroke({alpha: 0.5, color: colors.black, width: 1})
 
 const animatePlayerScore = (figure, player) => {
+    if (figure.team !== figure.oldTeam) {
+        figure.score.getChildAt(0).tint = teams[figure.team] ? teams[figure.team].color : colors.black
+        figure.oldteam = figure.team
+    }
+
     if (!restartGame) {
         var lp = Math.min((dtProcessed - player.joinedTime) / moveNewPlayerDuration, 1)
         var lpi = 1-lp
@@ -383,6 +386,8 @@ const animatePlayerScore = (figure, player) => {
         figure.score.x += -5+10*Math.random()
         figure.score.y += -5+10*Math.random()
     }
+
+    
 }
 
 const addPlayerScore = (figure, player) => {
@@ -400,6 +405,7 @@ const addPlayerScore = (figure, player) => {
     } else {
         circle = new PIXI.Graphics(playerCircleContext)
     }
+    circle.tint = colors.black
     
     const text = new PIXI.Text({
         text: 0,
@@ -445,11 +451,7 @@ const animateWinningCeremony = winnerText => {
             }
 
             if (lastWinnerPlayerIds.has(f.playerId)) {
-                if (figureIsBot(f)) {
-                    f.score.getChildAt(0).context = botWinnerCircleContext
-                } else {
-                    f.score.getChildAt(0).context = playerWinnerCircleContext
-                }
+                f.score.getChildAt(0).tint = colors.gold
             }
         } else if (lastRoundEndThen && dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
             f.score.x = f.x
@@ -470,11 +472,8 @@ const animateWinningCeremony = winnerText => {
             if (lastFinalWinnerPlayerId) {
                 f.score.shownPoints = 0
             }
-            if (figureIsBot(f)) {
-                f.score.getChildAt(0).context = botCircleContext
-            } else {
-                f.score.getChildAt(0).context = playerCircleContext
-            }
+
+            f.score.getChildAt(0).tint = teams[f.team] ? teams[f.team].color : colors.black
         }
     })
     
