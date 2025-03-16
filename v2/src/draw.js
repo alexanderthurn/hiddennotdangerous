@@ -211,7 +211,6 @@ const addNetworkQrCode = (app, lobbyContainer) => {
     nw.qrCodeOptions.foregroundAlpha = 1.0,
     nw.hostRoom();
 
-
     const qrCodeContainer = new PIXI.Container()
     qrCodeContainer.sprite = new PIXI.Sprite()
     qrCodeContainer.sprite.anchor.set(0., 1.0)
@@ -227,6 +226,7 @@ const addNetworkQrCode = (app, lobbyContainer) => {
     qrCodeContainer.label.anchor.set(0.5, 1)
     qrCodeContainer.addChild(qrCodeContainer.sprite, qrCodeContainer.label)
     lobbyContainer.addChild(qrCodeContainer)
+
     app.ticker.add(() => {
         const qrWidth = Math.min(level.width,level.height) * 0.25;
         qrCodeContainer.position.set(level.width*0.0, level.height*1)

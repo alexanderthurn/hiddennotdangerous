@@ -362,6 +362,76 @@ createCloudAtlasData = () => {
     return atlasData
 }
 
+const initVIPGamePositions = figures => {
+    // distribute neutral players evenly
+    const numberPlayerAssassins = figures.filter(figure => figure.playerId && figure.team === 'assassin').length
+    const numberPlayerGuards = figures.filter(figure => figure.playerId && figure.team === 'guard').length
+    const neutralPlayerFigures = shuffle(figures.filter(figure => figure.playerId && !figure.team))
+    const numberJoinSmallerTeam = Math.abs(numberPlayerAssassins - numberPlayerGuards)
+    const numberEvenlyJoinTeam = Math.floor((neutralPlayerFigures.length-numberJoinSmallerTeam)/2)
+    const smallerTeam = numberPlayerAssassins > numberPlayerGuards ? 'guard' : 'assassin'
+    const randomTeam = getRandomInt(2) > 0 ? 'guard' : 'assassin'
+    for (let i = 0; i < numberJoinSmallerTeam; i++) {
+        switchTeam(neutralPlayerFigures[i], smallerTeam)
+    }
+    for (let i = 0; i < numberEvenlyJoinTeam; i++) {
+        switchTeam(neutralPlayerFigures[i+numberJoinSmallerTeam], 'guard')
+    }
+    for (let i = 0; i < numberEvenlyJoinTeam; i++) {
+        switchTeam(neutralPlayerFigures[i+numberJoinSmallerTeam+numberEvenlyJoinTeam], 'assassin')
+    }
+    for (let i = 0; i < (neutralPlayerFigures.length-numberJoinSmallerTeam) % 2; i++) {
+        switchTeam(neutralPlayerFigures[i+neutralPlayerFigures.length-1], randomTeam)
+    }
+
+    // put neutrals in teams
+    const numberMissingGuards = numberGuards - figures.filter(figure => figure.team === 'guard').length
+    const neutralFigures = shuffle(figures.filter(figure => !figure.team))
+    for (let i = 0; i < numberMissingGuards; i++) {
+        switchTeam(neutralFigures[i], 'guard')
+    }
+
+    for (let i = numberMissingGuards; i < neutralFigures.length; i++) {
+        switchTeam(neutralFigures[i], 'assassin')
+    }
+
+    // assassin positions
+    const assassins = shuffle(figures.filter(figure => figure.team === 'assassin'))
+    const assassinPositions = []
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 5; j++) {
+            assassinPositions.push({x: ((2*j+1)/10)*level.width, y: (2+(2*i+1)/6)/3*level.height})
+        }
+    }
+    assassins.forEach((f, i) => {
+        initFigure(f, assassinPositions[i].x, assassinPositions[i].y, deg2rad(-90))
+    })
+
+    // guard positions
+    const guards = shuffle(figures.filter(figure => figure.team === 'guard'))
+    const guardPositions = []
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 5; j++) {
+            if (i > 0 || j === 0 || j === 4) {
+                guardPositions.push({x: ((2*j+1)/10)*level.width, y: ((2*i+1)/8)/2*level.height})
+            }
+        }
+    }
+    guards.forEach((f, i) => {
+        initFigure(f, guardPositions[i].x, guardPositions[i].y, deg2rad(90))
+    })
+
+    // vip positions
+    const vips = figures.filter(figure => figure.team === 'vip')
+    const vipPositions = []
+    for (let i = 0; i < 3; i++) {
+        vipPositions.push({x: (5+(i-1)/3)/10*level.width, y: (1/8)/2*level.height})
+    }
+    vips.forEach((f, i) => {
+        initFigure(f, vipPositions[i].x, vipPositions[i].y, deg2rad(90))
+    })
+}
+
 const attackFigure = (figureAttacker, figureAttacked) => {
     const attackDistance = figureAttacker.attackDistanceMultiplier ? figureAttacker.attackDistanceMultiplier*figureAttacker.attackDistance : figureAttacker.attackDistance
     if (distance(figureAttacker.x,figureAttacker.y,figureAttacked.x,figureAttacked.y) < attackDistance) {
