@@ -394,8 +394,9 @@ const addPlayerScore = (figure, player) => {
     const figureIndex = figures.filter(f => f.type === 'fighter').findIndex(f => !f.playerId)
     playerScore.xDefault = 32+figureIndex*offx
     playerScore.yDefault = level.height+32
-    playerScore.shownPoints = 0
     playerScore.points = 0
+    playerScore.oldPoints = 0
+    playerScore.shownPoints = 0
 
     let circle
     if (player.type === 'bot') {

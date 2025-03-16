@@ -520,11 +520,7 @@ function gameLoop() {
         if (game === games.battleRoyale || game === games.food) {
             const survivors = figuresPlayer.filter(f => !f.isDead)
             if (survivors.length < 2) {
-                figuresPlayer.forEach(f => f.score.oldPoints = f.score.points)
-                survivors.forEach(f => f.score.points++)
-                lastWinnerPlayerIds = new Set(survivors.map(f => f.playerId))
-                lastRoundEndThen = dtProcessed
-                restartGame = true
+                winRound(survivors)
             }
         } else {
             const assassins = figures.filter(f => f.playerId && f.team === 'assassin')
@@ -533,17 +529,7 @@ function gameLoop() {
             const assassinSurvivors = assassins.filter(f => !f.isDead)
             const vipSurvivors = vips.filter(f => !f.isDead)
             if (assassinSurvivors.length === 0 || vipSurvivors.length === 0) {
-                figuresPlayer.forEach(f => f.score.oldPoints = f.score.points)
-                let winners
-                if (vipSurvivors.length === 0) {
-                    winners = assassins
-                } else {
-                    winners = guards
-                }
-                winners.forEach(f => f.score.points++)
-                lastWinnerPlayerIds = new Set(winners.map(f => f.playerId))
-                lastRoundEndThen = dtProcessed
-                restartGame = true
+                winRound(vipSurvivors.length === 0 ? assassins : guards)
             }
         }
 

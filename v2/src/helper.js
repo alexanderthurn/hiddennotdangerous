@@ -375,3 +375,13 @@ const attackFigure = (figureAttacker, figureAttacked) => {
     }
     return false
 }
+
+const winRound = winnerFigures =>{
+    winnerFigures.forEach(f => {
+        f.score.oldPoints = f.score.points
+        f.score.points++
+    })
+    lastWinnerPlayerIds = new Set(winnerFigures.map(f => f.playerId))
+    lastRoundEndThen = dtProcessed
+    restartGame = true
+}
