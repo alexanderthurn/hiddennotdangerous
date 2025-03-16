@@ -412,8 +412,8 @@ function roundInit() {
             })
         } else {
             // distribute neutral players evenly
-            const numberPlayerAssassins = figures.filter(figure => figure.team === 'assassin').length
-            const numberPlayerGuards = figures.filter(figure => figure.team === 'guard').length
+            const numberPlayerAssassins = figures.filter(figure => figure.playerId && figure.team === 'assassin').length
+            const numberPlayerGuards = figures.filter(figure => figure.playerId && figure.team === 'guard').length
             const neutralPlayerFigures = shuffle(figures.filter(figure => figure.playerId && !figure.team))
             const numberJoinSmallerTeam = Math.abs(numberPlayerAssassins - numberPlayerGuards)
             const numberEvenlyJoinTeam = Math.floor((neutralPlayerFigures.length-numberJoinSmallerTeam)/2)
