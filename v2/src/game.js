@@ -411,6 +411,27 @@ function roundInit() {
                 initRandomPositionFigure(figure)
             })
         } else {
+            // distribute neutral players evenly
+            const numberAssassins = figures.filter(figure => figure.team === 'assassin').length
+            const numberGuard = figures.filter(figure => figure.team === 'guard').length
+            const neutralPlayerFigures = shuffle(figures.filter(figure => figure.playerId && !figure.team))
+            const numberJoinSmallerTeam = Math.abs(numberAssassins - numberGuard)
+            const numberEvenlyJoinTeam = Math.floor((neutralPlayerFigures.length-numberJoinSmallerTeam)/2)
+            const smallerTeam = numberAssassins > numberGuard ? 'guard' : 'assassin'
+            const randomTeam = getRandomInt(2) > 0 ? 'guard' : 'assassin'
+            for (let i = 0; i < numberJoinSmallerTeam; i++) {
+                switchTeam(neutralPlayerFigures[i], smallerTeam)
+            }
+            for (let i = 0; i < numberEvenlyJoinTeam; i++) {
+                switchTeam(neutralPlayerFigures[i+numberJoinSmallerTeam], 'guard')
+            }
+            for (let i = 0; i < numberEvenlyJoinTeam; i++) {
+                switchTeam(neutralPlayerFigures[i+numberJoinSmallerTeam+numberEvenlyJoinTeam], 'assassin')
+            }
+            for (let i = 0; i < (neutralPlayerFigures.length-numberJoinSmallerTeam) % 2; i++) {
+                switchTeam(neutralPlayerFigures[i+neutralPlayerFigures.length-1], randomTeam)
+            }
+
             // put neutrals in teams
             const numberMissingGuards = numberGuards - figures.filter(figure => figure.team === 'guard').length
             const neutralFigures = shuffle(figures.filter(figure => !figure.team))
