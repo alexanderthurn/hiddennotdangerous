@@ -207,13 +207,16 @@ const buttonDefinition = () => ({
 
 const teams = {
     assassin: {
-        color: colors.red
+        color: colors.red,
+        walkRectLength: 300
     },
     guard: {
-        color: colors.blue
+        color: colors.blue,
+        walkRectLength: 300
     },
     vip: {
-        color: colors.green
+        color: colors.darkgreen,
+        walkRectLength: 150
     }
 }
 
@@ -716,7 +719,7 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
         if (time >= f.startWalkTime) {
             if (f.speed === 0) {
                 if (!startKeyboardMovement) {
-                    [f.xTarget, f.yTarget] = getRandomXY(level)
+                    [f.xTarget, f.yTarget] = getCloseRandomXY(f)
                 }
 
                 if (numberJoinedKeyboardPlayers > 0) {

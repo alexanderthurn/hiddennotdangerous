@@ -288,14 +288,27 @@ const createLevelContainer = (app, level) => {
 
 function createLevel() {
     const level = {width: 1920, height: 1080, padding: 16}
+    level.rectangle = new PIXI.Rectangle(level.padding, level.padding, level.width-2*level.padding, level.height-2*level.padding)
     level.shortestPathNotBean5 = 2*0.6*level.height+2*0.3*Math.hypot(level.height, level.width);
     level.shortestPathBean5 = 2*0.6*level.height+0.6*level.width+0.3*Math.hypot(level.height, level.width);
 
     return level
 }
 
-function getRandomXY(level) {
-    return[level.padding+Math.random()*(level.width-level.padding*2), level.padding+Math.random()*(level.height-level.padding*2)]
+function getRandomXY() {
+    return [level.rectangle.x+Math.random()*level.rectangle.width, level.rectangle.y+Math.random()*level.rectangle.height]
+}
+
+function getCloseRandomXY(figure) {
+    if (figure.walkRectLength) {
+        return getRandomXYInRectangle(figure.x-figure.walkRectLength, figure.y-figure.walkRectLength, 2*figure.walkRectLength, 2*figure.walkRectLength)
+    }
+    return getRandomXY()
+}
+
+function getRandomXYInRectangle(x, y, w, h) {
+    const rectangle = new PIXI.Rectangle(x, y, w, h).fit(level.rectangle)
+    return [rectangle.x+Math.random()*rectangle.width, rectangle.y+Math.random()*rectangle.height]
 }
 
 const getRandomXYInCircle = (x, y, r) => {

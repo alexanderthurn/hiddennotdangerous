@@ -301,6 +301,7 @@ const animateTeamSwitcher = button => {
 
 const switchTeam = (figure, team) => {
     figure.team = team
+    figure.walkRectLength = teams[team]?.walkRectLength
 }
 
 const createTeamSwitcher = (app, props, lobbyContainer) => {
@@ -796,10 +797,10 @@ const addFigures = (app, spritesheet) => {
             points: 0,
             attackDistance: 80,
             attackAngle: 90,
-            team: 'vip',
             type: 'fighter',
         })
-        figure.tint = colors.darkgreen
+        switchTeam(figure, 'vip')
+
         app.ticker.add(() => {
             figure.visible = game === games.vip
         })
