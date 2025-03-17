@@ -459,7 +459,7 @@ function gameLoop() {
         while(dtToProcess > dtFix) {
             if (!restartGame) {
                 handleInput(players, figures, dtProcessed) 
-                handleAi(figures, dtProcessed, oldNumberJoinedKeyboardPlayers, dtFix)
+                handleNPCs(figures, dtProcessed, oldNumberJoinedKeyboardPlayers, dtFix)
                 updateGame(figures, dtFix, dtProcessed)
             }
             dtToProcess-=dtFix
@@ -699,15 +699,15 @@ function handleInput(players, figures, dtProcessed) {
     })
 }
 
-function handleAi(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
+function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
     const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.map(f => f.type === 'fighter' && f.playerId).includes(k.playerId)).length;
     const startKeyboardMovement = oldNumberJoinedKeyboardPlayers === 0 && numberJoinedKeyboardPlayers > 0;
-    const livingAIFigures = figures.filter(f => !f.playerId && !f.isDead && f.type === 'fighter');
+    const livingNPCFigures = figures.filter(f => !f.playerId && !f.isDead && f.type === 'fighter');
     let shuffledIndexes;
     if (startKeyboardMovement) {
-        shuffledIndexes = shuffle([...Array(livingAIFigures.length).keys()]);
+        shuffledIndexes = shuffle([...Array(livingNPCFigures.length).keys()]);
     }
-    livingAIFigures.forEach((f,i,array) => {
+    livingNPCFigures.forEach((f,i,array) => {
         if (((startKeyboardMovement && shuffledIndexes[i] < array.length/2) || distance(f.x,f.y,f.xTarget,f.yTarget) < 5) && f.speed > 0) {
             const breakDuration = startKeyboardMovement ? 0 : Math.random() * f.maxBreakDuration;
             f.startWalkTime = Math.random() * breakDuration + time

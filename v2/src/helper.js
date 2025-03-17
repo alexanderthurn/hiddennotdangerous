@@ -298,6 +298,25 @@ function getRandomXY(level) {
     return[level.padding+Math.random()*(level.width-level.padding*2), level.padding+Math.random()*(level.height-level.padding*2)]
 }
 
+const getRandomXYInCircle = (x, y, r) => {
+    const angle = Math.random()*Math.PI, angleX = Math.cos(angle), angleY = Math.sin(angle)
+
+    const t1 = Math.min(distanceToBorder(x, y, angleX, angleY), r)
+    const t2 = Math.min(distanceToBorder(x, y, -angleX, -angleY), r)
+    const t = Math.random()*(t1+t2)-t2
+
+    return [t*angleX+x, t*angleY+y]
+}
+
+const distanceToBorder = (x, y, angleX, angleY) => {
+    const xBorder = angleX > 0 ? level.width-level.padding : level.padding
+    const yBorder = angleY > 0 ? level.height-level.padding : level.padding
+    const tX = (xBorder-x)/angleX
+    const tY = (yBorder-y)/angleY
+
+    return Math.min(!isNaN(tX) ? tX : Infinity, !isNaN(tY) ? tY : Infinity)
+}
+
 function cropXY(x,y,level) {
     if (x > level.width-level.padding) x = level.width-level.padding
     if (y > level.height-level.padding) y = level.height-level.padding
