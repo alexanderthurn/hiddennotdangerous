@@ -440,23 +440,24 @@ function roundInit() {
 function gameLoop() {
     now = Date.now();
     dt = now - then;
-    if (fpsTime < now - 1000) {
-        fpsTime = now
-        fps = Math.floor(1000/dt)
-    }
-
-    players = collectInputs()
-    const oldNumberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.map(f => f.type === 'fighter' && f.playerId).includes(k.playerId)).length;
-
-    // remove figures without valid playerId
-    figures.filter(f => f.playerId).forEach((f) => {
-        if (!players.some(p => p.playerId === f.playerId)) {
-            destroyContainer(app, f.score)
-            f.playerId = null
-        }
-    })
 
     if (windowHasFocus) {
+        if (fpsTime < now - 1000) {
+            fpsTime = now
+            fps = Math.floor(1000/dt)
+        }
+
+        players = collectInputs()
+        const oldNumberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.map(f => f.type === 'fighter' && f.playerId).includes(k.playerId)).length;
+
+        // remove figures without valid playerId
+        figures.filter(f => f.playerId).forEach((f) => {
+            if (!players.some(p => p.playerId === f.playerId)) {
+                destroyContainer(app, f.score)
+                f.playerId = null
+            }
+        })
+
         dtToProcess += dt
         let counter = 0;
         while(dtToProcess > dtFix) {
@@ -469,47 +470,46 @@ function gameLoop() {
             dtProcessed+=dtFix
             counter++
         }
-        
-    }
 
-    const figuresPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
+        const figuresPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
 
-    if (!restartGame && stage === stages.game) {
-        if (game === games.battleRoyale || game === games.food) {
-            const survivors = figuresPlayer.filter(f => !f.isDead)
-            if (survivors.length < 2) {
-                winRound(survivors)
+        if (!restartGame && stage === stages.game) {
+            if (game === games.battleRoyale || game === games.food) {
+                const survivors = figuresPlayer.filter(f => !f.isDead)
+                if (survivors.length < 2) {
+                    winRound(survivors)
+                }
+            } else {
+                const assassins = figures.filter(f => f.playerId && f.team === 'assassin')
+                const guards = figures.filter(f => f.playerId && f.team === 'guard')
+                const vips = figures.filter(f => f.team === 'vip')
+                const assassinSurvivors = assassins.filter(f => !f.isDead)
+                const vipSurvivors = vips.filter(f => !f.isDead)
+                if (assassinSurvivors.length === 0 || vipSurvivors.length === 0) {
+                    winRound(vipSurvivors.length === 0 ? assassins : guards)
+                }
             }
-        } else {
-            const assassins = figures.filter(f => f.playerId && f.team === 'assassin')
-            const guards = figures.filter(f => f.playerId && f.team === 'guard')
-            const vips = figures.filter(f => f.team === 'vip')
-            const assassinSurvivors = assassins.filter(f => !f.isDead)
-            const vipSurvivors = vips.filter(f => !f.isDead)
-            if (assassinSurvivors.length === 0 || vipSurvivors.length === 0) {
-                winRound(vipSurvivors.length === 0 ? assassins : guards)
+
+            const maxPoints = Math.max(...figuresPlayer.map(f => f.score.points));
+            if (maxPoints >= pointsToWin) {
+                const figuresWithMaxPoints = figuresPlayer.filter(f => f.score.points === maxPoints);
+                if (!lastFinalWinnerPlayerIds) {
+                    lastFinalWinnerPlayerIds = new Set(figuresWithMaxPoints.map(f => f.playerId))
+                    playAudio(soundWin)
+                }
             }
         }
 
-        const maxPoints = Math.max(...figuresPlayer.map(f => f.score.points));
-        if (maxPoints >= pointsToWin) {
-            const figuresWithMaxPoints = figuresPlayer.filter(f => f.score.points === maxPoints);
-            if (!lastFinalWinnerPlayerIds) {
-                lastFinalWinnerPlayerIds = new Set(figuresWithMaxPoints.map(f => f.playerId))
-                playAudio(soundWin)
+        const gameBreakDuration = (figuresPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
+        if (restartGame && (!lastRoundEndThen || dtProcessed - lastRoundEndThen > gameBreakDuration)) {
+            restartGame = false;
+            if (lastFinalWinnerPlayerIds) {
+                nextStage = stages.startLobby
             }
+            roundInit();
         }
     }
 
-    const gameBreakDuration = (figuresPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
-    if (restartGame && (!lastRoundEndThen || dtProcessed - lastRoundEndThen > gameBreakDuration)) {
-        restartGame = false;
-        if (lastFinalWinnerPlayerIds) {
-            nextStage = stages.startLobby
-        }
-        roundInit();
-    }
-    
     then = now
     window.requestAnimationFrame(gameLoop);
 }

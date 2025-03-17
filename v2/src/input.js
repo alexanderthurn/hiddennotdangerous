@@ -1,12 +1,20 @@
 window.addEventListener('keydown', event => {
+    if (!windowHasFocus) {
+        windowHasFocus = true
+        return
+    }
+
     keyboards.forEach(k => {
         k.pressed.add(event.code);
     });
 
+    if (event.code === 'Escape') {
+        showDebug =!showDebug
+    }
+
     if (event.code === 'ArrowDown' || event.code === 'ArrowUp') { /* prevent scrolling of website */
         event.preventDefault();
     }
-  
 });
 
 window.addEventListener('blur', () => {
@@ -39,12 +47,6 @@ window.addEventListener('touchmove', event => {
 
 
 window.addEventListener('keyup', event => {
-    if (event.code === 'Escape') {
-        showDebug =!showDebug
-    }
-    if (event.code === 'KeyM') {
-        toggleMusic()
-    }
     keyboards.forEach(k => {
         k.pressed.delete(event.code);
     });
@@ -60,8 +62,6 @@ window.addEventListener('pointerdown', event => {
     }
 
     if (mousePlayers.length === 0) {mousePlayers.push(mouses[0]);}
-
-  
   
     if (event.pointerType === 'mouse') {
         mousePlayers[0].pressed.add(event.button);
@@ -89,7 +89,6 @@ window.addEventListener('pointerup', event => {
         windowHasFocus = true
         return
     }
-    
    
     if (event.pointerType === 'mouse') {
         mousePlayers[0].pressed.delete(event.button);
