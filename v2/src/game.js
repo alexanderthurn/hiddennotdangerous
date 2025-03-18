@@ -382,7 +382,15 @@ function roundInit() {
         gamepadPlayers = []
         mousePlayers = []
         keyboardPlayers = []
+
+        figures.filter(figure => figure.type === 'fighter').forEach(figure => {
+            destroyContainer(app, figure.score)
+            figure.playerId = null
+        })
     }
+
+    figures.filter(figure => figure.type === 'cloud').forEach(cloud => destroyContainer(app, cloud))
+    
     if (!isMusicMuted()) {
         if (stage === stages.startLobby) {
             stopMusicPlaylist();
@@ -392,13 +400,6 @@ function roundInit() {
     }
 
     Object.values(buttons).forEach(button => button.loadingPercentage = 0);
-
-    figures.filter(figure => figure.type === 'fighter').forEach(figure => {
-        if (stage === stages.startLobby) {
-            destroyContainer(app, figure.score)
-            figure.playerId = null
-        }
-    })
 
     figures = []
 
