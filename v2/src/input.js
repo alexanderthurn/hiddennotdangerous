@@ -153,10 +153,15 @@ function collectInputs() {
             } else {
                 var beans = figures.filter(b => b.type === 'bean')
                 if (f.beans.size === beans.length) {
-                    const otherPlayerFigures = figures.filter(fig => fig.playerId && fig.playerId !== f.playerId && f.type === 'fighter');
+                    const otherPlayerFigures = figures.filter(fig => fig.playerId && fig.playerId !== f.playerId && !fig.isDead && fig.type === 'fighter');
+
+                    //go to center of other players
                     xTarget = otherPlayerFigures.reduce((prevValue, fig) => prevValue+fig.x, 0)/otherPlayerFigures.length;
                     yTarget = otherPlayerFigures.reduce((prevValue, fig) => prevValue+fig.y, 0)/otherPlayerFigures.length;
                     if (distance(f.x,f.y,xTarget, yTarget) < 50) {
+                        //turn around and fart
+                        xTarget *= -1
+                        yTarget *= -1
                         bot.isAttackButtonPressed = true
                     }
                 } else {
