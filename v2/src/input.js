@@ -191,11 +191,15 @@ function collectInputs() {
     gamepadPlayers.forEach(g => {
         g.isAttackButtonPressed = false
         g.isAnyButtonPressed = false
-        if (g.buttons[0].pressed) {
-            g.isAttackButtonPressed = true
-        } 
         if (g.buttons.some(b => b.pressed)) {
+            if (!windowHasFocus) {
+                windowHasFocus = true
+                return
+            }
             g.isAnyButtonPressed = true
+            if (g.buttons[0].pressed) {
+                g.isAttackButtonPressed = true
+            }
         }
         let x = g.axes[0];
         let y = g.axes[1];
