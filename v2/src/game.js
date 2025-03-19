@@ -1,7 +1,7 @@
 var loadPromises = []
 var gamepadPlayers = []
-var mousePlayers = [];
-var mouses = [{pointerType: 'unknown', x: 0, y: 0, xCenter: undefined, yCenter: undefined, pressed: new Set()}]
+var touchPlayers = [];
+var touches = [{pointerType: 'unknown', x: 0, y: 0, xCenter: undefined, yCenter: undefined, pressed: new Set()}]
 const defaultkeyboardPlayer = {
     xAxis: 0,
     yAxis: 0,
@@ -380,7 +380,7 @@ function roundInit() {
     if (stage === stages.startLobby) {
         game = undefined
         gamepadPlayers = []
-        mousePlayers = []
+        touchPlayers = []
         keyboardPlayers = []
 
         figures.filter(figure => figure.type === 'fighter').forEach(figure => {

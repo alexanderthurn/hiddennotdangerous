@@ -343,7 +343,7 @@ const addLobbyItems = app => {
     const fontHeight = level.width*0.017  
     const howToPlay = new PIXI.Text({
         text: 'HOW TO PLAY\n\nJoin by pressing any key on your Gamepad' 
-            + '\nor WASDT(Key1) or ' + String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0(RSHIFT)\nor mouse or touch' 
+            + '\nor WASDT(Key1) or ' + String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0(RSHIFT)\nor touch' 
             + '\n\n1.) Find your player 2.) Fart to knock out others\n3.) Stay hidden 4.) Eat to power up your farts' 
             + '\n\nBe the last baby standing!',
         style: {
@@ -810,15 +810,14 @@ const addFigures = (app, spritesheet) => {
 
 const addOverlay = app => {
     const circleOfDeathGraphic = createCircleOfDeath(app)
-    const mouseControl = createMouseControl(app)
     const touchControl = createTouchControl(app)
     const fpsText = createFpsText(app)
     const pauseOverlay = createPauseOverlay(app)
 
     circleOfDeath = circleOfDeathGraphic
     levelContainer.addChild(circleOfDeathGraphic)
-    app.stage.addChild(mouseControl, touchControl, fpsText, pauseOverlay)
-    overlayLayer.attach(circleOfDeathGraphic, mouseControl, touchControl, fpsText, pauseOverlay)
+    app.stage.addChild(touchControl, fpsText, pauseOverlay)
+    overlayLayer.attach(circleOfDeathGraphic, touchControl, fpsText, pauseOverlay)
 }
 
 const animateCircleOfDeath = circle => {
@@ -964,7 +963,7 @@ const createTouchControl = app => {
         const distanceToBorder = 0.3*minHeightWidth
         const radius = 0.18*minHeightWidth
 
-        const mp = mousePlayers.length > 0 ? mousePlayers[0] : mouses[0]
+        const mp = touchPlayers.length > 0 ? touchPlayers[0] : touches[0]
         touchControl.visible = mp.pointerType === 'touch'
 
         moveControl.radius = radius
@@ -984,49 +983,6 @@ const createTouchControl = app => {
     })
 
     return touchControl
-}
-
-const createMouseControl = app => {
-    const mouseControl = new PIXI.Container()
-    mouseControl.alpha = 0.5
-
-    mp = mousePlayers.length > 0 ? mousePlayers[0] : mouses[0]
-    const circle = new PIXI.Graphics().circle(0, 0,level.width*0.03)
-    .stroke({color: colors.white, width:8})
-
-    const arrow = new PIXI.Container()
-    const arrowBody = new PIXI.Graphics().rect(0, -4, 1, 8).fill(colors.white)
-    const arrowHead = new PIXI.Graphics().moveTo(0, -12).lineTo(12, 0).lineTo(0,12).fill(colors.white)
-    arrow.addChild(arrowBody, arrowHead)
-
-    const circlePointer = new PIXI.Graphics().circle(0, 0, 12)
-    .fill(colors.white)
-
-    app.ticker.add(() => {
-        const mp = mousePlayers.length > 0 ? mousePlayers[0] : mouses[0]
-        if (mp.xCenter !== undefined && mp.yCenter !== undefined) {
-            circle.x = mp.xCenter
-            circle.y = mp.yCenter
-            arrow.visible = mp.isMoving
-            if (mp.isMoving) {
-                const length = distance(mp.xCenter, mp.yCenter, mp.x, mp.y)
-                arrow.x = mp.xCenter
-                arrow.y = mp.yCenter
-                arrow.rotation = angle(mp.xCenter, mp.yCenter, mp.x, mp.y)
-                arrow.getChildAt(0).width = length-12
-                arrow.getChildAt(1).x = length-12
-            }
-        }
-        circlePointer.x = mp.x
-        circlePointer.y = mp.y
-
-        arrow.visible = mp.isMoving
-        circlePointer.visible = !mp.isMoving
-        mouseControl.visible = mp.pointerType !== 'touch' && mp.xCenter !== undefined && mp.yCenter !== undefined
-    })
-    mouseControl.addChild(circle, arrow, circlePointer)
-
-    return mouseControl
 }
 
 const addDebug = app => {

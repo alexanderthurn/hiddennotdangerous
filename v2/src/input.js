@@ -25,16 +25,9 @@ window.addEventListener('focus', () => {
     setTimeout(() => {windowHasFocus = true}, 100)
 }, { passive: false })
 
-window.addEventListener('click', event => {
-    
-    if (mousePlayers.length > 0) {mousePlayers[0].pointerType = 'mouse'}
-    mouses[0].pointerType = 'mouse'
-    
-}, { passive: false })
-
 window.addEventListener('touchstart', event => {
-    if (mousePlayers.length > 0) {mousePlayers[0].pointerType = 'touch'}
-    mouses[0].pointerType = 'touch'
+    if (touchPlayers.length > 0) {touchPlayers[0].pointerType = 'touch'}
+    touches[0].pointerType = 'touch'
 
     event.preventDefault();
 }, { passive: false });
@@ -61,18 +54,14 @@ window.addEventListener('pointerdown', event => {
         return
     }
 
-    if (mousePlayers.length === 0) {mousePlayers.push(mouses[0]);}
-  
-    if (event.pointerType === 'mouse') {
-        mousePlayers[0].pressed.add(event.button);
-    }
-
     if (event.pointerType === 'touch') {
+        if (touchPlayers.length === 0) {touchPlayers.push(touches[0]);}
+
         if (event.clientX < (btnTouchAction.radius > 0 ? (btnTouchAction.x + btnTouchController.x) >> 1 : app.screen.width*0.7) || event.clientY < app.screen.height * 0.5) {
-            mousePlayers[0].pressed.add(0);
+            touchPlayers[0].pressed.add(0);
             pointerEvents[event.pointerId] = 0
         } else {
-            mousePlayers[0].pressed.add(1);
+            touchPlayers[0].pressed.add(1);
             pointerEvents[event.pointerId] = 1
         }
     } 
@@ -83,19 +72,13 @@ window.addEventListener('pointerdown', event => {
 
 
 window.addEventListener('pointerup', event => {
-    if (mousePlayers.length === 0 && windowHasFocus) {mousePlayers.push(mouses[0])}
-
     if (!windowHasFocus) {
         windowHasFocus = true
         return
     }
-   
-    if (event.pointerType === 'mouse') {
-        mousePlayers[0].pressed.delete(event.button);
-    } 
 
     if (event.pointerType === 'touch') {
-        mousePlayers[0].pressed.delete( pointerEvents[event.pointerId]);
+        touchPlayers[0].pressed.delete( pointerEvents[event.pointerId]);
         delete pointerEvents[event.pointerId]
     } 
 
@@ -108,15 +91,15 @@ window.addEventListener('pointermove', event => {
         return
     }
 
-    mouses[0].x = event.clientX
-    mouses[0].y = event.clientY
+    touches[0].x = event.clientX
+    touches[0].y = event.clientY
 
-    if (mousePlayers.length > 0) {
-        mousePlayers[0].x = mouses[0].x
-        mousePlayers[0].y =  mouses[0].y
+    if (touchPlayers.length > 0) {
+        touchPlayers[0].x = touches[0].x
+        touchPlayers[0].y =  touches[0].y
     } else {
-        mouses[0].xCenter = mouses[0].x
-        mouses[0].yCenter = mouses[0].y
+        touches[0].xCenter = touches[0].x
+        touches[0].yCenter = touches[0].y
     }
 
     event.preventDefault();
@@ -262,11 +245,10 @@ function collectInputs() {
             }
         })
     });
-
     
-    mousePlayers.forEach((mp,i) => {
-        mp.type = 'mouse'
-        mp.playerId = 'm' + i
+    touchPlayers.forEach((mp,i) => {
+        mp.type = 'touch'
+        mp.playerId = 't' + i
         mp.isAttackButtonPressed = mp.pressed.has(0)
         mp.xAxis = 0
         mp.yAxis = 0
@@ -287,24 +269,9 @@ function collectInputs() {
 
                 mp.isMoving = Math.abs(mp.xAxis) + Math.abs(mp.yAxis) > 4
                
-            } else if (mp.pointerType === 'mouse') {
-                let x = mp.x- mp.xCenter
-                let y = mp.y- mp.yCenter
-                mp.xAxis = x
-                mp.yAxis = y   
-                if (mp.pressed.has(2)) {
-                    mp.xAxis = 0
-                    mp.yAxis = 0 
-                    mp.xCenter = mp.x
-                    mp.yCenter = mp.y
-                }
-                mp.isMoving = Math.abs(mp.xAxis) + Math.abs(mp.yAxis) > level.width*0.05
             }
-        
         }
-       
     })
 
-    return [...gamepadPlayers, ...keyboardPlayers, ...mousePlayers, ...botPlayers];
-
+    return [...gamepadPlayers, ...keyboardPlayers, ...touchPlayers, ...botPlayers];
 }
