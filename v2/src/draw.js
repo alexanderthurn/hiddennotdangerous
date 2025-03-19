@@ -301,6 +301,7 @@ const animateTeamSwitcher = button => {
 
 const switchTeam = (figure, team) => {
     figure.team = team
+    figure.maxSpeed = teams[team]?.maxSpeed || 0.08
     figure.walkRectLength = teams[team]?.walkRectLength
 }
 
@@ -791,7 +792,6 @@ const addFigures = (app, spritesheet) => {
     for (var i = 0; i < numberVIPs; i++) {
         const figure = createFigure(app, spritesheet, {
             maxBreakDuration: 5000,
-            maxSpeed: 0.04,
             attackDuration: 500,
             attackBreakDuration: 2000,
             points: 0,
