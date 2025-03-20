@@ -438,18 +438,34 @@ const initVIPGamePositions = figures => {
         initFigure(f, assassinPositions[i].x, assassinPositions[i].y, deg2rad(-90))
     })
 
-    // guard positions
+    // guard positions, minimum guards in center columns
     const guards = shuffle(figures.filter(figure => figure.team === 'guard'))
-    const guardPositions = []
+    
+    const minCenterPlayerGuards = 2
+    let centerGuards = guards.filter(figure => figure.playerId).slice(0, minCenterPlayerGuards)
+    const numberMinCenterPlayers = centerGuards.length
+    let otherGuards = guards.filter(figure => !new Set(centerGuards).has(figure))
+    centerGuards = centerGuards.concat(otherGuards.slice(0, 9-numberMinCenterPlayers))
+    otherGuards = otherGuards.slice(9-numberMinCenterPlayers)
+
+    const guardCenterPositions = [], guardOuterPositions = []
     for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 5; j++) {
             if (i > 0 || j === 0 || j === 4) {
-                guardPositions.push({x: ((2*j+1)/10)*level.width, y: ((2*i+1)/8)/2*level.height})
+                const position = {x: ((2*j+1)/10)*level.width, y: ((2*i+1)/8)/2*level.height}
+                if (j === 0 || j === 4) {
+                    guardOuterPositions.push(position)
+                } else {
+                    guardCenterPositions.push(position)
+                }
             }
         }
     }
-    guards.forEach((f, i) => {
-        initFigure(f, guardPositions[i].x, guardPositions[i].y, deg2rad(90))
+    centerGuards.forEach((f, i) => {
+        initFigure(f, guardCenterPositions[i].x, guardCenterPositions[i].y, deg2rad(90))
+    })
+    otherGuards.forEach((f, i) => {
+        initFigure(f, guardOuterPositions[i].x, guardOuterPositions[i].y, deg2rad(90))
     })
 
     // vip positions
