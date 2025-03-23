@@ -404,8 +404,13 @@ class FWNetwork {
             return this.getLocalGamepads();
         }
         const localGamepads = Array.from(navigator.getGamepads());
+        this.networkGamepads.forEach((gp, idx) => {
+            if (gp) gp.index = 'gamepad' + idx;
+        })
         const allGamepads = [...localGamepads, ...this.networkGamepads];
+        
         return allGamepads;
+       
     }
 
     // Gibt nur die Netzwerk-Gamepads zurück (nur relevant für Host)
