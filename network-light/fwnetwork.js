@@ -405,7 +405,7 @@ class FWNetwork {
         }
         const localGamepads = Array.from(navigator.getGamepads());
         this.networkGamepads.forEach((gp, idx) => {
-            if (gp) gp.index = 'gamepad' + idx;
+            if (gp) gp.index = localGamepads.length + idx;
         })
         const allGamepads = [...localGamepads, ...this.networkGamepads];
         
