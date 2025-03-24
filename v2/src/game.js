@@ -598,10 +598,7 @@ function updateGame(figures, dt, dtProcessed) {
         circleOfDeath.radius = scale*circleOfDeath.startRadius
         figuresAlive.filter(f => f.type === 'fighter' ).forEach(f => {
             if (distance(f.x, f.y, level.width/2, level.height/2) > circleOfDeath.radius) {
-                f.isDead = true
-                f.killTime = dtProcessed
-                f.speed = 0
-                playAudioPool(soundDeathPool)
+                killFigure(f)
             }
         })
     }
