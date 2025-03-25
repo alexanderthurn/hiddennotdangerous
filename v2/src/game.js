@@ -20,7 +20,7 @@ var keyboards = [{bindings: {
     'KeyW': {playerId: 'k0', action: 'up'},
     'KeyS': {playerId: 'k0', action: 'down'},
     'KeyT': {playerId: 'k0', action: 'attack'},
-    'KeyQ': {playerId: 'k0', action: 'speed'},
+    'ShiftLeft': {playerId: 'k0', action: 'speed'},
     'KeyR': {playerId: 'k0', action: 'marker'},
     'Digit1': {playerId: 'k0', action: 'attack'},
     'Digit2': {playerId: 'k0', action: 'speed'},
