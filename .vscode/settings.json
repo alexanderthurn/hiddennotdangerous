@@ -1,5 +1,7 @@
 {
     "search.exclude": {
-      "**/v1": true
+      "/v1": true,
+      "/network-light": true,
+      "/misc": true
     }
   }

@@ -357,6 +357,7 @@ const addLobbyItems = app => {
     howToPlay.anchor.set(0.5, 0)
     howToPlay.x = level.width*0.22+fontHeight
     howToPlay.y = level.height*0.1
+    howToPlay.visible = false
 
     lobbyContainer.addChild(howToPlay)
     levelContainer.addChild(lobbyContainer)
@@ -843,7 +844,7 @@ const animatePauseOverlay = (app, overlay) => {
     background.height = app.screen.height/2
     background.width = app.screen.width
     background.y = app.screen.height/4
-    text.text = (stage !== stages.startLobby) ? 'Pause' : 'Welcome to Knirps und Knall'
+    text.text = (stage !== stages.startLobby) ? 'Pause' : 'Welcome to Knirps und Knall\n      Press any key to join'
     text.style.fontSize = 0.05*app.screen.width
     text.x = app.screen.width/2
     text.y = app.screen.height/2
@@ -964,7 +965,7 @@ const createTouchControl = app => {
         const radius = 0.18*minHeightWidth
 
         const mp = touchPlayers.length > 0 ? touchPlayers[0] : touches[0]
-        touchControl.visible = mp.pointerType === 'touch'
+        touchControl.visible = false // mp.pointerType === 'touch' TODO: Alex not working nicely
 
         moveControl.radius = radius
         moveControl.scale = radius/moveControl.startRadius

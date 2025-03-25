@@ -512,6 +512,10 @@ function gameLoop() {
             }
             roundInit();
         }
+    } else {
+        FWNetwork.getInstance().getAllGamepads().filter(x => x && x.connected).map(x => {
+            windowHasFocus = true
+        })
     }
 
     then = now
