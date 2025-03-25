@@ -33,8 +33,6 @@ const addHeadline = () => {
     title.x = level.width/2;
     title.y = -level.width*0.005;
 
-    levelContainer.addChild(title);
-
     const authors = new PIXI.Text({
         text: 'made by TORSTEN STELLJES & ALEXANDER THURN',
         style: {
@@ -47,7 +45,19 @@ const addHeadline = () => {
     authors.x = level.width;
     authors.y = -level.width*0.005;
 
-    levelContainer.addChild(authors);
+    const code = new PIXI.Text({
+        text: '',
+        style: {
+            fontSize: level.width*0.012,
+            fill: colors.white
+        },
+        anchor: {x: 0, y: 1},
+        position: {x: 0, y: -level.width*0.005}
+    });
+
+  
+    levelContainer.addChild(title, authors, code);
+    levelContainer.code = code
 }
 
 const animateCircleButton = button => {
@@ -205,15 +215,15 @@ const addGameStartButton = (app, lobbyContainer) => {
 const addNetworkQrCode = (app, lobbyContainer) => { 
 
     const nw = FWNetwork.getInstance();
-    nw.qrCodeOptions.background = '0xffff00',
-    nw.qrCodeOptions.backgroundAlpha = 0.8,
-    nw.qrCodeOptions.foreground = 'red',
+    nw.qrCodeOptions.background = 'darkbrown',
+    nw.qrCodeOptions.backgroundAlpha = 0.0,
+    nw.qrCodeOptions.foreground = 'white',
     nw.qrCodeOptions.foregroundAlpha = 1.0,
     nw.hostRoom();
 
     const qrCodeContainer = new PIXI.Container()
     qrCodeContainer.sprite = new PIXI.Sprite()
-    qrCodeContainer.sprite.anchor.set(0., 1.0)
+    qrCodeContainer.sprite.anchor.set(0., 0)
     qrCodeContainer.label = new PIXI.Text( {
         text: '', 
         style: {
@@ -223,20 +233,24 @@ const addNetworkQrCode = (app, lobbyContainer) => {
             stroke: colors.white
              }
         })
-    qrCodeContainer.label.anchor.set(0.5, 1)
+    qrCodeContainer.label.anchor.set(0.5, 0)
     qrCodeContainer.addChild(qrCodeContainer.sprite, qrCodeContainer.label)
     lobbyContainer.addChild(qrCodeContainer)
 
     app.ticker.add(() => {
         const qrWidth = Math.min(level.width,level.height) * 0.25;
-        qrCodeContainer.position.set(level.width*0.0, level.height*1)
+        qrCodeContainer.position.set(level.width*0.05, level.height*0.6)
         qrCodeContainer.sprite.texture = nw.qrCodeTexture
         qrCodeContainer.sprite.width = qrCodeContainer.sprite.height = qrWidth;
 
         qrCodeContainer.label.text = nw.qrCodeBaseUrl + "\n" + nw.roomNumber
-        qrCodeContainer.label.position.set(qrCodeContainer.sprite.width*0.5, -qrCodeContainer.sprite.height)
+        qrCodeContainer.label.position.set(qrCodeContainer.sprite.width*0.5, qrCodeContainer.sprite.height*1)
         qrCodeContainer.label.width =  qrCodeContainer.sprite.width*0.8;
         qrCodeContainer.label.scale.y = qrCodeContainer.label.scale.x;
+
+        levelContainer.code.text = (nw.roomNumber && nw.qrCodeBaseUrl + " " + nw.roomNumber || '')
+        levelContainer.code.visible = (stage !== stages.startLobby)
+        qrCodeContainer.visible = (stage === stages.startLobby)
     })
 }
 const animateRectangleButton = button => {
@@ -851,7 +865,7 @@ const animatePauseOverlay = (app, overlay) => {
     background.height = app.screen.height/2
     background.width = app.screen.width
     background.y = app.screen.height/4
-    text.text = (stage !== stages.startLobby) ? 'Pause' : 'Welcome to Knirps und Knall\n      Press any key to join'
+    text.text = (stage !== stages.startLobby) ? 'Pause' : '    Welcome to\nKnirps und Knall\n  Press any key'
     text.style.fontSize = 0.05*app.screen.width
     text.x = app.screen.width/2
     text.y = app.screen.height/2
