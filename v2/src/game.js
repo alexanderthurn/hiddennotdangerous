@@ -162,7 +162,7 @@ const foodAtlasData = {
 
 const gameSelectionDefinition = () => ({
     x: level.width*0.5,
-    y: level.height*0.65,
+    y: level.height*0.5,
     innerRadius: level.width*0.1,
     outerRadius: level.width*0.15,
     loadingSpeed: 1/3000,
@@ -176,7 +176,7 @@ const gameSelectionDefinition = () => ({
 
 const gameStartButtonDefinition = () => ({
     x: level.width*0.5,
-    y: level.height*0.65,
+    y: level.height*0.5,
     innerRadius: level.width*0.1,
     outerRadius: level.width*0.15,
     loadingSpeed: 1/3000,
@@ -226,12 +226,12 @@ const teams = {
 const teamSwitchersDefinition = () => ({
     assassin: {
         x: level.width*0.25,
-        y: level.height*0.65,
+        y: level.height*0.5,
         team: 'assassin'
     },
     guard: {
         x: level.width*0.75,
-        y: level.height*0.65,
+        y: level.height*0.5,
         team: 'guard'
     }
 })
