@@ -282,15 +282,17 @@ const createRectangleButton = (props, lobbyContainer) => {
 
 const animateMuteButton = button => {
     button.getChildAt(2).text = isMusicMuted() ? 'Music: OFF' : 'Music: ON'
+    button.visible = stage === stages.startLobby 
 }
 
 const animateBotsButton = button => {
     button.getChildAt(2).text = 'Bots: ' + getBotCount()
+    button.visible = stage === stages.startLobby 
 }
 
 const addButtons = (app, lobbyContainer) => {
     Object.entries(buttonDefinition()).forEach(([id, button]) => {buttons[id] = createRectangleButton(button, lobbyContainer)})
-
+    
     app.ticker.add(() => animateMuteButton(buttons.mute))
     app.ticker.add(() => animateBotsButton(buttons.bots))
 }

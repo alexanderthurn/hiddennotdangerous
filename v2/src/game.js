@@ -265,24 +265,24 @@ var circleOfDeath
 
 const foodDefinition = () => ({
     bean: {
-        x: stage === stages.gameLobby ? level.width*3.4/5 : level.width*4/5,
-        y: stage === stages.gameLobby ? level.height*1.6/5 : level.height*4/5,
+        x: stage === stages.gameLobby ? level.width*4.4/5 : level.width*4/5,
+        y: stage === stages.gameLobby ? level.height*2.6/5 : level.height*4/5,
     },
     brokkoli: {
-        x: stage === stages.gameLobby ? level.width*2.6/5 : level.width/5,
-        y: stage === stages.gameLobby ? level.height*0.8/5 : level.height/5,
+        x: stage === stages.gameLobby ? level.width*3.6/5 : level.width/5,
+        y: stage === stages.gameLobby ? level.height*1.8/5 : level.height/5,
     },
     onion: {
-        x: stage === stages.gameLobby ? level.width*2.6/5 : level.width/5,
-        y: stage === stages.gameLobby ? level.height*1.6/5 : level.height*4/5,
+        x: stage === stages.gameLobby ? level.width*3.6/5 : level.width/5,
+        y: stage === stages.gameLobby ? level.height*2.6/5 : level.height*4/5,
     },
     salad: {
-        x: stage === stages.gameLobby ? level.width*3.4/5 : level.width*4/5,
-        y: stage === stages.gameLobby ? level.height*0.8/5 : level.height/5,
+        x: stage === stages.gameLobby ? level.width*4.4/5 : level.width*4/5,
+        y: stage === stages.gameLobby ? level.height*1.8/5 : level.height/5,
     },
     taco: {
-        x: stage === stages.gameLobby ? level.width*3.0/5 : level.width/2,
-        y: stage === stages.gameLobby ? level.height*1.2/5 : level.height/2,
+        x: stage === stages.gameLobby ? level.width*4.0/5 : level.width/2,
+        y: stage === stages.gameLobby ? level.height*2.2/5 : level.height/2,
     }
 })
 
@@ -562,6 +562,7 @@ function updateGame(figures, dt, dtProcessed) {
             const minimumPlayers = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
             const playersPossible = figures.filter(f => f.playerId && f.playerId[0] !== 'b' && f.type === 'fighter')
         Object.values(buttons).forEach(btn => {
+            if (!btn.visible) return
             btn.playersPossible = playersPossible
             btn.playersNear = playersPossible.filter(f => !f.isDead && btn.isInArea(f))
             
