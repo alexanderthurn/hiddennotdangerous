@@ -419,12 +419,12 @@ class FWTouchControl extends PIXI.Container {
         }
 
         // Achsen (axes) aktualisieren
-        // axes[0] und axes[1]: Linker Stick (axisContainer[1])
-        gamepad.setAxis(0, this.axesContainers[1].xAxis); // Horizontal (left stick)
-        gamepad.setAxis(1, this.axesContainers[1].yAxis); // Vertical (left stick)
-        // axes[2] und axes[3]: Rechter Stick (axisContainer[0])
-        gamepad.setAxis(2, this.axesContainers[0].xAxis); // Horizontal (right stick)
-        gamepad.setAxis(3, this.axesContainers[0].yAxis); // Vertical (right stick)
+        // axes[0] und axes[1]: Linker Stick (axisContainer[0])
+        gamepad.setAxis(0, this.axesContainers[0].xAxis); // Horizontal (left stick)
+        gamepad.setAxis(1, this.axesContainers[0].yAxis); // Vertical (left stick)
+        // axes[2] und axes[3]: Rechter Stick (axisContainer[1])
+        gamepad.setAxis(2, this.axesContainers[1].xAxis); // Horizontal (right stick)
+        gamepad.setAxis(3, this.axesContainers[1].yAxis); // Vertical (right stick)
 
         // Buttons aktualisieren
         this.buttonContainers.forEach((buttonContainer, index) => {
