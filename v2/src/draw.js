@@ -986,7 +986,7 @@ const createTouchControl = app => {
         const radius = 0.18*minHeightWidth
 
         const mp = touchPlayers.length > 0 ? touchPlayers[0] : touches[0]
-        touchControl.visible = false // mp.pointerType === 'touch' TODO: Alex not working nicely
+        touchControl.visible = false // mp.pointerType === 'touch' TODO: Alex touch not working nicely
 
         moveControl.radius = radius
         moveControl.scale = radius/moveControl.startRadius

@@ -302,5 +302,5 @@ function collectInputs() {
         }
     })
 
-    return [...gamepadPlayers, ...keyboardPlayers, ...touchPlayers, ...botPlayers];
+    return [...gamepadPlayers, ...keyboardPlayers, ...botPlayers]; // ...touchPlayers  TODO: Alex touch not working nicely
 }
