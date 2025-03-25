@@ -294,9 +294,9 @@ class FWTouchControl extends PIXI.Container {
             this.buttonContainers.forEach((buttonContainer, i) => {
                 switch(i) {
                     case 0: buttonContainer.rPos = [1.0, 1.0, 0.12, -0.5, 0.0]; break;
-                    case 1: buttonContainer.rPos = [1.0, 0.7, 0.12, 0.25, 0.0]; break;
-                    case 2: buttonContainer.rPos = [1.0, 0.7, 0.12, -1.25, 0.0]; break;
-                    case 3: buttonContainer.rPos = [1.0, 0.4, 0.12, -0.5, 0.0]; break;
+                    case 1: buttonContainer.rPos = [1.0, 0.7, 0.12, 0.1, -0.1]; break;
+                    case 2: buttonContainer.rPos = [1.0, 0.7, 0.12, -1.15, -0.1]; break;
+                    case 3: buttonContainer.rPos = [1.0, 0.4, 0.12, -0.5, -0.2]; break;
                     case 4:  buttonContainer.rPos = R_POS_INVISIBLE; break;
                     case 5:  buttonContainer.rPos = R_POS_INVISIBLE; break;
                     case 6:  buttonContainer.rPos = R_POS_INVISIBLE; break;

@@ -1,7 +1,7 @@
 {
     "search.exclude": {
       "/v1": true,
-      "/network-light": true,
+      "/network-light2": true,
       "/misc": true
     }
   }
