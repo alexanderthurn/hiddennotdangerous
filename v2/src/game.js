@@ -7,7 +7,9 @@ const defaultkeyboardPlayer = {
     yAxis: 0,
     isMoving: false,
     type: 'keyboard',
-    isAttackButtonPressed: false
+    isAttackButtonPressed: false,
+    isMarkerButtonPressed: false,
+    isSpeedButtonPressed: false
 };
 var keyboardPlayers = [];
 var botPlayers = []
@@ -18,13 +20,21 @@ var keyboards = [{bindings: {
     'KeyW': {playerId: 'k0', action: 'up'},
     'KeyS': {playerId: 'k0', action: 'down'},
     'KeyT': {playerId: 'k0', action: 'attack'},
+    'KeyQ': {playerId: 'k0', action: 'speed'},
+    'KeyR': {playerId: 'k0', action: 'marker'},
     'Digit1': {playerId: 'k0', action: 'attack'},
+    'Digit2': {playerId: 'k0', action: 'speed'},
+    'Digit3': {playerId: 'k0', action: 'marker'},
     'ArrowLeft': {playerId: 'k1', action: 'left'},
     'ArrowRight': {playerId: 'k1', action: 'right'},
     'ArrowUp': {playerId: 'k1', action: 'up'},
     'ArrowDown': {playerId: 'k1', action: 'down'},
     'Numpad0': {playerId: 'k1', action: 'attack'},
-    'ShiftRight': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
+    'Numpad1': {playerId: 'k1', action: 'marker'},
+    'Numpad2': {playerId: 'k1', action: 'speed'},
+    'ShiftRight': {playerId: 'k1', action: 'attack'},
+    'ControlRight': {playerId: 'k1', action: 'speed'},
+    'AltRight': {playerId: 'k1', action: 'marker'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var restartGame = false, lastWinnerPlayerIds, lastRoundEndThen, lastFinalWinnerPlayerIds;
@@ -682,10 +692,14 @@ function handleInput(players, figures, dtProcessed) {
         var p = players.find(p => p.playerId === f.playerId && f.type === 'fighter')
 
         f.speed = 0.0
+
+        f.isSpeedButtonPressed = p.isSpeedButtonPressed
+        f.isMarkerButtonPressed = p.isMarkerButtonPressed
+
         if (!f.isDead) {
             if (p.isMoving) {
                 f.direction = angle(0,0,p.xAxis,p.yAxis)
-                f.speed = f.maxSpeed
+                f.speed = f.maxSpeed * (f.isSpeedButtonPressed ? 2.2 : 1)
             }
             if (p.isAttackButtonPressed && !f.isAttacking) {
                 if (!f.lastAttackTime || dtProcessed-f.lastAttackTime > f.attackBreakDuration) {

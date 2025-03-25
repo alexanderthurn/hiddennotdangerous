@@ -385,9 +385,12 @@ const animatePlayerScore = (figure, player) => {
 
     figure.score.getChildAt(1).text = figure.score.shownPoints
 
-    if (figure.isAttacking && !restartGame) {
+    if (figure.isMarkerButtonPressed && !restartGame) {
         figure.score.x += -5+10*Math.random()
         figure.score.y += -5+10*Math.random()
+        figure.tint = colors.purple
+    } else {
+        figure.tint = teams[figure.team] ? teams[figure.team].color : colors.white
     }
 }
 

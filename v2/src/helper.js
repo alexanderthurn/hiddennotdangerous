@@ -7,7 +7,8 @@ const colors = {
     grey: 0x787878,
     lightbrown: 0x8B4513,
     red: 0xFF0000,
-    white: 0xFFFFFF
+    white: 0xFFFFFF,
+    purple: 0x800080,
 }
 
 /**

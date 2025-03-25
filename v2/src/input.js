@@ -114,6 +114,8 @@ function collectInputs() {
         var bot = {
             type: 'bot',
             isAttackButtonPressed: false,
+            isMarkerButtonPressed: false,
+            isSpeedButtonPressed: false,
             isAnyButtonPressed: stage !== stages.game,
             xAxis: 0,
             yAxis: 0,
@@ -191,6 +193,8 @@ function collectInputs() {
     gamepadPlayers.forEach(g => {
         g.isAttackButtonPressed = false
         g.isAnyButtonPressed = false
+        g.isMarkerButtonPressed = false
+        g.isSpeedButtonPressed = false
         if (g.buttons.some(b => b.pressed)) {
             if (!windowHasFocus) {
                 windowHasFocus = true
@@ -199,6 +203,12 @@ function collectInputs() {
             g.isAnyButtonPressed = true
             if (g.buttons[0].pressed) {
                 g.isAttackButtonPressed = true
+            }
+            if (g.buttons[1].pressed) {
+                g.isSpeedButtonPressed = true
+            }
+            if (g.buttons[2].pressed) {
+                g.isMarkerButtonPressed = true
             }
         }
         let x = g.axes[0];
@@ -214,6 +224,14 @@ function collectInputs() {
     });
 
     keyboardPlayers = keyboardPlayers.map((kp,i) => ({...defaultkeyboardPlayer, playerId: 'k' + i}));
+    
+    keyboardPlayers.forEach(g => {
+        g.isAttackButtonPressed = false
+        g.isAnyButtonPressed = false
+        g.isMarkerButtonPressed = false
+        g.isSpeedButtonPressed = false
+    })
+    
     keyboards.forEach(k => {
         Array.from(k.pressed.values()).forEach(pressedButton => {
             const binding = k.bindings[pressedButton];
@@ -225,6 +243,7 @@ function collectInputs() {
                     isNew = true
                     p = {...defaultkeyboardPlayer, playerId: 'k' + keyboardPlayers.length};
                 }
+                p.isAnyButtonPressed = true
                 switch (action) {
                     case 'left':
                         p.xAxis--;
@@ -240,6 +259,12 @@ function collectInputs() {
                         break;
                     case 'attack':
                         p.isAttackButtonPressed = true
+                        break;
+                    case 'marker':
+                        p.isMarkerButtonPressed = true
+                        break;
+                    case 'speed':
+                        p.isSpeedButtonPressed = true
                         break;
                     default:
                         break;
