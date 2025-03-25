@@ -50,6 +50,8 @@ async function init() {
     app.serverPrefix = 'hidden'
     app.serverId = getQueryParam('id') || '';
     app.color = new PIXI.Color(getQueryParam('color') || 'ff0000');
+    app.layout = getQueryParam('layout') || 'default';
+    app.mode = getQueryParam('mode') || 'default';
     app.connectionStatus = CONNECTION_STATUS_OFF;
 
     const network = FWNetwork.getInstance();
@@ -62,7 +64,7 @@ async function init() {
         network.peer.on('error', (err) => {
             console.error('Connection error:', err);
         });
-    } else {
+    } else if (app.mode !== 'dev') {
         app.settingsDialog.show();
     }
    

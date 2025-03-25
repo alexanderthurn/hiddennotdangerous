@@ -107,27 +107,29 @@ class FWTouchControl extends PIXI.Container {
             this.addChild(buttonContainer);
 
             switch(i) {
-                case 0: buttonContainer.buttonText.text = 'A'; buttonContainer.key = 'k'; buttonContainer.rPos = [1.0, 1.0, 0.09, -0.75, 0.0]; break;
-                case 1: buttonContainer.buttonText.text = 'B'; buttonContainer.key = 'l'; buttonContainer.rPos = [1.0, 0.8, 0.09, 0.0, 0.0]; break;
-                case 2: buttonContainer.buttonText.text = 'X'; buttonContainer.key = 'j'; buttonContainer.rPos = [1.0, 0.8, 0.09, -1.5, 0.0]; break;
-                case 3: buttonContainer.buttonText.text = 'Y'; buttonContainer.key = 'i'; buttonContainer.rPos = [1.0, 0.6, 0.09, -0.75, 0.0]; break;
-                case 4: buttonContainer.buttonText.text = 'LB'; buttonContainer.key = 'z'; buttonContainer.rPos = [0.925, 0.1, 0.07, -0.6]; break;
-                case 5: buttonContainer.buttonText.text = 'RB'; buttonContainer.key = 'p'; buttonContainer.rPos = [0.925, 0.1, 0.07, 0.6]; break;
-                case 6: buttonContainer.buttonText.text = 'LT'; buttonContainer.key = 'o'; buttonContainer.rPos = [0.925, 0.3, 0.07, 0.6]; break;
-                case 7: buttonContainer.buttonText.text = 'RT'; buttonContainer.key = 'u'; buttonContainer.rPos = [0.925, 0.3, 0.07, -0.6]; break;
-                case 8: buttonContainer.buttonText.text = 'SELECT'; buttonContainer.key = 'ArrowLeft'; buttonContainer.rPos = [0.4, 0.35, 0.075]; break;
-                case 9: buttonContainer.buttonText.text = 'START'; buttonContainer.key = 'ArrowRight'; buttonContainer.rPos = [0.6, 0.35, 0.075]; break;
-                case 10: buttonContainer.buttonText.text = 'A1'; buttonContainer.key = 'q'; buttonContainer.rPos = [-2.5, 1.0, 0.05, -0.5]; break;
-                case 11: buttonContainer.buttonText.text = 'A2'; buttonContainer.key = 'e'; buttonContainer.rPos = [-2.5, 1.0, 0.05, 0.5]; break;
-                case 12: buttonContainer.buttonText.text = 'v'; buttonContainer.key = 's'; buttonContainer.rPos = [0.035, 0.2, 0.05, 1.0, 1.0]; break;
-                case 13: buttonContainer.buttonText.text = '^'; buttonContainer.key = 'w'; buttonContainer.rPos = [0.035, 0.2, 0.05, 1.0, -1.0]; break;
-                case 14: buttonContainer.buttonText.text = '<'; buttonContainer.key = 'a'; buttonContainer.rPos = [0.035, 0.2, 0.05, 0.0, 0]; break;
-                case 15: buttonContainer.buttonText.text = '>'; buttonContainer.key = 'd'; buttonContainer.rPos = [0.035, 0.2, 0.05, 2.0, 0]; break;
-                case 16: buttonContainer.buttonText.text = 'HOME'; buttonContainer.key = 'ArrowUp'; buttonContainer.rPos = [0.5, 0.15, 0.075]; break;
-                case 17: buttonContainer.buttonText.text = ''; buttonContainer.key = 'ArrowDown'; buttonContainer.rPos = [0.5, 0.55, 0.075]; break;
+                case 0: buttonContainer.buttonText.text = 'A'; buttonContainer.key = 'k';  break;
+                case 1: buttonContainer.buttonText.text = 'B'; buttonContainer.key = 'l'; break;
+                case 2: buttonContainer.buttonText.text = 'X'; buttonContainer.key = 'j'; break;
+                case 3: buttonContainer.buttonText.text = 'Y'; buttonContainer.key = 'i'; break;
+                case 4: buttonContainer.buttonText.text = 'LB'; buttonContainer.key = 'z'; break;
+                case 5: buttonContainer.buttonText.text = 'RB'; buttonContainer.key = 'p'; break;
+                case 6: buttonContainer.buttonText.text = 'LT'; buttonContainer.key = 'o'; break;
+                case 7: buttonContainer.buttonText.text = 'RT'; buttonContainer.key = 'u'; break;
+                case 8: buttonContainer.buttonText.text = 'SELECT'; buttonContainer.key = 'ArrowLeft';  break;
+                case 9: buttonContainer.buttonText.text = 'START'; buttonContainer.key = 'ArrowRight';  break;
+                case 10: buttonContainer.buttonText.text = 'A1'; buttonContainer.key = 'q'; break;
+                case 11: buttonContainer.buttonText.text = 'A2'; buttonContainer.key = 'e'; break;
+                case 12: buttonContainer.buttonText.text = 'v'; buttonContainer.key = 's'; break;
+                case 13: buttonContainer.buttonText.text = '^'; buttonContainer.key = 'w'; break;
+                case 14: buttonContainer.buttonText.text = '<'; buttonContainer.key = 'a'; break;
+                case 15: buttonContainer.buttonText.text = '>'; buttonContainer.key = 'd'; break;
+                case 16: buttonContainer.buttonText.text = 'HOME'; buttonContainer.key = 'ArrowUp'; break;
+                case 17: buttonContainer.buttonText.text = ''; buttonContainer.key = 'ArrowDown'; break;
             }
+
+           
         }
-        this.dpadCenterContainer.rPos = [0.035, 0.2, 0.05, 1.0, 0];
+        this.dpadCenterContainer.rPos = [0,0,0,0];
         this.dpadCenterContainer.startRadius = radius;
         this.dpadCenterContainer.stick = new PIXI.Graphics().rect(-radius, -radius, radius*2, radius*2).fill({alpha: 1.0, color: 0xFFFFFF});
         this.dpadCenterContainer.addChild(this.dpadCenterContainer.stick);
@@ -274,6 +276,77 @@ class FWTouchControl extends PIXI.Container {
         let maxHeightWidth = Math.max(app.containerGame.screenWidth, app.containerGame.screenHeight);
         const distanceToBorderX = 0.05 * app.containerGame.screenWidth;
         const distanceToBorderY = 0.05 * app.containerGame.screenHeight;
+
+
+        const R_POS_INVISIBLE = [- 10.0, -10.0, 0.0, 0.0];
+       
+        if (app.layout === 'simple') {
+            this.dpadCenterContainer.rPos = R_POS_INVISIBLE;
+
+            this.axesContainers.forEach((axisContainer, i) => {
+                switch(i) {
+                    case 0: axisContainer.rPos = [0.05, 0.75, 0.25]; break;
+                    case 1: axisContainer.rPos = R_POS_INVISIBLE; break;
+                }
+            })
+          
+
+            this.buttonContainers.forEach((buttonContainer, i) => {
+                switch(i) {
+                    case 0: buttonContainer.rPos = [1.0, 1.0, 0.12, -0.5, 0.0]; break;
+                    case 1: buttonContainer.rPos = [1.0, 0.7, 0.12, 0.25, 0.0]; break;
+                    case 2: buttonContainer.rPos = [1.0, 0.7, 0.12, -1.25, 0.0]; break;
+                    case 3: buttonContainer.rPos = [1.0, 0.4, 0.12, -0.5, 0.0]; break;
+                    case 4:  buttonContainer.rPos = R_POS_INVISIBLE; break;
+                    case 5:  buttonContainer.rPos = R_POS_INVISIBLE; break;
+                    case 6:  buttonContainer.rPos = R_POS_INVISIBLE; break;
+                    case 7:  buttonContainer.rPos = R_POS_INVISIBLE; break;
+                    case 8: buttonContainer.rPos = [0.425, 0.35, 0.075]; break;
+                    case 9: buttonContainer.rPos = [0.575, 0.35, 0.075]; break;
+                    case 10:; buttonContainer.rPos = [-2.5, 1.0, 0.05, -0.5]; break;
+                    case 11:; buttonContainer.rPos = [-2.5, 1.0, 0.05, 0.5]; break;
+                    case 12: buttonContainer.rPos = R_POS_INVISIBLE; break;
+                    case 13: buttonContainer.rPos = R_POS_INVISIBLE; break;
+                    case 14: buttonContainer.rPos = R_POS_INVISIBLE; break;
+                    case 15: buttonContainer.rPos = R_POS_INVISIBLE; break;
+                    case 16: buttonContainer.rPos = [0.5, 0.15, 0.075]; break;
+                    case 17: buttonContainer.rPos = [0.5, 0.55, 0.075]; break;
+                }
+            })
+        } else {
+            this.dpadCenterContainer.rPos =[0.035, 0.2, 0.05, 1.0, 0]
+
+            this.axesContainers.forEach((axisContainer, i) => {
+                switch(i) {
+                    case 0: axisContainer.rPos = [0.05, 0.95, 0.2]; break;
+                    case 1: axisContainer.rPos = [0.5, 0.95, 0.1, 0.0]; break;
+                }
+            })
+            
+            this.buttonContainers.forEach((buttonContainer, i) => {
+                switch(i) {
+                    case 0: buttonContainer.rPos = [1.0, 1.0, 0.09, -0.75, 0.0]; break;
+                    case 1: buttonContainer.rPos = [1.0, 0.8, 0.09, 0.0, 0.0]; break;
+                    case 2: buttonContainer.rPos = [1.0, 0.8, 0.09, -1.5, 0.0]; break;
+                    case 3: buttonContainer.rPos = [1.0, 0.6, 0.09, -0.75, 0.0]; break;
+                    case 4: buttonContainer.rPos = [0.925, 0.1, 0.07, -0.6]; break;
+                    case 5: buttonContainer.rPos = [0.925, 0.1, 0.07, 0.6]; break;
+                    case 6: buttonContainer.rPos = [0.925, 0.3, 0.07, 0.6]; break;
+                    case 7: buttonContainer.rPos = [0.925, 0.3, 0.07, -0.6]; break;
+                    case 8: buttonContainer.rPos = [0.4, 0.35, 0.075]; break;
+                    case 9: buttonContainer.rPos = [0.6, 0.35, 0.075]; break;
+                    case 10: buttonContainer.rPos = [-2.5, 1.0, 0.05, -0.5]; break;
+                    case 11: buttonContainer.rPos = [-2.5, 1.0, 0.05, 0.5]; break;
+                    case 12: buttonContainer.rPos = [0.035, 0.2, 0.05, 1.0, 1.0]; break;
+                    case 13: buttonContainer.rPos = [0.035, 0.2, 0.05, 1.0, -1.0]; break;
+                    case 14: buttonContainer.rPos = [0.035, 0.2, 0.05, 0.0, 0]; break;
+                    case 15: buttonContainer.rPos = [0.035, 0.2, 0.05, 2.0, 0]; break;
+                    case 16: buttonContainer.rPos = [0.5, 0.15, 0.075]; break;
+                    case 17: buttonContainer.rPos = [0.5, 0.55, 0.075]; break;
+                }
+            })
+        }
+
 
         this.axesContainers.forEach((container, index) => {
             container.radius = container.rPos[2] * minHeightWidth;
