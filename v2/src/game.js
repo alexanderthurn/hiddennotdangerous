@@ -328,7 +328,8 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
             {alias: 'food', src: '../gfx/food-OCAL.png'},
             {alias: 'grass', src: '../gfx/kacheln.png'},
             {alias: 'players', src: '../gfx/character_base_32x32.png'},
-            {alias: 'cloud', src: '../gfx/fart.png'}
+            {alias: 'cloud', src: '../gfx/fart.png'},
+            {alias: 'background_grass', src: '../gfx/background_grass.jpg'}
         ];
     
         // Load the assets defined above.

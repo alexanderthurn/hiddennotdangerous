@@ -587,6 +587,8 @@ const addGrass = (textures, spritesheet) => {
             levelContainer.addChild(grass)
         }
     }
+
+    levelContainer.addChild(PIXI.Sprite.from('background_grass'))
 }
 
 const createHorizontalFence = level => {
