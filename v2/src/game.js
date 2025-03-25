@@ -315,7 +315,7 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         console.log('no need to hide');
     
         // Initialize the application.
-        await app.init({antialias: true, backgroundAlpha: 0, resizeTo: window});
+        await app.init({antialias: true, backgroundAlpha: 0, resizeTo: window,resolution: window.devicePixelRatio || 1, autoDensity: true,});
     
         // Then adding the application's canvas to the DOM body.
         document.body.appendChild(app.canvas);
