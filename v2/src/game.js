@@ -27,7 +27,7 @@ var keyboards = [{bindings: {
     'ShiftRight': {playerId: 'k1', action: 'attack'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var restartGame = false, lastWinnerPlayerIds, lastRoundEndThen, lastFinalWinnerPlayerIds;
+var restartGame = false, lastWinnerPlayerIds, lastRoundEndThen, lastFinalWinnerPlayerIds, finalWinnerTeam
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figuresPool = []
@@ -374,6 +374,7 @@ function roundInit() {
     startTime = dtProcessed;
     stage = nextStage
     lastFinalWinnerPlayerIds = undefined
+    finalWinnerTeam = undefined
     fpsTime = then
     lastKillTime = undefined;
     multikillCounter = 0;
@@ -491,6 +492,18 @@ function gameLoop() {
                 const vipSurvivors = vips.filter(f => !f.isDead)
                 if (assassinSurvivors.length === 0 || vipSurvivors.length === 0) {
                     winRound(vipSurvivors.length === 0 ? assassins : guards)
+                }
+            }
+
+            if (game === games.battleRoyale || game === games.food) {
+                if (figuresPlayer.length < 2) {
+                    lastFinalWinnerPlayerIds = new Set(figuresPlayer.map(f => f.playerId))
+                }
+            } else {
+                const assassins = figures.filter(f => f.playerId && f.team === 'assassin')
+                const guards = figures.filter(f => f.playerId && f.team === 'guard')
+                if (assassins.length === 0 || guards.length === 0) {
+                    finalWinnerTeam = guards.length === 0 ? 'assassin' : 'guard'
                 }
             }
 
