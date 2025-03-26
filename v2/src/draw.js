@@ -215,10 +215,11 @@ const addGameStartButton = (app, lobbyContainer) => {
 const addNetworkQrCode = (app, lobbyContainer) => { 
 
     const nw = FWNetwork.getInstance();
-    nw.qrCodeOptions.background = 'darkbrown',
-    nw.qrCodeOptions.backgroundAlpha = 0.0,
+    nw.qrCodeOptions.background = 'green',
+    nw.qrCodeOptions.backgroundAlpha = 1.0,
     nw.qrCodeOptions.foreground = 'white',
     nw.qrCodeOptions.foregroundAlpha = 1.0,
+    nw.gamepadLayout = 'simple'
     nw.hostRoom();
 
     const qrCodeContainer = new PIXI.Container()

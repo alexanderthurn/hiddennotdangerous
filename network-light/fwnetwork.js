@@ -10,6 +10,7 @@ class FWNetwork {
         this.connection = null;
         this.roomId = null;
         this.isHost = false;
+        this.gamepadLayout = '';
         this.networkGamepads = [];
         this.clientGamepadIndices = new Map();
         this.status = 'disconnected';
@@ -122,7 +123,7 @@ class FWNetwork {
                 this.roomNumber = wantedRoomNumber
                 this.roomId = id
                 sessionStorage.setItem('roomNumber', this.roomNumber)
-                this.qrCodeUrl = `https://${this.qrCodeBaseUrl}?id=${this.roomNumber}`
+                this.qrCodeUrl = `https://${this.qrCodeBaseUrl}?id=${this.roomNumber}` + (this.gamepadLayout ? `&layout=${this.gamepadLayout}` : '')
                 const qrCode = this.getQRCodeTexture();
                 const dataUrl = qrCode.toDataURL();
                 PIXI.Assets.load(dataUrl).then((texture) => {
