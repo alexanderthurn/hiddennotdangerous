@@ -516,6 +516,7 @@ function gameLoop() {
                 const guards = figures.filter(f => f.playerId && f.team === 'guard')
                 if (assassins.length === 0 || guards.length === 0) {
                     finalWinnerTeam = guards.length === 0 ? 'assassin' : 'guard'
+                    lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.team === finalWinnerTeam).map(f => f.playerId))
                     winRoundTeam(finalWinnerTeam)
                 }
 
@@ -531,6 +532,7 @@ function gameLoop() {
                     if (maxPoints >= pointsToWin) {
                         const teamsWithMaxPoints = Object.keys(teams).filter(team => teams[team].points === maxPoints)
                         finalWinnerTeam = teamsWithMaxPoints[0]
+                        lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.team === finalWinnerTeam).map(f => f.playerId))
                     }
                 }
             }

@@ -509,7 +509,7 @@ const killFigure = figure => {
 
 const winRoundTeam = team =>{
     teams[team].points++
-    winRoundFigures(figures.filter(f => f.playerId && f.team === team))
+    winRoundFigures(figures.filter(f => f.playerId && f.team === team && f.type === 'fighter'))
 }
 
 const winRoundFigures = winnerFigures =>{
