@@ -8,6 +8,29 @@ var initDialog = (app) => {
   let btnClose = app.settingsDialog.querySelector('#btnClose')
   var canvasElement = document.getElementById("canvasCamera");
   var loadingMessage = document.getElementById("loadingMessage"); 
+  let divButtonsLayout = document.getElementById('layouts')
+  let divButtonsColor = document.getElementById('colors')
+
+
+  divButtonsColor.querySelectorAll("button").forEach((button) => {
+      button.addEventListener('click', function() {
+          let color = button.dataset.color
+          app.color = new PIXI.Color(color)
+          app.settingsDialog.style.backgroundColor = app.color.toHex();
+          setUrlParam('color',color)
+          updateSettingsDialog(app)
+      })
+  })
+
+  divButtonsLayout.querySelectorAll("button").forEach((button) => {
+    button.addEventListener('click', function() {
+        let layout = button.dataset.layout
+        app.layout = layout
+        setUrlParam('layout',layout)
+        updateSettingsDialog(app)
+    })
+
+})
 
   app.settingsDialog.addEventListener("close", () => {
           console.log("Dialog wurde geschlossen")
@@ -15,7 +38,7 @@ var initDialog = (app) => {
               app.qrCodeReader.onClose()
           }
           if (app.serverId !== '' && getQueryParam('id') !== app.serverId) {
-            setUrlParams(app.serverId)
+            setUrlParam('id',app.serverId)
             window.location.reload()
           }
 
@@ -23,12 +46,12 @@ var initDialog = (app) => {
   );
 
 
-input.addEventListener("keyup", function(event) {
-    if (event.key === "Enter") {
-      app.serverId = input.value
-      app.settingsDialog.close()
-    }
-});
+  input.addEventListener("keyup", function(event) {
+      if (event.key === "Enter") {
+        app.serverId = input.value
+        app.settingsDialog.close()
+      }
+  });
 
   
   app.settingsDialog.show =() => {
@@ -39,6 +62,7 @@ input.addEventListener("keyup", function(event) {
       canvasElement.height = 0;
       canvasElement.width = 0;
       btnScan.hidden = false
+      updateSettingsDialog(app)
       //let dialogColor = new PIXI.Color([app.color.red*0.5, app.color.green*0.5, app.color.blue*0.5])
       //app.settingsDialog.style.backgroundColor = app.color.toHex();
       app.settingsDialog.showModal()
@@ -68,6 +92,31 @@ input.addEventListener("keyup", function(event) {
       })
   }
   
+}
+
+var updateSettingsDialog = function(app) {
+  let divButtonsLayout = document.getElementById('layouts')
+
+  divButtonsLayout.querySelectorAll("button").forEach((button) => {
+    if (app.layout === button.dataset.layout) {
+      button.classList.add('selected')
+    } else {
+      button.classList.remove('selected')
+    }
+  })
+
+
+  let divButtonsColor = document.getElementById('colors')
+
+
+  divButtonsColor.querySelectorAll("button").forEach((button) => {
+    if (app.color?.value === button.dataset.color) {
+      button.classList.add('selected')
+    } else {
+      button.classList.remove('selected')
+    }
+  })
+
 }
 
 var startQRCode = function(app, callbackCode) {

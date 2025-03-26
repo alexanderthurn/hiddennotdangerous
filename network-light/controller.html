@@ -49,9 +49,10 @@
             }
 
             #dialog-footer {
-                position: absolute;
+                /*position: absolute;
                 bottom: 10px;
-                right: 10px;
+                right: 10px; */
+                float: right;
                 font-size: 14px;
             }
 
@@ -77,8 +78,17 @@
 
             }
 
+            .btn-small {
+                width: auto;
+            }
+
             h1, h2 {
                 margin-bottom: 5px;
+            }
+
+            .selected {
+                background: black;
+                color: white;
             }
 
         </style>
@@ -104,7 +114,35 @@
            <h2>Or...</h2>
             <button id="btnScan">Have a QR-Code?</button>
            <div id="loadingMessage" hidden>Unable to access video stream (please make sure you have a webcam enabled)</div>
-          <div id="dialog-footer">F-Mote 1.0.0 by Alexander Thurn <a href="https://github.com/alexanderthurn/hiddennotdangerous/tree/main/network-light">Sourcecode</a></div>
+           
+           <h2>Layout</h2>
+           <div id="layouts">
+            <button class="btn-small" data-layout="full">Full</button>
+            <button class="btn-small" data-layout="simple">Simple</button>
+           </div>
+
+           <h2>Color</h2>
+           <div id="colors">
+            <button class="btn-small" data-color="ff0055">Neon Red</button>
+            <button class="btn-small" data-color="00ffaa">Mint</button>
+            <button class="btn-small" data-color="0099ff">Electric Blue</button>
+            <button class="btn-small" data-color="ffcc00">Vivid Yellow</button>
+            <button class="btn-small" data-color="ff6600">Tangerine</button>
+            <button class="btn-small" data-color="cc00ff">Violet</button>
+            <button class="btn-small" data-color="00ffcc">Turquoise</button>
+            <button class="btn-small" data-color="ff3399">Hot Pink</button>
+            <button class="btn-small" data-color="33ff00">Lime</button>
+            <button class="btn-small" data-color="3366ff">Azure</button>
+            <button class="btn-small" data-color="ff0066">Raspberry</button>
+            <button class="btn-small" data-color="00ffee">Aqua Glow</button>
+            <button class="btn-small" data-color="ff9933">Coral</button>
+            <button class="btn-small" data-color="9900ff">Deep Purple</button>
+            <button class="btn-small" data-color="00ff66">Light Green</button>
+          </div>
+         
+           <div id="dialog-footer">F-Mote 1.1.0 by Alexander Thurn <a href="https://pad.feuerware.com">Reset</a> <a href="https://github.com/alexanderthurn/hiddennotdangerous/tree/main/network-light">Source</a></div>
+       
+           <div id="1cm" style="width: 1cm; position: absolute; visibility: hidden;"></div>
         </dialog>
         
     </body>

@@ -4,7 +4,7 @@ const CONNECTION_STATUS_WORKING = 2
 const CONNECTION_STATUS_ERROR = 3
 
 const angle = (x1, y1, x2, y2) => Math.atan2(y2 - y1, x2 - x1); 
-const version = '1.0.0';
+const version = '1.1.0';
 const getQueryParam = (key) => {
     const params = new URLSearchParams(window.location.search);
     return params.get(key);
@@ -20,10 +20,10 @@ var messageCount = 0; // Zähler für gesendete Nachrichten in der aktuellen Sek
 var currentSecond = Math.floor(Date.now() / 1000); // Aktuelle Sekunde
 var lastSentTime = 0; // Zeitpunkt des letzten Sendens
 
-function setUrlParams(id) {
+function setUrlParam(name, value) {
     let url = new URL(window.location.href);
     let params = new URLSearchParams(url.search);
-    if (id) params.set('id', id);
+    if (value) params.set(name, value);
     url.search = params.toString();
     window.history.replaceState({}, '', url);
 }

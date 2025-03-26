@@ -20,7 +20,7 @@ class FWTouchControl extends PIXI.Container {
             fontFamily: 'Xolonium',
             fontStyle: 'Bold',
             fontSize: 32,
-            fill: '#fff'
+            fill: '#000'
         });
         
         this.pointer = {pointerType: 'unknown', x: 0, y: 0, xCenter: undefined, yCenter: undefined, pressed: new Set(), events: {}};
@@ -301,16 +301,16 @@ class FWTouchControl extends PIXI.Container {
                     case 5:  buttonContainer.rPos = R_POS_INVISIBLE; break;
                     case 6:  buttonContainer.rPos = R_POS_INVISIBLE; break;
                     case 7:  buttonContainer.rPos = R_POS_INVISIBLE; break;
-                    case 8: buttonContainer.rPos = [0.425, 0.35, 0.075]; break;
-                    case 9: buttonContainer.rPos = [0.575, 0.35, 0.075]; break;
+                    case 8: buttonContainer.rPos = R_POS_INVISIBLE; break;
+                    case 9: buttonContainer.rPos = R_POS_INVISIBLE; break;
                     case 10:; buttonContainer.rPos = [-2.5, 1.0, 0.05, -0.5]; break;
                     case 11:; buttonContainer.rPos = [-2.5, 1.0, 0.05, 0.5]; break;
                     case 12: buttonContainer.rPos = R_POS_INVISIBLE; break;
                     case 13: buttonContainer.rPos = R_POS_INVISIBLE; break;
                     case 14: buttonContainer.rPos = R_POS_INVISIBLE; break;
                     case 15: buttonContainer.rPos = R_POS_INVISIBLE; break;
-                    case 16: buttonContainer.rPos = [0.5, 0.15, 0.075]; break;
-                    case 17: buttonContainer.rPos = [0.5, 0.55, 0.075]; break;
+                    case 16: buttonContainer.rPos = R_POS_INVISIBLE; break;
+                    case 17: buttonContainer.rPos = [0.5, 0.15, 0.075]; break;
                 }
             })
         } else {
@@ -383,9 +383,8 @@ class FWTouchControl extends PIXI.Container {
         }
         
         this.border.tint = app.color.toNumber();
-
-        this.title.position.set(app.containerGame.screenWidth * 0.65, app.containerGame.screenHeight * 0.95);
-        this.title.scale.set(app.containerGame.screenWidth / 1500);
+        this.title.position.set(app.containerGame.screenWidth * 0.8, app.containerGame.screenHeight * 0.07);
+        this.title.scale.set(Math.min(0.5,app.containerGame.screenWidth / 1500));
         this.connectionContainers[2].status = app.connectionStatus;
 
         let localGamepads = FWNetwork.getInstance().getLocalGamepads();
