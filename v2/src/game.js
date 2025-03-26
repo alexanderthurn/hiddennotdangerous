@@ -497,12 +497,12 @@ function gameLoop() {
             if (game === games.battleRoyale || game === games.food) {
                 if (figuresPlayer.length < 2) {
                     lastFinalWinnerPlayerIds = new Set(figuresPlayer.map(f => f.playerId))
-                    winRound(figuresPlayer)
+                    winRoundFigures(figuresPlayer)
                 }
                 if (!lastFinalWinnerPlayerIds) {
                     const survivors = figuresPlayer.filter(f => !f.isDead)
                     if (survivors.length < 2) {
-                        winRound(survivors)
+                        winRoundFigures(survivors)
                     }
                 
                     const maxPoints = Math.max(...figuresPlayer.map(f => f.score.points))
