@@ -357,14 +357,20 @@ createFigureAtlasData = () => {
     ]
 
     animations.forEach((e, j) => {
-        atlasData.animations[e] = []
-        for (let i = 0; i < 4; i++) {
-            const frameName = e + i
-            atlasData.frames[frameName] = {
-                frame: {x: i*32, y: j*32, w:32, h:32}
+        for (let fx = 0; fx < 2;fx++) {
+            for (let fy = 0; fy < 2;fy++) {
+                const postfix = '_' + fx + '_' + fy
+                atlasData.animations[e + postfix ] = []
+                for (let i = 0; i < 4; i++) {
+                    const frameName = e + postfix + '_' + i
+                    atlasData.frames[frameName] = {
+                        frame: {x: fx*128+i*32, y: fy*128+j*32, w:32, h:32}
+                    }
+                    atlasData.animations[e + postfix ].push(frameName)
+                }
             }
-            atlasData.animations[e].push(frameName)
         }
+       
     });
 
     return atlasData
