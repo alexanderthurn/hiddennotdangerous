@@ -399,9 +399,6 @@ const animatePlayerScore = (figure, player) => {
     if (figure.isMarkerButtonPressed && !restartGame) {
         figure.score.x += -5+10*Math.random()
         figure.score.y += -5+10*Math.random()
-        figure.tint = colors.purple
-    } else {
-        figure.tint = teams[figure.team] ? teams[figure.team].color : colors.white
     }
 }
 
@@ -687,7 +684,11 @@ const animateFigure = (figure, spritesheet) => {
         figureLayer.attach(body)
     }
 
-    body.tint = teams[figure.team]?.color
+    if (figure.isMarkerButtonPressed && !restartGame) {
+        body.tint = colors.purple
+    } else {
+        body.tint = teams[figure.team]?.color
+    }
 
     if (body.currentAnimation != animation) {
         body.currentAnimation = animation
