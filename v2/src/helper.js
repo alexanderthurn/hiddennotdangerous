@@ -521,3 +521,9 @@ const winRoundFigures = winnerFigures =>{
     lastRoundEndThen = dtProcessed
     restartGame = true
 }
+
+const switchTeam = (figure, team) => {
+    figure.team = team
+    figure.maxSpeed = teams[team]?.maxSpeed || 0.08
+    figure.walkRectLength = teams[team]?.walkRectLength
+}

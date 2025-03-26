@@ -316,12 +316,6 @@ const animateTeamSwitcher = button => {
     button.visible = game === games.vip
 }
 
-const switchTeam = (figure, team) => {
-    figure.team = team
-    figure.maxSpeed = teams[team]?.maxSpeed || 0.08
-    figure.walkRectLength = teams[team]?.walkRectLength
-}
-
 const createTeamSwitcher = (app, props, lobbyContainer) => {
     const {x, y, team} = props
     const width = 128
