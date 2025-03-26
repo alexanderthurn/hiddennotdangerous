@@ -692,34 +692,35 @@ function updateGame(figures, dt, dtProcessed) {
 }
 
 function handleInput(players, figures, dtProcessed) {
-    
-    // player join first
-    var joinedFighters = figures.filter(f => f.playerId && f.type === 'fighter')
-    // join by doing anything
-    players.filter(p => p.isAnyButtonPressed || p.isAttackButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
-        var figure = joinedFighters.find(f => f.playerId === p.playerId)
-        if (!figure) {
-            p.joinedTime = dtProcessed
-            if (p.type === 'bot' && joinedFighters.length === 0) {
-                return
-            }
-            var figure = figures.find(f => !f.playerId && f.type === 'fighter')
-            addPlayerScore(figure, p)
-            figure.isDead = false
-            figure.playerId = p.playerId
-            if (stage === stages.startLobby) {
-                figure.x = level.width*0.04+ Math.random() * level.width*0.4
-                figure.y = level.height*0.05+Math.random() * level.height*0.42
-            }
-            playAudio(soundJoin);
-
-            if (joinedFighters.length === 0) {
-                if (!isMusicMuted()) {
-                    playMusicPlaylist(musicLobby);
+    if (stage !== stages.game) {
+        var joinedFighters = figures.filter(f => f.playerId && f.type === 'fighter')
+        // join by doing anything
+        players.filter(p => p.isAnyButtonPressed || p.isAttackButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
+            var figure = joinedFighters.find(f => f.playerId === p.playerId)
+            if (!figure) {
+                p.joinedTime = dtProcessed
+                // player join first
+                if (p.type === 'bot' && joinedFighters.length === 0) {
+                    return
                 }
-            }  
-        }
-    })
+                var figure = figures.find(f => !f.playerId && f.type === 'fighter')
+                addPlayerScore(figure, p)
+                figure.isDead = false
+                figure.playerId = p.playerId
+                if (stage === stages.startLobby) {
+                    figure.x = level.width*0.04+ Math.random() * level.width*0.4
+                    figure.y = level.height*0.05+Math.random() * level.height*0.42
+                }
+                playAudio(soundJoin);
+
+                if (joinedFighters.length === 0) {
+                    if (!isMusicMuted()) {
+                        playMusicPlaylist(musicLobby);
+                    }
+                }  
+            }
+        })
+    }
 
     figures.filter(f => f.playerId && f.type === 'fighter').forEach(f => {
         var p = players.find(p => p.playerId === f.playerId && f.type === 'fighter')
