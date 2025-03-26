@@ -486,7 +486,7 @@ const attackFigure = (figureAttacker, figureAttacked) => {
     const attackDistance = figureAttacker.attackDistanceMultiplier ? figureAttacker.attackDistanceMultiplier*figureAttacker.attackDistance : figureAttacker.attackDistance
     if (distance(figureAttacker.x,figureAttacker.y,figureAttacked.x,figureAttacked.y) < attackDistance) {
         if (2*distanceAnglesDeg(rad2deg(figureAttacker.direction), rad2deg(angle(figureAttacker.x,figureAttacker.y,figureAttacked.x,figureAttacked.y))+180) <= figureAttacker.attackAngle) {
-            killFigure(figure)
+            killFigure(figureAttacked)
             return true
         }
     }
@@ -501,16 +501,8 @@ const killFigure = figure => {
 }
 
 const winRoundTeam = team =>{
-    
+    teams[team].points++
     winRoundFigures(figures.filter(f => f.playerId && f.team === team))
-
-    winnerFigures.forEach(f => {
-        f.score.oldPoints = f.score.points
-        f.score.points++
-    })
-    lastWinnerPlayerIds = new Set(winnerFigures.map(f => f.playerId))
-    lastRoundEndThen = dtProcessed
-    restartGame = true
 }
 
 const winRoundFigures = winnerFigures =>{

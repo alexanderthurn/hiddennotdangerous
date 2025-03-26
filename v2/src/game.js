@@ -31,7 +31,7 @@ var restartGame = false, lastWinnerPlayerIds, lastRoundEndThen, lastFinalWinnerP
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figuresPool = []
-var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = 5, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000
+var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = 1, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = createLevel()
@@ -208,16 +208,19 @@ const buttonDefinition = () => ({
 const teams = {
     assassin: {
         color: colors.red,
+        label: 'Assassins',
         walkRectLength: 300,
         maxSpeed: 0.08
     },
     guard: {
         color: colors.blue,
+        label: 'Guards',
         walkRectLength: 300,
         maxSpeed: 0.06
     },
     vip: {
         color: colors.darkgreen,
+        label: 'VIPs',
         walkRectLength: 150,
         maxSpeed: 0.04
     }
@@ -391,6 +394,7 @@ function roundInit() {
             destroyContainer(app, figure.score)
             figure.playerId = null
         })
+        Object.values(teams).forEach(team => team.points = 0)
     }
 
     figures.filter(figure => figure.type === 'cloud').forEach(cloud => destroyContainer(app, cloud))
@@ -480,38 +484,47 @@ function gameLoop() {
 
         if (!restartGame && stage === stages.game) {
             if (game === games.battleRoyale || game === games.food) {
-                const survivors = figuresPlayer.filter(f => !f.isDead)
-                if (survivors.length < 2) {
-                    winRound(survivors)
-                }
-            } else {
-                const assassins = figures.filter(f => f.playerId && f.team === 'assassin')
-                const guards = figures.filter(f => f.playerId && f.team === 'guard')
-                const vips = figures.filter(f => f.team === 'vip')
-                const assassinSurvivors = assassins.filter(f => !f.isDead)
-                const vipSurvivors = vips.filter(f => !f.isDead)
-                if (assassinSurvivors.length === 0 || vipSurvivors.length === 0) {
-                    winRound(vipSurvivors.length === 0 ? assassins : guards)
-                }
-            }
-
-            if (game === games.battleRoyale || game === games.food) {
                 if (figuresPlayer.length < 2) {
                     lastFinalWinnerPlayerIds = new Set(figuresPlayer.map(f => f.playerId))
+                    winRound(figuresPlayer)
                 }
             } else {
                 const assassins = figures.filter(f => f.playerId && f.team === 'assassin')
                 const guards = figures.filter(f => f.playerId && f.team === 'guard')
                 if (assassins.length === 0 || guards.length === 0) {
                     finalWinnerTeam = guards.length === 0 ? 'assassin' : 'guard'
+                    winRoundTeam(finalWinnerTeam)
                 }
             }
 
-            const maxPoints = Math.max(...figuresPlayer.map(f => f.score.points));
-            if (maxPoints >= pointsToWin) {
-                const figuresWithMaxPoints = figuresPlayer.filter(f => f.score.points === maxPoints);
-                if (!lastFinalWinnerPlayerIds) {
+            if ((game === games.battleRoyale || game === games.food) && !lastFinalWinnerPlayerIds) {
+                const survivors = figuresPlayer.filter(f => !f.isDead)
+                if (survivors.length < 2) {
+                    winRound(survivors)
+                }
+            } else if (!finalWinnerTeam) {
+                const assassins = figures.filter(f => f.playerId && f.team === 'assassin')
+                const guards = figures.filter(f => f.playerId && f.team === 'guard')
+                const vips = figures.filter(f => f.team === 'vip')
+                const assassinSurvivors = assassins.filter(f => !f.isDead)
+                const vipSurvivors = vips.filter(f => !f.isDead)
+                if (assassinSurvivors.length === 0 || vipSurvivors.length === 0) {
+                    winRoundTeam(vipSurvivors.length === 0 ? 'assassin' : 'guard')
+                }
+            }
+
+            if ((game === games.battleRoyale || game === games.food) && !lastFinalWinnerPlayerIds) {
+                const maxPoints = Math.max(...figuresPlayer.map(f => f.score.points))
+                if (maxPoints >= pointsToWin) {
+                    const figuresWithMaxPoints = figuresPlayer.filter(f => f.score.points === maxPoints)
                     lastFinalWinnerPlayerIds = new Set(figuresWithMaxPoints.map(f => f.playerId))
+                    playAudio(soundWin)
+                }
+            } else if (!finalWinnerTeam) {
+                const maxPoints = Math.max(...Object.values(teams).map(team => team.points))
+                if (maxPoints >= pointsToWin) {
+                    const teamsWithMaxPoints = Object.keys(teams).filter(team => teams[team].points === maxPoints)
+                    finalWinnerTeam = teamsWithMaxPoints[0]
                     playAudio(soundWin)
                 }
             }
@@ -520,7 +533,7 @@ function gameLoop() {
         const gameBreakDuration = (figuresPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
         if (restartGame && (!lastRoundEndThen || dtProcessed - lastRoundEndThen > gameBreakDuration)) {
             restartGame = false;
-            if (lastFinalWinnerPlayerIds) {
+            if (lastFinalWinnerPlayerIds || finalWinnerTeam) {
                 nextStage = stages.startLobby
             }
             roundInit();
