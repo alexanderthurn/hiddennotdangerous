@@ -501,7 +501,12 @@ const killFigure = figure => {
     playAudioPool(soundDeathPool)
 }
 
-const winRound = winnerFigures =>{
+const winRoundTeam = team =>{
+    teams[team].points++
+    winRoundFigures(figures.filter(f => f.playerId && f.team === team))
+}
+
+const winRoundFigures = winnerFigures =>{
     winnerFigures.forEach(f => {
         f.score.oldPoints = f.score.points
         f.score.points++

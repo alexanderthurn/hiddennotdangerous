@@ -498,9 +498,12 @@ const animateWinningCeremony = winnerText => {
         }
     })
     
-    if (!!lastFinalWinnerNumber && dt3 >= 0 && dt3 < showFinalWinnerDuration) {
+    if ((lastFinalWinnerPlayerIds || finalWinnerTeam) && dt3 >= 0 && dt3 < showFinalWinnerDuration) {
         winnerText.visible = true
-        if (figureIsBot(lastFinalWinnerFigure)) {
+        if (finalWinnerTeam) {
+            winnerText.style.fill.color = teams[finalWinnerTeam].color
+            winnerText.text = `${teams[finalWinnerTeam].label} win`
+        } else if (figureIsBot(lastFinalWinnerFigure)) {
             winnerText.text = `Player ${lastFinalWinnerNumber} (Bot) wins`
         } else {
             winnerText.text = `Player ${lastFinalWinnerNumber} wins`
