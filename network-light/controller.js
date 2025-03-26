@@ -28,7 +28,17 @@ function setUrlParam(name, value) {
     window.history.replaceState({}, '', url);
 }
 
+function getPixelPerCentimeter() {
+    const pxPerCm = document.getElementById('1cm').offsetWidth
+    return pxPerCm
+}
+
+function centimeterToPixel(cm) {
+    return cm * getPixelPerCentimeter()
+}
+
 async function init() {
+
     const app = new FWApplication();
     await app.init({
         title: 'F-Mote',  
@@ -60,7 +70,6 @@ async function init() {
 
     if (app.serverId && app.serverId !== '') {
         network.connectToRoom(app.serverPrefix + app.serverId);
-    
         network.peer.on('error', (err) => {
             console.error('Connection error:', err);
         });

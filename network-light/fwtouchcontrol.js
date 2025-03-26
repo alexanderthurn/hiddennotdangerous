@@ -200,20 +200,20 @@ class FWTouchControl extends PIXI.Container {
 
             axisContainer.addEventListener('pointerleave', {
                 handleEvent: function(event) {
-                    axisContainer.xAxis = 0;
+                   /* axisContainer.xAxis = 0;
                     axisContainer.yAxis = 0;
                     axisContainer.xAxisShadow = 0;
                     axisContainer.yAxisShadow = 0;
                     self.buttonContainers[axisContainer.clickIndex].pressed = false;
-                    axisContainer.pointerdown = null;
+                    axisContainer.pointerdown = null;*/
                 }
             }); 
 
             axisContainer.addEventListener('pointermove', {
                 handleEvent: function(event) {
-                    if (!axisContainer.pointerdown) {
-                        return;
-                    }
+                   // if (!axisContainer.pointerdown) {
+                     //   return;
+                    //}
                     if (app.isPortrait) {
                         let localEvent = {x: event.y, y: app.containerGame.screenHeight - event.x};
                         axisContainer.xAxis = (localEvent.x - axisContainer.x) / axisContainer.radius;
@@ -279,24 +279,27 @@ class FWTouchControl extends PIXI.Container {
 
 
         const R_POS_INVISIBLE = [- 10.0, -10.0, 0.0, 0.0];
-       
+        const screenSizeinCm = Math.max(window.innerHeight, window.innerWidth) / getPixelPerCentimeter()
+        const goodButtonSizeinPixel = 1.2 * getPixelPerCentimeter()
+
+        const goodButtonSizeInRelative = goodButtonSizeinPixel / minHeightWidth
         if (app.layout === 'simple') {
             this.dpadCenterContainer.rPos = R_POS_INVISIBLE;
 
             this.axesContainers.forEach((axisContainer, i) => {
                 switch(i) {
-                    case 0: axisContainer.rPos = [0.05, 0.75, 0.25]; break;
+                    case 0: axisContainer.rPos = [0.0, 1, goodButtonSizeInRelative*1.2, 0.25, -0.25]; break;
                     case 1: axisContainer.rPos = R_POS_INVISIBLE; break;
                 }
             })
           
-
+      
             this.buttonContainers.forEach((buttonContainer, i) => {
                 switch(i) {
-                    case 0: buttonContainer.rPos = [1.0, 1.0, 0.12, -0.5, 0.0]; break;
-                    case 1: buttonContainer.rPos = [1.0, 0.7, 0.12, 0.1, -0.1]; break;
-                    case 2: buttonContainer.rPos = [1.0, 0.7, 0.12, -1.15, -0.1]; break;
-                    case 3: buttonContainer.rPos = [1.0, 0.4, 0.12, -0.5, -0.2]; break;
+                    case 0: buttonContainer.rPos = [1.0, 1.0, goodButtonSizeInRelative, -0.5, 0.0]; break;
+                    case 1: buttonContainer.rPos = [1.0, 1.0, goodButtonSizeInRelative, 0.1, -1]; break;
+                    case 2: buttonContainer.rPos = [1.0, 1.0, goodButtonSizeInRelative, -1.15, -1]; break;
+                    case 3: buttonContainer.rPos = [1.0, 1.0, goodButtonSizeInRelative, -0.5, -2]; break;
                     case 4:  buttonContainer.rPos = R_POS_INVISIBLE; break;
                     case 5:  buttonContainer.rPos = R_POS_INVISIBLE; break;
                     case 6:  buttonContainer.rPos = R_POS_INVISIBLE; break;
