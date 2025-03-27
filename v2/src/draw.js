@@ -666,6 +666,7 @@ const animateFigure = (figure, spritesheet) => {
 
     if (figure.isDead) {
         body.angle = 90
+        body.y = figure.bodyHeight/4
         figureLayer.detach(body)
     } else {
         if (figure.isAttacking) {
@@ -681,6 +682,7 @@ const animateFigure = (figure, spritesheet) => {
         } else {
             body.angle = 0
         }
+        body.y = 0
         figureLayer.attach(body)
     }
 
