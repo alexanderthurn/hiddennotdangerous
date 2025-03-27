@@ -712,6 +712,12 @@ const animateFigure = (figure, spritesheet) => {
         shadow.stop()
     }
 
+    if (figure.speed > 0) {
+        const animationSpeedFactor = 1.5
+        body.animationSpeed = animationSpeedFactor * figure.speed
+        shadow.animationSpeed = animationSpeedFactor * figure.speed
+    }
+
     figure.children.forEach(child => child.zIndex = figure.y)
 }
 
@@ -767,14 +773,12 @@ const createFigure = (app, spritesheet, props) => {
 
     const body = new PIXI.AnimatedSprite(spritesheet.animations.down_0_0)
     body.anchor.set(0.5)
-    body.animationSpeed = 0.125
     body.currentAnimation = 'down_0_0'
     body.scale = 2
     body.label = 'body'
 
     const shadow = new PIXI.AnimatedSprite(spritesheet.animations.down_0_0)
     shadow.anchor.set(0.1, 0.5)
-    shadow.animationSpeed = 0.125
     shadow.currentAnimation = 'down_0_0'
     shadow.alpha = shadowDefinition.alpha
     shadow.scale.set(2*shadowDefinition.scale.x, 2*shadowDefinition.scale.y)
