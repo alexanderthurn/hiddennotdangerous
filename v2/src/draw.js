@@ -316,12 +316,6 @@ const animateTeamSwitcher = button => {
     button.visible = game === games.vip
 }
 
-const switchTeam = (figure, team) => {
-    figure.team = team
-    figure.maxSpeed = teams[team]?.maxSpeed || 0.08
-    figure.walkRectLength = teams[team]?.walkRectLength
-}
-
 const createTeamSwitcher = (app, props, lobbyContainer) => {
     const {x, y, team} = props
     const width = 128
@@ -405,9 +399,6 @@ const animatePlayerScore = (figure, player) => {
     if (figure.isMarkerButtonPressed && !restartGame) {
         figure.score.x += -5+10*Math.random()
         figure.score.y += -5+10*Math.random()
-        figure.tint = colors.purple
-    } else {
-        figure.tint = teams[figure.team] ? teams[figure.team].color : colors.white
     }
 }
 
@@ -693,7 +684,11 @@ const animateFigure = (figure, spritesheet) => {
         figureLayer.attach(body)
     }
 
-    body.tint = teams[figure.team]?.color
+    if (figure.isMarkerButtonPressed && !restartGame) {
+        body.tint = colors.purple
+    } else {
+        body.tint = teams[figure.team]?.color
+    }
 
     if (body.currentAnimation != animation) {
         body.currentAnimation = animation
@@ -715,6 +710,12 @@ const animateFigure = (figure, spritesheet) => {
         }
         body.stop()
         shadow.stop()
+    }
+
+    if (figure.speed > 0) {
+        const animationSpeedFactor = 1.5
+        body.animationSpeed = animationSpeedFactor * figure.speed
+        shadow.animationSpeed = animationSpeedFactor * figure.speed
     }
 
     figure.children.forEach(child => child.zIndex = figure.y)
@@ -772,14 +773,12 @@ const createFigure = (app, spritesheet, props) => {
 
     const body = new PIXI.AnimatedSprite(spritesheet.animations.down_0_0)
     body.anchor.set(0.5)
-    body.animationSpeed = 0.125
     body.currentAnimation = 'down_0_0'
     body.scale = 2
     body.label = 'body'
 
     const shadow = new PIXI.AnimatedSprite(spritesheet.animations.down_0_0)
     shadow.anchor.set(0.1, 0.5)
-    shadow.animationSpeed = 0.125
     shadow.currentAnimation = 'down_0_0'
     shadow.alpha = shadowDefinition.alpha
     shadow.scale.set(2*shadowDefinition.scale.x, 2*shadowDefinition.scale.y)

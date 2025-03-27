@@ -509,7 +509,7 @@ const killFigure = figure => {
 
 const winRoundTeam = team =>{
     teams[team].points++
-    winRoundFigures(figures.filter(f => f.playerId && f.team === team))
+    winRoundFigures(figures.filter(f => f.playerId && f.team === team && f.type === 'fighter'))
 }
 
 const winRoundFigures = winnerFigures =>{
@@ -520,4 +520,10 @@ const winRoundFigures = winnerFigures =>{
     lastWinnerPlayerIds = new Set(winnerFigures.map(f => f.playerId))
     lastRoundEndThen = dtProcessed
     restartGame = true
+}
+
+const switchTeam = (figure, team) => {
+    figure.team = team
+    figure.maxSpeed = teams[team]?.maxSpeed || 0.08
+    figure.walkRectLength = teams[team]?.walkRectLength
 }
