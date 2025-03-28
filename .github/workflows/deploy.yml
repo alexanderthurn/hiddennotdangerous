@@ -1,0 +1,20 @@
+name: Deploy to FTP
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-v2:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: FTP Deploy
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: w0058864.kasserver.com
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: "./v2/" 
+        server-dir: "/" 
