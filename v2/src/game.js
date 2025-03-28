@@ -7,6 +7,7 @@ const defaultkeyboardPlayer = {
     yAxis: 0,
     isMoving: false,
     type: 'keyboard',
+    isAnyButtonPressed: false,
     isAttackButtonPressed: false,
     isMarkerButtonPressed: false,
     isSpeedButtonPressed: false

@@ -402,11 +402,17 @@ const animatePlayerScore = (figure, player) => {
     }
 }
 
+const getScoreDefaultX = player => {
+    const offx = 48*1.2
+    const sortedPlayers = players.filter(player => player.joinedTime).sort((player1, player2) => player1.joinedTime - player2.joinedTime)
+    console.log('A', players, players.filter(player => player.joinedTime))
+    const playerIndex = sortedPlayers.indexOf(player)
+    return 32+playerIndex*offx
+}
+
 const addPlayerScore = (figure, player) => {
     let playerScore = new PIXI.Container()
-    const offx = 48*1.2
-    const figureIndex = figures.filter(f => f.type === 'fighter').findIndex(f => !f.playerId)
-    playerScore.xDefault = 32+figureIndex*offx
+    playerScore.xDefault = getScoreDefaultX(player)
     playerScore.yDefault = level.height+32
     playerScore.points = 0
     playerScore.oldPoints = 0

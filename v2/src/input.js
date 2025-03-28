@@ -224,6 +224,9 @@ function collectInputs() {
     });
 
     keyboardPlayers = keyboardPlayers.map((kp,i) => ({...defaultkeyboardPlayer, playerId: 'k' + i}));
+
+    //keyboardPlayers = keyboardPlayers.map(kp => ({...kp, ...defaultkeyboardPlayer}));
+    //console.log('WHAT', keyboardPlayers)
     
     keyboardPlayers.forEach(g => {
         g.isAttackButtonPressed = false
