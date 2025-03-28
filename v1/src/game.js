@@ -40,7 +40,7 @@ var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAud
 var level = {}
 var tileMap, tileMap2;
 var playerImage = new Image()
-playerImage.src = '../gfx/character_base_32x32.png' // '../gfx/character_base_topview_32x32.png' beuelerjong
+playerImage.src = './gfx/character_base_32x32.png' // './gfx/character_base_topview_32x32.png' beuelerjong
 var playerImageAnim = {
     width: 62,
     height: 62,
@@ -66,7 +66,7 @@ loadPromises.push(new Promise((resolve, reject) => {
 }))
 
 var imageArrow = new Image()
-imageArrow.src = '../gfx/arrow.png'
+imageArrow.src = './gfx/arrow.png'
 loadPromises.push(new Promise((resolve, reject) => {
     imageArrow.onload = () => {
         resolve()
@@ -74,14 +74,14 @@ loadPromises.push(new Promise((resolve, reject) => {
 }))
 
 var cloudImage = new Image()
-cloudImage.src = '../gfx/fart.png'
+cloudImage.src = './gfx/fart.png'
 loadPromises.push(new Promise((resolve, reject) => {
     cloudImage.onload = () => {
         resolve()
     }
 }))
 var texture = new Image()
-texture.src = '../gfx/kacheln.png'
+texture.src = './gfx/kacheln.png'
 loadPromises.push(new Promise((resolve, reject) => {
     texture.onload = () => {
         resolve();
@@ -134,7 +134,7 @@ cloudImageAnim = {
     default: {a: [[0,0,64,64],[64,0,64,64],[128,0,64,64],[0,64,64,64],[64,64,64,64],[128,64,64,64],[0,128,64,64],[64,128,64,64],[128,128,64,64]]}
 }
 var foodImage = new Image()
-foodImage.src = '../gfx/food-OCAL.png'
+foodImage.src = './gfx/food-OCAL.png'
 foodImageAnim = {
     hasDirections: false,
     width: 64,

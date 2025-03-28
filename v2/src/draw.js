@@ -589,27 +589,7 @@ const addFoods = (app, spritesheet) => {
     })
 }
 
-const addGrass = (textures, spritesheet) => {
-    const widthInTiles = 16
-    const heightInTiles = 9
-
-    for (let i = tileArea.length; i < widthInTiles; i++) {
-        tileArea[i] = []
-        for (let j = tileArea[i].length; j < heightInTiles; j++) {
-            tileArea[i][j] = getRandomInt(3)
-        }
-    }
-
-    for (let i = 0; i < widthInTiles; i++) {
-        for (let j = 0; j < heightInTiles; j++) {
-            const texture = textures[tileArea[i][j]]
-            const grass = new PIXI.Sprite(spritesheet.textures[texture])
-            grass.x = i*tileWidth
-            grass.y = j*tileWidth
-            levelContainer.addChild(grass)
-        }
-    }
-
+const addGrass = () => {
     levelContainer.addChild(PIXI.Sprite.from('background_grass'))
 }
 

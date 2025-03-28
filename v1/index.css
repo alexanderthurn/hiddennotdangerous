@@ -32,5 +32,5 @@ h1 {
 }
 
 canvas {
-    background-image: url('../gfx/plain_grass.jpg');
+    background-image: url('./gfx/plain_grass.jpg');
 }

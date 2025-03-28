@@ -280,28 +280,6 @@ const foodDefinition = () => ({
     }
 })
 
-const grassAtlasData = {
-    frames: {
-        mushroom: {
-            frame: { x: 0, y: 0, w: 120, h: 120 }
-        },
-        plain: {
-            frame: { x: 120, y: 0, w: 120, h: 120 }
-        },
-        flowers: {
-            frame: { x: 240, y: 0, w: 120, h: 120 }
-        }
-    },
-    meta: {
-        image: 'grass'
-    },
-    textures: {
-        mushroom: 'mushroom',
-        plain: 'plain',
-        flowers: 'flowers'
-    }
-};
-
 const figureAtlasData = createFigureAtlasData();
 const cloudAtlasData = createCloudAtlasData();
 var spriteSheets;
@@ -329,11 +307,10 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         await Promise.all(loadPromises);
 
         const assets = [
-            {alias: 'food', src: '../gfx/food-OCAL.png'},
-            {alias: 'grass', src: '../gfx/kacheln.png'},
-            {alias: 'players', src: '../gfx/character_base_all_32x32.png'},
-            {alias: 'cloud', src: '../gfx/fart.png'},
-            {alias: 'background_grass', src: '../gfx/background_grass.jpg'}
+            {alias: 'food', src: './gfx/food-OCAL.png'},
+            {alias: 'players', src: './gfx/character_base_all_32x32.png'},
+            {alias: 'cloud', src: './gfx/fart.png'},
+            {alias: 'background_grass', src: './gfx/background_grass.jpg'}
         ];
     
         // Load the assets defined above.
@@ -342,8 +319,7 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         const atlasData = {
             cloud: cloudAtlasData,
             figure: figureAtlasData,
-            food: foodAtlasData,
-            grass: grassAtlasData
+            food: foodAtlasData
         }
         
         spriteSheets = Object.entries(atlasData).reduce((acc, [key, value]) => ({...acc, [key]: new PIXI.Spritesheet(
@@ -359,7 +335,7 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         destroyContainer(app, loadingText)
         levelContainer = createLevelContainer(app, level);
         app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, scoreLayer, overlayLayer, debugLayer)
-        addGrass(Object.keys(atlasData.grass.frames), spriteSheets.grass);
+        addGrass();
         addHeadline();
         addLobbyItems(app);
         addFoods(app, spriteSheets.food);
