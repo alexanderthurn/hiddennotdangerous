@@ -405,7 +405,6 @@ const animatePlayerScore = (figure, player) => {
 const getScoreDefaultX = player => {
     const offx = 48*1.2
     const sortedPlayers = players.filter(player => player.joinedTime).sort((player1, player2) => player1.joinedTime - player2.joinedTime)
-    console.log('A', players, players.filter(player => player.joinedTime))
     const playerIndex = sortedPlayers.indexOf(player)
     return 32+playerIndex*offx
 }

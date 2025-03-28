@@ -689,12 +689,12 @@ function handleInput(players, figures, dtProcessed) {
         players.filter(p => p.isAnyButtonPressed || p.isAttackButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
             var figure = joinedFighters.find(f => f.playerId === p.playerId)
             if (!figure) {
-                p.joinedTime = dtProcessed
                 // player join first
                 if (p.type === 'bot' && joinedFighters.length === 0) {
                     return
                 }
                 var figure = figures.find(f => !f.playerId && f.type === 'fighter')
+                p.joinedTime = dtProcessed
                 addPlayerScore(figure, p)
                 figure.isDead = false
                 figure.playerId = p.playerId

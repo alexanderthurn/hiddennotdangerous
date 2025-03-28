@@ -108,6 +108,9 @@ window.addEventListener('pointermove', event => {
 
 
 function collectInputs() {
+    const botCount = getBotCount()
+    botPlayers = botPlayers.slice(0, botCount)
+
     const defaultBotPlayer = {
         type: 'bot',
         isAttackButtonPressed: false,
