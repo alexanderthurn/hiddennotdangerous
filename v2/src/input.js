@@ -108,23 +108,31 @@ window.addEventListener('pointermove', event => {
 
 
 function collectInputs() {
-    botPlayers = []
-    for (var b = 0; b < getBotCount(); b++) {
+    const botCount = getBotCount()
+    botPlayers = botPlayers.slice(0, botCount)
 
-        var bot = {
-            type: 'bot',
-            isAttackButtonPressed: false,
-            isMarkerButtonPressed: false,
-            isSpeedButtonPressed: false,
-            isAnyButtonPressed: stage !== stages.game,
-            xAxis: 0,
-            yAxis: 0,
-            isMoving: true,
-            playerId: 'b' + b
+    const defaultBotPlayer = {
+        type: 'bot',
+        isAttackButtonPressed: false,
+        isMarkerButtonPressed: false,
+        isSpeedButtonPressed: false,
+        isAnyButtonPressed: stage !== stages.game,
+        xAxis: 0,
+        yAxis: 0,
+        isMoving: false,
+    };
+
+    botPlayers = botPlayers.map(bp => ({...bp, ...defaultBotPlayer}));
+    for (var b = 0; b < getBotCount(); b++) {
+        const playerId = 'b' + b
+        let bot = botPlayers.find(bp => bp.playerId === playerId);
+        let isNew = false
+        if (!bot) {
+            isNew = true
+            bot = {...defaultBotPlayer, playerId};
         }
 
         var f = figures.find(f => f.playerId === bot.playerId && f.type === 'fighter')
-        
         if (f && !f.isDead) {
             var xTarget = -1000
             var yTarget = -1000
@@ -174,7 +182,7 @@ function collectInputs() {
 
         bot.isMoving = Math.abs(bot.xAxis) + Math.abs(bot.yAxis) > 4;
        
-        botPlayers.push(bot)
+        isNew && botPlayers.push(bot)
     }
 
     FWNetwork.getInstance().getAllGamepads().filter(x => x && x.connected).map(x => {
@@ -223,15 +231,17 @@ function collectInputs() {
         return g
     });
 
-    keyboardPlayers = keyboardPlayers.map((kp,i) => ({...defaultkeyboardPlayer, playerId: 'k' + i}));
-    
-    keyboardPlayers.forEach(g => {
-        g.isAttackButtonPressed = false
-        g.isAnyButtonPressed = false
-        g.isMarkerButtonPressed = false
-        g.isSpeedButtonPressed = false
-    })
-    
+    const defaultkeyboardPlayer = {
+        xAxis: 0,
+        yAxis: 0,
+        isMoving: false,
+        type: 'keyboard',
+        isAnyButtonPressed: false,
+        isAttackButtonPressed: false,
+        isMarkerButtonPressed: false,
+        isSpeedButtonPressed: false
+    };
+    keyboardPlayers = keyboardPlayers.map(kp => ({...kp, ...defaultkeyboardPlayer}));
     keyboards.forEach(k => {
         Array.from(k.pressed.values()).forEach(pressedButton => {
             const binding = k.bindings[pressedButton];

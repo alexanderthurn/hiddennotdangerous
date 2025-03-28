@@ -2,15 +2,6 @@ var loadPromises = []
 var gamepadPlayers = []
 var touchPlayers = [];
 var touches = [{pointerType: 'unknown', x: 0, y: 0, xCenter: undefined, yCenter: undefined, pressed: new Set()}]
-const defaultkeyboardPlayer = {
-    xAxis: 0,
-    yAxis: 0,
-    isMoving: false,
-    type: 'keyboard',
-    isAttackButtonPressed: false,
-    isMarkerButtonPressed: false,
-    isSpeedButtonPressed: false
-};
 var keyboardPlayers = [];
 var botPlayers = []
 var players = []
@@ -698,12 +689,12 @@ function handleInput(players, figures, dtProcessed) {
         players.filter(p => p.isAnyButtonPressed || p.isAttackButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
             var figure = joinedFighters.find(f => f.playerId === p.playerId)
             if (!figure) {
-                p.joinedTime = dtProcessed
                 // player join first
                 if (p.type === 'bot' && joinedFighters.length === 0) {
                     return
                 }
                 var figure = figures.find(f => !f.playerId && f.type === 'fighter')
+                p.joinedTime = dtProcessed
                 addPlayerScore(figure, p)
                 figure.isDead = false
                 figure.playerId = p.playerId

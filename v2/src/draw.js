@@ -376,8 +376,12 @@ const addLobbyItems = app => {
     app.ticker.add(() => animateLobbyItems(lobbyContainer))
 }
 
-const botCircleContext = new PIXI.GraphicsContext().rect(-24,-24, 48,48).fill({alpha: 0.5, color: colors.white}).stroke({alpha: 0.5, color: colors.black, width: 1})
-const playerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: colors.white}).stroke({alpha: 0.5, color: colors.black, width: 1})
+const getScoreDefaultX = figure => {
+    const offx = 48*1.2
+    const sortedPlayers = players.filter(player => player.joinedTime).sort((player1, player2) => player1.joinedTime - player2.joinedTime || player1.playerId - player2.playerId)
+    const playerIndex = sortedPlayers.findIndex(player => player.playerId === figure.playerId)
+    return 32+playerIndex*offx
+}
 
 const animatePlayerScore = (figure, player) => {
     if (figure.team !== figure.oldTeam) {
@@ -389,7 +393,7 @@ const animatePlayerScore = (figure, player) => {
         var lp = Math.min((dtProcessed - player.joinedTime) / moveNewPlayerDuration, 1)
         var lpi = 1-lp
 
-        figure.score.x = lpi * (level.width*0.5) + lp*figure.score.xDefault
+        figure.score.x = lpi * (level.width*0.5) + lp*getScoreDefaultX(figure)
         figure.score.y = lpi*(level.height*0.5) + lp*figure.score.yDefault
         figure.score.scale = 12*lpi + lp
     }
@@ -402,11 +406,11 @@ const animatePlayerScore = (figure, player) => {
     }
 }
 
+const botCircleContext = new PIXI.GraphicsContext().rect(-24,-24, 48,48).fill({alpha: 0.5, color: colors.white}).stroke({alpha: 0.5, color: colors.black, width: 1})
+const playerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: colors.white}).stroke({alpha: 0.5, color: colors.black, width: 1})
+
 const addPlayerScore = (figure, player) => {
     let playerScore = new PIXI.Container()
-    const offx = 48*1.2
-    const figureIndex = figures.filter(f => f.type === 'fighter').findIndex(f => !f.playerId)
-    playerScore.xDefault = 32+figureIndex*offx
     playerScore.yDefault = level.height+32
     playerScore.points = 0
     playerScore.oldPoints = 0
@@ -439,10 +443,14 @@ const addPlayerScore = (figure, player) => {
 
 const animateWinningCeremony = winnerText => {
     const playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
+
     const playerFiguresSortedByNewPoints = playerFigures.toSorted((f1,f2) => (f1.score.points-f1.score.oldPoints) - (f2.score.points-f2.score.oldPoints))
-    const lastFinalWinnerIndex = playerFigures.findIndex(f => lastFinalWinnerPlayerIds?.has(f.playerId))
-    const lastFinalWinnerFigure = playerFigures[lastFinalWinnerIndex]
+
+    const sortedPlayers = players.filter(player => player.joinedTime).sort((player1, player2) => player1.joinedTime - player2.joinedTime || player1.playerId - player2.playerId)
+    const lastFinalWinnerFigure = playerFigures.find(f => lastFinalWinnerPlayerIds?.has(f.playerId))
+    const lastFinalWinnerIndex = sortedPlayers.findIndex(player => player.playerId === lastFinalWinnerFigure?.playerId)
     const lastFinalWinnerNumber = lastFinalWinnerIndex+1
+
     const dt3 = dtProcessed - (lastRoundEndThen + playerFigures.length*moveScoreToPlayerDuration);
     const dt4 = dtProcessed - (lastRoundEndThen + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
 
@@ -454,7 +462,7 @@ const animateWinningCeremony = winnerText => {
             const lp = dt2 / moveScoreToPlayerDuration
             const lpi = 1-lp
 
-            f.score.x = lpi*f.score.xDefault + lp*f.x
+            f.score.x = lpi*getScoreDefaultX(f) + lp*f.x
             f.score.y = lpi*f.score.yDefault + lp*f.y
 
             if (lastFinalWinnerPlayerIds?.has(f.playerId)) {
@@ -479,7 +487,7 @@ const animateWinningCeremony = winnerText => {
             const lp = dt4 / moveScoreToPlayerDuration
             const lpi = 1-lp
 
-            f.score.x = lpi*f.x + lp*f.score.xDefault
+            f.score.x = lpi*f.x + lp*getScoreDefaultX(f)
             f.score.y = lpi*f.y + lp*f.score.yDefault
             f.score.scale = 2*lpi + lp
             if (lastFinalWinnerPlayerIds) {
@@ -666,6 +674,7 @@ const animateFigure = (figure, spritesheet) => {
 
     if (figure.isDead) {
         body.angle = 90
+        body.y = figure.bodyHeight/4
         figureLayer.detach(body)
     } else {
         if (figure.isAttacking) {
@@ -681,6 +690,7 @@ const animateFigure = (figure, spritesheet) => {
         } else {
             body.angle = 0
         }
+        body.y = 0
         figureLayer.attach(body)
     }
 
