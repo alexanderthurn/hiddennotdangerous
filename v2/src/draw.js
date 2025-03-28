@@ -389,7 +389,7 @@ const animatePlayerScore = (figure, player) => {
         var lp = Math.min((dtProcessed - player.joinedTime) / moveNewPlayerDuration, 1)
         var lpi = 1-lp
 
-        figure.score.x = lpi * (level.width*0.5) + lp*figure.score.xDefault
+        figure.score.x = lpi * (level.width*0.5) + lp*getScoreDefaultX(figure)
         figure.score.y = lpi*(level.height*0.5) + lp*figure.score.yDefault
         figure.score.scale = 12*lpi + lp
     }
@@ -402,16 +402,15 @@ const animatePlayerScore = (figure, player) => {
     }
 }
 
-const getScoreDefaultX = player => {
+const getScoreDefaultX = figure => {
     const offx = 48*1.2
     const sortedPlayers = players.filter(player => player.joinedTime).sort((player1, player2) => player1.joinedTime - player2.joinedTime)
-    const playerIndex = sortedPlayers.indexOf(player)
+    const playerIndex = sortedPlayers.findIndex(player => player.playerId === figure.playerId)
     return 32+playerIndex*offx
 }
 
 const addPlayerScore = (figure, player) => {
     let playerScore = new PIXI.Container()
-    playerScore.xDefault = getScoreDefaultX(player)
     playerScore.yDefault = level.height+32
     playerScore.points = 0
     playerScore.oldPoints = 0
@@ -459,7 +458,7 @@ const animateWinningCeremony = winnerText => {
             const lp = dt2 / moveScoreToPlayerDuration
             const lpi = 1-lp
 
-            f.score.x = lpi*f.score.xDefault + lp*f.x
+            f.score.x = lpi*getScoreDefaultX(f) + lp*f.x
             f.score.y = lpi*f.score.yDefault + lp*f.y
 
             if (lastFinalWinnerPlayerIds?.has(f.playerId)) {
@@ -484,7 +483,7 @@ const animateWinningCeremony = winnerText => {
             const lp = dt4 / moveScoreToPlayerDuration
             const lpi = 1-lp
 
-            f.score.x = lpi*f.x + lp*f.score.xDefault
+            f.score.x = lpi*f.x + lp*getScoreDefaultX(f)
             f.score.y = lpi*f.y + lp*f.score.yDefault
             f.score.scale = 2*lpi + lp
             if (lastFinalWinnerPlayerIds) {
