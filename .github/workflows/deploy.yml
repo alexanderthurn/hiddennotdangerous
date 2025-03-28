@@ -1,10 +1,10 @@
-name: Deploy to FTP
+name: Deploy v2 to Production
 
 on:
   workflow_dispatch:
 
 jobs:
-  deploy-v2:
+  deploy:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
