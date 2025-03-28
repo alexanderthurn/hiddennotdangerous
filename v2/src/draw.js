@@ -376,8 +376,12 @@ const addLobbyItems = app => {
     app.ticker.add(() => animateLobbyItems(lobbyContainer))
 }
 
-const botCircleContext = new PIXI.GraphicsContext().rect(-24,-24, 48,48).fill({alpha: 0.5, color: colors.white}).stroke({alpha: 0.5, color: colors.black, width: 1})
-const playerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: colors.white}).stroke({alpha: 0.5, color: colors.black, width: 1})
+const getScoreDefaultX = figure => {
+    const offx = 48*1.2
+    const sortedPlayers = players.filter(player => player.joinedTime).sort((player1, player2) => player1.joinedTime - player2.joinedTime || player1.playerId - player2.playerId)
+    const playerIndex = sortedPlayers.findIndex(player => player.playerId === figure.playerId)
+    return 32+playerIndex*offx
+}
 
 const animatePlayerScore = (figure, player) => {
     if (figure.team !== figure.oldTeam) {
@@ -402,12 +406,8 @@ const animatePlayerScore = (figure, player) => {
     }
 }
 
-const getScoreDefaultX = figure => {
-    const offx = 48*1.2
-    const sortedPlayers = players.filter(player => player.joinedTime).sort((player1, player2) => player1.joinedTime - player2.joinedTime)
-    const playerIndex = sortedPlayers.findIndex(player => player.playerId === figure.playerId)
-    return 32+playerIndex*offx
-}
+const botCircleContext = new PIXI.GraphicsContext().rect(-24,-24, 48,48).fill({alpha: 0.5, color: colors.white}).stroke({alpha: 0.5, color: colors.black, width: 1})
+const playerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: colors.white}).stroke({alpha: 0.5, color: colors.black, width: 1})
 
 const addPlayerScore = (figure, player) => {
     let playerScore = new PIXI.Container()
