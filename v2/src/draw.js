@@ -443,10 +443,14 @@ const addPlayerScore = (figure, player) => {
 
 const animateWinningCeremony = winnerText => {
     const playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
+
     const playerFiguresSortedByNewPoints = playerFigures.toSorted((f1,f2) => (f1.score.points-f1.score.oldPoints) - (f2.score.points-f2.score.oldPoints))
-    const lastFinalWinnerIndex = playerFigures.findIndex(f => lastFinalWinnerPlayerIds?.has(f.playerId))
-    const lastFinalWinnerFigure = playerFigures[lastFinalWinnerIndex]
+
+    const sortedPlayers = players.filter(player => player.joinedTime).sort((player1, player2) => player1.joinedTime - player2.joinedTime || player1.playerId - player2.playerId)
+    const lastFinalWinnerFigure = playerFigures.find(f => lastFinalWinnerPlayerIds?.has(f.playerId))
+    const lastFinalWinnerIndex = sortedPlayers.findIndex(player => player.playerId === lastFinalWinnerFigure?.playerId)
     const lastFinalWinnerNumber = lastFinalWinnerIndex+1
+
     const dt3 = dtProcessed - (lastRoundEndThen + playerFigures.length*moveScoreToPlayerDuration);
     const dt4 = dtProcessed - (lastRoundEndThen + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
 
