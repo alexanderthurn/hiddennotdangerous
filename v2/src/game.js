@@ -2,16 +2,6 @@ var loadPromises = []
 var gamepadPlayers = []
 var touchPlayers = [];
 var touches = [{pointerType: 'unknown', x: 0, y: 0, xCenter: undefined, yCenter: undefined, pressed: new Set()}]
-const defaultkeyboardPlayer = {
-    xAxis: 0,
-    yAxis: 0,
-    isMoving: false,
-    type: 'keyboard',
-    isAnyButtonPressed: false,
-    isAttackButtonPressed: false,
-    isMarkerButtonPressed: false,
-    isSpeedButtonPressed: false
-};
 var keyboardPlayers = [];
 var botPlayers = []
 var players = []
