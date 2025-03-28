@@ -477,7 +477,6 @@ function gameLoop() {
             windowHasFocus = true
         })
     }
-
     then = now
     window.requestAnimationFrame(gameLoop);
 }
