@@ -693,14 +693,11 @@ function handleInput(players, figures, dtProcessed) {
         var p = players.find(p => p.playerId === f.playerId && f.type === 'fighter')
 
         f.speed = 0.0
-
-        f.isSpeedButtonPressed = p.isSpeedButtonPressed
-        f.isMarkerButtonPressed = p.isMarkerButtonPressed
-
+   
         if (!f.isDead) {
             if (p.isMoving) {
                 f.direction = angle(0,0,p.xAxis,p.yAxis)
-                f.speed = f.maxSpeed * (f.isSpeedButtonPressed ? 2.2 : 1)
+                f.speed = f.maxSpeed * (p?.isSpeedButtonPressed ? 2.2 : 1)
             }
             if (p.isAttackButtonPressed && !f.isAttacking) {
                 if (!f.lastAttackTime || dtProcessed-f.lastAttackTime > f.attackBreakDuration) {

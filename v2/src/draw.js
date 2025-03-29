@@ -400,7 +400,7 @@ const animatePlayerScore = (figure, player) => {
 
     figure.score.getChildAt(1).text = figure.score.shownPoints
 
-    if (figure.isMarkerButtonPressed && !restartGame) {
+    if (player.isMarkerButtonPressed && !restartGame) {
         figure.score.x += -5+10*Math.random()
         figure.score.y += -5+10*Math.random()
     }
@@ -636,7 +636,7 @@ const addLevelBoundary = () => {
     figureLayer.attach(lowerFence)
 }
 
-const animateFigure = (figure, spritesheet) => {
+const animateFigure = (figure, spritesheet, player) => {
     const deg = rad2limiteddeg(figure.direction)
     const body = figure.getChildByLabel('body')
     const shadow = figure.getChildByLabel('shadow')
@@ -674,7 +674,7 @@ const animateFigure = (figure, spritesheet) => {
         figureLayer.attach(body)
     }
 
-    if (figure.isMarkerButtonPressed && !restartGame) {
+    if (player?.isMarkerButtonPressed && !restartGame) {
         body.tint = colors.purple
     } else {
         body.tint = teams[figure.team]?.color
