@@ -371,6 +371,7 @@ function roundInit() {
         figures.filter(figure => figure.type === 'fighter').forEach(figure => {
             destroyContainer(app, figure.score)
             figure.playerId = null
+            figure.player = null
         })
         Object.values(teams).forEach(team => team.points = 0)
     }
@@ -435,13 +436,14 @@ function gameLoop() {
         }
 
         players = collectInputs()
-        const oldNumberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.map(f => f.type === 'fighter' && f.playerId).includes(k.playerId)).length;
+        const oldNumberJoinedKeyboardPlayers = keyboardPlayers.filter(k => k.joinedTime).length
 
         // remove figures without valid playerId
         figures.filter(f => f.playerId).forEach((f) => {
             if (!players.some(p => p.playerId === f.playerId)) {
                 destroyContainer(app, f.score)
                 f.playerId = null
+                f.player = null
             }
         })
 
@@ -673,6 +675,7 @@ function handleInput(players, figures, dtProcessed) {
                 addPlayerScore(figure, p)
                 figure.isDead = false
                 figure.playerId = p.playerId
+                figure.player = p
                 if (stage === stages.startLobby) {
                     figure.x = level.width*0.04+ Math.random() * level.width*0.4
                     figure.y = level.height*0.05+Math.random() * level.height*0.42
@@ -689,7 +692,7 @@ function handleInput(players, figures, dtProcessed) {
     }
 
     figures.filter(f => f.playerId && f.type === 'fighter').forEach(f => {
-        var p = players.find(p => p.playerId === f.playerId && f.type === 'fighter')
+        var p = f.player
 
         f.speed = 0.0
 
@@ -723,7 +726,7 @@ function handleInput(players, figures, dtProcessed) {
 }
 
 function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
-    const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => figures.map(f => f.type === 'fighter' && f.playerId).includes(k.playerId)).length;
+    const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => k.joinedTime).length;
     const startKeyboardMovement = oldNumberJoinedKeyboardPlayers === 0 && numberJoinedKeyboardPlayers > 0;
     const livingNPCFigures = figures.filter(f => !f.playerId && !f.isDead && f.type === 'fighter');
     let shuffledIndexes;

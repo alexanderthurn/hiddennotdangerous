@@ -122,7 +122,7 @@ function collectInputs() {
         isMoving: false,
     };
 
-    botPlayers = botPlayers.map(bp => ({...bp, ...defaultBotPlayer}));
+    botPlayers = botPlayers.map(bp => Object.assign(bp, defaultBotPlayer));
     for (var b = 0; b < getBotCount(); b++) {
         const playerId = 'b' + b
         let bot = botPlayers.find(bp => bp.playerId === playerId);
@@ -241,7 +241,7 @@ function collectInputs() {
         isMarkerButtonPressed: false,
         isSpeedButtonPressed: false
     };
-    keyboardPlayers = keyboardPlayers.map(kp => ({...kp, ...defaultkeyboardPlayer}));
+    keyboardPlayers = keyboardPlayers.map(kp => (Object.assign(kp, defaultkeyboardPlayer)));
     keyboards.forEach(k => {
         Array.from(k.pressed.values()).forEach(pressedButton => {
             const binding = k.bindings[pressedButton];

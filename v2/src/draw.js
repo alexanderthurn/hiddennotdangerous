@@ -66,7 +66,7 @@ const animateCircleButton = button => {
 }
 
 const animateLobbyStartButton = button => {
-    button.visible = stage === stages.startLobby && figures.filter(f => f.playerId && f.type === 'fighter').length > 0
+    button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime).length > 0
 
     let text = 'Vote to\nSTART\n\n'+button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
     if (button.playersPossible?.length === 1) {
@@ -125,7 +125,7 @@ const createCircleButton = (props, lobbyContainer) => {
 }
 
 const animateRingPartButton = button => {
-    button.visible = stage === stages.startLobby && figures.filter(f => f.playerId && f.type === 'fighter').length > 0
+    button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime).length > 0
 
     if (button.oldloadingPercentage != button.loadingPercentage) {
         button.oldloadingPercentage = button.loadingPercentage
@@ -255,7 +255,7 @@ const addNetworkQrCode = (app, lobbyContainer) => {
     })
 }
 const animateRectangleButton = button => {
-    button.visible = figures.filter(f => f.playerId && f.type === 'fighter').length > 0
+    button.visible = players.filter(p => p.joinedTime).length > 0
 
     const loadingBar = button.getChildAt(1)
     loadingBar.width = button.width*button.loadingPercentage
