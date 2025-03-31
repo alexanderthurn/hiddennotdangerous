@@ -367,6 +367,7 @@ function roundInit() {
         players.forEach(player => {
             destroyContainer(app, player.score)
         })
+        botPlayers = []
         gamepadPlayers = []
         touchPlayers = []
         keyboardPlayers = []
