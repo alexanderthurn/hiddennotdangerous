@@ -255,7 +255,7 @@ const addNetworkQrCode = (app, lobbyContainer) => {
     })
 }
 const animateRectangleButton = button => {
-    button.visible = players.filter(p => p.joinedTime).length > 0
+    button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime).length > 0
 
     const loadingBar = button.getChildAt(1)
     loadingBar.width = button.width*button.loadingPercentage
@@ -297,12 +297,10 @@ const createRectangleButton = (props, lobbyContainer) => {
 
 const animateMuteButton = button => {
     button.getChildAt(2).text = isMusicMuted() ? 'Music: OFF' : 'Music: ON'
-    button.visible = stage === stages.startLobby 
 }
 
 const animateBotsButton = button => {
     button.getChildAt(2).text = 'Bots: ' + getBotCount()
-    button.visible = stage === stages.startLobby 
 }
 
 const addButtons = (app, lobbyContainer) => {
