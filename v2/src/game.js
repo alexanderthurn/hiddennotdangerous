@@ -364,12 +364,14 @@ function roundInit() {
 
     if (stage === stages.startLobby) {
         game = undefined
+        players.forEach(player => {
+            destroyContainer(app, player.score)
+        })
         gamepadPlayers = []
         touchPlayers = []
         keyboardPlayers = []
 
         figures.filter(figure => figure.type === 'fighter').forEach(figure => {
-            destroyContainer(app, figure.score)
             figure.playerId = null
             figure.player = null
         })
@@ -441,7 +443,7 @@ function gameLoop() {
         // remove figures without valid playerId
         figures.filter(f => f.playerId).forEach((f) => {
             if (!players.some(p => p.playerId === f.playerId)) {
-                destroyContainer(app, f.score)
+                destroyContainer(app, f.player.score)
                 f.playerId = null
                 f.player = null
             }
@@ -497,10 +499,10 @@ const handleWinning = () => {
                 winRoundFigures(survivors)
             }
         
-            const maxPoints = Math.max(...figuresPlayer.map(f => f.score.points))
+            const maxPoints = Math.max(...players.map(p => p.score?.points || 0))
             if (maxPoints >= pointsToWin) {
-                const figuresWithMaxPoints = figuresPlayer.filter(f => f.score.points === maxPoints)
-                lastFinalWinnerPlayerIds = new Set(figuresWithMaxPoints.map(f => f.playerId))
+                const playersWithMaxPoints = players.filter(p => p.score?.points === maxPoints)
+                lastFinalWinnerPlayerIds = new Set(playersWithMaxPoints.map(p => p.playerId))
             }
         }
     } else {

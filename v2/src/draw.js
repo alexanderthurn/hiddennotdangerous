@@ -374,16 +374,16 @@ const addLobbyItems = app => {
     app.ticker.add(() => animateLobbyItems(lobbyContainer))
 }
 
-const getScoreDefaultX = figure => {
+const getScoreDefaultX = player => {
     const offx = 48*1.2
     const sortedPlayers = players.filter(player => player.joinedTime).sort((player1, player2) => player1.joinedTime - player2.joinedTime || player1.playerId - player2.playerId)
-    const playerIndex = sortedPlayers.findIndex(player => player.playerId === figure.playerId)
+    const playerIndex = sortedPlayers.indexOf(player)
     return 32+playerIndex*offx
 }
 
 const animatePlayerScore = (figure, player) => {
     if (figure.team !== figure.oldTeam) {
-        figure.score.getChildAt(0).tint = teams[figure.team] ? teams[figure.team].color : colors.black
+        player.score.getChildAt(0).tint = teams[figure.team] ? teams[figure.team].color : colors.black
         figure.oldTeam = figure.team
     }
 
@@ -391,16 +391,16 @@ const animatePlayerScore = (figure, player) => {
         var lp = Math.min((dtProcessed - player.joinedTime) / moveNewPlayerDuration, 1)
         var lpi = 1-lp
 
-        figure.score.x = lpi * (level.width*0.5) + lp*getScoreDefaultX(figure)
-        figure.score.y = lpi*(level.height*0.5) + lp*figure.score.yDefault
-        figure.score.scale = 12*lpi + lp
+        player.score.x = lpi * (level.width*0.5) + lp*getScoreDefaultX(figure.player)
+        player.score.y = lpi*(level.height*0.5) + lp*player.score.yDefault
+        player.score.scale = 12*lpi + lp
     }
 
-    figure.score.getChildAt(1).text = figure.score.shownPoints
+    player.score.getChildAt(1).text = player.score.shownPoints
 
     if (figure.isMarkerButtonPressed && !restartGame) {
-        figure.score.x += -5+10*Math.random()
-        figure.score.y += -5+10*Math.random()
+        player.score.x += -5+10*Math.random()
+        player.score.y += -5+10*Math.random()
     }
 }
 
@@ -431,7 +431,7 @@ const addPlayerScore = (figure, player) => {
     });
     text.anchor.set(0.5)
 
-    figure.score = playerScore
+    player.score = playerScore
     playerScore.addChild(circle, text)
     levelContainer.addChild(playerScore)
     scoreLayer.attach(playerScore)
@@ -442,57 +442,54 @@ const addPlayerScore = (figure, player) => {
 const animateWinningCeremony = winnerText => {
     const playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
 
-    const playerFiguresSortedByNewPoints = playerFigures.toSorted((f1,f2) => (f1.score.points-f1.score.oldPoints) - (f2.score.points-f2.score.oldPoints))
+    const playerFiguresSortedByNewPoints = playerFigures.toSorted((f1,f2) => (f1.player.score.points-f1.player.score.oldPoints) - (f2.player.score.points-f2.player.score.oldPoints))
 
     const sortedPlayers = players.filter(player => player.joinedTime).sort((player1, player2) => player1.joinedTime - player2.joinedTime || player1.playerId - player2.playerId)
-    const lastFinalWinnerFigure = playerFigures.find(f => lastFinalWinnerPlayerIds?.has(f.playerId))
-    const lastFinalWinnerIndex = sortedPlayers.findIndex(player => player.playerId === lastFinalWinnerFigure?.playerId)
-    const lastFinalWinnerNumber = lastFinalWinnerIndex+1
 
     const dt3 = dtProcessed - (lastRoundEndThen + playerFigures.length*moveScoreToPlayerDuration);
     const dt4 = dtProcessed - (lastRoundEndThen + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
 
     playerFiguresSortedByNewPoints.forEach((f, i) => {
-        f.score.zIndex = i
+        f.player.score.zIndex = i
         const dt2 = dtProcessed - (lastRoundEndThen + i*moveScoreToPlayerDuration);
         
         if (lastRoundEndThen && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
             const lp = dt2 / moveScoreToPlayerDuration
             const lpi = 1-lp
 
-            f.score.x = lpi*getScoreDefaultX(f) + lp*f.x
-            f.score.y = lpi*f.score.yDefault + lp*f.y
+            f.player.score.x = lpi*getScoreDefaultX(f.player) + lp*f.x
+            f.player.score.y = lpi*f.player.score.yDefault + lp*f.y
 
             if (lastFinalWinnerPlayerIds?.has(f.playerId)) {
-                f.score.scale = (lpi + 2*lp)*(lpi + 2*lp)
+                f.player.score.scale = (lpi + 2*lp)*(lpi + 2*lp)
             } else {
-                f.score.scale = lpi + 2*lp
+                f.player.score.scale = lpi + 2*lp
             }
 
             if (lastWinnerPlayerIds.has(f.playerId)) {
-                f.score.getChildAt(0).tint = colors.gold
+                f.player.score.getChildAt(0).tint = colors.gold
             }
         } else if (lastRoundEndThen && dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
-            f.score.x = f.x
-            f.score.y = f.y
+            f.player.score.x = f.x
+            f.player.score.y = f.y
             if (lastFinalWinnerPlayerIds?.has(f.playerId)) {
-                f.score.scale = 4
+                f.player.score.scale = 4
             } else {
-                f.score.scale = 2
+                f.player.score.scale = 2
             }
-            f.score.shownPoints = f.score.points
+            f.player.score.shownPoints = f.player.score.points
         } else if (lastRoundEndThen && dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
             const lp = dt4 / moveScoreToPlayerDuration
             const lpi = 1-lp
 
-            f.score.x = lpi*f.x + lp*getScoreDefaultX(f)
-            f.score.y = lpi*f.y + lp*f.score.yDefault
-            f.score.scale = 2*lpi + lp
+            f.player.score.x = lpi*f.x + lp*getScoreDefaultX(f.player)
+            f.player.score.y = lpi*f.y + lp*f.player.score.yDefault
+            f.player.score.scale = 2*lpi + lp
             if (lastFinalWinnerPlayerIds) {
-                f.score.shownPoints = 0
+                f.player.score.shownPoints = 0
             }
 
-            f.score.getChildAt(0).tint = teams[f.team] ? teams[f.team].color : colors.black
+            f.player.score.getChildAt(0).tint = teams[f.team] ? teams[f.team].color : colors.black
         }
     })
     
@@ -501,10 +498,15 @@ const animateWinningCeremony = winnerText => {
         if (finalWinnerTeam) {
             winnerText.style.fill.color = teams[finalWinnerTeam].color
             winnerText.text = `${teams[finalWinnerTeam].label} win`
-        } else if (figureIsBot(lastFinalWinnerFigure)) {
-            winnerText.text = `Player ${lastFinalWinnerNumber} (Bot) wins`
         } else {
-            winnerText.text = `Player ${lastFinalWinnerNumber} wins`
+            const lastFinalWinnerFigure = playerFigures.find(f => lastFinalWinnerPlayerIds?.has(f.playerId))
+            const lastFinalWinnerIndex = sortedPlayers.indexOf(lastFinalWinnerFigure?.player)
+            const lastFinalWinnerNumber = lastFinalWinnerIndex+1
+            if (figureIsBot(lastFinalWinnerFigure)) {
+                winnerText.text = `Player ${lastFinalWinnerNumber} (Bot) wins`
+            } else {
+                winnerText.text = `Player ${lastFinalWinnerNumber} wins`
+            }
         }
     } else {
         winnerText.visible = false

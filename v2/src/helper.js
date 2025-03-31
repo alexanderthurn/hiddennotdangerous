@@ -514,8 +514,8 @@ const winRoundTeam = team =>{
 
 const winRoundFigures = winnerFigures =>{
     winnerFigures.forEach(f => {
-        f.score.oldPoints = f.score.points
-        f.score.points++
+        f.player.score.oldPoints = f.player.score.points
+        f.player.score.points++
     })
     lastWinnerPlayerIds = new Set(winnerFigures.map(f => f.playerId))
     lastRoundEndThen = dtProcessed
