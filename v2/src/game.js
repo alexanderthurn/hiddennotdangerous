@@ -675,10 +675,10 @@ function handleInput(players, figures, dtProcessed) {
                 }
                 var figure = figures.find(f => !f.playerId && f.type === 'fighter')
                 p.joinedTime = dtProcessed
-                addPlayerScore(figure, p)
                 figure.isDead = false
                 figure.playerId = p.playerId
                 figure.player = p
+                addPlayerScore(figure)
                 if (stage === stages.startLobby) {
                     figure.x = level.width*0.04+ Math.random() * level.width*0.4
                     figure.y = level.height*0.05+Math.random() * level.height*0.42
@@ -698,14 +698,10 @@ function handleInput(players, figures, dtProcessed) {
         var p = f.player
 
         f.speed = 0.0
-
-        f.isSpeedButtonPressed = p.isSpeedButtonPressed
-        f.isMarkerButtonPressed = p.isMarkerButtonPressed
-
         if (!f.isDead) {
             if (p.isMoving) {
                 f.direction = angle(0,0,p.xAxis,p.yAxis)
-                f.speed = f.maxSpeed * (f.isSpeedButtonPressed ? 2.2 : 1)
+                f.speed = f.maxSpeed * (f.player.isSpeedButtonPressed ? 2.2 : 1)
             }
             if (p.isAttackButtonPressed && !f.isAttacking) {
                 if (!f.lastAttackTime || dtProcessed-f.lastAttackTime > f.attackBreakDuration) {

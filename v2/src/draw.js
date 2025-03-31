@@ -94,7 +94,7 @@ const animateGameStartButton = button => {
 }
 
 const createCircleButton = (props, lobbyContainer) => {
-    const {x, y, innerRadius, outerRadius, loadingPercentage, loadingSpeed, execute} = props
+    const {innerRadius} = props
 
     let button = new PIXI.Container()
     button = Object.assign(button, props)
@@ -381,7 +381,8 @@ const getScoreDefaultX = player => {
     return 32+playerIndex*offx
 }
 
-const animatePlayerScore = (figure, player) => {
+const animatePlayerScore = figure => {
+    const {player} = figure
     if (figure.team !== figure.oldTeam) {
         player.score.getChildAt(0).tint = teams[figure.team] ? teams[figure.team].color : colors.black
         figure.oldTeam = figure.team
@@ -391,14 +392,14 @@ const animatePlayerScore = (figure, player) => {
         var lp = Math.min((dtProcessed - player.joinedTime) / moveNewPlayerDuration, 1)
         var lpi = 1-lp
 
-        player.score.x = lpi * (level.width*0.5) + lp*getScoreDefaultX(figure.player)
+        player.score.x = lpi * (level.width*0.5) + lp*getScoreDefaultX(player)
         player.score.y = lpi*(level.height*0.5) + lp*player.score.yDefault
         player.score.scale = 12*lpi + lp
     }
 
     player.score.getChildAt(1).text = player.score.shownPoints
 
-    if (figure.isMarkerButtonPressed && !restartGame) {
+    if (player.isMarkerButtonPressed && !restartGame) {
         player.score.x += -5+10*Math.random()
         player.score.y += -5+10*Math.random()
     }
@@ -407,7 +408,7 @@ const animatePlayerScore = (figure, player) => {
 const botCircleContext = new PIXI.GraphicsContext().rect(-24,-24, 48,48).fill({alpha: 0.5, color: colors.white}).stroke({alpha: 0.5, color: colors.black, width: 1})
 const playerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: colors.white}).stroke({alpha: 0.5, color: colors.black, width: 1})
 
-const addPlayerScore = (figure, player) => {
+const addPlayerScore = figure => {
     let playerScore = new PIXI.Container()
     playerScore.yDefault = level.height+32
     playerScore.points = 0
@@ -415,7 +416,7 @@ const addPlayerScore = (figure, player) => {
     playerScore.shownPoints = 0
 
     let circle
-    if (player.type === 'bot') {
+    if (figure.player.type === 'bot') {
         circle = new PIXI.Graphics(botCircleContext)
     } else {
         circle = new PIXI.Graphics(playerCircleContext)
@@ -431,12 +432,12 @@ const addPlayerScore = (figure, player) => {
     });
     text.anchor.set(0.5)
 
-    player.score = playerScore
+    figure.player.score = playerScore
     playerScore.addChild(circle, text)
     levelContainer.addChild(playerScore)
     scoreLayer.attach(playerScore)
 
-    addAnimation(playerScore, () => animatePlayerScore(figure, player))
+    addAnimation(playerScore, () => animatePlayerScore(figure))
 }
 
 const animateWinningCeremony = winnerText => {
@@ -674,7 +675,7 @@ const animateFigure = (figure, spritesheet) => {
         figureLayer.attach(body)
     }
 
-    if (figure.isMarkerButtonPressed && !restartGame) {
+    if (figure.player?.isMarkerButtonPressed && !restartGame) {
         body.tint = colors.purple
     } else {
         body.tint = teams[figure.team]?.color
