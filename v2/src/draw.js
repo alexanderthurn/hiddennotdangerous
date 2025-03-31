@@ -824,6 +824,19 @@ const addFigures = (app, spritesheet) => {
     }
 }
 
+const addCrosshair = () => {
+    const crosshair = PIXI.Sprite.from('crosshair')
+    crosshair.x = level.width/2
+    crosshair.y = level.height/2
+    crosshair.scale = 2
+    crosshair.anchor.set(0.5)
+    crosshair.alpha = 0.5
+    crosshair.tint = colors.red
+
+    crosshairLayer.attach(crosshair)
+    levelContainer.addChild(crosshair)
+}
+
 const addOverlay = app => {
     const circleOfDeathGraphic = createCircleOfDeath(app)
     const touchControl = createTouchControl(app)

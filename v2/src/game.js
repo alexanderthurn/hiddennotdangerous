@@ -288,6 +288,7 @@ var levelContainer;
 const figureShadowLayer = new PIXI.RenderLayer();
 const figureLayer = new PIXI.RenderLayer({sortableChildren: true});
 const cloudLayer = new PIXI.RenderLayer();
+const crosshairLayer = new PIXI.RenderLayer();
 const scoreLayer = new PIXI.RenderLayer({sortableChildren: true});
 const overlayLayer = new PIXI.RenderLayer();
 const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
@@ -310,7 +311,8 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
             {alias: 'food', src: './gfx/food-OCAL.png'},
             {alias: 'players', src: './gfx/character_base_all_32x32.png'},
             {alias: 'cloud', src: './gfx/fart.png'},
-            {alias: 'background_grass', src: './gfx/background_grass.jpg'}
+            {alias: 'background_grass', src: './gfx/background_grass.jpg'},
+            {alias: 'crosshair', src: './gfx/crosshair.svg'}
         ];
     
         // Load the assets defined above.
@@ -334,7 +336,7 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
 
         destroyContainer(app, loadingText)
         levelContainer = createLevelContainer(app, level);
-        app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, scoreLayer, overlayLayer, debugLayer)
+        app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, crosshairLayer, scoreLayer, overlayLayer, debugLayer)
         addGrass();
         addHeadline();
         addLobbyItems(app);
@@ -345,6 +347,8 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         addOverlay(app)
         addDebug(app);
        
+
+        addCrosshair()
         roundInit();
         window.requestAnimationFrame(gameLoop);
     }
