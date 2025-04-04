@@ -423,17 +423,17 @@ const initVIPGamePositions = figures => {
         for (let i = 0; i < (neutralPlayerFigures.length-numberJoinSmallerTeam) % 2; i++) {
             switchTeam(neutralPlayerFigures[i+neutralPlayerFigures.length-1], randomTeam)
         }
+    }
 
-        // put NPC neutrals in teams
-        const numberMissingGuards = numberGuards - figures.filter(figure => figure.team === 'guard').length
-        const neutralFigures = shuffle(figures.filter(figure => !figure.team))
-        for (let i = 0; i < numberMissingGuards; i++) {
-            switchTeam(neutralFigures[i], 'guard')
-        }
+    // put NPC neutrals in teams
+    const numberMissingGuards = numberGuards - figures.filter(figure => figure.team === 'guard').length
+    const neutralFigures = shuffle(figures.filter(figure => !figure.team))
+    for (let i = 0; i < numberMissingGuards; i++) {
+        switchTeam(neutralFigures[i], 'guard')
+    }
 
-        for (let i = numberMissingGuards; i < neutralFigures.length; i++) {
-            switchTeam(neutralFigures[i], 'assassin')
-        }
+    for (let i = numberMissingGuards; i < neutralFigures.length; i++) {
+        switchTeam(neutralFigures[i], 'assassin')
     }
 
     // assassin positions
