@@ -43,6 +43,10 @@ function clampStick(x, y) {
     return [x, y];
 }
 
+const getQueryParam = (key) => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(key);
+}
 const mod = (n, m) => ((n % m) + m) % m;
 const getRandomInt = max => Math.floor(Math.random() * max);
 const getRandomIndex = intArray => {
@@ -449,13 +453,13 @@ const initVIPGamePositions = figures => {
     })
 
     // guard positions, minimum guards in center columns
-    const guards = shuffle(figures.filter(figure => figure.team === 'guard'))
+    const guards = figures.filter(figure => figure.team === 'guard')
     
     const minCenterPlayerGuards = 2
     let centerGuards = guards.filter(figure => figure.playerId).slice(0, minCenterPlayerGuards)
     const numberMinCenterPlayers = centerGuards.length
     let otherGuards = guards.filter(figure => !new Set(centerGuards).has(figure))
-    centerGuards = centerGuards.concat(otherGuards.slice(0, 9-numberMinCenterPlayers))
+    centerGuards = shuffle(centerGuards.concat(otherGuards.slice(0, 9-numberMinCenterPlayers)))
     otherGuards = otherGuards.slice(9-numberMinCenterPlayers)
 
     const guardCenterPositions = [], guardOuterPositions = []
