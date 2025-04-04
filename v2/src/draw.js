@@ -66,7 +66,7 @@ const animateCircleButton = button => {
 }
 
 const animateLobbyStartButton = button => {
-    button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime).length > 0
+    button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime >= 0).length > 0
 
     let text = 'Vote to\nSTART\n\n'+button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
     if (button.playersPossible?.length === 1) {
@@ -125,7 +125,7 @@ const createCircleButton = (props, lobbyContainer) => {
 }
 
 const animateRingPartButton = button => {
-    button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime).length > 0
+    button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime >= 0).length > 0
 
     if (button.oldloadingPercentage != button.loadingPercentage) {
         button.oldloadingPercentage = button.loadingPercentage
@@ -255,7 +255,7 @@ const addNetworkQrCode = (app, lobbyContainer) => {
     })
 }
 const animateRectangleButton = button => {
-    button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime).length > 0
+    button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime >= 0).length > 0
 
     const loadingBar = button.getChildAt(1)
     loadingBar.width = button.width*button.loadingPercentage
@@ -376,7 +376,7 @@ const addLobbyItems = app => {
 
 const getScoreDefaultX = player => {
     const offx = 48*1.2
-    const sortedPlayers = players.filter(player => player.joinedTime).sort((player1, player2) => player1.joinedTime - player2.joinedTime || player1.playerId - player2.playerId)
+    const sortedPlayers = players.filter(player => player.joinedTime >= 0).sort((player1, player2) => player1.joinedTime - player2.joinedTime || player1.playerId - player2.playerId)
     const playerIndex = sortedPlayers.indexOf(player)
     return 32+playerIndex*offx
 }
