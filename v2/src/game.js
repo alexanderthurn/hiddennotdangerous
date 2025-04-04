@@ -666,7 +666,7 @@ function handleInput(players, figures, dtProcessed) {
     if (stage !== stages.game) {
         var joinedFighters = figures.filter(f => f.playerId && f.type === 'fighter')
         // join by doing anything
-        players.filter(p => p.isAnyButtonPressed || p.isAttackButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
+        players.filter(p => p.isAnyButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
             var figure = joinedFighters.find(f => f.playerId === p.playerId)
             if (!figure) {
                 // player join first
