@@ -399,9 +399,10 @@ const animatePlayerScore = figure => {
 
     player.score.getChildAt(1).text = player.score.shownPoints
 
-    if (player.isMarkerButtonPressed && !restartGame) {
-        player.score.x += -5+10*Math.random()
-        player.score.y += -5+10*Math.random()
+    if (player.isMarkerButtonPressed) {
+        const shakeMargin = 10
+        player.score.x += (Math.random()-0.5)*shakeMargin*player.score.scale.x
+        player.score.y += (Math.random()-0.5)*shakeMargin*player.score.scale.y
     }
 }
 
