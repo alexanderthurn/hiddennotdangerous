@@ -53,11 +53,13 @@ const games = {
     },
     battleRoyale: {
         color: colors.red,
-        text: 'BATTLE ROYALE'
+        text: 'BATTLE ROYALE',
+        countdown: 90,
     },
     vip: {
         color: colors.blue,
-        text: 'VIP'
+        text: 'VIP',
+        countdown: 180
     }
 }
 
@@ -250,7 +252,6 @@ const buttons = {
 const circleOfDeathDefinition = () => ({
     x: level.width/2,
     y: level.height/2,
-    duration: 180000,
     radius: Math.hypot(level.width/2, level.height/2),
     startRadius: Math.hypot(level.width/2, level.height/2)
 })
@@ -613,7 +614,7 @@ function updateGame(figures, dt, dtProcessed) {
 
     // circle of death
     if (stage !== stages.startLobby && game === games.battleRoyale) {
-        const scale =  1 - (dtProcessed - startTime)/circleOfDeath.duration
+        const scale =  1 - (dtProcessed - startTime)/(game.countdown*1000)
         circleOfDeath.radius = scale*circleOfDeath.startRadius
         figuresAlive.filter(f => f.type === 'fighter' ).forEach(f => {
             if (distance(f.x, f.y, level.width/2, level.height/2) > circleOfDeath.radius) {

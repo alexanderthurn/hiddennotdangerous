@@ -110,7 +110,7 @@ const createCircleButton = (props, lobbyContainer) => {
     const buttonText = new PIXI.Text({
         style: {
             align: 'center',
-            fontSize: level.width*0.017,
+            fontSize: 32,
             fill: colors.white,
             stroke: colors.white
         }
@@ -166,7 +166,7 @@ const createRingPartButton = (props, lobbyContainer) => {
         text: game.text,
         style: {
             align: 'center',
-            fontSize: level.width*0.017,
+            fontSize: 32,
             fill: colors.white,
             stroke: colors.white
         }
@@ -279,7 +279,7 @@ const createRectangleButton = (props, lobbyContainer) => {
     const buttonText = new PIXI.Text({
         style: {
             align: 'center',
-            fontSize: level.width*0.017,
+            fontSize: 32,
             fill: colors.white,
             stroke: colors.white
         }
@@ -350,7 +350,7 @@ const addLobbyItems = app => {
     addTeamSwitchers(app, lobbyContainer)
     addNetworkQrCode(app, lobbyContainer)
 
-    const fontHeight = level.width*0.017  
+    const fontHeight = 32
     const howToPlay = new PIXI.Text({
         text: 'HOW TO PLAY\n\nJoin by pressing any key on your Gamepad' 
             + '\nor WASDT(Key1) or ' + String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0(RSHIFT)\nor touch' 
@@ -827,14 +827,15 @@ const addFigures = (app, spritesheet) => {
 
 const addOverlay = app => {
     const circleOfDeathGraphic = createCircleOfDeath(app)
+    const countdown = createCountdown(app)
     const touchControl = createTouchControl(app)
     const fpsText = createFpsText(app)
     const pauseOverlay = createPauseOverlay(app)
 
     circleOfDeath = circleOfDeathGraphic
-    levelContainer.addChild(circleOfDeathGraphic)
+    levelContainer.addChild(circleOfDeathGraphic, countdown)
     app.stage.addChild(touchControl, fpsText, pauseOverlay)
-    overlayLayer.attach(circleOfDeathGraphic, touchControl, fpsText, pauseOverlay)
+    overlayLayer.attach(circleOfDeathGraphic, countdown, touchControl, fpsText, pauseOverlay)
 }
 
 const animateCircleOfDeath = circle => {
@@ -852,6 +853,30 @@ const createCircleOfDeath = app => {
 
     app.ticker.add(() => animateCircleOfDeath(circle))
     return circle
+}
+
+const animateCountdown = countdown => {
+    if (!restartGame && stage === stages.game && game.countdown) {
+        countdown.text = getCountdownText(dtProcessed, startTime+game.countdown*1000)
+    }
+}
+
+const createCountdown = app => {
+    const countdown = new PIXI.Text({
+        style: {
+            fontSize: 48,
+            fill: colors.white,
+            stroke: {
+                width: 1,
+            }
+        }
+    })
+    countdown.anchor.set(0.5)
+    countdown.x = level.width/2,
+    countdown.y = 0.9*level.height,
+
+    app.ticker.add(() => animateCountdown(countdown))
+    return countdown
 }
 
 const animatePauseOverlay = (app, overlay) => {

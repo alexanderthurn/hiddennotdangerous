@@ -43,6 +43,20 @@ function clampStick(x, y) {
     return [x, y];
 }
 
+const pad = (num, size) => {
+    num = num.toString()
+    while (num.length < size) num = "0" + num
+    return num
+}
+
+const getCountdownText = (now, countdownToTime) => {
+    const distance = countdownToTime - now
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000)
+
+    return minutes + ":" + pad(seconds, 2)
+}
+
 const getQueryParam = (key) => {
     const params = new URLSearchParams(window.location.search);
     return params.get(key);
