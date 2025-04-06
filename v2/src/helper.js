@@ -267,7 +267,7 @@ const loadButton = (btn, aimLoadingPercentage) => {
         btn.loadingPercentage = aimLoadingPercentage
     }
     
-    if (btn.loadingPercentage >= 1) {
+    if (btn.loadingPercentage === undefined || btn.loadingPercentage >= 1) {
         if (btn.execute) {
             btn.loadingPercentage = 0
             btn.execute()

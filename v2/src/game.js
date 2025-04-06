@@ -163,7 +163,16 @@ const foodAtlasData = {
     }
 };
 
-const gameSelectionDefinition = () => ({
+const gameVoteButtonDefinition = () => ({
+    x: level.width*0.5,
+    y: level.height*0.5,
+    innerRadius: level.width*0.1,
+    outerRadius: level.width*0.15,
+    loadingSpeed: 1/3000,
+    getExecute: button => () => game.votes = button.playersNear.length
+})
+
+const lobbyStartButtonDefinition = () => ({
     x: level.width*0.5,
     y: level.height*0.5,
     innerRadius: level.width*0.1,
@@ -189,7 +198,7 @@ const gameStartButtonDefinition = () => ({
     }
 })
 
-const buttonDefinition = () => ({
+const rectangleButtonsDefinition = () => ({
     mute: {
         x: level.width*(1.0 - 0.05 -0.15),
         y: level.height*0.12,
@@ -590,7 +599,7 @@ function updateGame(figures, dt, dtProcessed) {
             if (btn === buttons.startGame || btn === buttons.selectGame) {
                 aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers);
             } else if (btn.game) {
-                btn.game.votes = btn.playersNear.length
+                //btn.game.votes = btn.playersNear.length
             } else {
                 aimLoadingPercentage = btn.playersNear.length > 0 ? 1 : 0;
             }

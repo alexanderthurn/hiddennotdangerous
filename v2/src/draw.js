@@ -156,12 +156,13 @@ const animateRingPartButton = button => {
 }
 
 const createRingPartButton = (props, lobbyContainer) => {
-    const {x, y, startAngle, endAngle, innerRadius, outerRadius, game, loadingPercentage, execute} = props
+    const {x, y, startAngle, endAngle, innerRadius, outerRadius, game, getExecute} = props
     const width = distanceAnglesRad(startAngle, endAngle)
     const centerAngle = startAngle + width/2
 
     let button = new PIXI.Container()
-    button = Object.assign(button, {x, y, startAngle, endAngle, innerRadius, outerRadius, game, loadingPercentage, execute})
+    button = Object.assign(button, {x, y, startAngle, endAngle, innerRadius, outerRadius, game, execute: getExecute(button)})
+    button.execute = () => game.votes = button.playersNear.length
     button.isInArea = f => new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y+f.bodyHeight*0.5) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y+f.bodyHeight*0.5) && (distanceAnglesRad(angle(x, y, f.x, f.y+f.bodyHeight*0.5), centerAngle) < width/2)
 
     const area = new PIXI.Graphics()
@@ -198,13 +199,13 @@ const addGameRing = (lobbyContainer) => {
     const diffAngle = 360/gameEntries.length
 
     gameEntries.forEach(([id, game], index) => {
-        const button = createRingPartButton({...gameSelectionDefinition(), startAngle: deg2limitedrad(startAngle+index*diffAngle), endAngle:deg2limitedrad(startAngle+(index+1)*diffAngle), game, execute: undefined}, lobbyContainer);
+        const button = createRingPartButton({...gameVoteButtonDefinition(), startAngle: deg2limitedrad(startAngle+index*diffAngle), endAngle:deg2limitedrad(startAngle+(index+1)*diffAngle), game}, lobbyContainer);
         buttons['vote_' + id] = button
     })
 }
 
 const addGameSelection = (app, lobbyContainer) => {
-    const circleButton = createCircleButton(gameSelectionDefinition(), lobbyContainer)
+    const circleButton = createCircleButton(lobbyStartButtonDefinition(), lobbyContainer)
     circleButton.isInArea = f => stage === stages.startLobby && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.outerRadius).contains(f.x, f.y+f.bodyHeight*0.5) && !(new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius)).contains(f.x, f.y+f.bodyHeight*0.5)
     addGameRing(lobbyContainer)
 
@@ -314,7 +315,7 @@ const animateBotsButton = button => {
 }
 
 const addButtons = (app, lobbyContainer) => {
-    Object.entries(buttonDefinition()).forEach(([id, button]) => {buttons[id] = createRectangleButton(button, lobbyContainer)})
+    Object.entries(rectangleButtonsDefinition()).forEach(([id, button]) => {buttons[id] = createRectangleButton(button, lobbyContainer)})
     
     app.ticker.add(() => animateMuteButton(buttons.mute))
     app.ticker.add(() => animateBotsButton(buttons.bots))
