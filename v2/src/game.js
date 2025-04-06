@@ -169,7 +169,7 @@ const gameVoteButtonDefinition = () => ({
     innerRadius: level.width*0.1,
     outerRadius: level.width*0.15,
     loadingSpeed: 1/3000,
-    getExecute: button => () => game.votes = button.playersNear.length
+    getExecute: button => () => button.game.votes = button.playersNear.length
 })
 
 const lobbyStartButtonDefinition = () => ({

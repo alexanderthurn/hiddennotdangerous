@@ -162,7 +162,7 @@ const createRingPartButton = (props, lobbyContainer) => {
 
     let button = new PIXI.Container()
     button = Object.assign(button, {x, y, startAngle, endAngle, innerRadius, outerRadius, game, execute: getExecute(button)})
-    button.execute = () => game.votes = button.playersNear.length
+    //button.execute = () => game.votes = button.playersNear.length
     button.isInArea = f => new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y+f.bodyHeight*0.5) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y+f.bodyHeight*0.5) && (distanceAnglesRad(angle(x, y, f.x, f.y+f.bodyHeight*0.5), centerAngle) < width/2)
 
     const area = new PIXI.Graphics()
