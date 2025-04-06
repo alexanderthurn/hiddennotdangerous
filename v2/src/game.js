@@ -491,16 +491,24 @@ const handleWinning = () => {
     const figuresPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
 
     if (game === games.battleRoyale || game === games.food) {
+        // players left
         if (figuresPlayer.length < 2) {
             lastFinalWinnerPlayerIds = new Set(figuresPlayer.map(f => f.playerId))
             winRoundFigures(figuresPlayer)
         }
         if (!lastFinalWinnerPlayerIds) {
+            // countdown
+            if (game.countdown && dtProcessed >= startTime+game.countdown*1000) {
+                winRoundFigures([])
+            }
+
+            // round won
             const survivors = figuresPlayer.filter(f => !f.isDead)
             if (survivors.length < 2) {
                 winRoundFigures(survivors)
             }
         
+            // game won
             const maxPoints = Math.max(...players.map(p => p.score?.points || 0))
             if (maxPoints >= pointsToWin) {
                 const playersWithMaxPoints = players.filter(p => p.score?.points === maxPoints)
@@ -508,6 +516,7 @@ const handleWinning = () => {
             }
         }
     } else {
+        // players left
         const assassins = figures.filter(f => f.playerId && f.team === 'assassin')
         const guards = figures.filter(f => f.playerId && f.team === 'guard')
         if (assassins.length === 0 || guards.length === 0) {
@@ -517,6 +526,12 @@ const handleWinning = () => {
         }
 
         if (!finalWinnerTeam) {
+            // countdown
+            if (game.countdown && dtProcessed >= startTime+game.countdown*1000) {
+                winRoundTeam('guard')
+            }
+
+            // round won
             const vips = figures.filter(f => f.team === 'vip')
             const assassinSurvivors = assassins.filter(f => !f.isDead)
             const vipSurvivors = vips.filter(f => !f.isDead)
@@ -524,6 +539,7 @@ const handleWinning = () => {
                 winRoundTeam(vipSurvivors.length === 0 ? 'assassin' : 'guard')
             }
         
+            // game won
             const maxPoints = Math.max(...Object.values(teams).map(team => team.points))
             if (maxPoints >= pointsToWin) {
                 const teamsWithMaxPoints = Object.keys(teams).filter(team => teams[team].points === maxPoints)
