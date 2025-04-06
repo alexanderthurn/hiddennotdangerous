@@ -127,20 +127,30 @@ const createCircleButton = (props, lobbyContainer) => {
 const animateRingPartButton = button => {
     button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime >= 0).length > 0
 
-    if (button.oldloadingPercentage != button.loadingPercentage) {
-        button.oldloadingPercentage = button.loadingPercentage
+    if (button.playersNear && button.playersPossible && (button.numberOldPlayersNear !== button.playersNear.length || button.numberOldPlayersPossible !== button.playersPossible.length)) {
+        button.numberOldPlayersNear = button.playersNear.length
+        button.numberOldPlayersPossible = button.playersPossible.length
 
         const loadingArea = button.getChildAt(1)
         loadingArea.clear()
-        
-        if (button.loadingPercentage > 0) {
-            const height = button.outerRadius - button.innerRadius
-            const outerRadius = (button.innerRadius+button.loadingPercentage*height)
 
-            loadingArea.arc(0, 0, button.innerRadius, button.startAngle, button.endAngle)
-            .lineTo(Math.cos(button.endAngle)*outerRadius, Math.sin(button.endAngle)*outerRadius)
-            .arc(0, 0, outerRadius, button.endAngle, button.startAngle, true)
-            .fill({alpha: 0.5, color: button.game.color})
+        if (button.playersNear.length > 0) {
+            const height = button.outerRadius - button.innerRadius
+            const rel = 8
+            const partHeight = rel * height / (button.playersPossible.length*rel+button.playersPossible.length-1)
+            const margin = partHeight / rel
+
+            let startRadius = button.innerRadius
+            for (let index = 0; index < button.playersNear.length; index++) {
+                const innerRadius = startRadius
+                const outerRadius = innerRadius + partHeight
+                startRadius = outerRadius + margin
+
+                loadingArea.arc(0, 0, innerRadius, button.startAngle, button.endAngle)
+                .lineTo(Math.cos(button.endAngle)*outerRadius, Math.sin(button.endAngle)*outerRadius)
+                .arc(0, 0, outerRadius, button.endAngle, button.startAngle, true)
+                .fill({alpha: 0.5, color: button.game.color})
+            }
         }
     }
 }

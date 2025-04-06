@@ -590,13 +590,14 @@ function updateGame(figures, dt, dtProcessed) {
             if (btn === buttons.startGame || btn === buttons.selectGame) {
                 aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers);
             } else if (btn.game) {
-                aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers)
                 btn.game.votes = btn.playersNear.length
             } else {
                 aimLoadingPercentage = btn.playersNear.length > 0 ? 1 : 0;
             }
             
-            loadButton(btn, aimLoadingPercentage)
+            if (btn.execute) {
+                loadButton(btn, aimLoadingPercentage)
+            }
         })
 
         figuresDead.forEach(f => {if (dtProcessed-f.killTime > deadDuration) {
