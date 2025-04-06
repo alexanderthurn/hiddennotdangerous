@@ -169,7 +169,7 @@ const gameVoteButtonDefinition = () => ({
     innerRadius: level.width*0.1,
     outerRadius: level.width*0.15,
     loadingSpeed: 1/3000,
-    getExecute: button => () => button.game.votes = button.playersNear.length
+    getExecute: button => () => button.playersNear.forEach(figure => figure.player.vote = button.gameId)
 })
 
 const lobbyStartButtonDefinition = () => ({
@@ -181,6 +181,8 @@ const lobbyStartButtonDefinition = () => ({
     execute: () => {
         restartGame = true
         const gamesValues = Object.values(games)
+        gamesValues.forEach(game => game.votes = 0)
+        Object.values(players).forEach(player => player.vote && games[player.vote].votes++)
         game = gamesValues[getRandomIndex(gamesValues.map(game => game.votes))]
         nextStage = stages.gameLobby
     }

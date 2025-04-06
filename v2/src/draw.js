@@ -68,13 +68,13 @@ const animateCircleButton = button => {
 const animateLobbyStartButton = button => {
     button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime >= 0).length > 0
 
-    let text = 'Vote to\nSTART\n\n'+button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
+    let text = 'Walk here to\nVOTE\n\n'+button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
     if (button.playersPossible?.length === 1) {
-        text = 'Vote to\nSTART\n\nmin 2 players\nor 1 player +1 bot'
+        text = 'Walk here to\nVOTE\n\nmin 2 players\nor 1 player +1 bot'
     } else if (button.playersPossible?.length > 1 && button.playersNear?.length === button.playersPossible?.length ) {
-        text ='Prepare your\nbellies'
+        text ='Entering LOBBY'
     } else if (button.playersNear?.length > 0) {
-        text = 'Vote to\nSTART\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
+        text = 'Walk here to\nVOTE\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
     }
     button.getChildAt(2).text = text
 }
@@ -83,10 +83,12 @@ const animateGameStartButton = button => {
     button.visible = stage === stages.gameLobby
 
     let text = 'Walk here to\nSTART\n\n'+button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
-    if (button.playersPossible?.length === 1) {
+    if (dtProcessed - startTime <= 5000) {
+        text = 'PREPARE\nfor the game'
+    } else if (button.playersPossible?.length === 1) {
         text = 'Walk here to\nSTART\n\nmin 2 players\nor 1 player +1 bot'
     } else if (button.playersPossible?.length > 1 && button.playersNear?.length === button.playersPossible?.length ) {
-        text ='Prepare your\nbellies'
+        text ='Starting GAME'
     } else if (button.playersNear?.length > 0) {
         text = 'Walk here to\nSTART\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
     }
@@ -127,21 +129,24 @@ const createCircleButton = (props, lobbyContainer) => {
 const animateRingPartButton = button => {
     button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime >= 0).length > 0
 
-    if (button.playersNear && button.playersPossible && (button.numberOldPlayersNear !== button.playersNear.length || button.numberOldPlayersPossible !== button.playersPossible.length)) {
-        button.numberOldPlayersNear = button.playersNear.length
+    let votes = 0, oldVotes
+    Object.values(players).forEach(player => player.vote === button.gameId && votes++)
+
+    if (button.playersPossible && (oldVotes !== votes || button.numberOldPlayersPossible !== button.playersPossible.length)) {
+        oldVotes = votes
         button.numberOldPlayersPossible = button.playersPossible.length
 
         const loadingArea = button.getChildAt(1)
         loadingArea.clear()
 
-        if (button.playersNear.length > 0) {
+        if (votes > 0) {
             const height = button.outerRadius - button.innerRadius
             const rel = 8
             const partHeight = rel * height / (button.playersPossible.length*rel+button.playersPossible.length-1)
             const margin = partHeight / rel
 
             let startRadius = button.innerRadius
-            for (let index = 0; index < button.playersNear.length; index++) {
+            for (let index = 0; index < votes; index++) {
                 const innerRadius = startRadius
                 const outerRadius = innerRadius + partHeight
                 startRadius = outerRadius + margin
@@ -149,32 +154,31 @@ const animateRingPartButton = button => {
                 loadingArea.arc(0, 0, innerRadius, button.startAngle, button.endAngle)
                 .lineTo(Math.cos(button.endAngle)*outerRadius, Math.sin(button.endAngle)*outerRadius)
                 .arc(0, 0, outerRadius, button.endAngle, button.startAngle, true)
-                .fill({alpha: 0.5, color: button.game.color})
+                .fill({alpha: 0.5, color: games[button.gameId].color})
             }
         }
     }
 }
 
 const createRingPartButton = (props, lobbyContainer) => {
-    const {x, y, startAngle, endAngle, innerRadius, outerRadius, game, getExecute} = props
+    const {x, y, startAngle, endAngle, innerRadius, outerRadius, gameId, getExecute} = props
     const width = distanceAnglesRad(startAngle, endAngle)
     const centerAngle = startAngle + width/2
 
     let button = new PIXI.Container()
-    button = Object.assign(button, {x, y, startAngle, endAngle, innerRadius, outerRadius, game, execute: getExecute(button)})
-    //button.execute = () => game.votes = button.playersNear.length
+    button = Object.assign(button, {x, y, startAngle, endAngle, innerRadius, outerRadius, gameId, execute: getExecute(button)})
     button.isInArea = f => new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y+f.bodyHeight*0.5) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y+f.bodyHeight*0.5) && (distanceAnglesRad(angle(x, y, f.x, f.y+f.bodyHeight*0.5), centerAngle) < width/2)
 
     const area = new PIXI.Graphics()
     .arc(0, 0, innerRadius, startAngle, endAngle)
     .lineTo(Math.cos(endAngle)*outerRadius, Math.sin(endAngle)*outerRadius)
     .arc(0, 0, outerRadius, endAngle, startAngle, true)
-    .fill({alpha: 0.5, color: game.color})
+    .fill({alpha: 0.5, color: games[gameId].color})
 
     const loadingArea = new PIXI.Graphics()
 
     const buttonText = new PIXI.Text({
-        text: game.text,
+        text: games[gameId].text,
         style: {
             align: 'center',
             fontSize: 32,
@@ -194,19 +198,19 @@ const createRingPartButton = (props, lobbyContainer) => {
 }
 
 const addGameRing = (lobbyContainer) => {
-    const gameEntries = Object.entries(games)
+    const gameIds = Object.keys(games)
     const startAngle = 270
-    const diffAngle = 360/gameEntries.length
+    const diffAngle = 360/gameIds.length
 
-    gameEntries.forEach(([id, game], index) => {
-        const button = createRingPartButton({...gameVoteButtonDefinition(), startAngle: deg2limitedrad(startAngle+index*diffAngle), endAngle:deg2limitedrad(startAngle+(index+1)*diffAngle), game}, lobbyContainer);
-        buttons['vote_' + id] = button
+    gameIds.forEach((gameId, index) => {
+        const button = createRingPartButton({...gameVoteButtonDefinition(), startAngle: deg2limitedrad(startAngle+index*diffAngle), endAngle:deg2limitedrad(startAngle+(index+1)*diffAngle), gameId}, lobbyContainer);
+        buttons['vote_' + gameId] = button
     })
 }
 
 const addGameSelection = (app, lobbyContainer) => {
     const circleButton = createCircleButton(lobbyStartButtonDefinition(), lobbyContainer)
-    circleButton.isInArea = f => stage === stages.startLobby && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.outerRadius).contains(f.x, f.y+f.bodyHeight*0.5) && !(new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius)).contains(f.x, f.y+f.bodyHeight*0.5)
+    circleButton.isInArea = f => stage === stages.startLobby && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius).contains(f.x, f.y+f.bodyHeight*0.5)
     addGameRing(lobbyContainer)
 
     buttons.selectGame = circleButton
@@ -216,7 +220,7 @@ const addGameSelection = (app, lobbyContainer) => {
 
 const addGameStartButton = (app, lobbyContainer) => {
     const circleButton = createCircleButton(gameStartButtonDefinition(), lobbyContainer)
-    circleButton.isInArea = f => stage === stages.gameLobby && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius).contains(f.x, f.y+f.bodyHeight*0.5)
+    circleButton.isInArea = f => stage === stages.gameLobby && dtProcessed - startTime > 5000 && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius).contains(f.x, f.y+f.bodyHeight*0.5)
 
     buttons.startGame = circleButton
 
