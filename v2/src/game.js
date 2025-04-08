@@ -179,6 +179,12 @@ const fenceAtlasData = {
       },
       "fence_vertical": {
         "frame": { "x": 420, "y": 282, "w": 121, "h": 201 },
+      },
+      "house_assassin": {
+        "frame": { "x": 584, "y": 0, "w": 211, "h": 236 },
+      },
+      "house_guard": {
+        "frame": { "x": 795, "y": 0, "w": 205, "h": 236 },
       }
     },
     "meta": {
@@ -383,9 +389,9 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, scoreLayer, overlayLayer, debugLayer)
         addGrass();
         addHeadline();
-        addLobbyItems(app);
+        addLobbyItems(app, spriteSheets);
         addFoods(app, spriteSheets.food);
-        addLevelBoundary(app, spriteSheets.fence);
+        addLevelBoundary(app, spriteSheets);
         addFigures(app, spriteSheets.figure);
         addWinningCeremony(app);
         addOverlay(app)

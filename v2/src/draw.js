@@ -329,12 +329,14 @@ const animateTeamSwitcher = button => {
     button.visible = game === games.vip
 }
 
-const createTeamSwitcher = (app, props, lobbyContainer) => {
+const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
     const {x, y, team} = props
     const width = 128
     const height = 128
     const newX = x - width/2
     const newY = y - height/2
+
+    const buttonContainer = new PIXI.Container()
 
     const button = new PIXI.Graphics()
     .rect(newX, newY, width, height)
@@ -342,27 +344,30 @@ const createTeamSwitcher = (app, props, lobbyContainer) => {
     button.execute = () => button.playersNear.forEach(f => switchTeam(f, team)) 
     button.isInArea = f => stage === stages.gameLobby && game === games.vip && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
 
-    lobbyContainer.addChild(button)
+    const house = createSpriteWithShadowContainer(spriteSheets.fence.textures['house_' + team],{x:1, y:0.9}, {x:1, y:1}, {x: newX + width*0.5, y: newY+ height*0.9}, {x: 0.5, y: 0.9})
+    house.scale.set(0.75)
+    buttonContainer.addChild(button, house)
+    lobbyContainer.addChild(buttonContainer)
 
-    app.ticker.add(() => animateTeamSwitcher(button))
+    app.ticker.add(() => animateTeamSwitcher(buttonContainer))
 
     return button
 }
 
-const addTeamSwitchers = (app, lobbyContainer) => {
-    Object.entries(teamSwitchersDefinition()).forEach(([id, button]) => {buttons[id] = createTeamSwitcher(app, button, lobbyContainer)})
+const addTeamSwitchers = (app, lobbyContainer, spriteSheets) => {
+    Object.entries(teamSwitchersDefinition()).forEach(([id, button]) => {buttons[id] = createTeamSwitcher(app, button, lobbyContainer, spriteSheets)})
 }
 
 const animateLobbyItems = lobbyContainer => {
     lobbyContainer.visible = stage === stages.startLobby || stage === stages.gameLobby
 }
 
-const addLobbyItems = app => {
+const addLobbyItems = (app, spriteSheets) => {
     const lobbyContainer = new PIXI.Container()
     addGameSelection(app, lobbyContainer)
     addGameStartButton(app, lobbyContainer)
     addButtons(app, lobbyContainer)
-    addTeamSwitchers(app, lobbyContainer)
+    addTeamSwitchers(app, lobbyContainer, spriteSheets)
     addNetworkQrCode(app, lobbyContainer)
 
     const fontHeight = 32
@@ -611,9 +616,9 @@ const addGrass = () => {
 }
 
 
-const addLevelBoundary = (app, spritesheet) => {
-
-    const tree1 = createSpriteWithShadowContainer(spritesheet.textures['tree1'],{x:1, y:0.9}, {x:1, y:1}, {x: level.width * 0.1, y: level.height * 0.1}, {x: 0.5, y: 0.9})
+const addLevelBoundary = (app, spritesheets) => {
+    const spritesheet = spritesheets.fence
+    const tree1 = createSpriteWithShadowContainer(spritesheet.textures['tree1'],{x:1, y:0.9}, {x:1, y:1}, {x: level.width * 0.2, y: level.height * 0.1}, {x: 0.5, y: 0.9})
     const tree2 = createSpriteWithShadowContainer(spritesheet.textures['tree2'],{x:1, y:0.9}, {x:1, y:1}, {x: level.width * 0.8, y: level.height * 0.6}, {x: 0.5, y: 0.9})
     const tree3 = createSpriteWithShadowContainer(spritesheet.textures['tree3'],{x:1, y:0.9}, {x:1, y:1}, {x: level.width * 0.9, y: level.height * 0.9}, {x: 0.5, y: 0.9})
     
