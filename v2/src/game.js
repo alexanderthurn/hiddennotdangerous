@@ -56,6 +56,11 @@ const games = {
         text: 'BATTLE ROYALE',
         countdown: 90,
     },
+    rampage: {
+        color: colors.purple,
+        text: 'RAMPAGE',
+        countdown: 180
+    },
     vip: {
         color: colors.blue,
         text: 'VIP',
@@ -449,12 +454,14 @@ function roundInit() {
 
     figures = []
 
+    // Figuren aus Pool laden
     if (game === games.vip) {
         figures = figures.concat(figuresPool.filter(figure => figure.type === 'fighter'))
     } else {
         figures = figures.concat(figuresPool.filter(figure => figure.type === 'fighter' && figure.team !== 'vip'))
     }
 
+    // Figuren platzieren
     if (game === games.vip) {
         if (stage === stages.gameLobby) {
             figures.filter(figure => figure.team === 'vip').forEach(figure => {
@@ -707,6 +714,8 @@ function updateGame(figures, dt, dtProcessed) {
                 }
             });
         })
+    } else if (game === games.rampage) {
+
     } else {
         const assassinsAlive = figuresAlive.filter(f => f.team === 'assassin')
         const guardsAlive = figuresAlive.filter(f => f.team === 'guard')
