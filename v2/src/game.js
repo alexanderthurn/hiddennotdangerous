@@ -163,6 +163,38 @@ const foodAtlasData = {
     }
 };
 
+const fenceAtlasData = {
+    "frames": {
+      "tree1": {
+        "frame": { "x": 0, "y": 0, "w": 190, "h": 236 }
+      },
+      "tree2": {
+        "frame": { "x": 191, "y": 0, "w": 190, "h": 236 },
+      },
+      "tree3": {
+        "frame": { "x": 380, "y": 0, "w": 180, "h": 236 },
+      },
+      "fence_horizontal": {
+        "frame": { "x": 31, "y": 311, "w": 276, "h": 145 }
+      },
+      "fence_vertical": {
+        "frame": { "x": 420, "y": 282, "w": 121, "h": 201 },
+      }
+    },
+    "meta": {
+      "image": "fence",
+      "size": { "w": 128, "h": 112 },
+      "scale": "1"
+    },
+    textures: {
+        tree1: 'tree1',
+        tree2: 'tree2',
+        tree3: 'tree3',
+        fence_horizontal: 'fence_horizontal',
+        fence_vertical: 'fence_vertical'
+    }
+  }
+
 const gameVoteButtonDefinition = () => ({
     x: level.width*0.5,
     y: level.height*0.5,
@@ -320,6 +352,7 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
 
         const assets = [
             {alias: 'food', src: './gfx/food-OCAL.png'},
+            {alias: 'fence', src: './gfx/fence.png'},
             {alias: 'players', src: './gfx/character_base_all_32x32.png'},
             {alias: 'cloud', src: './gfx/fart.png'},
             {alias: 'background_grass', src: './gfx/background_grass.jpg'}
@@ -331,7 +364,8 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         const atlasData = {
             cloud: cloudAtlasData,
             figure: figureAtlasData,
-            food: foodAtlasData
+            food: foodAtlasData,
+            fence: fenceAtlasData
         }
         
         spriteSheets = Object.entries(atlasData).reduce((acc, [key, value]) => ({...acc, [key]: new PIXI.Spritesheet(
@@ -351,7 +385,7 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         addHeadline();
         addLobbyItems(app);
         addFoods(app, spriteSheets.food);
-        addLevelBoundary(app);
+        addLevelBoundary(app, spriteSheets.fence);
         addFigures(app, spriteSheets.figure);
         addWinningCeremony(app);
         addOverlay(app)

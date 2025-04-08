@@ -1,5 +1,5 @@
 const shadowDefinition = {
-    alpha: 0.3,
+    alpha: 0.25,
     angle: 0,
     scale: {x: 1, y: 1.28},
     skew: {x: -0.68, y: 0},
@@ -610,47 +610,69 @@ const addGrass = () => {
     levelContainer.addChild(PIXI.Sprite.from('background_grass'))
 }
 
-const createHorizontalFence = level => {
-    return new PIXI.GraphicsContext().rect(0,0,level.width,level.padding*0.6)
-    .fill({color: 0x969696})
-    .rect(level.padding*0.5,level.padding*0.8,level.width-level.padding,level.padding*0.6)
-    .fill({color: colors.grey})
-    .rect(level.padding*0.5,level.padding*1.6,level.width-level.padding,level.padding*0.6)
-    .fill({color: 0x5A5A5A})
+
+const addLevelBoundary = (app, spritesheet) => {
+
+    const tree1 = createSpriteWithShadowContainer(spritesheet.textures['tree1'],{x:1, y:0.9}, {x:1, y:1}, {x: level.width * 0.2, y: level.height * 0.25}, {x: 0.5, y: 0.9})
+    const tree2 = createSpriteWithShadowContainer(spritesheet.textures['tree2'],{x:1, y:0.9}, {x:1, y:1}, {x: level.width * 0.8, y: level.height * 0.75}, {x: 0.5, y: 0.9})
+    const tree3 = createSpriteWithShadowContainer(spritesheet.textures['tree3'],{x:1, y:0.9}, {x:1, y:1}, {x: level.width * 0.9, y: level.height * 0.9}, {x: 0.5, y: 0.9})
+    
+    const fenceLower = createSpriteWithShadowContainer(spritesheet.textures['fence_horizontal'],{x:1, y:1.3}, {x:1, y:1}, {x: level.width * 0.0, y: level.height * 1}, {x: 0.0, y: 0.9}, {tilingSprite: {tileScale : {x: 0.28, y: 0.28}, tilePosition : {x: 0, y: 0}}})
+    fenceLower.shadow.width = fenceLower.sprite.width=level.width
+    fenceLower.shadow.height = fenceLower.sprite.height=level.height*0.04
+
+    const fenceUpper = createSpriteWithShadowContainer(spritesheet.textures['fence_horizontal'],{x:1, y:1.3}, {x:1, y:1}, {x: level.width * 0.0, y: level.height * 0.03}, {x: 0.0, y: 0.9}, {tilingSprite: {tileScale : {x: 0.28, y: 0.28}, tilePosition : {x: 0, y: 0}}})
+    fenceUpper.shadow.width = fenceUpper.sprite.width=level.width
+    fenceUpper.shadow.height = fenceUpper.sprite.height=level.height*0.04
+    fenceUpper.sprite.zIndex = -level.height
+    
+    const fenceLeft = createSpriteWithShadowContainer(spritesheet.textures['fence_horizontal'],{x:1.5/shadowDefinition.scale.x, y:1/shadowDefinition.scale.y}, {x:0, y:0}, {x: -level.width * 0.001, y: level.height * 0.00}, {x: 0.0, y: 0.0}, {tilingSprite: {tileScale : {x: 0.4, y: 0.4}, tilePosition : {x: 0, y: 0}}})
+    fenceLeft.shadow.width = fenceLeft.sprite.width=level.width*0.006
+    fenceLeft.shadow.height = fenceLeft.sprite.height=level.height
+    fenceLeft.sprite.zIndex = level.height
+   // fenceLeft.shadow.position.x = 5
+
+    
+    const fenceRight = createSpriteWithShadowContainer(spritesheet.textures['fence_horizontal'],{x:1.5/shadowDefinition.scale.x, y:1/shadowDefinition.scale.y}, {x:0, y:0}, {x: level.width * 1, y: level.height * 0.00}, {x: 1, y: 0.0}, {tilingSprite: {tileScale : {x: 0.4, y: 0.4}, tilePosition : {x: 0, y: 0}}})
+    fenceRight.shadow.width = fenceRight.sprite.width=level.width*0.006
+    fenceRight.shadow.height = fenceRight.sprite.height=level.height
+    fenceRight.sprite.zIndex = level.height
+    
+    levelContainer.addChild(tree1, tree2, tree3, fenceLower, fenceUpper, fenceLeft, fenceRight)
+    
 }
 
-const createUpperFence = level => {
-    return new PIXI.Graphics(createHorizontalFence(level))
-    .rect(0,0, level.padding*0.5, level.padding*2)
-    .rect(level.width-level.padding*0.5,0, level.padding*0.5, level.padding*2)
-    .fill({color: 0x969696})
+const createSpriteWithShadowContainer = (texture, scaleFactor, skewFactor, position, anchor, options) => { 
+    const container = new PIXI.Container()
+    container.position.set(position.x, position.y)
+    if (options?.tilingSprite) {
+        container.sprite = new PIXI.TilingSprite({texture: texture, tileScale: options.tilingSprite.tileScale, tilePosition: options.tilingSprite.tilePosition}) 
+    } else {
+        container.sprite = new PIXI.Sprite(texture)
+    }
+    container.sprite.anchor.set(anchor.x, anchor.y)
+    container.sprite.zIndex = container.y
+    figureLayer.attach(container.sprite)
+    
+    container.shadow = createShadow(container.sprite, scaleFactor, skewFactor, container.y)
+    container.addChild(container.sprite, container.shadow)
+    return container
 }
 
-const createLowerFence = level => {
-    const offsetY = level.height-2*level.padding
-    const lowerFence = new PIXI.Graphics(createHorizontalFence(level))
-    .rect(0,level.padding*2-offsetY, level.padding*0.5, level.height-level.padding)
-    .rect(level.width-level.padding*0.5,level.padding*2-offsetY, level.padding*0.5, level.height-level.padding)
-    .fill({color: 0x969696})
-
-    lowerFence.y = offsetY
-    lowerFence.zIndex = level.height
-    return lowerFence
-}
-
-const addLevelBoundary = () => {
-    const upperFence = createUpperFence(level)
-    //const upperFenceShadow = upperFence.clone()
-
-    /*upperFenceShadow.x = upperFence.x+25
-    upperFenceShadow.alpha = shadowDefinition.alpha
-    upperFenceShadow.scale.set(shadowDefinition.scale.x,shadowDefinition.scale.y)
-    upperFenceShadow.skew.set(shadowDefinition.skew.x, shadowDefinition.skew.y)
-    upperFenceShadow.tint = shadowDefinition.color*/
-
-    const lowerFence = createLowerFence(level)
-    levelContainer.addChild(upperFence, lowerFence)
-    figureLayer.attach(lowerFence)
+const createShadow = (spriteOriginal, scaleFactor, skewFactor, zIndex) => {
+    let shadow = new PIXI.Sprite(spriteOriginal.texture)
+    if (spriteOriginal instanceof PIXI.TilingSprite) {
+        shadow = new PIXI.TilingSprite({texture: spriteOriginal.texture, tileScale: spriteOriginal.tileScale, tilePosition: spriteOriginal.tilePosition}) 
+  
+    }
+    shadow.scale.set((scaleFactor?.x ?? 1)* shadowDefinition.scale.x, (scaleFactor?.y ?? 1)* shadowDefinition.scale.y)
+    shadow.skew.set((skewFactor?.x ?? 1)* shadowDefinition.skew.x, (skewFactor?.y ?? 1)*shadowDefinition.skew.y)
+    shadow.alpha = shadowDefinition.alpha
+    shadow.tint = shadowDefinition.color
+    shadow.anchor.set(spriteOriginal.anchor.x, spriteOriginal.anchor.y)
+    shadow.zIndex = zIndex
+    figureShadowLayer.attach(shadow)
+    return shadow
 }
 
 const animateFigure = (figure, spritesheet) => {
