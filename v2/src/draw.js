@@ -613,8 +613,8 @@ const addGrass = () => {
 
 const addLevelBoundary = (app, spritesheet) => {
 
-    const tree1 = createSpriteWithShadowContainer(spritesheet.textures['tree1'],{x:1, y:0.9}, {x:1, y:1}, {x: level.width * 0.2, y: level.height * 0.25}, {x: 0.5, y: 0.9})
-    const tree2 = createSpriteWithShadowContainer(spritesheet.textures['tree2'],{x:1, y:0.9}, {x:1, y:1}, {x: level.width * 0.8, y: level.height * 0.75}, {x: 0.5, y: 0.9})
+    const tree1 = createSpriteWithShadowContainer(spritesheet.textures['tree1'],{x:1, y:0.9}, {x:1, y:1}, {x: level.width * 0.1, y: level.height * 0.1}, {x: 0.5, y: 0.9})
+    const tree2 = createSpriteWithShadowContainer(spritesheet.textures['tree2'],{x:1, y:0.9}, {x:1, y:1}, {x: level.width * 0.8, y: level.height * 0.6}, {x: 0.5, y: 0.9})
     const tree3 = createSpriteWithShadowContainer(spritesheet.textures['tree3'],{x:1, y:0.9}, {x:1, y:1}, {x: level.width * 0.9, y: level.height * 0.9}, {x: 0.5, y: 0.9})
     
     const fenceLower = createSpriteWithShadowContainer(spritesheet.textures['fence_horizontal'],{x:1, y:1.3}, {x:1, y:1}, {x: level.width * 0.0, y: level.height * 1}, {x: 0.0, y: 0.9}, {tilingSprite: {tileScale : {x: 0.28, y: 0.28}, tilePosition : {x: 0, y: 0}}})
