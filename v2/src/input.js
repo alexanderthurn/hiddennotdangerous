@@ -192,7 +192,9 @@ function collectInputs() {
                 gamepadPlayers.push(x)
             }
         } else {
-            gamepadPlayers[gamepadPlayerIndex] = x
+            Object.assign(gamepadPlayers[gamepadPlayerIndex],x)
+          
+            //gamepadPlayers[gamepadPlayerIndex] = x
             //gamepadPlayers[gamepadPlayerIndex].buttons = x.buttons
             //gamepadPlayers[gamepadPlayerIndex].axes = x.axes
         }

@@ -43,6 +43,24 @@ function clampStick(x, y) {
     return [x, y];
 }
 
+const pad = (num, size) => {
+    num = num.toString()
+    while (num.length < size) num = "0" + num
+    return num
+}
+
+const getCountdownText = (now, countdownToTime) => {
+    const distance = countdownToTime - now
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000)
+
+    return minutes + ":" + pad(seconds, 2)
+}
+
+const getQueryParam = (key) => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(key);
+}
 const mod = (n, m) => ((n % m) + m) % m;
 const getRandomInt = max => Math.floor(Math.random() * max);
 const getRandomIndex = intArray => {
@@ -249,7 +267,7 @@ const loadButton = (btn, aimLoadingPercentage) => {
         btn.loadingPercentage = aimLoadingPercentage
     }
     
-    if (btn.loadingPercentage >= 1) {
+    if (btn.loadingPercentage === undefined || btn.loadingPercentage >= 1) {
         if (btn.execute) {
             btn.loadingPercentage = 0
             btn.execute()
@@ -423,17 +441,17 @@ const initVIPGamePositions = figures => {
         for (let i = 0; i < (neutralPlayerFigures.length-numberJoinSmallerTeam) % 2; i++) {
             switchTeam(neutralPlayerFigures[i+neutralPlayerFigures.length-1], randomTeam)
         }
+    }
 
-        // put NPC neutrals in teams
-        const numberMissingGuards = numberGuards - figures.filter(figure => figure.team === 'guard').length
-        const neutralFigures = shuffle(figures.filter(figure => !figure.team))
-        for (let i = 0; i < numberMissingGuards; i++) {
-            switchTeam(neutralFigures[i], 'guard')
-        }
+    // put NPC neutrals in teams
+    const numberMissingGuards = numberGuards - figures.filter(figure => figure.team === 'guard').length
+    const neutralFigures = shuffle(figures.filter(figure => !figure.team))
+    for (let i = 0; i < numberMissingGuards; i++) {
+        switchTeam(neutralFigures[i], 'guard')
+    }
 
-        for (let i = numberMissingGuards; i < neutralFigures.length; i++) {
-            switchTeam(neutralFigures[i], 'assassin')
-        }
+    for (let i = numberMissingGuards; i < neutralFigures.length; i++) {
+        switchTeam(neutralFigures[i], 'assassin')
     }
 
     // assassin positions
@@ -449,13 +467,13 @@ const initVIPGamePositions = figures => {
     })
 
     // guard positions, minimum guards in center columns
-    const guards = shuffle(figures.filter(figure => figure.team === 'guard'))
+    const guards = figures.filter(figure => figure.team === 'guard')
     
     const minCenterPlayerGuards = 2
     let centerGuards = guards.filter(figure => figure.playerId).slice(0, minCenterPlayerGuards)
     const numberMinCenterPlayers = centerGuards.length
     let otherGuards = guards.filter(figure => !new Set(centerGuards).has(figure))
-    centerGuards = centerGuards.concat(otherGuards.slice(0, 9-numberMinCenterPlayers))
+    centerGuards = shuffle(centerGuards.concat(otherGuards.slice(0, 9-numberMinCenterPlayers)))
     otherGuards = otherGuards.slice(9-numberMinCenterPlayers)
 
     const guardCenterPositions = [], guardOuterPositions = []

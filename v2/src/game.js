@@ -32,7 +32,7 @@ var restartGame = false, lastWinnerPlayerIds, lastRoundEndThen, lastFinalWinnerP
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figuresPool = []
-var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = 1, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000
+var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = createLevel()
@@ -53,11 +53,13 @@ const games = {
     },
     battleRoyale: {
         color: colors.red,
-        text: 'BATTLE ROYALE'
+        text: 'BATTLE ROYALE',
+        countdown: 90,
     },
     vip: {
         color: colors.blue,
-        text: 'VIP'
+        text: 'VIP',
+        countdown: 180
     }
 }
 
@@ -161,7 +163,54 @@ const foodAtlasData = {
     }
 };
 
-const gameSelectionDefinition = () => ({
+const fenceAtlasData = {
+    "frames": {
+      "tree1": {
+        "frame": { "x": 0, "y": 0, "w": 190, "h": 236 }
+      },
+      "tree2": {
+        "frame": { "x": 191, "y": 0, "w": 190, "h": 236 },
+      },
+      "tree3": {
+        "frame": { "x": 380, "y": 0, "w": 180, "h": 236 },
+      },
+      "fence_horizontal": {
+        "frame": { "x": 31, "y": 311, "w": 276, "h": 145 }
+      },
+      "fence_vertical": {
+        "frame": { "x": 420, "y": 282, "w": 121, "h": 201 },
+      },
+      "house_assassin": {
+        "frame": { "x": 584, "y": 0, "w": 211, "h": 236 },
+      },
+      "house_guard": {
+        "frame": { "x": 795, "y": 0, "w": 205, "h": 236 },
+      }
+    },
+    "meta": {
+      "image": "fence",
+      "size": { "w": 128, "h": 112 },
+      "scale": "1"
+    },
+    textures: {
+        tree1: 'tree1',
+        tree2: 'tree2',
+        tree3: 'tree3',
+        fence_horizontal: 'fence_horizontal',
+        fence_vertical: 'fence_vertical'
+    }
+  }
+
+const gameVoteButtonDefinition = () => ({
+    x: level.width*0.5,
+    y: level.height*0.5,
+    innerRadius: level.width*0.1,
+    outerRadius: level.width*0.15,
+    loadingSpeed: 1/3000,
+    getExecute: button => () => button.playersNear.forEach(figure => figure.player.vote = button.gameId)
+})
+
+const lobbyStartButtonDefinition = () => ({
     x: level.width*0.5,
     y: level.height*0.5,
     innerRadius: level.width*0.1,
@@ -170,6 +219,8 @@ const gameSelectionDefinition = () => ({
     execute: () => {
         restartGame = true
         const gamesValues = Object.values(games)
+        gamesValues.forEach(game => game.votes = 0)
+        Object.values(players).forEach(player => player.vote && games[player.vote].votes++)
         game = gamesValues[getRandomIndex(gamesValues.map(game => game.votes))]
         nextStage = stages.gameLobby
     }
@@ -187,7 +238,7 @@ const gameStartButtonDefinition = () => ({
     }
 })
 
-const buttonDefinition = () => ({
+const rectangleButtonsDefinition = () => ({
     mute: {
         x: level.width*(1.0 - 0.05 -0.15),
         y: level.height*0.12,
@@ -250,7 +301,6 @@ const buttons = {
 const circleOfDeathDefinition = () => ({
     x: level.width/2,
     y: level.height/2,
-    duration: 180000,
     radius: Math.hypot(level.width/2, level.height/2),
     startRadius: Math.hypot(level.width/2, level.height/2)
 })
@@ -309,6 +359,7 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
 
         const assets = [
             {alias: 'food', src: './gfx/food-OCAL.png'},
+            {alias: 'fence', src: './gfx/fence.png'},
             {alias: 'players', src: './gfx/character_base_all_32x32.png'},
             {alias: 'cloud', src: './gfx/fart.png'},
             {alias: 'background_grass', src: './gfx/background_grass.jpg'},
@@ -321,7 +372,8 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         const atlasData = {
             cloud: cloudAtlasData,
             figure: figureAtlasData,
-            food: foodAtlasData
+            food: foodAtlasData,
+            fence: fenceAtlasData
         }
         
         spriteSheets = Object.entries(atlasData).reduce((acc, [key, value]) => ({...acc, [key]: new PIXI.Spritesheet(
@@ -339,9 +391,9 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, crosshairLayer, scoreLayer, overlayLayer, debugLayer)
         addGrass();
         addHeadline();
-        addLobbyItems(app);
+        addLobbyItems(app, spriteSheets);
         addFoods(app, spriteSheets.food);
-        addLevelBoundary(app);
+        addLevelBoundary(app, spriteSheets);
         addFigures(app, spriteSheets.figure);
         addWinningCeremony(app);
         addOverlay(app)
@@ -443,7 +495,7 @@ function gameLoop() {
         }
 
         players = collectInputs()
-        const oldNumberJoinedKeyboardPlayers = keyboardPlayers.filter(k => k.joinedTime).length
+        const oldNumberJoinedKeyboardPlayers = keyboardPlayers.filter(k => k.joinedTime >= 0).length
 
         // remove figures without valid playerId
         figures.filter(f => f.playerId).forEach((f) => {
@@ -494,16 +546,24 @@ const handleWinning = () => {
     const figuresPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
 
     if (game === games.battleRoyale || game === games.food) {
+        // players left
         if (figuresPlayer.length < 2) {
             lastFinalWinnerPlayerIds = new Set(figuresPlayer.map(f => f.playerId))
             winRoundFigures(figuresPlayer)
         }
         if (!lastFinalWinnerPlayerIds) {
+            // countdown
+            if (game.countdown && dtProcessed >= startTime+game.countdown*1000) {
+                winRoundFigures([])
+            }
+
+            // round won
             const survivors = figuresPlayer.filter(f => !f.isDead)
             if (survivors.length < 2) {
                 winRoundFigures(survivors)
             }
         
+            // game won
             const maxPoints = Math.max(...players.map(p => p.score?.points || 0))
             if (maxPoints >= pointsToWin) {
                 const playersWithMaxPoints = players.filter(p => p.score?.points === maxPoints)
@@ -511,6 +571,7 @@ const handleWinning = () => {
             }
         }
     } else {
+        // players left
         const assassins = figures.filter(f => f.playerId && f.team === 'assassin')
         const guards = figures.filter(f => f.playerId && f.team === 'guard')
         if (assassins.length === 0 || guards.length === 0) {
@@ -520,6 +581,12 @@ const handleWinning = () => {
         }
 
         if (!finalWinnerTeam) {
+            // countdown
+            if (game.countdown && dtProcessed >= startTime+game.countdown*1000) {
+                winRoundTeam('guard')
+            }
+
+            // round won
             const vips = figures.filter(f => f.team === 'vip')
             const assassinSurvivors = assassins.filter(f => !f.isDead)
             const vipSurvivors = vips.filter(f => !f.isDead)
@@ -527,6 +594,7 @@ const handleWinning = () => {
                 winRoundTeam(vipSurvivors.length === 0 ? 'assassin' : 'guard')
             }
         
+            // game won
             const maxPoints = Math.max(...Object.values(teams).map(team => team.points))
             if (maxPoints >= pointsToWin) {
                 const teamsWithMaxPoints = Object.keys(teams).filter(team => teams[team].points === maxPoints)
@@ -577,13 +645,14 @@ function updateGame(figures, dt, dtProcessed) {
             if (btn === buttons.startGame || btn === buttons.selectGame) {
                 aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers);
             } else if (btn.game) {
-                aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers)
-                btn.game.votes = btn.playersNear.length
+                //btn.game.votes = btn.playersNear.length
             } else {
                 aimLoadingPercentage = btn.playersNear.length > 0 ? 1 : 0;
             }
             
-            loadButton(btn, aimLoadingPercentage)
+            if (btn.execute) {
+                loadButton(btn, aimLoadingPercentage)
+            }
         })
 
         figuresDead.forEach(f => {if (dtProcessed-f.killTime > deadDuration) {
@@ -617,7 +686,7 @@ function updateGame(figures, dt, dtProcessed) {
 
     // circle of death
     if (stage !== stages.startLobby && game === games.battleRoyale) {
-        const scale =  1 - (dtProcessed - startTime)/circleOfDeath.duration
+        const scale =  1 - (dtProcessed - startTime)/(game.countdown*1000)
         circleOfDeath.radius = scale*circleOfDeath.startRadius
         figuresAlive.filter(f => f.type === 'fighter' ).forEach(f => {
             if (distance(f.x, f.y, level.width/2, level.height/2) > circleOfDeath.radius) {
@@ -670,7 +739,7 @@ function handleInput(players, figures, dtProcessed) {
     if (stage !== stages.game) {
         var joinedFighters = figures.filter(f => f.playerId && f.type === 'fighter')
         // join by doing anything
-        players.filter(p => p.isAnyButtonPressed || p.isAttackButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
+        players.filter(p => p.isAnyButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
             var figure = joinedFighters.find(f => f.playerId === p.playerId)
             if (!figure) {
                 // player join first
@@ -729,7 +798,7 @@ function handleInput(players, figures, dtProcessed) {
 }
 
 function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
-    const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => k.joinedTime).length;
+    const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => k.joinedTime >= 0).length;
     const startKeyboardMovement = oldNumberJoinedKeyboardPlayers === 0 && numberJoinedKeyboardPlayers > 0;
     const livingNPCFigures = figures.filter(f => !f.playerId && !f.isDead && f.type === 'fighter');
     let shuffledIndexes;
