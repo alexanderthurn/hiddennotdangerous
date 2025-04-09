@@ -245,6 +245,12 @@ const teams = {
     }
 }
 
+const shootingRangeDefinition = () => ({
+    x: level.width*0.5,
+    y: level.height*0.9,
+    team: 'guard'
+})
+
 const teamSwitchersDefinition = () => ({
     assassin: {
         x: level.width*0.25,
@@ -367,7 +373,7 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         addDebug(app);
        
 
-        addCrosshair()
+        //addCrosshair({x: level.width/2, y: level.height/2, color: colors.red})
         roundInit();
         window.requestAnimationFrame(gameLoop);
     }

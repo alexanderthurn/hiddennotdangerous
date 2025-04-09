@@ -325,6 +325,34 @@ const addButtons = (app, lobbyContainer) => {
     app.ticker.add(() => animateBotsButton(buttons.bots))
 }
 
+const animateShootingRange = button => {
+    button.visible = game === games.rampage
+}
+
+const addShootingRange = (app, props, lobbyContainer) => {
+    const {x, y, team} = props
+    const width = 512
+    const height = 128
+    const newX = x - width/2
+    const newY = y - height/2
+
+    const button = new PIXI.Graphics()
+    .rect(newX, newY, width, height)
+    .fill({color: teams[team].color})
+    button.execute = () => button.playersNear.forEach(f => {
+        if (f.team !== team) {
+            f.team = team
+            f.inactive = true
+            addCrosshair({...f, x: f.x, y: f.y, color: colors.red})
+        }
+    }) 
+    button.isInArea = f => stage === stages.gameLobby && game === games.rampage && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
+
+    buttons.sniper = button
+    lobbyContainer.addChild(button)
+    app.ticker.add(() => animateShootingRange(button))
+}
+
 const animateTeamSwitcher = button => {
     button.visible = game === games.vip
    
@@ -379,6 +407,7 @@ const addLobbyItems = (app, spriteSheets) => {
     addGameSelection(app, lobbyContainer)
     addGameStartButton(app, lobbyContainer)
     addButtons(app, lobbyContainer)
+    addShootingRange(app, shootingRangeDefinition(), lobbyContainer)
     addTeamSwitchers(app, lobbyContainer, spriteSheets)
     addNetworkQrCode(app, lobbyContainer)
 
@@ -882,17 +911,22 @@ const addFigures = (app, spritesheet) => {
     }
 }
 
-const addCrosshair = () => {
+const addCrosshair = props => {
+    const {x, y, player, color} = props
     const crosshair = PIXI.Sprite.from('crosshair')
-    crosshair.x = level.width/2
-    crosshair.y = level.height/2
+    crosshair.x = x
+    crosshair.y = y
     crosshair.scale = 2
     crosshair.anchor.set(0.5)
     crosshair.alpha = 0.5
-    crosshair.tint = colors.red
+    crosshair.playerId = player.playerId
+    crosshair.player = player
+    crosshair.tint = color
+    crosshair.type = 'crosshair'
 
-    crosshairLayer.attach(crosshair)
+    figures.push(crosshair)
     levelContainer.addChild(crosshair)
+    crosshairLayer.attach(crosshair)
 }
 
 const addOverlay = app => {
