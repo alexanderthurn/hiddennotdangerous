@@ -344,7 +344,21 @@ const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
     button.execute = () => button.playersNear.forEach(f => switchTeam(f, team)) 
     button.isInArea = f => stage === stages.gameLobby && game === games.vip && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
 
-    const house = createSpriteWithShadowContainer(spriteSheets.fence.textures['house_' + team],{x:1, y:0.9}, {x:1, y:1}, {x: newX + width*0.5, y: newY+ height*0.9}, {x: 0.5, y: 0.9})
+    const house = createSpriteWithShadowContainer({
+        texture: spriteSheets.fence.textures['house_' + team],
+        scaleFactor: { x: 1, y: 0.9 },
+        skewFactor: { x: 1, y: 1 },
+        position: { x: newX + width * 0.5, y: newY + height * 0.9 },
+        anchor: { x: 0.5, y: 0.9 },
+        options: {} // ggf. Optionen einfügen
+    });
+
+
+
+
+
+
+
     house.scale.set(0.75)
     buttonContainer.addChild(button, house)
     lobbyContainer.addChild(buttonContainer)
@@ -618,27 +632,29 @@ const addGrass = () => {
 
 const addLevelBoundary = (app, spritesheets) => {
     const spritesheet = spritesheets.fence
-    const tree1 = createSpriteWithShadowContainer(spritesheet.textures['tree1'],{x:1, y:0.9}, {x:1, y:1}, {x: level.width * 0.2, y: level.height * 0.1}, {x: 0.5, y: 0.9})
-    const tree2 = createSpriteWithShadowContainer(spritesheet.textures['tree2'],{x:1, y:0.9}, {x:1, y:1}, {x: level.width * 0.8, y: level.height * 0.6}, {x: 0.5, y: 0.9})
-    const tree3 = createSpriteWithShadowContainer(spritesheet.textures['tree3'],{x:1, y:0.9}, {x:1, y:1}, {x: level.width * 0.9, y: level.height * 0.9}, {x: 0.5, y: 0.9})
-    
-    const fenceLower = createSpriteWithShadowContainer(spritesheet.textures['fence_horizontal'],{x:1, y:1.3}, {x:1, y:1}, {x: level.width * 0.0, y: level.height * 1}, {x: 0.0, y: 0.9}, {tilingSprite: {tileScale : {x: 0.28, y: 0.28}, tilePosition : {x: 0, y: 0}}})
+
+    const tree1 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree1'], scaleFactor: { x: 1, y: 0.9 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.2, y: level.height * 0.1 }, anchor: { x: 0.5, y: 0.9 }, options: {} });
+    const tree2 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree2'], scaleFactor: { x: 1, y: 0.9 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.8, y: level.height * 0.6 }, anchor: { x: 0.5, y: 0.9 }, options: {} });
+    const tree3 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree3'], scaleFactor: { x: 1, y: 0.9 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.9, y: level.height * 0.9 }, anchor: { x: 0.5, y: 0.9 }, options: {} });
+
+
+    const fenceLower = createSpriteWithShadowContainer({ texture: spritesheet.textures['fence_horizontal'], scaleFactor: { x: 1, y: 1.3 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.0, y: level.height * 1 }, anchor: { x: 0.0, y: 0.9 }, options: { tilingSprite: { tileScale: { x: 0.28, y: 0.28 }, tilePosition: { x: 0, y: 0 } } } });
     fenceLower.shadow.width = fenceLower.sprite.width=level.width
     fenceLower.shadow.height = fenceLower.sprite.height=level.height*0.04
 
-    const fenceUpper = createSpriteWithShadowContainer(spritesheet.textures['fence_horizontal'],{x:1, y:1.3}, {x:1, y:1}, {x: level.width * 0.0, y: level.height * 0.03}, {x: 0.0, y: 0.9}, {tilingSprite: {tileScale : {x: 0.28, y: 0.28}, tilePosition : {x: 0, y: 0}}})
+    const fenceUpper = createSpriteWithShadowContainer({ texture: spritesheet.textures['fence_horizontal'], scaleFactor: { x: 1, y: 1.3 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.0, y: level.height * 0.03 }, anchor: { x: 0.0, y: 0.9 }, options: { tilingSprite: { tileScale: { x: 0.28, y: 0.28 }, tilePosition: { x: 0, y: 0 } } } });
     fenceUpper.shadow.width = fenceUpper.sprite.width=level.width
     fenceUpper.shadow.height = fenceUpper.sprite.height=level.height*0.04
     fenceUpper.sprite.zIndex = -level.height
     
-    const fenceLeft = createSpriteWithShadowContainer(spritesheet.textures['fence_horizontal'],{x:1.5/shadowDefinition.scale.x, y:1/shadowDefinition.scale.y}, {x:0, y:0}, {x: -level.width * 0.001, y: level.height * 0.00}, {x: 0.0, y: 0.0}, {tilingSprite: {tileScale : {x: 0.4, y: 0.4}, tilePosition : {x: 0, y: 0}}})
+    const fenceLeft = createSpriteWithShadowContainer({ texture: spritesheet.textures['fence_horizontal'], scaleFactor: { x: 1.5 / shadowDefinition.scale.x, y: 1 / shadowDefinition.scale.y }, skewFactor: { x: 0, y: 0 }, position: { x: -level.width * 0.001, y: level.height * 0.00 }, anchor: { x: 0.0, y: 0.0 }, options: { tilingSprite: { tileScale: { x: 0.4, y: 0.4 }, tilePosition: { x: 0, y: 0 } } } });
     fenceLeft.shadow.width = fenceLeft.sprite.width=level.width*0.006
     fenceLeft.shadow.height = fenceLeft.sprite.height=level.height
     fenceLeft.sprite.zIndex = level.height
    // fenceLeft.shadow.position.x = 5
 
     
-    const fenceRight = createSpriteWithShadowContainer(spritesheet.textures['fence_horizontal'],{x:1.5/shadowDefinition.scale.x, y:1/shadowDefinition.scale.y}, {x:0, y:0}, {x: level.width * 1, y: level.height * 0.00}, {x: 1, y: 0.0}, {tilingSprite: {tileScale : {x: 0.4, y: 0.4}, tilePosition : {x: 0, y: 0}}})
+    const fenceRight = createSpriteWithShadowContainer({ texture: spritesheet.textures['fence_horizontal'], scaleFactor: { x: 1.5 / shadowDefinition.scale.x, y: 1 / shadowDefinition.scale.y }, skewFactor: { x: 0, y: 0 }, position: { x: level.width * 1, y: level.height * 0.00 }, anchor: { x: 1, y: 0.0 }, options: { tilingSprite: { tileScale: { x: 0.4, y: 0.4 }, tilePosition: { x: 0, y: 0 } } } });
     fenceRight.shadow.width = fenceRight.sprite.width=level.width*0.006
     fenceRight.shadow.height = fenceRight.sprite.height=level.height
     fenceRight.sprite.zIndex = level.height
@@ -647,7 +663,7 @@ const addLevelBoundary = (app, spritesheets) => {
     
 }
 
-const createSpriteWithShadowContainer = (texture, scaleFactor, skewFactor, position, anchor, options) => { 
+const createSpriteWithShadowContainer = ({texture, scaleFactor, skewFactor, position, anchor, options}) => { 
     const container = new PIXI.Container()
     container.position.set(position.x, position.y)
     if (options?.tilingSprite) {
