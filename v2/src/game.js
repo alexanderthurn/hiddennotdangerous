@@ -180,10 +180,10 @@ const fenceAtlasData = {
       "fence_vertical": {
         "frame": { "x": 420, "y": 282, "w": 121, "h": 201 },
       },
-      "house_assassin": {
+      "house_guard": {
         "frame": { "x": 584, "y": 0, "w": 211, "h": 236 },
       },
-      "house_guard": {
+      "house_assassin": {
         "frame": { "x": 795, "y": 0, "w": 205, "h": 236 },
       }
     },
