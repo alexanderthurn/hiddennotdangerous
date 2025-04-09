@@ -658,20 +658,6 @@ const addLevelBoundary = (app, spritesheets) => {
     fenceRight.sprite.zIndex = level.height
     
     levelContainer.addChild(tree1, tree2, tree3, fenceLower, fenceUpper, fenceLeft, fenceRight)
-    
-
-    const crosshair =  new PIXI.Sprite( spritesheet.textures['crosshair']) 
-    crosshair.position.set(level.width*0.75, level.height*0.75)
-    crosshair.anchor.set(0.5, 0.5)
-    crosshair.zIndex = level.height
-    crosshair.scale.set(0.5)
-    figureLayer.attach(crosshair)
-    levelContainer.addChild(crosshair)
-    app.ticker.add(() => crosshair.position.set(
-        level.width * (0.5 + 0.25 * Math.sin(app.ticker.lastTime * 0.0005)),
-        level.height * (0.5 + 0.25 * Math.cos(app.ticker.lastTime * 0.0005))
-      ));
-
 }
 
 const createSpriteWithShadowContainer = ({texture, scaleFactor, skewFactor, position, anchor, options}) => { 
