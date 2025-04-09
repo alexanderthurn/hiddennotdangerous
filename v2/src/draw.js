@@ -328,7 +328,8 @@ const addButtons = (app, lobbyContainer) => {
 const animateTeamSwitcher = button => {
     button.visible = game === games.vip
    
-    button.house.children.forEach(child => child.zIndex = button.house.y + (1-child.anchor.y)*child.height)  
+    //put in createSpriteWithShadowContainer later
+    button.house.sprite.zIndex = button.house.y + (1-button.house.sprite.anchor.y)*button.house.sprite.height
 }
 
 const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
@@ -708,6 +709,7 @@ const createShadow = (spriteOriginal, scaleFactor, skewFactor, zIndex) => {
 const animateFigure = (figure, spritesheet) => {
     const deg = rad2limiteddeg(figure.direction)
     const body = figure.getChildByLabel('body')
+    const marker = figure.getChildByLabel('marker')
     const shadow = figure.getChildByLabel('shadow')
     let animation
 
@@ -777,9 +779,8 @@ const animateFigure = (figure, spritesheet) => {
         shadow.animationSpeed = animationSpeedFactor * figure.speed
     }
    
-    figure.children.forEach((child) => {
-        child.zIndex = figure.y + (1-body.anchor.y)*body.height
-    })
+    body.zIndex = figure.y + (1-body.anchor.y)*body.height
+    marker.zIndex = figure.y
 }
 
 const figureMarker = new PIXI.GraphicsContext().circle(0, 0, 5).fill()
@@ -849,6 +850,7 @@ const createFigure = (app, spritesheet, props) => {
 
     const attackArc = createAttackArc(figure)
     const marker = createFigureMarker(figure)
+    marker.label = 'marker'
 
     figure.bodyHeight = body.height
     figure.addChild(body, attackArc, marker, shadow)
