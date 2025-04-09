@@ -88,14 +88,6 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":58,"h":61},
 	"sourceSize": {"w":58,"h":61}
 },
-"crosshair":
-{
-	"frame": {"x":1,"y":1,"w":1019,"h":1019},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":3,"y":5,"w":1019,"h":1019},
-	"sourceSize": {"w":1024,"h":1024}
-},
 "fence_horizontal":
 {
 	"frame": {"x":1022,"y":302,"w":278,"h":148},
