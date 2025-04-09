@@ -333,8 +333,8 @@ const animateTeamSwitcher = button => {
 
 const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
     const {x, y, team} = props
-    const width = 128
-    const height = 128
+    const width = 256
+    const height = 256
     const newX = x - width/2
     const newY = y - height/2
 
@@ -350,12 +350,12 @@ const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
         texture: spriteSheets.fence.textures['house_' + team],
         scaleFactor: { x: 1, y: 1 },
         skewFactor: { x: 1, y: 1 },
-        position: { x: newX + width * 0.5, y: newY + height + 3 },
+        position: { x: newX + width * 0.5, y: newY + height + 3},
         anchor: { x: 0.5, y: 1 },
         options: {} // ggf. Optionen einfügen
     });
 
-    house.scale.set(0.75)
+    house.scale.set(0.6)
     buttonContainer.house = house
     buttonContainer.addChild(button, house)
     lobbyContainer.addChild(buttonContainer)
@@ -658,6 +658,19 @@ const addLevelBoundary = (app, spritesheets) => {
     
     levelContainer.addChild(tree1, tree2, tree3, fenceLower, fenceUpper, fenceLeft, fenceRight)
     
+
+    const crosshair =  new PIXI.Sprite( spritesheet.textures['crosshair']) 
+    crosshair.position.set(level.width*0.75, level.height*0.75)
+    crosshair.anchor.set(0.5, 0.5)
+    crosshair.zIndex = level.height
+    crosshair.scale.set(0.5)
+    figureLayer.attach(crosshair)
+    levelContainer.addChild(crosshair)
+    app.ticker.add(() => crosshair.position.set(
+        level.width * (0.5 + 0.25 * Math.sin(app.ticker.lastTime * 0.0005)),
+        level.height * (0.5 + 0.25 * Math.cos(app.ticker.lastTime * 0.0005))
+      ));
+
 }
 
 const createSpriteWithShadowContainer = ({texture, scaleFactor, skewFactor, position, anchor, options}) => { 
