@@ -401,7 +401,11 @@ function roundInit() {
         touchPlayers = []
         keyboardPlayers = []
 
+        figures.filter(figure => figure.type === 'crosshair').forEach(figure => {
+            destroyContainer(figure)
+        })
         figures.filter(figure => figure.type === 'fighter').forEach(figure => {
+            figure.inactive = false
             figure.playerId = null
             figure.player = null
         })
