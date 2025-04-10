@@ -272,7 +272,7 @@ const addNetworkQrCode = (app, lobbyContainer) => {
 const animateRectangleButton = button => {
     button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime >= 0).length > 0
 
-    const loadingBar = button.getChildAt(2)
+    const loadingBar = button.getChildAt(1)
     loadingBar.width = button.width*button.loadingPercentage
 }
 
@@ -283,13 +283,9 @@ const createRectangleButton = (props, lobbyContainer) => {
     button = Object.assign(button, {x, y, loadingPercentage, loadingSpeed, execute})
     button.isInArea = f => new PIXI.Rectangle(x, y, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
 
-    const area = new PIXI.Graphics()
-    .rect(0, 0, width, height)
-    .fill({alpha: 0.5, color: colors.darkbrown})
-
     const loadingBar = new PIXI.Graphics()
     .rect(0, 0, 0.1, height)
-    .fill({alpha: 0.5, color: colors.grey})
+    .fill({alpha: 0.5, color: colors.darkbrown})
 
     const buttonText = new PIXI.Text({
         style: {
@@ -310,7 +306,7 @@ const createRectangleButton = (props, lobbyContainer) => {
     buttonSprite.height = height
   
 
-    button.addChild(area, buttonSprite, loadingBar, buttonText)
+    button.addChild(buttonSprite, loadingBar, buttonText)
     lobbyContainer.addChild(button)
 
 
@@ -321,11 +317,11 @@ const createRectangleButton = (props, lobbyContainer) => {
 }
 
 const animateMuteButton = button => {
-    button.getChildAt(3).text = isMusicMuted() ? 'Music: OFF' : 'Music: ON'
+    button.getChildAt(2).text = isMusicMuted() ? 'Music: OFF' : 'Music: ON'
 }
 
 const animateBotsButton = button => {
-    button.getChildAt(3).text = 'Bots: ' + getBotCount()
+    button.getChildAt(2).text = 'Bots: ' + getBotCount()
 }
 
 const addButtons = (app, lobbyContainer) => {
