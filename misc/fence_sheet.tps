@@ -338,21 +338,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">fence/crosshair.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0,0</point_f>
-                <key>spriteScale</key>
-                <double>0.25</double>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>256,256,512,512</rect>
-                <key>scale9Paddings</key>
-                <rect>256,256,512,512</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">fence/fence_horizontal.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -635,6 +620,29 @@
                 <rect>21,15,41,29</rect>
                 <key>scale9Paddings</key>
                 <rect>21,15,41,29</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">fence/vapor_cloud_0.png</key>
+            <key type="filename">fence/vapor_cloud_1.png</key>
+            <key type="filename">fence/vapor_cloud_2.png</key>
+            <key type="filename">fence/vapor_cloud_3.png</key>
+            <key type="filename">fence/vapor_cloud_4.png</key>
+            <key type="filename">fence/vapor_cloud_5.png</key>
+            <key type="filename">fence/vapor_cloud_6.png</key>
+            <key type="filename">fence/vapor_cloud_7.png</key>
+            <key type="filename">fence/vapor_cloud_8.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>spriteScale</key>
+                <double>4</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,16,32,32</rect>
+                <key>scale9Paddings</key>
+                <rect>16,16,32,32</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

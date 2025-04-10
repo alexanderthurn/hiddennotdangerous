@@ -1117,8 +1117,8 @@ const animateFartCloud = cloud => {
     }
 }
 
-const addFartCloud = (spritesheet, props) => {
-    let cloud = new PIXI.AnimatedSprite(spritesheet.animations.explode)
+const addFartCloud = (props) => {
+    let cloud = new PIXI.AnimatedSprite(PIXI.Assets.get('fenceAtlas').animations.vapor_cloud)
     cloud = Object.assign(cloud, {
         type: 'cloud',
         attackAngle: 360,
@@ -1129,11 +1129,9 @@ const addFartCloud = (spritesheet, props) => {
         lifetime: 0,
         ...props
     })
-    
+    cloud.tint = colors.lightbrown
     cloud.anchor.set(0.5)
     cloud.animationSpeed = 0.1
-    cloud.currentAnimation = 'explode'
-
     figures.push(cloud)
     levelContainer.addChild(cloud)
     cloudLayer.attach(cloud)

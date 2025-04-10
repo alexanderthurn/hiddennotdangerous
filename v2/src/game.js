@@ -293,7 +293,6 @@ const foodDefinition = () => ({
 })
 
 const figureAtlasData = createFigureAtlasData();
-const cloudAtlasData = createCloudAtlasData();
 var spriteSheets;
 const app = new PIXI.Application();
 var levelContainer;
@@ -321,7 +320,6 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         const assets = [
             {alias: 'food', src: './gfx/food-OCAL.png'},
             {alias: 'players', src: './gfx/character_base_all_32x32.png'},
-            {alias: 'cloud', src: './gfx/fart.png'},
             {alias: 'background_grass', src: './gfx/background_grass.jpg'}
         ];
     
@@ -329,7 +327,6 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         await PIXI.Assets.load(assets);
 
         const atlasData = {
-            cloud: cloudAtlasData,
             figure: figureAtlasData,
             food: foodAtlasData,
         }
@@ -741,7 +738,7 @@ function handleInput(players, figures, dtProcessed) {
 
                     if (f.beans.size > 0) {
                         playAudioPool(soundAttack2Pool);
-                        addFartCloud(spriteSheets.cloud, {x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size})
+                        addFartCloud({x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size})
                     } else {
                         playAudioPool(soundAttackPool);
                     }
