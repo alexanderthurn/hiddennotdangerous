@@ -283,13 +283,9 @@ const createRectangleButton = (props, lobbyContainer) => {
     button = Object.assign(button, {x, y, loadingPercentage, loadingSpeed, execute})
     button.isInArea = f => new PIXI.Rectangle(x, y, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
 
-    const area = new PIXI.Graphics()
-    .rect(0, 0, width, height)
-    .fill({alpha: 0.5, color: colors.darkbrown})
-
     const loadingBar = new PIXI.Graphics()
     .rect(0, 0, 0.1, height)
-    .fill({alpha: 0.5, color: colors.grey})
+    .fill({alpha: 0.5, color: colors.darkbrown})
 
     const buttonText = new PIXI.Text({
         style: {
@@ -303,8 +299,18 @@ const createRectangleButton = (props, lobbyContainer) => {
     buttonText.x = width/2
     buttonText.y = height/2
 
-    button.addChild(area, loadingBar, buttonText)
+
+
+    const buttonSprite = new PIXI.NineSliceSprite(PIXI.Assets.get('fenceAtlas').textures['button'])
+    buttonSprite.width = width
+    buttonSprite.height = height
+  
+
+    button.addChild(buttonSprite, loadingBar, buttonText)
     lobbyContainer.addChild(button)
+
+
+
 
     addAnimation(button, () => animateRectangleButton(button))
     return button
@@ -362,8 +368,8 @@ const animateTeamSwitcher = button => {
 
 const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
     const {x, y, team} = props
-    const width = 256
-    const height = 256
+    const width = 128
+    const height = 128
     const newX = x - width/2
     const newY = y - height/2
 
@@ -384,7 +390,6 @@ const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
         options: {} // ggf. Optionen einfügen
     });
 
-    house.scale.set(0.6)
     buttonContainer.house = house
     buttonContainer.addChild(button, house)
     lobbyContainer.addChild(buttonContainer)
@@ -640,9 +645,9 @@ const addFood = (app, texture, props) => {
     app.ticker.add(() => animateFood(food))
 }
 
-const addFoods = (app, spritesheet) => {
+const addFoods = (app) => {
     Object.keys(foodDefinition()).forEach(key => {
-        addFood(app, spritesheet.textures[key], {
+        addFood(app, PIXI.Assets.get(key), {
             id: key,
             type: 'bean',
             attackDistance: 32,
@@ -1159,8 +1164,8 @@ const animateFartCloud = cloud => {
     }
 }
 
-const addFartCloud = (spritesheet, props) => {
-    let cloud = new PIXI.AnimatedSprite(spritesheet.animations.explode)
+const addFartCloud = (props) => {
+    let cloud = new PIXI.AnimatedSprite(PIXI.Assets.get('fenceAtlas').animations.vapor_cloud)
     cloud = Object.assign(cloud, {
         type: 'cloud',
         attackAngle: 360,
@@ -1171,11 +1176,9 @@ const addFartCloud = (spritesheet, props) => {
         lifetime: 0,
         ...props
     })
-    
+    cloud.tint = colors.lightbrown
     cloud.anchor.set(0.5)
     cloud.animationSpeed = 0.1
-    cloud.currentAnimation = 'explode'
-
     figures.push(cloud)
     levelContainer.addChild(cloud)
     cloudLayer.attach(cloud)

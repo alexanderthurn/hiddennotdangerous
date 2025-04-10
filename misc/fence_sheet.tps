@@ -4,7 +4,7 @@
         <key>fileFormatVersion</key>
         <int>6</int>
         <key>texturePackerVersion</key>
-        <string>7.5.0</string>
+        <string>7.6.2</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -188,6 +188,25 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">fence/broccoli.png</key>
+            <key type="filename">fence/onion.png</key>
+            <key type="filename">fence/oreo.png</key>
+            <key type="filename">fence/salad.png</key>
+            <key type="filename">fence/taco.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>8,8,16,16</rect>
+                <key>scale9Paddings</key>
+                <rect>8,8,16,16</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">fence/bush1.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -296,13 +315,13 @@
             <key type="filename">fence/button.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0,0</point_f>
+                <point_f>0.0234114,0.00414938</point_f>
                 <key>spriteScale</key>
-                <double>1</double>
+                <double>0.2</double>
                 <key>scale9Enabled</key>
-                <false/>
+                <true/>
                 <key>scale9Borders</key>
-                <rect>75,60,149,121</rect>
+                <rect>66,59,169,90</rect>
                 <key>scale9Paddings</key>
                 <rect>75,60,149,121</rect>
                 <key>scale9FromFile</key>
@@ -403,7 +422,7 @@
                 <key>pivotPoint</key>
                 <point_f>0,0</point_f>
                 <key>spriteScale</key>
-                <double>1</double>
+                <double>0.3</double>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -418,7 +437,7 @@
                 <key>pivotPoint</key>
                 <point_f>0,0</point_f>
                 <key>spriteScale</key>
-                <double>1</double>
+                <double>0.3</double>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -620,6 +639,29 @@
                 <rect>21,15,41,29</rect>
                 <key>scale9Paddings</key>
                 <rect>21,15,41,29</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">fence/vapor_cloud_0.png</key>
+            <key type="filename">fence/vapor_cloud_1.png</key>
+            <key type="filename">fence/vapor_cloud_2.png</key>
+            <key type="filename">fence/vapor_cloud_3.png</key>
+            <key type="filename">fence/vapor_cloud_4.png</key>
+            <key type="filename">fence/vapor_cloud_5.png</key>
+            <key type="filename">fence/vapor_cloud_6.png</key>
+            <key type="filename">fence/vapor_cloud_7.png</key>
+            <key type="filename">fence/vapor_cloud_8.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>spriteScale</key>
+                <double>4</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,16,32,32</rect>
+                <key>scale9Paddings</key>
+                <rect>16,16,32,32</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

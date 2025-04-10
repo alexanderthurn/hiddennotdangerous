@@ -394,29 +394,6 @@ createFigureAtlasData = () => {
     return atlasData
 }
 
-createCloudAtlasData = () => {
-    const atlasData = {
-        frames: {},
-        meta: {
-            image: 'cloud',
-            scale: 1/3
-        },
-        animations: {}
-    }
-
-    atlasData.animations.explode = []
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-            const frameName = 'explode' + (i+3*j)
-            atlasData.frames[frameName] = {
-                frame: {x: i*64, y: j*64, w:64, h:64}
-            }
-            atlasData.animations.explode.push(frameName)
-        }
-    }
-
-    return atlasData
-}
 
 const initVIPGamePositions = figures => {
 
