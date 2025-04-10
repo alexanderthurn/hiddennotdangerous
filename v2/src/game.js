@@ -133,36 +133,6 @@ var soundWin = getAudio(audio.win);
 
 var actualMusicPlaylist;
 
-const foodAtlasData = {
-    frames: {
-        bean: {
-            frame: { x: 32, y: 192, w: 32, h: 32 }
-        },
-        brokkoli: {
-            frame: { x: 256, y: 32, w: 32, h: 32 }
-        },
-        onion: {
-            frame: { x: 192, y: 64, w: 32, h: 32 }
-        },
-        salad: {
-            frame: { x: 64, y: 64, w: 32, h: 32 }
-        },
-        taco: {
-            frame: { x: 224, y: 256, w: 32, h: 32 }
-        }
-    },
-    meta: {
-        image: 'food'
-    },
-    textures: {
-        bean: 'bean',
-        brokkoli: 'brokkoli',
-        onion: 'onion',
-        salad: 'salad',
-        taco: 'taco'
-    }
-};
-
 const gameVoteButtonDefinition = () => ({
     x: level.width*0.5,
     y: level.height*0.5,
@@ -270,11 +240,11 @@ const circleOfDeathDefinition = () => ({
 var circleOfDeath
 
 const foodDefinition = () => ({
-    bean: {
+    oreo: {
         x: stage === stages.gameLobby ? level.width*4.4/5 : level.width*4/5,
         y: stage === stages.gameLobby ? level.height*2.6/5 : level.height*4/5,
     },
-    brokkoli: {
+    broccoli: {
         x: stage === stages.gameLobby ? level.width*3.6/5 : level.width/5,
         y: stage === stages.gameLobby ? level.height*1.8/5 : level.height/5,
     },
@@ -318,7 +288,6 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         await Promise.all(loadPromises);
 
         const assets = [
-            {alias: 'food', src: './gfx/food-OCAL.png'},
             {alias: 'players', src: './gfx/character_base_all_32x32.png'},
             {alias: 'background_grass', src: './gfx/background_grass.jpg'}
         ];
@@ -327,8 +296,7 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         await PIXI.Assets.load(assets);
 
         const atlasData = {
-            figure: figureAtlasData,
-            food: foodAtlasData,
+            figure: figureAtlasData
         }
         
         spriteSheets = Object.entries(atlasData).reduce((acc, [key, value]) => ({...acc, [key]: new PIXI.Spritesheet(
@@ -349,7 +317,7 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
         addGrass();
         addHeadline();
         addLobbyItems(app, spriteSheets);
-        addFoods(app, spriteSheets.food);
+        addFoods(app);
         addLevelBoundary(app, spriteSheets);
         addFigures(app, spriteSheets.figure);
         addWinningCeremony(app);

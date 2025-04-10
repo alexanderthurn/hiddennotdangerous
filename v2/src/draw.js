@@ -616,9 +616,9 @@ const addFood = (app, texture, props) => {
     app.ticker.add(() => animateFood(food))
 }
 
-const addFoods = (app, spritesheet) => {
+const addFoods = (app) => {
     Object.keys(foodDefinition()).forEach(key => {
-        addFood(app, spritesheet.textures[key], {
+        addFood(app, PIXI.Assets.get(key), {
             id: key,
             type: 'bean',
             attackDistance: 32,
