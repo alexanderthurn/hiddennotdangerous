@@ -272,7 +272,7 @@ const addNetworkQrCode = (app, lobbyContainer) => {
 const animateRectangleButton = button => {
     button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime >= 0).length > 0
 
-    const loadingBar = button.getChildAt(1)
+    const loadingBar = button.getChildAt(2)
     loadingBar.width = button.width*button.loadingPercentage
 }
 
@@ -303,19 +303,29 @@ const createRectangleButton = (props, lobbyContainer) => {
     buttonText.x = width/2
     buttonText.y = height/2
 
-    button.addChild(area, loadingBar, buttonText)
+
+
+    const buttonSprite = new PIXI.NineSliceSprite(PIXI.Assets.get('fenceAtlas').textures['button'])
+    buttonSprite.width = width
+    buttonSprite.height = height
+  
+
+    button.addChild(area, buttonSprite, loadingBar, buttonText)
     lobbyContainer.addChild(button)
+
+
+
 
     addAnimation(button, () => animateRectangleButton(button))
     return button
 }
 
 const animateMuteButton = button => {
-    button.getChildAt(2).text = isMusicMuted() ? 'Music: OFF' : 'Music: ON'
+    button.getChildAt(3).text = isMusicMuted() ? 'Music: OFF' : 'Music: ON'
 }
 
 const animateBotsButton = button => {
-    button.getChildAt(2).text = 'Bots: ' + getBotCount()
+    button.getChildAt(3).text = 'Bots: ' + getBotCount()
 }
 
 const addButtons = (app, lobbyContainer) => {
@@ -333,8 +343,8 @@ const animateTeamSwitcher = button => {
 
 const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
     const {x, y, team} = props
-    const width = 256
-    const height = 256
+    const width = 128
+    const height = 128
     const newX = x - width/2
     const newY = y - height/2
 
@@ -355,7 +365,6 @@ const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
         options: {} // ggf. Optionen einfügen
     });
 
-    house.scale.set(0.6)
     buttonContainer.house = house
     buttonContainer.addChild(button, house)
     lobbyContainer.addChild(buttonContainer)
@@ -670,6 +679,8 @@ const addLevelBoundary = (app, spritesheets) => {
         level.width * (0.5 + 0.25 * Math.sin(app.ticker.lastTime * 0.0005)),
         level.height * (0.5 + 0.25 * Math.cos(app.ticker.lastTime * 0.0005))
       ));
+
+
 
 }
 

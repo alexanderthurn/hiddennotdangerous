@@ -344,7 +344,7 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
             await spriteSheet.parse()
         ))
 
-        spriteSheets.fence = await PIXI.Assets.load( './gfx/fence.json'); 
+        spriteSheets.fence = await PIXI.Assets.load( {alias: 'fenceAtlas', src: './gfx/fence.json'}); 
 
         destroyContainer(app, loadingText)
         levelContainer = createLevelContainer(app, level);
