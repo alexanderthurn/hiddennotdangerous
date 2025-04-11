@@ -207,6 +207,10 @@ const teams = {
         walkRectLength: 300,
         maxSpeed: 0.06
     },
+    sniper: {
+        color: colors.black,
+        label: 'Snipers'
+    },
     vip: {
         color: colors.darkgreen,
         label: 'VIPs',
@@ -218,19 +222,33 @@ const teams = {
 const shootingRangeDefinition = () => ({
     x: level.width*0.5,
     y: level.height*0.9,
-    team: 'guard'
+    team: 'sniper'
 })
 
 const teamSwitchersDefinition = () => ({
     assassin: {
         x: level.width*0.25,
         y: level.height*0.5,
+        games: new Set([games.vip]),
         team: 'assassin'
     },
     guard: {
         x: level.width*0.75,
         y: level.height*0.5,
+        games: new Set([games.vip]),
         team: 'guard'
+    },
+    killer: {
+        x: level.width*0.4,
+        y: level.height*0.75,
+        games: new Set([games.rampage]),
+        team: 'killer'
+    },
+    sniper: {
+        x: level.width*0.6,
+        y: level.height*0.75,
+        games: new Set([games.rampage]),
+        team: 'sniper'
     }
 })
 

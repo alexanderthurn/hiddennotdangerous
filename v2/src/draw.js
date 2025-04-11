@@ -346,8 +346,7 @@ const addShootingRange = (app, props, lobbyContainer) => {
     .rect(newX, newY, width, height)
     .fill({color: teams[team].color})
     button.execute = () => button.playersNear.forEach(f => {
-        if (f.team !== team) {
-            f.team = team
+        if (!f.inactive) {
             f.inactive = true
             addCrosshair({...f, x: f.x, y: f.y, color: colors.red})
         }
@@ -359,15 +358,15 @@ const addShootingRange = (app, props, lobbyContainer) => {
     app.ticker.add(() => animateShootingRange(button))
 }
 
-const animateTeamSwitcher = button => {
-    button.visible = game === games.vip
+const animateTeamSwitcher = (button, games) => {
+    button.visible = games.has(game)
    
     //put in createSpriteWithShadowContainer later
     button.house.sprite.zIndex = button.house.y + (1-button.house.sprite.anchor.y)*button.house.sprite.height
 }
 
 const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
-    const {x, y, team} = props
+    const {x, y, games, team} = props
     const width = 128
     const height = 128
     const newX = x - width/2
@@ -375,11 +374,13 @@ const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
 
     const buttonContainer = new PIXI.Container()
 
+    console.log('createTeamSwitcher', teams[team], teams[team]?.color)
+
     const button = new PIXI.Graphics()
     .rect(newX, newY, width, height)
-    .fill({color: teams[team].color})
+    .fill({color: teams[team]?.color >= 0 ? teams[team].color : colors.white})
     button.execute = () => button.playersNear.forEach(f => switchTeam(f, team)) 
-    button.isInArea = f => stage === stages.gameLobby && game === games.vip && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
+    button.isInArea = f => stage === stages.gameLobby && games.has(game) && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
 
     const house = createSpriteWithShadowContainer({
         texture: spriteSheets.fence.textures['house_' + team],
@@ -394,7 +395,7 @@ const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
     buttonContainer.addChild(button, house)
     lobbyContainer.addChild(buttonContainer)
 
-    app.ticker.add(() => animateTeamSwitcher(buttonContainer))
+    app.ticker.add(() => animateTeamSwitcher(buttonContainer, games))
 
     return button
 }
