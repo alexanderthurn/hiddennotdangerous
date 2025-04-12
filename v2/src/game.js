@@ -302,6 +302,10 @@ const crosshairLayer = new PIXI.RenderLayer();
 const scoreLayer = new PIXI.RenderLayer({sortableChildren: true});
 const overlayLayer = new PIXI.RenderLayer();
 const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
+app.textStyleDefault = {
+    fontFamily: 'Knall',
+    fontSize: 32
+};
 
 (async () =>
     {
@@ -317,14 +321,70 @@ const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
 
         await Promise.all(loadPromises);
 
-        const assets = [
-            {alias: 'players', src: './gfx/character_base_all_32x32.png'},
-            {alias: 'background_grass', src: './gfx/background_grass.jpg'},
-            {alias: 'crosshair', src: './gfx/crosshair.svg'}
-        ];
+        PIXI.Assets.addBundle('main', {
+            players: './gfx/character_base_all_32x32.png',
+            background_grass: './gfx/background_grass.jpg',
+            crosshair: './gfx/crosshair.svg',
+            fontTTF: './gfx/BBSesque.ttf',
+        });
+        await PIXI.Assets.loadBundle('main');
+
+        document.fonts.add(PIXI.Assets.get('fontTTF'))
+
+        PIXI.BitmapFontManager.install({
+            name: 'Knall', 
+            style: {
+                chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
+                fontFamily: 'BBSesque',
+                fontSize: 32,
+                fill: colors.white
+            }
+        });
+
+        PIXI.BitmapFontManager.install({
+            name: 'KnallStroke', 
+            style: {
+                chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
+                fontFamily: 'BBSesque',
+                fontSize: 48,
+                fill: colors.white,
+                stroke: {
+                    width: 1,
+                }
+            }
+        });
+
+        PIXI.BitmapFontManager.install({
+            name: 'KnallTitle', 
+            style: {
+                chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
+                fontFamily: 'BBSesque',
+                fontSize: 256,
+                fill: colors.white,
+                stroke: {
+                    color: colors.black,
+                    width: 25,
+                }
+            }
+        });
+
+        PIXI.BitmapFontManager.install({
+            name: 'KnallWinning', 
+            style: {
+                chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
+                fontFamily: 'BBSesque',
+                fontSize: level.width*0.1,
+                fill: {
+                    alpha: 0.8,
+                    color: colors.lightbrown,
+                },
+                stroke: {
+                    color: colors.white,
+                    width: 6,
+                }
+            }
+        });
     
-        // Load the assets defined above.
-        await PIXI.Assets.load(assets);
 
         const atlasData = {
             figure: figureAtlasData

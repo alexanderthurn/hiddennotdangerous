@@ -7,13 +7,9 @@ const shadowDefinition = {
 }
 
 const createLoadingText = app => {
-    const text = new PIXI.Text({
+    const text = new PIXI.BitmapText({
         text: 'Loading...',
-        style: {
-            fontFamily: 'Serif',
-            fontSize: app.screen.height*0.1,
-            fill: colors.white
-        }
+        style: app.textStyleDefault,
     })
 
     app.stage.addChild(text)
@@ -21,36 +17,27 @@ const createLoadingText = app => {
 }
 
 const addHeadline = () => {
-    const title = new PIXI.Text({
+    const title = new PIXI.BitmapText({
         text: 'KNIRPS UND KNALL',
-        style: {
-            fontSize: level.width*0.02,
-            fill: colors.white
-        }
+        style: app.textStyleDefault,
+        anchor: {x: 0.5, y: 1},
+        position: {x: level.width/2, y: -level.width*0.005},
+        tint: colors.white
     });
 
-    title.anchor.set(0.5, 1);
-    title.x = level.width/2;
-    title.y = -level.width*0.005;
-
-    const authors = new PIXI.Text({
+    const authors = new PIXI.BitmapText({
         text: 'made by TORSTEN STELLJES & ALEXANDER THURN',
-        style: {
-            fontSize: level.width*0.012,
-            fill: colors.white
-        }
+        style: app.textStyleDefault,
+        scale: {x: 0.8, y: 0.8},
     });
 
     authors.anchor.set(1, 1);
     authors.x = level.width;
     authors.y = -level.width*0.005;
 
-    const code = new PIXI.Text({
+    const code = new PIXI.BitmapText({
         text: '',
-        style: {
-            fontSize: level.width*0.012,
-            fill: colors.white
-        },
+        style: app.textStyleDefault,
         anchor: {x: 0, y: 1},
         position: {x: 0, y: -level.width*0.005}
     });
@@ -109,15 +96,10 @@ const createCircleButton = (props, lobbyContainer) => {
     .circle(0, 0, innerRadius)
     .fill({alpha: 0.5, color: colors.grey})
 
-    const buttonText = new PIXI.Text({
-        style: {
-            align: 'center',
-            fontSize: 32,
-            fill: colors.white,
-            stroke: colors.white
-        }
+    const buttonText = new PIXI.BitmapText({
+        style: {...app.textStyleDefault, align: 'center'},
+        anchor: {x: 0.5, y: 0.5}
     });
-    buttonText.anchor.set(0.5)
 
     button.addChild(area, loadingCircle, buttonText)
     lobbyContainer.addChild(button)
@@ -177,14 +159,9 @@ const createRingPartButton = (props, lobbyContainer) => {
 
     const loadingArea = new PIXI.Graphics()
 
-    const buttonText = new PIXI.Text({
+    const buttonText = new PIXI.BitmapText({
         text: games[gameId].text,
-        style: {
-            align: 'center',
-            fontSize: 32,
-            fill: colors.white,
-            stroke: colors.white
-        }
+        style: {...app.textStyleDefault, align: 'center'}
     });
     buttonText.x = Math.cos(centerAngle)*((innerRadius+outerRadius)/2)
     buttonText.y = Math.sin(centerAngle)*((innerRadius+outerRadius)/2)
@@ -240,15 +217,10 @@ const addNetworkQrCode = (app, lobbyContainer) => {
     const qrCodeContainer = new PIXI.Container()
     qrCodeContainer.sprite = new PIXI.Sprite()
     qrCodeContainer.sprite.anchor.set(0., 0)
-    qrCodeContainer.label = new PIXI.Text( {
+    qrCodeContainer.label = new PIXI.BitmapText( {
         text: '', 
-        style: {
-            align: 'center',
-            fontSize: 32,
-            fill: colors.white,
-            stroke: colors.white
-             }
-        })
+        style: {...app.textStyleDefault, align: 'center'},
+    })
     qrCodeContainer.label.anchor.set(0.5, 0)
     qrCodeContainer.addChild(qrCodeContainer.sprite, qrCodeContainer.label)
     lobbyContainer.addChild(qrCodeContainer)
@@ -287,24 +259,19 @@ const createRectangleButton = (props, lobbyContainer) => {
     .rect(0, 0, 0.1, height)
     .fill({alpha: 0.5, color: colors.darkbrown})
 
-    const buttonText = new PIXI.Text({
-        style: {
-            align: 'center',
-            fontSize: 32,
-            fill: colors.white,
-            stroke: colors.white
-        }
+    const buttonText = new PIXI.BitmapText({
+        style: app.textStyleDefault,
+        anchor: {x: 0.5, y: 0.5},
+        position: {x: width/2, y: height/2},
     });
-    buttonText.anchor.set(0.5)
-    buttonText.x = width/2
-    buttonText.y = height/2
 
 
+    const buttonSprite = new PIXI.NineSliceSprite({
+        texture: PIXI.Assets.get('fenceAtlas').textures['button'],
+        width: width,
+        height: height
+    })
 
-    const buttonSprite = new PIXI.NineSliceSprite(PIXI.Assets.get('fenceAtlas').textures['button'])
-    buttonSprite.width = width
-    buttonSprite.height = height
-  
 
     button.addChild(buttonSprite, loadingBar, buttonText)
     lobbyContainer.addChild(button)
@@ -418,7 +385,7 @@ const addLobbyItems = (app, spriteSheets) => {
     addNetworkQrCode(app, lobbyContainer)
 
     const fontHeight = 32
-    const howToPlay = new PIXI.Text({
+    const howToPlay = new PIXI.BitmapText({
         text: 'HOW TO PLAY\n\nJoin by pressing any key on your Gamepad' 
             + '\nor WASDT(Key1) or ' + String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0(RSHIFT)\nor touch' 
             + '\n\n1.) Find your player 2.) Fart to knock out others\n3.) Stay hidden 4.) Eat to power up your farts' 
@@ -491,14 +458,12 @@ const addPlayerScore = figure => {
     }
     circle.tint = colors.black
     
-    const text = new PIXI.Text({
+    const text = new PIXI.BitmapText({
         text: 0,
-        style: {
-            fontSize: 36,
-            fill: colors.white
-        }
+        style: app.textStyleDefault,
+        anchor: {x: 0.5, y: 0.5},
+        scale: {x: 1.1, y: 1.1},
     });
-    text.anchor.set(0.5)
 
     figure.player.score = playerScore
     playerScore.addChild(circle, text)
@@ -583,22 +548,13 @@ const animateWinningCeremony = winnerText => {
 }
 
 const addWinningCeremony = app => {
-    let winnerText = new PIXI.Text({
+    let winnerText = new PIXI.BitmapText({
         style: {
-            fontSize: level.width*0.1,
-            fill: {
-                alpha: 0.8,
-                color: colors.lightbrown,
-            },
-            stroke: {
-                color: colors.white,
-                width: 6,
-            }
-        }
+            fontFamily: 'KnallWinning'
+        },
+        anchor: {x: 0.5, y: 0.5},
+        position: {x: level.width/2, y: level.height/2},
     })
-    winnerText.anchor.set(0.5)
-    winnerText.x = level.width/2
-    winnerText.y = level.height/2
 
     levelContainer.addChild(winnerText)
     overlayLayer.attach(winnerText)
@@ -666,7 +622,7 @@ const addGrass = () => {
 const addLevelBoundary = (app, spritesheets) => {
     const spritesheet = spritesheets.fence
 
-    const tree1 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree1'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.2, y: level.height * 0.1 }, anchor: { x: 0.5, y: 0.9 }, options: {} });
+    const tree1 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree1'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.3, y: level.height * 0.1 }, anchor: { x: 0.5, y: 0.9 }, options: {} });
     const tree2 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree2'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.8, y: level.height * 0.6 }, anchor: { x: 0.5, y: 0.9 }, options: {} });
     const tree3 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree3'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.9, y: level.height * 0.9 }, anchor: { x: 0.5, y: 0.9 }, options: {} });
 
@@ -815,13 +771,11 @@ createFigureMarker = figure => {
     const markerContainer = new PIXI.Container()
     const marker = new PIXI.Graphics(figureMarker)
 
-    const markerText = new PIXI.Text({
-        style: {
-            fontSize: 16,
-            fill: colors.white
-        }
+    const markerText = new PIXI.BitmapText({
+        style: app.textStyleDefault,
+        scale: 0.5,
+        anchor: {x: 0, y: 1},
     })
-    markerText.anchor.set(0, 1)
 
     markerContainer.addChild(marker, markerText)
 
@@ -972,18 +926,13 @@ const animateCountdown = countdown => {
 }
 
 const createCountdown = app => {
-    const countdown = new PIXI.Text({
+    const countdown = new PIXI.BitmapText({
         style: {
-            fontSize: 48,
-            fill: colors.white,
-            stroke: {
-                width: 1,
-            }
-        }
+            fontFamily: 'KnallStroke'
+        },
+        anchor: {x: 0.5, y: 0.5},
+        position: {x: level.width/2, y: 0.9*level.height},
     })
-    countdown.anchor.set(0.5)
-    countdown.x = level.width/2,
-    countdown.y = 0.9*level.height,
 
     app.ticker.add(() => animateCountdown(countdown))
     return countdown
@@ -992,11 +941,12 @@ const createCountdown = app => {
 const animatePauseOverlay = (app, overlay) => {
     const background = overlay.getChildByLabel('background')
     const text = overlay.getChildByLabel('text')
-    background.height = app.screen.height/2
+    background.height = app.screen.height
     background.width = app.screen.width
-    background.y = app.screen.height/4
+    background.y = 0
     text.text = (stage !== stages.startLobby) ? 'Pause' : '    Welcome to\nKnirps und Knall\n  Press any key'
-    text.style.fontSize = 0.05*app.screen.width
+    text.scale.set(5,5)
+    //text.style.fontSize = 0.05*app.screen.width
     text.x = app.screen.width/2
     text.y = app.screen.height/2
     overlay.visible = !windowHasFocus
@@ -1005,17 +955,16 @@ const animatePauseOverlay = (app, overlay) => {
 const createPauseOverlay = app => {
     const overlay = new PIXI.Container();
 
-    const background = new PIXI.Graphics().rect(0, 0, app.screen.width, app.screen.height/2)
-    .fill({alpha: 0.9, color: colors.darkbrown})
+    const background = new PIXI.Graphics().rect(0, 0, app.screen.width, app.screen.height)
+    .fill({alpha: 0.3, color: colors.darkbrown})
     background.label = 'background'
 
-    const text = new PIXI.Text({
+    const text = new PIXI.BitmapText({
         style: {
-            fill: colors.white
-        }
+            fontFamily: 'KnallTitle'},
+        anchor: {x: 0.5, y: 0.5},
+        label: 'text'
     })
-    text.anchor.set(0.5)
-    text.label = 'text'
 
     overlay.addChild(background, text)
 
@@ -1030,14 +979,12 @@ const animateFpsText = (app, fpsText) => {
 }
 
 const createFpsText = app => {
-    const fpsText = new PIXI.Text({
-        style: {
-            fontSize: 16,
-            fill: colors.white
-        }
+    const fpsText = new PIXI.BitmapText({
+        style: app.textStyleDefault,
+        anchor: {x: 1, y: 0},
+        position: {x: app.screen.width, y: 0},
+        scale: {x: 0.5, y: 0.5},
     })
-    fpsText.anchor.set(1, 0)
-    fpsText.y = 0
 
     app.ticker.add(() => animateFpsText(app, fpsText))
     return fpsText
@@ -1052,15 +999,12 @@ const animatePlayersText = playersText => {
 }
 
 const createPlayersText = app => {
-    const playersText = new PIXI.Text({
-        style: {
-            fontSize: 16,
-            fill: colors.white
-        }
+    const playersText = new PIXI.BitmapText({
+        style: app.textStyleDefault,
+        anchor: {x: 0, y: 0},   
+        position: {x: 0, y: 0},
+        scale: {x: 0.5, y: 0.5},
     })
-    playersText.anchor.set(0)
-    playersText.x = 0
-    playersText.y = 0
 
     app.ticker.add(() => animatePlayersText(playersText))
     return playersText
@@ -1076,14 +1020,12 @@ const animateFiguresText = (app, figuresText) => {
 }
 
 const createFiguresText = app => {
-    const figuresText = new PIXI.Text({
-        style: {
-            fontSize: 16,
-            fill: colors.white
-        }
+    const figuresText = new PIXI.BitmapText({
+        style: app.textStyleDefault,
+        anchor: {x: 0, y: 1},   
+        position: {x: 0, y: 0},
+        scale: {x: 0.5, y: 0.5}
     })
-    figuresText.anchor.set(0, 1)
-    figuresText.x = 0
 
     app.ticker.add(() => animateFiguresText(app, figuresText))
     return figuresText
