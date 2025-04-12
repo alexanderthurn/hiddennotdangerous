@@ -322,7 +322,7 @@ app.textStyleDefault = {
         await Promise.all(loadPromises);
         const fontFamilyName = 'Rockboxcond12'
         PIXI.Assets.addBundle('main', {
-            players: './gfx/character_base_all_32x32.png',
+            players: './gfx/character_new_all_34x34.png',
             background_grass: './gfx/background_grass.jpg',
             crosshair: './gfx/crosshair.svg',
             fontTTF: './gfx/'+fontFamilyName+'.ttf',

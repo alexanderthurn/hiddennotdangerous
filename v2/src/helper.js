@@ -382,7 +382,7 @@ createFigureAtlasData = () => {
                 for (let i = 0; i < 4; i++) {
                     const frameName = e + postfix + '_' + i
                     atlasData.frames[frameName] = {
-                        frame: {x: fx*128+i*32, y: fy*128+j*32, w:32, h:32}
+                        frame: {x: fx*136+i*34, y: fy*136+j*34, w:34, h:34}
                     }
                     atlasData.animations[e + postfix ].push(frameName)
                 }
