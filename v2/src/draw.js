@@ -22,13 +22,13 @@ const addHeadline = () => {
         style: app.textStyleDefault,
         anchor: {x: 0.5, y: 1},
         position: {x: level.width/2, y: -level.width*0.005},
-        tint: colors.white
+        tint: colors.white,
+        scale: {x: 1.5, y: 1.5}
     });
 
     const authors = new PIXI.BitmapText({
         text: 'made by TORSTEN STELLJES & ALEXANDER THURN',
-        style: app.textStyleDefault,
-        scale: {x: 0.8, y: 0.8},
+        style: app.textStyleDefault
     });
 
     authors.anchor.set(1, 1);
@@ -932,6 +932,7 @@ const createCountdown = app => {
         },
         anchor: {x: 0.5, y: 0.5},
         position: {x: level.width/2, y: 0.9*level.height},
+        scale: {x: 2, y: 2},
     })
 
     app.ticker.add(() => animateCountdown(countdown))

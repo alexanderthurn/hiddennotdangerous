@@ -320,12 +320,12 @@ app.textStyleDefault = {
         const loadingText = createLoadingText(app);
 
         await Promise.all(loadPromises);
-
+        const fontFamilyName = 'Rockboxcond12'
         PIXI.Assets.addBundle('main', {
             players: './gfx/character_base_all_32x32.png',
             background_grass: './gfx/background_grass.jpg',
             crosshair: './gfx/crosshair.svg',
-            fontTTF: './gfx/BBSesque.ttf',
+            fontTTF: './gfx/'+fontFamilyName+'.ttf',
         });
         await PIXI.Assets.loadBundle('main');
 
@@ -335,7 +335,7 @@ app.textStyleDefault = {
             name: 'Knall', 
             style: {
                 chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
-                fontFamily: 'BBSesque',
+                fontFamily: fontFamilyName,
                 fontSize: 32,
                 fill: colors.white
             }
@@ -345,7 +345,7 @@ app.textStyleDefault = {
             name: 'KnallStroke', 
             style: {
                 chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
-                fontFamily: 'BBSesque',
+                fontFamily: fontFamilyName,
                 fontSize: 48,
                 fill: colors.white,
                 stroke: {
@@ -358,7 +358,7 @@ app.textStyleDefault = {
             name: 'KnallTitle', 
             style: {
                 chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
-                fontFamily: 'BBSesque',
+                fontFamily: fontFamilyName,
                 fontSize: 256,
                 fill: colors.white,
                 stroke: {
@@ -372,7 +372,7 @@ app.textStyleDefault = {
             name: 'KnallWinning', 
             style: {
                 chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
-                fontFamily: 'BBSesque',
+                fontFamily: fontFamilyName,
                 fontSize: level.width*0.1,
                 fill: {
                     alpha: 0.8,
