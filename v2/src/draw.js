@@ -569,7 +569,7 @@ const animateFood = figure => {
     let durationLastAttack = dtProcessed-figure.lastAttackTime
     if (figure.lastAttackTime && durationLastAttack < figure.attackDuration) {
         const perc = durationLastAttack/figure.attackDuration
-        plate.scale = 1 - 0.2 * Math.sin(perc*Math.PI)
+        figure.scale = 1 - 0.2 * Math.sin(perc*Math.PI)
     }
 
     const marker = figure.getChildByLabel('marker')
@@ -580,12 +580,13 @@ const addFood = (app, texture, props) => {
     let food = new PIXI.Container()
     food = Object.assign(food, props)
 
-    const plate = new PIXI.Graphics().circle(0, 0 , food.attackDistance)
-    .fill({color: colors.white})
-    .circle(0, 0 , 0.8*food.attackDistance)
-    .stroke({color: colors.black, width: 2})
-    plate.label = 'plate'
-
+    const plate = new PIXI.Sprite({texture: PIXI.Assets.get('plate'), 
+        width: food.attackDistance*2,
+        height: food.attackDistance*2,
+        label: 'plate',
+        anchor: {x: 0.5, y: 0.5},
+    })
+    
     const meal = new PIXI.Sprite(texture)
     meal.anchor.set(0.5)
     meal.scale = 1.2
@@ -607,7 +608,7 @@ const addFoods = (app) => {
         addFood(app, PIXI.Assets.get(key), {
             id: key,
             type: 'bean',
-            attackDistance: 32,
+            attackDistance: 48,
             lastAttackTime: undefined,
             attackDuration: beanAttackDuration
         })
@@ -939,17 +940,15 @@ const createCountdown = app => {
     return countdown
 }
 
-const animatePauseOverlay = (app, overlay) => {
+const animatePauseOverlay = (app, overlay, time) => {
     const background = overlay.getChildByLabel('background')
     const text = overlay.getChildByLabel('text')
     background.height = app.screen.height
     background.width = app.screen.width
     background.y = 0
-    text.text = (stage !== stages.startLobby) ? 'Pause' : '    Welcome to\nKnirps und Knall\n  Press any key'
-    text.scale.set(5,5)
-    //text.style.fontSize = 0.05*app.screen.width
-    text.x = app.screen.width/2
-    text.y = app.screen.height/2
+    text.text = (stage !== stages.startLobby) ? 'Pause' : '   Welcome to\nKnirps und Knall\n \n Press any key'
+    text.x = Math.sin(time.lastTime/1000)*10 + app.screen.width/2
+    text.y = Math.cos(time.lastTime/1000)*10 + app.screen.height/2
     overlay.visible = !windowHasFocus
 }
 
@@ -964,12 +963,15 @@ const createPauseOverlay = app => {
         style: {
             fontFamily: 'KnallTitle'},
         anchor: {x: 0.5, y: 0.5},
-        label: 'text'
+        label: 'text',
+        scale: {x: 2, y: 2},
+        position: {x: app.screen.width/2, y: app.screen.height/2},
+
     })
 
     overlay.addChild(background, text)
 
-    app.ticker.add(() => animatePauseOverlay(app, overlay))
+    app.ticker.add((time) => animatePauseOverlay(app, overlay, time))
     return overlay
 }
 

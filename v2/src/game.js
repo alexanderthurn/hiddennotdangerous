@@ -359,11 +359,12 @@ app.textStyleDefault = {
             style: {
                 chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
                 fontFamily: fontFamilyName,
-                fontSize: 256,
+                fontSize: 128,
                 fill: colors.white,
+                align: 'center',
                 stroke: {
                     color: colors.black,
-                    width: 25,
+                    width: 12,
                 }
             }
         });
