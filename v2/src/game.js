@@ -599,8 +599,8 @@ const handleWinning = () => {
         }
     } else {
         // players left
-        const assassins = figures.filter(f => f.playerId && f.team === 'assassin')
-        const guards = figures.filter(f => f.playerId && f.team === 'guard')
+        const assassins = figuresPlayer.filter(f => f.team === 'assassin')
+        const guards = figuresPlayer.filter(f => f.team === 'guard')
         if (assassins.length === 0 || guards.length === 0) {
             finalWinnerTeam = guards.length === 0 ? 'assassin' : 'guard'
             lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.team === finalWinnerTeam).map(f => f.playerId))
