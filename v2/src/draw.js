@@ -690,14 +690,15 @@ const animateFigure = (figure, spritesheet) => {
     let animation
 
     if (distanceAnglesDeg(deg, 0) < 45) {
-        animation = 'right_neutral'
+        animation = 'right'
     } else if (distanceAnglesDeg(deg, 90) <= 45) {
-        animation = 'down_neutral'
+        animation = 'down'
     } else if (distanceAnglesDeg(deg, 180) < 45) {
-        animation = 'left_neutral'
+        animation = 'left'
     } else {
-        animation = 'up_neutral'
+        animation = 'up'
     }
+    animation += '_' + figure.currentSprite
 
     if (figure.isDead) {
         body.angle = 90
@@ -809,13 +810,11 @@ const createFigure = (app, spritesheet, props) => {
 
     const body = new PIXI.AnimatedSprite(spritesheet.animations.down_neutral)
     body.anchor.set(0.5)
-    body.currentAnimation = 'down_neutral'
     body.scale = 2
     body.label = 'body'
 
     const shadow = new PIXI.AnimatedSprite(spritesheet.animations.down_neutral)
     shadow.anchor.set(0.1, 0.5)
-    shadow.currentAnimation = 'down_neutral'
     shadow.alpha = shadowDefinition.alpha
     shadow.scale.set(2*shadowDefinition.scale.x, 2*shadowDefinition.scale.y)
     shadow.skew.set(shadowDefinition.skew.x, shadowDefinition.skew.y)
@@ -827,6 +826,7 @@ const createFigure = (app, spritesheet, props) => {
     marker.label = 'marker'
 
     figure.bodyHeight = body.height
+    figure.currentSprite = 'neutral'
     figure.addChild(body, attackArc, marker, shadow)
     figuresPool.push(figure)
     figureShadowLayer.attach(shadow)
