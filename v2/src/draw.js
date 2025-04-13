@@ -354,7 +354,6 @@ const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
         scaleFactor: { x: 1, y: 1 },
         skewFactor: { x: 1, y: 1 },
         position: { x: newX + width * 0.5, y: newY + height + 3},
-        anchor: { x: 0.5, y: 1 },
         options: {} // ggf. Optionen einfügen
     });
 
@@ -588,7 +587,6 @@ const addFood = (app, texture, props) => {
     })
     
     const meal = new PIXI.Sprite(texture)
-    meal.anchor.set(0.5)
     meal.scale = 1.2
 
     const marker = new PIXI.Graphics(figureMarker)
@@ -623,9 +621,9 @@ const addGrass = () => {
 const addLevelBoundary = (app, spritesheets) => {
     const spritesheet = spritesheets.fence
 
-    const tree1 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree1'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.3, y: level.height * 0.1 }, anchor: { x: 0.5, y: 0.9 }, options: {} });
-    const tree2 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree2'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.8, y: level.height * 0.6 }, anchor: { x: 0.5, y: 0.9 }, options: {} });
-    const tree3 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree3'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.9, y: level.height * 0.9 }, anchor: { x: 0.5, y: 0.9 }, options: {} });
+    const tree1 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree1'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.3, y: level.height * 0.1 }, options: {} });
+    const tree2 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree2'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.8, y: level.height * 0.6 }, options: {} });
+    const tree3 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree3'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.9, y: level.height * 0.9 }, options: {} });
 
 
     const fenceLower = createSpriteWithShadowContainer({ texture: spritesheet.textures['fence_horizontal'], scaleFactor: { x: 1, y: 1.3 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.0, y: level.height * 1 }, anchor: { x: 0.0, y: 0.9 }, options: { tilingSprite: { tileScale: { x: 0.28, y: 0.28 }, tilePosition: { x: 0, y: 0 } } } });
@@ -660,8 +658,8 @@ const createSpriteWithShadowContainer = ({texture, scaleFactor, skewFactor, posi
     } else {
         container.sprite = new PIXI.Sprite(texture)
     }
-    container.sprite.anchor.set(anchor.x, anchor.y)
-    container.sprite.zIndex = container.y + (1-anchor.y)*container.sprite.height
+    anchor && container.sprite.anchor.set(anchor.x, anchor.y)
+    container.sprite.zIndex = container.y + (1-container.sprite.anchor.y)*container.sprite.height
     figureLayer.attach(container.sprite)
     container.shadow = createShadow(container.sprite, scaleFactor, skewFactor, container.y)
     container.addChild(container.sprite, container.shadow)
@@ -1123,7 +1121,6 @@ const addFartCloud = (props) => {
         ...props
     })
     cloud.tint = colors.lightbrown
-    cloud.anchor.set(0.5)
     cloud.animationSpeed = 0.1
     figures.push(cloud)
     levelContainer.addChild(cloud)
