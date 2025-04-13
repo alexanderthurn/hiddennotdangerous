@@ -690,13 +690,13 @@ const animateFigure = (figure, spritesheet) => {
     let animation
 
     if (distanceAnglesDeg(deg, 0) < 45) {
-        animation = 'right_0_0'
+        animation = 'right_neutral'
     } else if (distanceAnglesDeg(deg, 90) <= 45) {
-        animation = 'down_0_0'
+        animation = 'down_neutral'
     } else if (distanceAnglesDeg(deg, 180) < 45) {
-        animation = 'left_0_0'
+        animation = 'left_neutral'
     } else {
-        animation = 'up_0_0'
+        animation = 'up_neutral'
     }
 
     if (figure.isDead) {
@@ -807,15 +807,15 @@ const createFigure = (app, spritesheet, props) => {
     let figure = new PIXI.Container({sortableChildren: false});
     figure = Object.assign(figure, props)
 
-    const body = new PIXI.AnimatedSprite(spritesheet.animations.down_0_0)
+    const body = new PIXI.AnimatedSprite(spritesheet.animations.down_neutral)
     body.anchor.set(0.5)
-    body.currentAnimation = 'down_0_0'
+    body.currentAnimation = 'down_neutral'
     body.scale = 2
     body.label = 'body'
 
-    const shadow = new PIXI.AnimatedSprite(spritesheet.animations.down_0_0)
+    const shadow = new PIXI.AnimatedSprite(spritesheet.animations.down_neutral)
     shadow.anchor.set(0.1, 0.5)
-    shadow.currentAnimation = 'down_0_0'
+    shadow.currentAnimation = 'down_neutral'
     shadow.alpha = shadowDefinition.alpha
     shadow.scale.set(2*shadowDefinition.scale.x, 2*shadowDefinition.scale.y)
     shadow.skew.set(shadowDefinition.skew.x, shadowDefinition.skew.y)

@@ -367,6 +367,17 @@ createFigureAtlasData = () => {
         animations: {}
     }
 
+    const sprites = [
+        [
+            "neutral",
+            "assassin"
+        ],
+        [
+            "guard",
+            "vip"
+        ]
+    ]
+
     const animations = [
         "down",
         "up",
@@ -375,9 +386,9 @@ createFigureAtlasData = () => {
     ]
 
     animations.forEach((e, j) => {
-        for (let fx = 0; fx < 2;fx++) {
-            for (let fy = 0; fy < 2;fy++) {
-                const postfix = '_' + fx + '_' + fy
+        sprites.forEach((row, fy) => {
+            row.forEach((sprite, fx) => {
+                const postfix = '_' + sprite
                 atlasData.animations[e + postfix ] = []
                 for (let i = 0; i < 4; i++) {
                     const frameName = e + postfix + '_' + i
@@ -386,10 +397,9 @@ createFigureAtlasData = () => {
                     }
                     atlasData.animations[e + postfix ].push(frameName)
                 }
-            }
-        }
-       
-    });
+            })
+        })
+    })
 
     return atlasData
 }
