@@ -529,6 +529,7 @@ const winRoundFigures = winnerFigures =>{
 
 const switchTeam = (figure, team) => {
     figure.team = team
+    figure.currentSprite = teams[team]?.sprite || 'neutral'
     figure.maxSpeed = teams[team]?.maxSpeed || 0.08
     figure.walkRectLength = teams[team]?.walkRectLength
 }

@@ -199,23 +199,27 @@ const teams = {
         color: colors.red,
         label: 'Assassins',
         walkRectLength: 300,
-        maxSpeed: 0.08
+        maxSpeed: 0.08,
+        sprite: 'assassin'
     },
     guard: {
         color: colors.blue,
         label: 'Guards',
         walkRectLength: 300,
-        maxSpeed: 0.06
+        maxSpeed: 0.06,
+        sprite: 'guard'
     },
     sniper: {
         color: colors.black,
-        label: 'Snipers'
+        label: 'Snipers',
+        sprite: 'guard'
     },
     vip: {
         color: colors.darkgreen,
         label: 'VIPs',
         walkRectLength: 150,
-        maxSpeed: 0.04
+        maxSpeed: 0.04,
+        sprite: 'vip'
     }
 }
 
