@@ -313,7 +313,7 @@ const addShootingRange = (app, props, lobbyContainer) => {
     .rect(newX, newY, width, height)
     .fill({color: teams[team].color})
     button.execute = () => button.playersNear.forEach(f => {
-        if (!f.inactive) {
+        if (f.team === 'sniper' && !f.inactive) {
             f.inactive = true
             addCrosshair({...f, x: f.x, y: f.y, color: colors.red})
         }
@@ -869,7 +869,7 @@ const addFigures = (app, spritesheet) => {
 }
 
 const addCrosshair = props => {
-    const {x, y, player, color} = props
+    const {x, y, player, team, color} = props
     const crosshair = PIXI.Sprite.from('crosshair')
     crosshair.x = x
     crosshair.y = y
@@ -877,11 +877,13 @@ const addCrosshair = props => {
     crosshair.anchor.set(0.5)
     crosshair.alpha = 0.5
     crosshair.attackBreakDuration = 500
+    crosshair.attackDuration = 0
     crosshair.attackRectX = 16
     crosshair.attackRectY = 32
     crosshair.maxSpeed = 0.32
     crosshair.playerId = player.playerId
     crosshair.player = player
+    crosshair.team = team
     crosshair.tint = color
     crosshair.type = 'crosshair'
 

@@ -426,7 +426,6 @@ app.textStyleDefault = {
         addDebug(app);
        
 
-        //addCrosshair({x: level.width/2, y: level.height/2, color: colors.red})
         roundInit();
         window.requestAnimationFrame(gameLoop);
     }
@@ -495,6 +494,10 @@ function roundInit() {
         } else {
             initVIPGamePositions(figures)
         }
+    } if (game === games.rampage && stage === stages.gameLobby) {
+        figures.filter(figure => figure.playerId).forEach(figure => {
+            switchTeam(figure, 'killer')
+        })
     } else if (stage !== stages.gameLobby) {
         figures.forEach(figure => {
             initRandomPositionFigure(figure)
@@ -843,7 +846,7 @@ function handleInput(players, figures, dtProcessed) {
                     f.lastAttackTime = dtProcessed
                 }
             }
-            f.isAttacking = f.lastAttackTime && (!f.attackDuration || (dtProcessed-f.lastAttackTime < f.attackDuration)) ? true : false;
+            f.isAttacking = f.lastAttackTime && (dtProcessed-f.lastAttackTime <= f.attackDuration) ? true : false;
         }
     })
 }
