@@ -210,12 +210,12 @@ const teams = {
         sprite: 'guard'
     },
     killer: {
-        color: colors.white,
+        color: colors.red,
         label: 'Killers',
         sprite: 'neutral'
     },
     sniper: {
-        color: colors.black,
+        color: colors.blue,
         label: 'Snipers',
         sprite: 'guard'
     },
@@ -666,8 +666,9 @@ function updateGame(figures, dt, dtProcessed) {
     }})
 
     if (stage === stages.startLobby || stage === stages.gameLobby) {
-            const minimumPlayers = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
-            const playersPossible = figures.filter(f => f.playerId && f.playerId[0] !== 'b' && f.type === 'fighter')
+        const minimumPlayers = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
+        const playersPossible = figures.filter(f => f.playerId && f.playerId[0] !== 'b' && f.type === 'fighter')
+
         Object.values(buttons).forEach(btn => {
             if (!btn.visible) return
             btn.playersPossible = playersPossible
@@ -676,8 +677,6 @@ function updateGame(figures, dt, dtProcessed) {
             let aimLoadingPercentage
             if (btn === buttons.startGame || btn === buttons.selectGame) {
                 aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers);
-            } else if (btn.game) {
-                //btn.game.votes = btn.playersNear.length
             } else {
                 aimLoadingPercentage = btn.playersNear.length > 0 ? 1 : 0;
             }

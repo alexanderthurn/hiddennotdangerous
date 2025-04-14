@@ -320,7 +320,7 @@ const addShootingRange = (app, props, lobbyContainer) => {
     }) 
     button.isInArea = f => stage === stages.gameLobby && game === games.rampage && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
 
-    buttons.sniper = button
+    buttons.shootingRange = button
     lobbyContainer.addChild(button)
     app.ticker.add(() => animateShootingRange(button))
 }
@@ -339,13 +339,11 @@ const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
     const newX = x - width/2
     const newY = y - height/2
 
-    const buttonContainer = new PIXI.Container()
+    const button = new PIXI.Container()
 
-    const button = new PIXI.Graphics()
+    const marker = new PIXI.Graphics()
     .rect(newX, newY, width, height)
     .fill({color: teams[team]?.color >= 0 ? teams[team].color : colors.white})
-    button.execute = () => button.playersNear.forEach(f => switchTeam(f, team)) 
-    button.isInArea = f => stage === stages.gameLobby && games.has(game) && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
 
     const house = createSpriteWithShadowContainer({
         texture: spriteSheets.fence.textures['house_' + team],
@@ -355,11 +353,13 @@ const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
         options: {} // ggf. Optionen einfügen
     });
 
-    buttonContainer.house = house
-    buttonContainer.addChild(button, house)
-    lobbyContainer.addChild(buttonContainer)
+    button.house = house
+    button.execute = () => button.playersNear.forEach(f => switchTeam(f, team)) 
+    button.isInArea = f => stage === stages.gameLobby && games.has(game) && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
+    button.addChild(marker, house)
+    lobbyContainer.addChild(button)
 
-    app.ticker.add(() => animateTeamSwitcher(buttonContainer, games))
+    app.ticker.add(() => animateTeamSwitcher(button, games))
 
     return button
 }
