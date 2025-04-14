@@ -484,6 +484,9 @@ function roundInit() {
     } else {
         figures = figures.concat(figuresPool.filter(figure => figure.type === 'fighter' && figure.team !== 'vip'))
     }
+    if (game === games.food) {
+        figures = figures.concat(figuresPool.filter(figure => figure.type === 'bean'))
+    }
 
     // Figuren platzieren
     if (game === games.vip) {
@@ -506,15 +509,13 @@ function roundInit() {
     }
 
     if (game === games.food) {
-        figuresPool.filter(figure => figure.type === 'bean').forEach(figure => {
+        figures.filter(figure => figure.type === 'bean').forEach(figure => {
             const {x, y} = foodDefinition()[figure.id]
             Object.assign(figure, {
                 x,
                 y,
                 lastAttackTime: undefined
             })
-    
-            figures.push(figure)
         })
     }
 }
