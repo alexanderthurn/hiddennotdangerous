@@ -415,7 +415,7 @@ const getScoreDefaultX = player => {
 const animatePlayerScore = figure => {
     const {player} = figure
     if (figure.team !== figure.oldTeam) {
-        player.score.getChildAt(0).tint = teams[figure.team] ? teams[figure.team].color : colors.black
+        player.score.getChildAt(0).tint = teams[figure.team]?.color || colors.black
         figure.oldTeam = figure.team
     }
 
@@ -723,7 +723,7 @@ const animateFigure = (figure, spritesheet) => {
     if (figure.player?.isMarkerButtonPressed && !restartGame) {
         body.tint = colors.purple
     } else {
-        body.tint = teams[figure.team]?.color
+        body.tint = undefined
     }
 
     if (body.currentAnimation != animation) {
