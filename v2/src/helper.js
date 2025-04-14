@@ -496,11 +496,14 @@ const initVIPGamePositions = figures => {
 
 const attackFigure = (figureAttacker, figureAttacked) => {
     const attackDistance = figureAttacker.attackDistanceMultiplier ? figureAttacker.attackDistanceMultiplier*figureAttacker.attackDistance : figureAttacker.attackDistance
-    if (distance(figureAttacker.x,figureAttacker.y,figureAttacked.x,figureAttacked.y) < attackDistance) {
+    if (attackDistance && distance(figureAttacker.x,figureAttacker.y,figureAttacked.x,figureAttacked.y) < attackDistance) {
         if (2*distanceAnglesDeg(rad2deg(figureAttacker.direction), rad2deg(angle(figureAttacker.x,figureAttacker.y,figureAttacked.x,figureAttacked.y))+180) <= figureAttacker.attackAngle) {
             killFigure(figureAttacked)
             return true
         }
+    } else if (new PIXI.Rectangle(figureAttacker.x-figureAttacker.attackRectX/2, figureAttacker.y-figureAttacker.attackRectY/2, figureAttacker.attackRectX, figureAttacker.attackRectY).contains(figureAttacked.x, figureAttacked.y)) {
+        killFigure(figureAttacked)
+        return true
     }
     return false
 }

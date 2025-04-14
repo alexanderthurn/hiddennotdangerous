@@ -209,6 +209,11 @@ const teams = {
         maxSpeed: 0.06,
         sprite: 'guard'
     },
+    killer: {
+        color: colors.white,
+        label: 'Killers',
+        sprite: 'neutral'
+    },
     sniper: {
         color: colors.black,
         label: 'Snipers',
@@ -735,7 +740,21 @@ function updateGame(figures, dt, dtProcessed) {
             });
         })
     } else if (game === games.rampage) {
+        const killersAlive = figuresAlive.filter(f => f.team === 'killer')
+        const snipersAlive = figuresAlive.filter(f => f.team === 'sniper')
+        const noTeamAlive = figuresAlive.filter(f => !f.team)
 
+        snipersAlive.filter(f => f.isAttacking).forEach(f => {
+            [...killersAlive, ...noTeamAlive].forEach(fig => {
+                attackFigure(f, fig)
+            })
+        })
+
+        killersAlive.filter(f => f.isAttacking).forEach(f => {
+            [...noTeamAlive].forEach(fig => {
+                attackFigure(f, fig)
+            })
+        })
     } else {
         const assassinsAlive = figuresAlive.filter(f => f.team === 'assassin')
         const guardsAlive = figuresAlive.filter(f => f.team === 'guard')
@@ -796,11 +815,11 @@ function handleInput(players, figures, dtProcessed) {
         })
     }
 
-    figures.filter(f => f.playerId && f.type === 'fighter').forEach(f => {
+    figures.filter(f => f.playerId && (f.type === 'crosshair' || f.type === 'fighter')).forEach(f => {
         var p = f.player
 
         f.speed = 0.0
-        if (!f.isDead) {
+        if (!f.isDead && !f.inactive) {
             if (p.isMoving) {
                 f.direction = angle(0,0,p.xAxis,p.yAxis)
                 f.speed = f.maxSpeed * (f.player.isSpeedButtonPressed ? 2.2 : 1)
@@ -808,20 +827,24 @@ function handleInput(players, figures, dtProcessed) {
             if (p.isAttackButtonPressed && !f.isAttacking) {
                 if (!f.lastAttackTime || dtProcessed-f.lastAttackTime > f.attackBreakDuration) {
 
-                    let xyNew = move(f.x, f.y, f.direction+deg2rad(180),f.attackDistance*0.5, 1)
-
-                    if (f.beans.size > 0) {
-                        playAudioPool(soundAttack2Pool);
-                        addFartCloud({x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size})
+                    if (f.type === 'crosshair') {
+                        //playAudioPool(soundShootPool);
                     } else {
-                        playAudioPool(soundAttackPool);
+                        let xyNew = move(f.x, f.y, f.direction+deg2rad(180),f.attackDistance*0.5, 1)
+
+                        if (f.beans.size > 0) {
+                            playAudioPool(soundAttack2Pool);
+                            addFartCloud({x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size})
+                        } else {
+                            playAudioPool(soundAttackPool);
+                        }
+                        f.beans.forEach(b => f.beansFarted.add(b))
+                        f.beans.clear()
                     }
-                    f.beans.forEach(b => f.beansFarted.add(b))
-                    f.beans.clear()
                     f.lastAttackTime = dtProcessed
                 }
             }
-            f.isAttacking = f.lastAttackTime && dtProcessed-f.lastAttackTime < f.attackDuration ? true : false;
+            f.isAttacking = f.lastAttackTime && (!f.attackDuration || (dtProcessed-f.lastAttackTime < f.attackDuration)) ? true : false;
         }
     })
 }

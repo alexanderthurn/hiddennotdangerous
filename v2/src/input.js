@@ -281,6 +281,7 @@ function collectInputs() {
                     default:
                         break;
                 }
+                [p.xAxis, p.yAxis] = clampStick(p.xAxis, p.yAxis)
                 isNew && keyboardPlayers.push(p)
                 p.isMoving = p.xAxis !== 0 || p.yAxis !== 0;
             }

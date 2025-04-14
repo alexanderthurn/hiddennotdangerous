@@ -341,8 +341,6 @@ const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
 
     const buttonContainer = new PIXI.Container()
 
-    console.log('createTeamSwitcher', teams[team], teams[team]?.color)
-
     const button = new PIXI.Graphics()
     .rect(newX, newY, width, height)
     .fill({color: teams[team]?.color >= 0 ? teams[team].color : colors.white})
@@ -878,6 +876,10 @@ const addCrosshair = props => {
     crosshair.scale = 2
     crosshair.anchor.set(0.5)
     crosshair.alpha = 0.5
+    crosshair.attackBreakDuration = 500
+    crosshair.attackRectX = 16
+    crosshair.attackRectY = 32
+    crosshair.maxSpeed = 0.32
     crosshair.playerId = player.playerId
     crosshair.player = player
     crosshair.tint = color
