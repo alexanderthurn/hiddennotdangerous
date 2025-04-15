@@ -210,12 +210,12 @@ const teams = {
         sprite: 'guard'
     },
     killer: {
-        color: colors.white,
+        color: colors.red,
         label: 'Killers',
         sprite: 'neutral'
     },
     sniper: {
-        color: colors.black,
+        color: colors.blue,
         label: 'Snipers',
         sprite: 'guard'
     },
@@ -426,7 +426,6 @@ app.textStyleDefault = {
         addDebug(app);
        
 
-        //addCrosshair({x: level.width/2, y: level.height/2, color: colors.red})
         roundInit();
         window.requestAnimationFrame(gameLoop);
     }
@@ -485,6 +484,9 @@ function roundInit() {
     } else {
         figures = figures.concat(figuresPool.filter(figure => figure.type === 'fighter' && figure.team !== 'vip'))
     }
+    if (game === games.food) {
+        figures = figures.concat(figuresPool.filter(figure => figure.type === 'bean'))
+    }
 
     // Figuren platzieren
     if (game === games.vip) {
@@ -495,6 +497,10 @@ function roundInit() {
         } else {
             initVIPGamePositions(figures)
         }
+    } if (game === games.rampage && stage === stages.gameLobby) {
+        figures.filter(figure => figure.playerId).forEach(figure => {
+            switchTeam(figure, 'killer')
+        })
     } else if (stage !== stages.gameLobby) {
         figures.forEach(figure => {
             initRandomPositionFigure(figure)
@@ -503,15 +509,13 @@ function roundInit() {
     }
 
     if (game === games.food) {
-        figuresPool.filter(figure => figure.type === 'bean').forEach(figure => {
+        figures.filter(figure => figure.type === 'bean').forEach(figure => {
             const {x, y} = foodDefinition()[figure.id]
             Object.assign(figure, {
                 x,
                 y,
                 lastAttackTime: undefined
             })
-    
-            figures.push(figure)
         })
     }
 }
@@ -666,8 +670,9 @@ function updateGame(figures, dt, dtProcessed) {
     }})
 
     if (stage === stages.startLobby || stage === stages.gameLobby) {
-            const minimumPlayers = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
-            const playersPossible = figures.filter(f => f.playerId && f.playerId[0] !== 'b' && f.type === 'fighter')
+        const minimumPlayers = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
+        const playersPossible = figures.filter(f => f.playerId && f.playerId[0] !== 'b' && f.type === 'fighter')
+
         Object.values(buttons).forEach(btn => {
             if (!btn.visible) return
             btn.playersPossible = playersPossible
@@ -676,8 +681,6 @@ function updateGame(figures, dt, dtProcessed) {
             let aimLoadingPercentage
             if (btn === buttons.startGame || btn === buttons.selectGame) {
                 aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers);
-            } else if (btn.game) {
-                //btn.game.votes = btn.playersNear.length
             } else {
                 aimLoadingPercentage = btn.playersNear.length > 0 ? 1 : 0;
             }
@@ -844,7 +847,7 @@ function handleInput(players, figures, dtProcessed) {
                     f.lastAttackTime = dtProcessed
                 }
             }
-            f.isAttacking = f.lastAttackTime && (!f.attackDuration || (dtProcessed-f.lastAttackTime < f.attackDuration)) ? true : false;
+            f.isAttacking = f.lastAttackTime && (dtProcessed-f.lastAttackTime <= f.attackDuration) ? true : false;
         }
     })
 }

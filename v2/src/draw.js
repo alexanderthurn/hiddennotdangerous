@@ -313,14 +313,14 @@ const addShootingRange = (app, props, lobbyContainer) => {
     .rect(newX, newY, width, height)
     .fill({color: teams[team].color})
     button.execute = () => button.playersNear.forEach(f => {
-        if (!f.inactive) {
+        if (f.team === 'sniper' && !f.inactive) {
             f.inactive = true
             addCrosshair({...f, x: f.x, y: f.y, color: colors.red})
         }
     }) 
     button.isInArea = f => stage === stages.gameLobby && game === games.rampage && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
 
-    buttons.sniper = button
+    buttons.shootingRange = button
     lobbyContainer.addChild(button)
     app.ticker.add(() => animateShootingRange(button))
 }
@@ -339,13 +339,11 @@ const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
     const newX = x - width/2
     const newY = y - height/2
 
-    const buttonContainer = new PIXI.Container()
+    const button = new PIXI.Container()
 
-    const button = new PIXI.Graphics()
+    const marker = new PIXI.Graphics()
     .rect(newX, newY, width, height)
     .fill({color: teams[team]?.color >= 0 ? teams[team].color : colors.white})
-    button.execute = () => button.playersNear.forEach(f => switchTeam(f, team)) 
-    button.isInArea = f => stage === stages.gameLobby && games.has(game) && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
 
     const house = createSpriteWithShadowContainer({
         texture: spriteSheets.fence.textures['house_' + team],
@@ -355,11 +353,13 @@ const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
         options: {} // ggf. Optionen einfügen
     });
 
-    buttonContainer.house = house
-    buttonContainer.addChild(button, house)
-    lobbyContainer.addChild(buttonContainer)
+    button.house = house
+    button.execute = () => button.playersNear.forEach(f => switchTeam(f, team)) 
+    button.isInArea = f => stage === stages.gameLobby && games.has(game) && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
+    button.addChild(marker, house)
+    lobbyContainer.addChild(button)
 
-    app.ticker.add(() => animateTeamSwitcher(buttonContainer, games))
+    app.ticker.add(() => animateTeamSwitcher(button, games))
 
     return button
 }
@@ -415,7 +415,7 @@ const getScoreDefaultX = player => {
 const animatePlayerScore = figure => {
     const {player} = figure
     if (figure.team !== figure.oldTeam) {
-        player.score.getChildAt(0).tint = teams[figure.team] ? teams[figure.team].color : colors.black
+        player.score.getChildAt(0).tint = teams[figure.team]?.color || colors.black
         figure.oldTeam = figure.team
     }
 
@@ -723,7 +723,7 @@ const animateFigure = (figure, spritesheet) => {
     if (figure.player?.isMarkerButtonPressed && !restartGame) {
         body.tint = colors.purple
     } else {
-        body.tint = teams[figure.team]?.color
+        body.tint = undefined
     }
 
     if (body.currentAnimation != animation) {
@@ -869,7 +869,7 @@ const addFigures = (app, spritesheet) => {
 }
 
 const addCrosshair = props => {
-    const {x, y, player, color} = props
+    const {x, y, player, team, color} = props
     const crosshair = PIXI.Sprite.from('crosshair')
     crosshair.x = x
     crosshair.y = y
@@ -877,11 +877,13 @@ const addCrosshair = props => {
     crosshair.anchor.set(0.5)
     crosshair.alpha = 0.5
     crosshair.attackBreakDuration = 500
+    crosshair.attackDuration = 0
     crosshair.attackRectX = 16
     crosshair.attackRectY = 32
     crosshair.maxSpeed = 0.32
     crosshair.playerId = player.playerId
     crosshair.player = player
+    crosshair.team = team
     crosshair.tint = color
     crosshair.type = 'crosshair'
 
