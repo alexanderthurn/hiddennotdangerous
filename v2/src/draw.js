@@ -332,7 +332,7 @@ const animateTeamSwitcher = (button, games) => {
     button.house.sprite.zIndex = button.house.y + (1-button.house.sprite.anchor.y)*button.house.sprite.height
 }
 
-const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
+const createTeamSwitcher = (app, props, lobbyContainer) => {
     const {x, y, games, team} = props
     const width = 128
     const height = 128
@@ -346,7 +346,7 @@ const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
     .fill({color: teams[team]?.color >= 0 ? teams[team].color : colors.white})
 
     const house = createSpriteWithShadowContainer({
-        texture: spriteSheets.fence.textures['house_' + team],
+        texture: PIXI.Assets.get('house_' + team),
         scaleFactor: { x: 1, y: 1 },
         skewFactor: { x: 1, y: 1 },
         position: { x: newX + width * 0.5, y: newY + height + 3},
@@ -364,21 +364,21 @@ const createTeamSwitcher = (app, props, lobbyContainer, spriteSheets) => {
     return button
 }
 
-const addTeamSwitchers = (app, lobbyContainer, spriteSheets) => {
-    Object.entries(teamSwitchersDefinition()).forEach(([id, button]) => {buttons[id] = createTeamSwitcher(app, button, lobbyContainer, spriteSheets)})
+const addTeamSwitchers = (app, lobbyContainer) => {
+    Object.entries(teamSwitchersDefinition()).forEach(([id, button]) => {buttons[id] = createTeamSwitcher(app, button, lobbyContainer)})
 }
 
 const animateLobbyItems = lobbyContainer => {
     lobbyContainer.visible = stage === stages.startLobby || stage === stages.gameLobby
 }
 
-const addLobbyItems = (app, spriteSheets) => {
+const addLobbyItems = (app) => {
     const lobbyContainer = new PIXI.Container()
     addGameSelection(app, lobbyContainer)
     addGameStartButton(app, lobbyContainer)
     addButtons(app, lobbyContainer)
     addShootingRange(app, shootingRangeDefinition(), lobbyContainer)
-    addTeamSwitchers(app, lobbyContainer, spriteSheets)
+    addTeamSwitchers(app, lobbyContainer)
     addNetworkQrCode(app, lobbyContainer)
 
     const fontHeight = 32
@@ -616,8 +616,8 @@ const addGrass = () => {
 }
 
 
-const addLevelBoundary = (app, spritesheets) => {
-    const spritesheet = spritesheets.fence
+const addLevelBoundary = (app) => {
+    const spritesheet = PIXI.Assets.get('fenceAtlas')
 
     const tree1 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree1'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.3, y: level.height * 0.1 }, options: {} });
     const tree2 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree2'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.8, y: level.height * 0.6 }, options: {} });
@@ -696,7 +696,7 @@ const animateFigure = (figure, spritesheet) => {
     } else {
         animation = 'up'
     }
-    animation += '_' + figure.currentSprite
+    animation = figure.currentSprite + '_' + animation
 
     if (figure.isDead) {
         body.angle = 90
@@ -806,12 +806,12 @@ const createFigure = (app, spritesheet, props) => {
     let figure = new PIXI.Container({sortableChildren: false});
     figure = Object.assign(figure, props)
 
-    const body = new PIXI.AnimatedSprite(spritesheet.animations.down_neutral)
+    const body = new PIXI.AnimatedSprite(spritesheet.animations.baby_down)
     body.anchor.set(0.5)
     body.scale = 2
     body.label = 'body'
 
-    const shadow = new PIXI.AnimatedSprite(spritesheet.animations.down_neutral)
+    const shadow = new PIXI.AnimatedSprite(spritesheet.animations.baby_down)
     shadow.anchor.set(0.1, 0.5)
     shadow.alpha = shadowDefinition.alpha
     shadow.scale.set(2*shadowDefinition.scale.x, 2*shadowDefinition.scale.y)
@@ -824,7 +824,7 @@ const createFigure = (app, spritesheet, props) => {
     marker.label = 'marker'
 
     figure.bodyHeight = body.height
-    figure.currentSprite = 'neutral'
+    figure.currentSprite = 'baby'
     figure.addChild(body, attackArc, marker, shadow)
     figuresPool.push(figure)
     figureShadowLayer.attach(shadow)
@@ -835,7 +835,8 @@ const createFigure = (app, spritesheet, props) => {
     return figure
 }
 
-const addFigures = (app, spritesheet) => {
+const addFigures = (app) => {
+    let spritesheet = PIXI.Assets.get('figureAtlas')
     for (var i = 0; i < maxPlayerFigures; i++) {
         const figure = createFigure(app, spritesheet, {
             maxBreakDuration: 5000,

@@ -200,24 +200,24 @@ const teams = {
         label: 'Assassins',
         walkRectLength: 300,
         maxSpeed: 0.08,
-        sprite: 'assassin'
+        sprite: 'girl'
     },
     guard: {
         color: colors.blue,
         label: 'Guards',
         walkRectLength: 300,
         maxSpeed: 0.06,
-        sprite: 'guard'
+        sprite: 'boy'
     },
     killer: {
         color: colors.red,
         label: 'Killers',
-        sprite: 'neutral'
+        sprite: 'baby'
     },
     sniper: {
         color: colors.blue,
         label: 'Snipers',
-        sprite: 'guard'
+        sprite: 'boy'
     },
     vip: {
         color: colors.darkgreen,
@@ -300,8 +300,6 @@ const foodDefinition = () => ({
     }
 })
 
-const figureAtlasData = createFigureAtlasData();
-var spriteSheets;
 const app = new PIXI.Application();
 var levelContainer;
 const figureShadowLayer = new PIXI.RenderLayer();
@@ -331,7 +329,6 @@ app.textStyleDefault = {
         await Promise.all(loadPromises);
         const fontFamilyName = 'Rockboxcond12'
         PIXI.Assets.addBundle('main', {
-            players: './gfx/character_new_all_34x34.png',
             background_grass: './gfx/background_grass.jpg',
             crosshair: './gfx/crosshair.svg',
             fontTTF: './gfx/'+fontFamilyName+'.ttf',
@@ -396,31 +393,18 @@ app.textStyleDefault = {
         });
     
 
-        const atlasData = {
-            figure: figureAtlasData
-        }
-        
-        spriteSheets = Object.entries(atlasData).reduce((acc, [key, value]) => ({...acc, [key]: new PIXI.Spritesheet(
-            PIXI.Texture.from(value.meta.image),
-            value
-        )}), {})
-
-        // Generate all the Textures asynchronously
-        await Promise.all(Object.values(spriteSheets).map(async spriteSheet => 
-            await spriteSheet.parse()
-        ))
-
-        spriteSheets.fence = await PIXI.Assets.load( {alias: 'fenceAtlas', src: './gfx/fence.json'}); 
+        await PIXI.Assets.load( {alias: 'figureAtlas', src: './gfx/figure.json'}); 
+        await PIXI.Assets.load( {alias: 'fenceAtlas', src: './gfx/fence.json'}); 
 
         destroyContainer(app, loadingText)
         levelContainer = createLevelContainer(app, level);
         app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, crosshairLayer, scoreLayer, overlayLayer, debugLayer)
         addGrass();
         addHeadline();
-        addLobbyItems(app, spriteSheets);
+        addLobbyItems(app);
         addFoods(app);
-        addLevelBoundary(app, spriteSheets);
-        addFigures(app, spriteSheets.figure);
+        addLevelBoundary(app);
+        addFigures(app);
         addWinningCeremony(app);
         addOverlay(app)
         addDebug(app);

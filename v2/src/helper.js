@@ -358,52 +358,6 @@ function cropXY(x,y,level) {
 
 const figureIsBot = figure => figure.playerId?.includes('b')
 
-createFigureAtlasData = () => {
-    const atlasData = {
-        frames: {},
-        meta: {
-            image: 'players'
-        },
-        animations: {}
-    }
-
-    const sprites = [
-        [
-            "neutral",
-            "assassin"
-        ],
-        [
-            "guard",
-            "vip"
-        ]
-    ]
-
-    const animations = [
-        "down",
-        "up",
-        "right",
-        "left"
-    ]
-
-    animations.forEach((e, j) => {
-        sprites.forEach((row, fy) => {
-            row.forEach((sprite, fx) => {
-                const postfix = '_' + sprite
-                atlasData.animations[e + postfix ] = []
-                for (let i = 0; i < 4; i++) {
-                    const frameName = e + postfix + '_' + i
-                    atlasData.frames[frameName] = {
-                        frame: {x: fx*136+i*34, y: fy*136+j*34, w:34, h:34}
-                    }
-                    atlasData.animations[e + postfix ].push(frameName)
-                }
-            })
-        })
-    })
-
-    return atlasData
-}
-
 
 const initVIPGamePositions = figures => {
 
@@ -532,7 +486,7 @@ const winRoundFigures = winnerFigures =>{
 
 const switchTeam = (figure, team) => {
     figure.team = team
-    figure.currentSprite = teams[team]?.sprite || 'neutral'
+    figure.currentSprite = teams[team]?.sprite || 'baby'
     figure.maxSpeed = teams[team]?.maxSpeed || 0.08
     figure.walkRectLength = teams[team]?.walkRectLength
 }
