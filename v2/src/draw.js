@@ -843,16 +843,37 @@ const createFigure = (app, spritesheet, props) => {
     figure.bodyHeight = body.height
     figure.currentSprite = 'baby'
     figure.addChild(body, attackArc, marker, shadow)
-    figuresPool.push(figure)
     figureShadowLayer.attach(shadow)
     figureLayer.attach(body)
     debugLayer.attach(attackArc, marker)
+    levelContainer.addChild(figure)
 
     app.ticker.add(() => animateFigure(figure, spritesheet))
     return figure
 }
 
-const addFigures = (app) => {
+const addSniperFigures = (app, sniperFigures) => {
+    let spritesheet = PIXI.Assets.get('figureAtlas')
+    sniperFigures.forEach(f => {
+        f.inactive = true
+        addCrosshair({...f, x: f.x, y: f.y, color: colors.red})
+        
+        // NPC replacement in level
+        const figure = createFigure(app, spritesheet, {
+            maxBreakDuration: 5000,
+            maxSpeed: 0.08,
+            attackDuration: 500,
+            attackBreakDuration: 2000,
+            points: 0,
+            attackDistance: 80,
+            attackAngle: 90,
+            type: 'fighter',
+        })
+        figures.push(figure)
+    })
+}
+
+const addFiguresPool = (app) => {
     let spritesheet = PIXI.Assets.get('figureAtlas')
     for (var i = 0; i < maxPlayerFigures; i++) {
         const figure = createFigure(app, spritesheet, {
@@ -865,7 +886,7 @@ const addFigures = (app) => {
             attackAngle: 90,
             type: 'fighter',
         })
-        levelContainer.addChild(figure)
+        figuresPool.push(figure)
     }
     for (var i = 0; i < numberVIPs; i++) {
         const figure = createFigure(app, spritesheet, {
@@ -882,7 +903,7 @@ const addFigures = (app) => {
         app.ticker.add(() => {
             figure.visible = game === games.vip
         })
-        levelContainer.addChild(figure)
+        figuresPool.push(figure)
     }
 }
 

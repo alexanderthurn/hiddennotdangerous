@@ -404,7 +404,7 @@ app.textStyleDefault = {
         addLobbyItems(app);
         addFoods(app);
         addLevelBoundary(app);
-        addFigures(app);
+        addFiguresPool(app);
         addWinningCeremony(app);
         addOverlay(app)
         addDebug(app);
@@ -438,7 +438,7 @@ function roundInit() {
         keyboardPlayers = []
 
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => {
-            destroyContainer(figure)
+            destroyContainer(app, figure)
         })
         figures.filter(figure => figure.type === 'fighter').forEach(figure => {
             figure.inactive = false
@@ -467,6 +467,9 @@ function roundInit() {
         figures = figures.concat(figuresPool.filter(figure => figure.type === 'fighter'))
     } else {
         figures = figures.concat(figuresPool.filter(figure => figure.type === 'fighter' && figure.team !== 'vip'))
+    }
+    if (stage === stages.game && game === games.rampage) {
+        addSniperFigures(app, figuresPool.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
     }
     if (game === games.food) {
         figures = figures.concat(figuresPool.filter(figure => figure.type === 'bean'))
