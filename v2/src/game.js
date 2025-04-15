@@ -714,6 +714,22 @@ function updateGame(figures, dt, dtProcessed) {
         })
     }
 
+    // bla
+    if (stage === stages.gameLobby && game === games.rampage) {
+        let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
+        figuresAlive.filter(f => f.type === 'crosshair' ).forEach(f => {
+            const playerFigure = playerFigures.find(figure => figure.playerId === f.playerId)
+            const dist = distance(f.x, f.y, playerFigure.x, playerFigure.y)
+            if (f.detached && dist <= f.attachRadius) {
+                playerFigure.inactive = false
+                f.isDead = true
+            } else if (!f.detached && dist > f.attachRadius) {
+                f.detached = true
+            }
+        })
+    }
+
+    // attack figures
     let numberKilledFigures = 0;
     let killTime;
 
@@ -918,8 +934,8 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
         
         
     })
-    var toDeleteIndex = figures.findIndex(f => f.type === 'cloud' && f.isDead)
-    figures.filter(f => f.type === 'cloud' && f.isDead).forEach(cloud => destroyContainer(app, cloud))
+    var toDeleteIndex = figures.findIndex(f => (f.type === 'cloud' || f.type === 'crosshair') && f.isDead)
+    figures.filter(f => (f.type === 'cloud' || f.type === 'crosshair') && f.isDead).forEach(f => destroyContainer(app, f))
     if (toDeleteIndex >= 0)
         figures.splice(toDeleteIndex,1)
 }

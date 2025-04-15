@@ -309,20 +309,37 @@ const addShootingRange = (app, props, lobbyContainer) => {
     const newX = x - width/2
     const newY = y - height/2
 
-    const button = new PIXI.Graphics()
+    const padding = Math.min(width, height)/4
+    const widthInside = width-2*padding
+    const heightInside = height-2*padding
+    const newXInside = x - widthInside/2
+    const newYInside = y - heightInside/2
+
+    const buttonOutside = new PIXI.Graphics()
     .rect(newX, newY, width, height)
+    .fill({color: colors.white})
+    buttonOutside.execute = () => buttonOutside.playersNear.forEach(f => f.justShot = false) 
+    buttonOutside.isInArea = f => stage === stages.gameLobby && game === games.rampage && !(new PIXI.Rectangle(newX, newY, width, height)).contains(f.x, f.y+f.bodyHeight*0.5)
+
+    const buttonInside = new PIXI.Graphics()
+    .rect(newXInside, newYInside, widthInside, heightInside)
     .fill({color: teams[team].color})
-    button.execute = () => button.playersNear.forEach(f => {
-        if (f.team === 'sniper' && !f.inactive) {
+    buttonInside.execute = () => buttonInside.playersNear.forEach(f => {
+        if (f.team === 'sniper' && !f.inactive && !f.justShot) {
             f.inactive = true
+            f.justShot = true
             addCrosshair({...f, x: f.x, y: f.y, color: colors.red})
         }
     }) 
-    button.isInArea = f => stage === stages.gameLobby && game === games.rampage && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
+    buttonInside.isInArea = f => stage === stages.gameLobby && game === games.rampage && new PIXI.Rectangle(newXInside, newYInside, widthInside, heightInside).contains(f.x, f.y+f.bodyHeight*0.5)
 
-    buttons.shootingRange = button
-    lobbyContainer.addChild(button)
-    app.ticker.add(() => animateShootingRange(button))
+    buttons.shootingRangeInside = buttonInside
+    buttons.shootingRangeOutside = buttonOutside
+    lobbyContainer.addChild(buttonOutside, buttonInside)
+    app.ticker.add(() => {
+        buttonInside.visible = game === games.rampage
+        buttonOutside.visible = game === games.rampage
+    })
 }
 
 const animateTeamSwitcher = (button, games) => {
@@ -877,6 +894,7 @@ const addCrosshair = props => {
     crosshair.scale = 2
     crosshair.anchor.set(0.5)
     crosshair.alpha = 0.5
+    crosshair.attachRadius = 80
     crosshair.attackBreakDuration = 500
     crosshair.attackDuration = 0
     crosshair.attackRectX = 16
