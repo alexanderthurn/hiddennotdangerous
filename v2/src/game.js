@@ -570,21 +570,22 @@ const handleWinning = () => {
     const figuresPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
 
     if (game === games.battleRoyale || game === games.food) {
-        // players left
+        // players left, quit game
         if (figuresPlayer.length < 2) {
             lastFinalWinnerPlayerIds = new Set(figuresPlayer.map(f => f.playerId))
             winRoundFigures(figuresPlayer)
         }
-        if (!lastFinalWinnerPlayerIds) {
-            // countdown
-            if (game.countdown && dtProcessed >= startTime+game.countdown*1000) {
-                winRoundFigures([])
-            }
 
+        if (!lastFinalWinnerPlayerIds) {
             // round won
             const survivors = figuresPlayer.filter(f => !f.isDead)
             if (survivors.length < 2) {
                 winRoundFigures(survivors)
+            }
+
+            //countdown
+            if (!restartGame && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
+                winRoundFigures([])
             }
         
             // game won
@@ -595,7 +596,7 @@ const handleWinning = () => {
             }
         }
     } else {
-        // players left
+        // players left, quit game
         const assassins = figuresPlayer.filter(f => f.team === 'assassin')
         const guards = figuresPlayer.filter(f => f.team === 'guard')
         if (assassins.length === 0 || guards.length === 0) {
@@ -604,18 +605,18 @@ const handleWinning = () => {
             winRoundTeam(finalWinnerTeam)
         }
 
-        if (!finalWinnerTeam) {
-            // countdown
-            if (game.countdown && dtProcessed >= startTime+game.countdown*1000) {
-                winRoundTeam('guard')
-            }
-
+        if (!lastFinalWinnerPlayerIds) {
             // round won
             const vips = figures.filter(f => f.team === 'vip')
             const assassinSurvivors = assassins.filter(f => !f.isDead)
             const vipSurvivors = vips.filter(f => !f.isDead)
             if (assassinSurvivors.length === 0 || vipSurvivors.length === 0) {
                 winRoundTeam(vipSurvivors.length === 0 ? 'assassin' : 'guard')
+            }
+
+            //countdown
+            if (!restartGame && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
+                winRoundTeam('guard')
             }
         
             // game won
@@ -627,6 +628,7 @@ const handleWinning = () => {
             }
         }
     }
+    
     if (lastFinalWinnerPlayerIds || finalWinnerTeam) {
         playAudio(soundWin)
     }
