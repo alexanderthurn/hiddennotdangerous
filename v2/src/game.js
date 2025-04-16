@@ -436,6 +436,7 @@ function roundInit() {
         gamepadPlayers = []
         touchPlayers = []
         keyboardPlayers = []
+        players = []
 
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => {
             destroyContainer(app, figure)
