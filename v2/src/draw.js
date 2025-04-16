@@ -751,6 +751,11 @@ const animateFigure = (figure, spritesheet) => {
         shadow.textures = spritesheet.animations[animation]
     }
 
+    body.anchor.x = body.textures[body.currentFrame].defaultAnchor.x
+    body.anchor.y = body.textures[body.currentFrame].defaultAnchor.y
+    shadow.anchor.x = 0.1
+    shadow.anchor.y = body.textures[body.currentFrame].defaultAnchor.y
+    
     shadow.visible = !figure.isDead
 
     if (!(figure.speed === 0 || !windowHasFocus || restartGame) && !body.playing) {
@@ -824,12 +829,12 @@ const createFigure = (app, spritesheet, props) => {
     figure = Object.assign(figure, props)
 
     const body = new PIXI.AnimatedSprite(spritesheet.animations.baby_down)
-    body.anchor.set(0.5)
+    //body.anchor.set(0.5)
     body.scale = 2
     body.label = 'body'
 
     const shadow = new PIXI.AnimatedSprite(spritesheet.animations.baby_down)
-    shadow.anchor.set(0.1, 0.5)
+    //shadow.anchor.set(0.1, 0.5)
     shadow.alpha = shadowDefinition.alpha
     shadow.scale.set(2*shadowDefinition.scale.x, 2*shadowDefinition.scale.y)
     shadow.skew.set(shadowDefinition.skew.x, shadowDefinition.skew.y)

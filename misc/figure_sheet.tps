@@ -176,30 +176,22 @@
             <key type="filename">figure/baby_down_0.png</key>
             <key type="filename">figure/baby_down_2.png</key>
             <key type="filename">figure/baby_up_0.png</key>
-            <key type="filename">figure/baby_up_1.png</key>
             <key type="filename">figure/baby_up_2.png</key>
-            <key type="filename">figure/baby_up_3.png</key>
             <key type="filename">figure/boy_down_0.png</key>
             <key type="filename">figure/boy_down_2.png</key>
             <key type="filename">figure/boy_up_0.png</key>
-            <key type="filename">figure/boy_up_1.png</key>
             <key type="filename">figure/boy_up_2.png</key>
-            <key type="filename">figure/boy_up_3.png</key>
             <key type="filename">figure/girl_down_0.png</key>
             <key type="filename">figure/girl_down_2.png</key>
             <key type="filename">figure/girl_up_0.png</key>
-            <key type="filename">figure/girl_up_1.png</key>
             <key type="filename">figure/girl_up_2.png</key>
-            <key type="filename">figure/girl_up_3.png</key>
             <key type="filename">figure/vip_down_0.png</key>
             <key type="filename">figure/vip_down_2.png</key>
             <key type="filename">figure/vip_up_0.png</key>
-            <key type="filename">figure/vip_up_1.png</key>
             <key type="filename">figure/vip_up_2.png</key>
-            <key type="filename">figure/vip_up_3.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0.5,0.533333</point_f>
                 <key>spriteScale</key>
                 <double>1</double>
                 <key>scale9Enabled</key>
@@ -221,7 +213,7 @@
             <key type="filename">figure/vip_down_3.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0.5,0.466667</point_f>
                 <key>spriteScale</key>
                 <double>1</double>
                 <key>scale9Enabled</key>
@@ -234,40 +226,24 @@
                 <false/>
             </struct>
             <key type="filename">figure/baby_left_0.png</key>
-            <key type="filename">figure/baby_left_1.png</key>
             <key type="filename">figure/baby_left_2.png</key>
-            <key type="filename">figure/baby_left_3.png</key>
             <key type="filename">figure/baby_right_0.png</key>
-            <key type="filename">figure/baby_right_1.png</key>
             <key type="filename">figure/baby_right_2.png</key>
-            <key type="filename">figure/baby_right_3.png</key>
             <key type="filename">figure/boy_left_0.png</key>
-            <key type="filename">figure/boy_left_1.png</key>
             <key type="filename">figure/boy_left_2.png</key>
-            <key type="filename">figure/boy_left_3.png</key>
             <key type="filename">figure/boy_right_0.png</key>
-            <key type="filename">figure/boy_right_1.png</key>
             <key type="filename">figure/boy_right_2.png</key>
-            <key type="filename">figure/boy_right_3.png</key>
             <key type="filename">figure/girl_left_0.png</key>
-            <key type="filename">figure/girl_left_1.png</key>
             <key type="filename">figure/girl_left_2.png</key>
-            <key type="filename">figure/girl_left_3.png</key>
             <key type="filename">figure/girl_right_0.png</key>
-            <key type="filename">figure/girl_right_1.png</key>
             <key type="filename">figure/girl_right_2.png</key>
-            <key type="filename">figure/girl_right_3.png</key>
             <key type="filename">figure/vip_left_0.png</key>
-            <key type="filename">figure/vip_left_1.png</key>
             <key type="filename">figure/vip_left_2.png</key>
-            <key type="filename">figure/vip_left_3.png</key>
             <key type="filename">figure/vip_right_0.png</key>
-            <key type="filename">figure/vip_right_1.png</key>
             <key type="filename">figure/vip_right_2.png</key>
-            <key type="filename">figure/vip_right_3.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0.5,0.533333</point_f>
                 <key>spriteScale</key>
                 <double>1</double>
                 <key>scale9Enabled</key>
@@ -276,6 +252,58 @@
                 <rect>5,8,10,15</rect>
                 <key>scale9Paddings</key>
                 <rect>5,8,10,15</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">figure/baby_left_1.png</key>
+            <key type="filename">figure/baby_left_3.png</key>
+            <key type="filename">figure/baby_right_1.png</key>
+            <key type="filename">figure/baby_right_3.png</key>
+            <key type="filename">figure/boy_left_1.png</key>
+            <key type="filename">figure/boy_left_3.png</key>
+            <key type="filename">figure/boy_right_1.png</key>
+            <key type="filename">figure/boy_right_3.png</key>
+            <key type="filename">figure/girl_left_1.png</key>
+            <key type="filename">figure/girl_left_3.png</key>
+            <key type="filename">figure/girl_right_1.png</key>
+            <key type="filename">figure/girl_right_3.png</key>
+            <key type="filename">figure/vip_left_1.png</key>
+            <key type="filename">figure/vip_left_3.png</key>
+            <key type="filename">figure/vip_right_1.png</key>
+            <key type="filename">figure/vip_right_3.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.466667</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,8,10,15</rect>
+                <key>scale9Paddings</key>
+                <rect>5,8,10,15</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">figure/baby_up_1.png</key>
+            <key type="filename">figure/baby_up_3.png</key>
+            <key type="filename">figure/boy_up_1.png</key>
+            <key type="filename">figure/boy_up_3.png</key>
+            <key type="filename">figure/girl_up_1.png</key>
+            <key type="filename">figure/girl_up_3.png</key>
+            <key type="filename">figure/vip_up_1.png</key>
+            <key type="filename">figure/vip_up_3.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.466667</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,8,12,15</rect>
+                <key>scale9Paddings</key>
+                <rect>6,8,12,15</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
