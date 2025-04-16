@@ -527,6 +527,10 @@ function gameLoop() {
                 destroyContainer(app, f.player.score)
                 f.playerId = null
                 f.player = null
+                if (f.type === 'crosshair') {
+                    // will be deleted
+                    f.isDead = true
+                }
             }
         })
 
@@ -595,7 +599,7 @@ const handleWinning = () => {
                 lastFinalWinnerPlayerIds = new Set(playersWithMaxPoints.map(p => p.playerId))
             }
         }
-    } else {
+    } else if (game === games.vip) {
         // players left, quit game
         const assassins = figuresPlayer.filter(f => f.team === 'assassin')
         const guards = figuresPlayer.filter(f => f.team === 'guard')
@@ -625,6 +629,13 @@ const handleWinning = () => {
                 const teamsWithMaxPoints = Object.keys(teams).filter(team => teams[team].points === maxPoints)
                 finalWinnerTeam = teamsWithMaxPoints[0]
                 lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.team === finalWinnerTeam).map(f => f.playerId))
+            }
+        }
+    } else if (game === games.rampage) {
+        if (!lastFinalWinnerPlayerIds) {
+            //countdown
+            if (!restartGame && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
+                winRoundFigures([])
             }
         }
     }
@@ -861,12 +872,12 @@ function handleInput(players, figures, dtProcessed) {
 function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
     const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => k.joinedTime >= 0).length;
     const startKeyboardMovement = oldNumberJoinedKeyboardPlayers === 0 && numberJoinedKeyboardPlayers > 0;
-    const livingNPCFigures = figures.filter(f => !f.playerId && !f.isDead && f.type === 'fighter');
+    const livingActiveNPCFigures = figures.filter(f => !f.playerId && !f.isDead && !f.inactive && f.type === 'fighter');
     let shuffledIndexes;
     if (startKeyboardMovement) {
-        shuffledIndexes = shuffle([...Array(livingNPCFigures.length).keys()]);
+        shuffledIndexes = shuffle([...Array(livingActiveNPCFigures.length).keys()]);
     }
-    livingNPCFigures.forEach((f,i,array) => {
+    livingActiveNPCFigures.forEach((f,i,array) => {
         if (((startKeyboardMovement && shuffledIndexes[i] < array.length/2) || distance(f.x,f.y,f.xTarget,f.yTarget) < 5) && f.speed > 0) {
             const breakDuration = startKeyboardMovement ? 0 : Math.random() * f.maxBreakDuration;
             f.startWalkTime = Math.random() * breakDuration + time
