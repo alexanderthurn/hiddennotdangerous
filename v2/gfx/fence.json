@@ -89,7 +89,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":60,"h":48},
 	"sourceSize": {"w":60,"h":48},
 	"anchor": {"x":0.0234114,"y":0.00414938},
-	"borders": {"left":14,"top":12,"right":13,"bottom":19}
+	"borders": {"left":19,"top":15,"right":22,"bottom":21}
 },
 "cap":
 {
@@ -419,6 +419,6 @@
 	"format": "RGBA8888",
 	"size": {"w":1623,"h":507},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:25b277e0acef779016ba78b782e8b2da:5f6050b5f47f1c99e1a20464f594c55f:e3867cbbfd361286286f4009cb6c9220$"
+	"smartupdate": "$TexturePacker:SmartUpdate:9696a395f9c6ce60920e77a0bb176a3b:5f6050b5f47f1c99e1a20464f594c55f:e3867cbbfd361286286f4009cb6c9220$"
 }
 }

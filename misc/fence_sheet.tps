@@ -321,7 +321,7 @@
                 <key>scale9Enabled</key>
                 <true/>
                 <key>scale9Borders</key>
-                <rect>66,59,169,90</rect>
+                <rect>93,74,99,64</rect>
                 <key>scale9Paddings</key>
                 <rect>75,60,149,121</rect>
                 <key>scale9FromFile</key>
