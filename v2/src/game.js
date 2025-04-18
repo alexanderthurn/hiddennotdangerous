@@ -485,15 +485,25 @@ function roundInit() {
         } else {
             initVIPGamePositions(figures)
         }
-    } else if (game === games.rampage && stage === stages.gameLobby) {
-        figures.filter(figure => figure.playerId).forEach(figure => {
-            switchTeam(figure, 'killer')
-        })
+    } else if (game === games.rampage) {
+        if (stage === stages.gameLobby) {
+            figures.filter(figure => figure.playerId).forEach(figure => {
+                switchTeam(figure, 'killer')
+            })
+        } else {
+            figures.filter(figure => figure.type !== 'fighter' || figure.team !== 'sniper').forEach(figure => {
+                initRandomPositionFigure(figure)
+            })
+        } 
     } else if (stage !== stages.gameLobby) {
         figures.forEach(figure => {
             initRandomPositionFigure(figure)
-            switchTeam(figure, undefined)
         })
+        if (stage === stages.startLobby) {
+            figures.forEach(figure => {
+                switchTeam(figure, undefined)
+            })
+        }
     }
 
     if (game === games.food) {
