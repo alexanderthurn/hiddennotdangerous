@@ -485,7 +485,7 @@ function roundInit() {
         } else {
             initVIPGamePositions(figures)
         }
-    } if (game === games.rampage && stage === stages.gameLobby) {
+    } else if (game === games.rampage && stage === stages.gameLobby) {
         figures.filter(figure => figure.playerId).forEach(figure => {
             switchTeam(figure, 'killer')
         })
