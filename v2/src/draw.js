@@ -990,8 +990,12 @@ const createCircleOfDeath = app => {
 }
 
 const animateCountdown = countdown => {
-    if (!restartGame && stage === stages.game && game.countdown) {
-        countdown.text = getCountdownText(dtProcessed, startTime+game.countdown*1000)
+    countdown.visible = false
+    if (stage === stages.game && game.countdown) {
+        countdown.visible = true
+        if (!restartGame ) {
+            countdown.text = getCountdownText(dtProcessed, startTime+game.countdown*1000)
+        }
     }
 }
 
