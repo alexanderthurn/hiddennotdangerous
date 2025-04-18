@@ -544,7 +544,7 @@ const animateWinningCeremony = winnerText => {
     if ((lastFinalWinnerPlayerIds || finalWinnerTeam) && dt3 >= 0 && dt3 < showFinalWinnerDuration) {
         winnerText.visible = true
         if (finalWinnerTeam) {
-            winnerText.style.fill.color = teams[finalWinnerTeam].color
+            winnerText.tint = teams[finalWinnerTeam].color
             winnerText.text = `${teams[finalWinnerTeam].label} win`
         } else {
             const lastFinalWinnerFigure = playerFigures.find(f => lastFinalWinnerPlayerIds?.has(f.playerId))
@@ -564,7 +564,8 @@ const animateWinningCeremony = winnerText => {
 const addWinningCeremony = app => {
     let winnerText = new PIXI.BitmapText({
         style: {
-            fontFamily: 'KnallWinning'
+            fontFamily: 'KnallWinning',
+            fontSize: 256
         },
         anchor: {x: 0.5, y: 0.5},
         position: {x: level.width/2, y: level.height/2},
