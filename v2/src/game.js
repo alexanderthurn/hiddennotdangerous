@@ -879,6 +879,9 @@ function handleInput(players, figures, dtProcessed) {
                 }
             }
             f.isAttacking = f.lastAttackTime && (dtProcessed-f.lastAttackTime <= f.attackDuration) ? true : false;
+        } else if (f.inactive) {
+            const crosshairFigure = figures.find(fig => fig.playerId === f.playerId && fig.type === 'crosshair')
+            f.direction = angle(f.x,f.y,crosshairFigure.x,crosshairFigure.y)
         }
     })
 }

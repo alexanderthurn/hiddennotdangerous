@@ -83,7 +83,6 @@ const initRandomPositionFigure = figure => {
 
 const initRandomOutsidePositionFigure = figure => {
     const [x, y] = getRandomOutsideLevelXY(level)
-    //const [xTarget, yTarget] = getRandomXY(level)
 
     initFigure(figure, x, y)
     figure.inactive = true

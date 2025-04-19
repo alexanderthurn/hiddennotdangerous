@@ -883,7 +883,6 @@ const createFigure = (app, spritesheet, props) => {
 const addSniperFigures = (app, sniperFigures) => {
     let spritesheet = PIXI.Assets.get('figureAtlas')
     sniperFigures.forEach(f => {
-        f.inactive = true
         addCrosshair({...f, x: f.x, y: f.y, color: colors.red})
         
         // NPC replacement in level
