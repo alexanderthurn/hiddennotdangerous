@@ -81,6 +81,14 @@ const initRandomPositionFigure = figure => {
     initFigure(figure, x, y, angle(x,y,xTarget,yTarget))
 }
 
+const initRandomOutsidePositionFigure = figure => {
+    const [x, y] = getRandomOutsideLevelXY(level)
+    //const [xTarget, yTarget] = getRandomXY(level)
+
+    initFigure(figure, x, y)
+    figure.inactive = true
+}
+
 const initFigure = (figure, x, y, direction) => {
     Object.assign(figure, {
         x,
@@ -324,19 +332,29 @@ function getCloseRandomXY(figure) {
     return getRandomXY()
 }
 
+const getParametrizedLevelPlusMargin = (t, length) => (- 1/36 + t*(10/9))*length
+
+const getRandomOutsideLevelXY = () => {
+    let t = Math.random()*(level.width+level.height)
+    
+    if (t < level.width/2) {
+        t = t*2/level.width
+        return [(- 1/36 + t*(10/9))*level.width, - 1/36*level.height]
+    } else if (t < level.width) {
+        t = t*2/level.width-1
+        return [(- 1/36 + t*(10/9))*level.width, 37/36*level.height]
+    } else if (t < level.width + level.height/2) {
+        t = (t-level.width)*2/level.height
+        return [- 1/36*level.width, (- 1/36 + t*(10/9))*level.height]
+    } else {
+        t = (t-level.width)*2/level.height-1
+        return [- 37/36*level.width, (- 1/36 + t*(10/9))*level.height]
+    }
+}
+
 function getRandomXYInRectangle(x, y, w, h) {
     const rectangle = new PIXI.Rectangle(x, y, w, h).fit(level.rectangle)
     return [rectangle.x+Math.random()*rectangle.width, rectangle.y+Math.random()*rectangle.height]
-}
-
-const getRandomXYInCircle = (x, y, r) => {
-    const angle = Math.random()*Math.PI, angleX = Math.cos(angle), angleY = Math.sin(angle)
-
-    const t1 = Math.min(distanceToBorder(x, y, angleX, angleY), r)
-    const t2 = Math.min(distanceToBorder(x, y, -angleX, -angleY), r)
-    const t = Math.random()*(t1+t2)-t2
-
-    return [t*angleX+x, t*angleY+y]
 }
 
 const distanceToBorder = (x, y, angleX, angleY) => {

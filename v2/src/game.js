@@ -491,8 +491,12 @@ function roundInit() {
                 switchTeam(figure, 'killer')
             })
         } else {
-            figures.filter(figure => figure.type !== 'fighter' || figure.team !== 'sniper').forEach(figure => {
-                initRandomPositionFigure(figure)
+            figures.forEach(figure => {
+                if (figure.type === 'fighter' && figure.team === 'sniper') {
+                    initRandomOutsidePositionFigure(figure)
+                } else if (figure.team !== 'sniper') {
+                    initRandomPositionFigure(figure)
+                }
             })
         } 
     } else if (stage !== stages.gameLobby) {
