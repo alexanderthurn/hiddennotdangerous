@@ -336,20 +336,28 @@ const getParametrizedLevelPlusMargin = (t, length) => (- 1/36 + t*(10/9))*length
 
 const getRandomOutsideLevelXY = () => {
     let t = Math.random()*(level.width+level.height)
-    
-    if (t < level.width/2) {
-        t = t*2/level.width
-        return [(- 1/36 + t*(10/9))*level.width, - 1/36*level.height]
-    } else if (t < level.width) {
-        t = t*2/level.width-1
-        return [(- 1/36 + t*(10/9))*level.width, 37/36*level.height]
-    } else if (t < level.width + level.height/2) {
-        t = (t-level.width)*2/level.height
-        return [- 1/36*level.width, (- 1/36 + t*(10/9))*level.height]
+    let x,y
+    if (t < level.width) {
+        t *= 2/level.width
+        if (t < 1) {
+            y = -1/36*level.height
+        } else {
+            t--
+            y = 37/36*level.height
+        }
+        x = getParametrizedLevelPlusMargin(t, level.width)
     } else {
-        t = (t-level.width)*2/level.height-1
-        return [- 37/36*level.width, (- 1/36 + t*(10/9))*level.height]
+        t -= level.width
+        t *= 2/level.height
+        if (t < 1) {
+            x = -1/36*level.width
+        } else {
+            t--
+            x = 37/36*level.width
+        }
+        y = getParametrizedLevelPlusMargin(t, level.height)
     }
+    return [x, y]
 }
 
 function getRandomXYInRectangle(x, y, w, h) {
