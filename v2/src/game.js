@@ -31,7 +31,7 @@ var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var restartGame = false, lastWinnerPlayerIds, lastRoundEndThen, lastFinalWinnerPlayerIds, finalWinnerTeam
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
-var figuresPool = []
+var figuresInitialPool = [], figuresPool = []
 var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
@@ -43,8 +43,7 @@ const stages = {
     startLobby: 'startLobby',
 }
 
-let stage
-let nextStage = stages.startLobby
+let stage, nextStage = stages.startLobby
 
 const games = {
     food: {
@@ -59,7 +58,7 @@ const games = {
     rampage: {
         color: colors.purple,
         text: 'RAMPAGE',
-        countdown: 180
+        countdown: 1
     },
     vip: {
         color: colors.blue,
@@ -68,7 +67,7 @@ const games = {
     }
 }
 
-let game
+let game, gameCounter = 0
 
 var btnTouchController = {
     radius: 0,
@@ -404,11 +403,10 @@ app.textStyleDefault = {
         addLobbyItems(app);
         addFoods(app);
         addLevelBoundary(app);
-        addFiguresPool(app);
+        addFiguresInitialPool(app);
         addWinningCeremony(app);
         addOverlay(app)
         addDebug(app);
-       
 
         roundInit();
         window.requestAnimationFrame(gameLoop);
@@ -438,6 +436,10 @@ function roundInit() {
         keyboardPlayers = []
         players = []
 
+        //figuresPool.filter(figure => )
+
+        figuresPool = [...figuresInitialPool]
+
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => {
             destroyContainer(app, figure)
         })
@@ -447,6 +449,8 @@ function roundInit() {
             figure.player = null
         })
         Object.values(teams).forEach(team => team.points = 0)
+    } else if (stage === stages.game) {
+        gameCounter++
     }
 
     figures.filter(figure => figure.type === 'cloud').forEach(cloud => destroyContainer(app, cloud))
@@ -461,6 +465,12 @@ function roundInit() {
 
     Object.values(buttons).forEach(button => button.loadingPercentage = 0);
 
+    // Figuren in Pool laden
+
+    if (gameCounter === 1 && stage === stages.game && game === games.rampage) {
+        addSniperFigures(app, figuresPool.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
+    }
+
     figures = []
 
     // Figuren aus Pool laden
@@ -469,8 +479,8 @@ function roundInit() {
     } else {
         figures = figures.concat(figuresPool.filter(figure => figure.type === 'fighter' && figure.team !== 'vip'))
     }
-    if (stage === stages.game && game === games.rampage) {
-        addSniperFigures(app, figuresPool.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
+    if (game === games.rampage) {
+        figures = figures.concat(figuresPool.filter(figure => figure.type === 'crosshair'))
     }
     if (game === games.food) {
         figures = figures.concat(figuresPool.filter(figure => figure.type === 'bean'))
@@ -492,7 +502,8 @@ function roundInit() {
             })
         } else {
             figures.forEach(figure => {
-                if (figure.type === 'fighter' && figure.team === 'sniper') {
+                if (gameCounter === 1 && figure.type === 'fighter' && figure.team === 'sniper') {
+                    console.log('init')
                     initRandomOutsidePositionFigure(figure)
                 } else if (figure.team !== 'sniper') {
                     initRandomPositionFigure(figure)

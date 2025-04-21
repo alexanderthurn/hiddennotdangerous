@@ -328,7 +328,8 @@ const addShootingRange = (app, props, lobbyContainer) => {
         if (f.team === 'sniper' && !f.inactive && !f.justShot) {
             f.inactive = true
             f.justShot = true
-            addCrosshair({...f, x: f.x, y: f.y, color: colors.red})
+            const crosshair = createCrosshair({...f, x: f.x, y: f.y, color: colors.red})
+            figures.push(crosshair)
         }
     }) 
     buttonInside.isInArea = f => stage === stages.gameLobby && game === games.rampage && new PIXI.Rectangle(newXInside, newYInside, widthInside, heightInside).contains(f.x, f.y+f.bodyHeight*0.5)
@@ -610,7 +611,7 @@ const addFood = (app, texture, props) => {
     marker.label = 'marker'
 
     food.addChild(plate, meal, marker)
-    figuresPool.push(food)
+    figuresInitialPool.push(food)
     levelContainer.addChild(food)
     debugLayer.attach(marker)
 
@@ -883,7 +884,7 @@ const createFigure = (app, spritesheet, props) => {
 const addSniperFigures = (app, sniperFigures) => {
     let spritesheet = PIXI.Assets.get('figureAtlas')
     sniperFigures.forEach(f => {
-        addCrosshair({...f, x: f.x, y: f.y, color: colors.red})
+        const crosshair = createCrosshair({...f, x: f.x, y: f.y, color: colors.red})
         
         // NPC replacement in level
         const figure = createFigure(app, spritesheet, {
@@ -896,11 +897,13 @@ const addSniperFigures = (app, sniperFigures) => {
             attackAngle: 90,
             type: 'fighter',
         })
-        figures.push(figure)
+
+        figuresPool.push(crosshair)
+        figuresPool.push(figure)
     })
 }
 
-const addFiguresPool = (app) => {
+const addFiguresInitialPool = (app) => {
     let spritesheet = PIXI.Assets.get('figureAtlas')
     for (var i = 0; i < maxPlayerFigures; i++) {
         const figure = createFigure(app, spritesheet, {
@@ -913,7 +916,7 @@ const addFiguresPool = (app) => {
             attackAngle: 90,
             type: 'fighter',
         })
-        figuresPool.push(figure)
+        figuresInitialPool.push(figure)
     }
     for (var i = 0; i < numberVIPs; i++) {
         const figure = createFigure(app, spritesheet, {
@@ -930,11 +933,11 @@ const addFiguresPool = (app) => {
         app.ticker.add(() => {
             figure.visible = game === games.vip
         })
-        figuresPool.push(figure)
+        figuresInitialPool.push(figure)
     }
 }
 
-const addCrosshair = props => {
+const createCrosshair = props => {
     const {x, y, player, team, color} = props
     const crosshair = PIXI.Sprite.from('crosshair')
     crosshair.x = x
@@ -954,9 +957,10 @@ const addCrosshair = props => {
     crosshair.tint = color
     crosshair.type = 'crosshair'
 
-    figures.push(crosshair)
     levelContainer.addChild(crosshair)
     crosshairLayer.attach(crosshair)
+
+    return crosshair
 }
 
 const addOverlay = app => {

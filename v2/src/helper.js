@@ -341,20 +341,18 @@ const getRandomOutsideLevelXY = () => {
         if (t < 1) {
             y = -1/36*level.height
         } else {
-            t--
             y = 37/36*level.height
         }
-        x = getParametrizedLevelPlusMargin(t, level.width)
+        x = getParametrizedLevelPlusMargin(t % 1, level.width)
     } else {
         t -= level.width
         t *= 2/level.height
         if (t < 1) {
             x = -1/36*level.width
         } else {
-            t--
             x = 37/36*level.width
         }
-        y = getParametrizedLevelPlusMargin(t, level.height)
+        y = getParametrizedLevelPlusMargin(t % 1, level.height)
     }
     return [x, y]
 }
