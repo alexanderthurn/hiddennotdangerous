@@ -290,11 +290,9 @@ const addAnimation = (container, callback) => {
 const destroyContainer = (app, container) => {
     if (container) {
         app.ticker.remove(container.tickerCallback)
-        
-        container.getChildByLabel('body')?.destroy()
-        container.getChildByLabel('shadow')?.destroy()
-        container.getChildByLabel('marker')?.destroy()
-        container.getChildByLabel('attackArc')?.destroy()
+
+        const children = [...container.children]
+        children.forEach(child => destroyContainer(app, child.destroy()))
         
         container.destroy()
     }
