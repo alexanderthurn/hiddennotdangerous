@@ -505,14 +505,6 @@ function roundInit() {
                 switchTeam(figure, 'killer')
             })
         } else {
-            /*figures.forEach(figure => {
-                if (gameCounter === 1 && figure.type === 'fighter' && figure.team === 'sniper') {
-                    initSniperPositions()
-                    initRandomOutsidePositionFigure(figure)
-                } else if (figure.team !== 'sniper') {
-                    initRandomPositionFigure(figure)
-                }
-            })*/
             figures.filter(figure => figure.team !== 'sniper').forEach(figure => initRandomPositionFigure(figure))
             if (gameCounter === 1) {
                 initSniperPositions(figures.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
