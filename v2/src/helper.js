@@ -335,29 +335,34 @@ function getCloseRandomXY(figure) {
     return getRandomXY()
 }
 
-const getParametrizedLevelPlusMargin = (t, length) => (- 1/36 + t*(10/9))*length
+const getParametrizedIntervalPoint = (t, start, end) => start + t*(end-start)
 
 const getRandomOutsideLevelXY = () => {
     let t = Math.random()*(level.width+level.height)
     let x,y
+    const inverseLevelScaleFactor = 1/0.9
+    const margin = (inverseLevelScaleFactor-1)/4
+    const start = -margin , end = 1+margin
     if (t < level.width) {
         t *= 2/level.width
         if (t < 1) {
-            y = -1/36*level.height
+            y = start
         } else {
-            y = 37/36*level.height
+            y = end
         }
-        x = getParametrizedLevelPlusMargin(t % 1, level.width)
+        x = getParametrizedIntervalPoint(t % 1, start, end)
     } else {
         t -= level.width
         t *= 2/level.height
         if (t < 1) {
-            x = -1/36*level.width
+            x = start
         } else {
-            x = 37/36*level.width
+            x = end
         }
-        y = getParametrizedLevelPlusMargin(t % 1, level.height)
+        y = getParametrizedIntervalPoint(t % 1, start, end)
     }
+    x *= level.width
+    y *= level.height
     return [x, y]
 }
 
