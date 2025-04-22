@@ -31,7 +31,7 @@ var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var restartGame = false, lastWinnerPlayerIds, lastRoundEndThen, lastFinalWinnerPlayerIds, finalWinnerTeam
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
-var figuresInitialPool = [], figuresPool = []
+var figuresInitialPool = new Set(), figuresPool = new Set()
 var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
@@ -436,13 +436,12 @@ function roundInit() {
         keyboardPlayers = []
         players = []
 
-        //figuresPool.filter(figure => )
-
-        figuresPool = [...figuresInitialPool]
-
-        figures.filter(figure => figure.type === 'crosshair').forEach(figure => {
+        figuresPool.difference(figuresInitialPool).forEach(figure => {
             destroyContainer(app, figure)
         })
+
+        figuresPool = new Set(figuresInitialPool)
+
         figures.filter(figure => figure.type === 'fighter').forEach(figure => {
             figure.inactive = false
             figure.playerId = null
@@ -467,23 +466,27 @@ function roundInit() {
 
     // Figuren in Pool laden
 
+    let figuresPoolArray = Array.from(figuresPool)
+
     if (gameCounter === 1 && stage === stages.game && game === games.rampage) {
-        addSniperFigures(app, figuresPool.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
+        addSniperFigures(app, figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
     }
+
+    figuresPoolArray = Array.from(figuresPool)
 
     figures = []
 
     // Figuren aus Pool laden
     if (game === games.vip) {
-        figures = figures.concat(figuresPool.filter(figure => figure.type === 'fighter'))
+        figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'fighter'))
     } else {
-        figures = figures.concat(figuresPool.filter(figure => figure.type === 'fighter' && figure.team !== 'vip'))
+        figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team !== 'vip'))
     }
     if (game === games.rampage) {
-        figures = figures.concat(figuresPool.filter(figure => figure.type === 'crosshair'))
+        figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'crosshair'))
     }
     if (game === games.food) {
-        figures = figures.concat(figuresPool.filter(figure => figure.type === 'bean'))
+        figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'bean'))
     }
 
     // Figuren platzieren
@@ -503,7 +506,6 @@ function roundInit() {
         } else {
             figures.forEach(figure => {
                 if (gameCounter === 1 && figure.type === 'fighter' && figure.team === 'sniper') {
-                    console.log('init')
                     initRandomOutsidePositionFigure(figure)
                 } else if (figure.team !== 'sniper') {
                     initRandomPositionFigure(figure)
@@ -661,6 +663,8 @@ const handleWinning = () => {
             //countdown
             if (!restartGame && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
                 winRoundFigures([])
+                restartGame = true
+                finalWinnerTeam = 'killer'
             }
         }
     }

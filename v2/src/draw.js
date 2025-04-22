@@ -611,7 +611,7 @@ const addFood = (app, texture, props) => {
     marker.label = 'marker'
 
     food.addChild(plate, meal, marker)
-    figuresInitialPool.push(food)
+    figuresInitialPool.add(food)
     levelContainer.addChild(food)
     debugLayer.attach(marker)
 
@@ -866,6 +866,7 @@ const createFigure = (app, spritesheet, props) => {
     shadow.label = 'shadow'
 
     const attackArc = createAttackArc(figure)
+    attackArc.label = 'attackArc'
     const marker = createFigureMarker(figure)
     marker.label = 'marker'
 
@@ -877,7 +878,7 @@ const createFigure = (app, spritesheet, props) => {
     debugLayer.attach(attackArc, marker)
     levelContainer.addChild(figure)
 
-    app.ticker.add(() => animateFigure(figure, spritesheet))
+    addAnimation(figure, () => animateFigure(figure, spritesheet))
     return figure
 }
 
@@ -898,8 +899,8 @@ const addSniperFigures = (app, sniperFigures) => {
             type: 'fighter',
         })
 
-        figuresPool.push(crosshair)
-        figuresPool.push(figure)
+        figuresPool.add(crosshair)
+        figuresPool.add(figure)
     })
 }
 
@@ -916,7 +917,7 @@ const addFiguresInitialPool = (app) => {
             attackAngle: 90,
             type: 'fighter',
         })
-        figuresInitialPool.push(figure)
+        figuresInitialPool.add(figure)
     }
     for (var i = 0; i < numberVIPs; i++) {
         const figure = createFigure(app, spritesheet, {
@@ -933,7 +934,7 @@ const addFiguresInitialPool = (app) => {
         app.ticker.add(() => {
             figure.visible = game === games.vip
         })
-        figuresInitialPool.push(figure)
+        figuresInitialPool.add(figure)
     }
 }
 
