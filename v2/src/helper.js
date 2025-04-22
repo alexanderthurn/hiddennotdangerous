@@ -385,6 +385,14 @@ function cropXY(x,y,level) {
 
 const figureIsBot = figure => figure.playerId?.includes('b')
 
+const initSniperPositions = figures => {
+    figures.forEach(figure => {
+        const [x, y] = getRandomOutsideLevelXY(level)
+
+        initFigure(figure, x, y)
+        figure.inactive = true
+    })
+}
 
 const initVIPGamePositions = figures => {
 

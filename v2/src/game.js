@@ -427,6 +427,7 @@ function roundInit() {
 
     if (stage === stages.startLobby) {
         game = undefined
+        gameCounter = 0
         players.forEach(player => {
             destroyContainer(app, player.score)
         })
@@ -489,7 +490,7 @@ function roundInit() {
         figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'bean'))
     }
 
-    // Figuren platzieren
+    // Figuren initialisieren
     if (game === games.vip) {
         if (stage === stages.gameLobby) {
             figures.filter(figure => figure.team === 'vip').forEach(figure => {
@@ -504,13 +505,18 @@ function roundInit() {
                 switchTeam(figure, 'killer')
             })
         } else {
-            figures.forEach(figure => {
+            /*figures.forEach(figure => {
                 if (gameCounter === 1 && figure.type === 'fighter' && figure.team === 'sniper') {
+                    initSniperPositions()
                     initRandomOutsidePositionFigure(figure)
                 } else if (figure.team !== 'sniper') {
                     initRandomPositionFigure(figure)
                 }
-            })
+            })*/
+            figures.filter(figure => figure.team !== 'sniper').forEach(figure => initRandomPositionFigure(figure))
+            if (gameCounter === 1) {
+                initSniperPositions(figures.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
+            }
         } 
     } else if (stage !== stages.gameLobby) {
         figures.forEach(figure => {
@@ -663,8 +669,8 @@ const handleWinning = () => {
             //countdown
             if (!restartGame && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
                 winRoundFigures([])
-                restartGame = true
-                finalWinnerTeam = 'killer'
+                //restartGame = true
+                //finalWinnerTeam = 'killer'
             }
         }
     }
