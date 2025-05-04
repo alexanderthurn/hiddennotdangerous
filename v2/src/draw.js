@@ -439,11 +439,9 @@ const animatePlayerScore = figure => {
 
     if (!restartGame) {
         var lp = Math.min((dtProcessed - player.joinedTime) / moveNewPlayerDuration, 1)
-        var lpi = 1-lp
 
-        player.score.x = lpi * (level.width*0.5) + lp*getScoreDefaultX(player)
-        player.score.y = lpi*(level.height*0.5) + lp*player.score.yDefault
-        player.score.scale = 12*lpi + lp
+        player.score = Object.assign(player.score, getLinePoint(lp, {x: level.width*0.5, y: level.height*0.5}, {x: getScoreDefaultX(player), y: player.score.yDefault}))
+        player.score.scale = getIntervalPoint(lp, 12, 1)
     }
 
     player.score.getChildAt(1).text = player.score.shownPoints
@@ -504,15 +502,13 @@ const animateWinningCeremony = winnerText => {
         
         if (lastRoundEndThen && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
             const lp = dt2 / moveScoreToPlayerDuration
-            const lpi = 1-lp
 
-            f.player.score.x = lpi*getScoreDefaultX(f.player) + lp*f.x
-            f.player.score.y = lpi*f.player.score.yDefault + lp*f.y
+            f.player.score = Object.assign(f.player.score, getLinePoint(lp, {x: getScoreDefaultX(f.player), y: f.player.score.yDefault}, f))
 
             if (lastFinalWinnerPlayerIds?.has(f.playerId)) {
-                f.player.score.scale = (lpi + 2*lp)*(lpi + 2*lp)
+                f.player.score.scale = getIntervalPoint(lp, 1, 2)*getIntervalPoint(lp, 1, 2)
             } else {
-                f.player.score.scale = lpi + 2*lp
+                f.player.score.scale = getIntervalPoint(lp, 1, 2)
             }
 
             if (lastWinnerPlayerIds.has(f.playerId)) {
@@ -529,11 +525,10 @@ const animateWinningCeremony = winnerText => {
             f.player.score.shownPoints = f.player.score.points
         } else if (lastRoundEndThen && dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
             const lp = dt4 / moveScoreToPlayerDuration
-            const lpi = 1-lp
 
-            f.player.score.x = lpi*f.x + lp*getScoreDefaultX(f.player)
-            f.player.score.y = lpi*f.y + lp*f.player.score.yDefault
-            f.player.score.scale = 2*lpi + lp
+            f.player.score = Object.assign(f.player.score, getLinePoint(lp, f, {x: getScoreDefaultX(f.player), y: f.player.score.yDefault}))
+
+            f.player.score.scale = f.player.score.scale = getIntervalPoint(lp, 2, 1)
             if (lastFinalWinnerPlayerIds) {
                 f.player.score.shownPoints = 0
             }

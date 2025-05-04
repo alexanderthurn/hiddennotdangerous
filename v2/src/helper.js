@@ -335,7 +335,9 @@ function getCloseRandomXY(figure) {
     return getRandomXY()
 }
 
-const getParametrizedIntervalPoint = (t, start, end) => start + t*(end-start)
+const getIntervalPoint = (t, start, end) => start + t*(end-start)
+
+const getLinePoint = (t, start, end) => ({x: getIntervalPoint(t, start.x, end.x), y: getIntervalPoint(t, start.y, end.y)})
 
 const getRandomOutsideLevelXY = () => {
     let t = Math.random()*(level.width+level.height)
@@ -350,7 +352,7 @@ const getRandomOutsideLevelXY = () => {
         } else {
             y = end
         }
-        x = getParametrizedIntervalPoint(t % 1, start, end)
+        x = getIntervalPoint(t % 1, start, end)
     } else {
         t -= level.width
         t *= 2/level.height
@@ -359,7 +361,7 @@ const getRandomOutsideLevelXY = () => {
         } else {
             x = end
         }
-        y = getParametrizedIntervalPoint(t % 1, start, end)
+        y = getIntervalPoint(t % 1, start, end)
     }
     x *= level.width
     y *= level.height
