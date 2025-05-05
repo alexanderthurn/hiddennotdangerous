@@ -459,9 +459,7 @@ const playerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({al
 const addPlayerScore = figure => {
     let playerScore = new PIXI.Container()
     playerScore.yDefault = level.height+32
-    playerScore.points = 0
-    playerScore.oldPoints = 0
-    playerScore.shownPoints = 0
+    initPlayerScore(playerScore)
 
     let circle
     if (figure.player.type === 'bot') {

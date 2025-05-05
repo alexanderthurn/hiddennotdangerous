@@ -104,6 +104,12 @@ const initFigure = (figure, x, y, direction) => {
     })
 }
 
+const initPlayerScore = score => {
+    score.points = 0
+    score.oldPoints = 0
+    score.shownPoints = 0
+}
+
 const shuffle = (arr) => arr
     .map(value => ({ value, sort: Math.random() }))
     .sort((a, b) => a.sort - b.sort)
@@ -499,11 +505,19 @@ const attackFigure = (figureAttacker, figureAttacked) => {
     return false
 }
 
-const killFigure = figure => {
-    figure.isDead = true
-    figure.killTime = dtProcessed
-    figure.speed = 0
-    playAudioPool(soundDeathPool)
+const killFigure = (figure) => {
+    if (!figure.isDead) {
+        figure.isDead = true
+        figure.killTime = dtProcessed
+        figure.speed = 0
+        playAudioPool(soundDeathPool)
+        if (game === games.rampage && figure.team !== 'killer') {
+            figures.filter(f => f.team === 'killer' & f.type === 'fighter').forEach(f => {
+                f.player.score.points++
+                f.player.score.shownPoints = f.player.score.points
+            })
+        }
+    }
 }
 
 const winRoundTeam = team =>{

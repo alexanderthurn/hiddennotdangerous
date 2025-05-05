@@ -451,6 +451,9 @@ function roundInit() {
         Object.values(teams).forEach(team => team.points = 0)
     } else if (stage === stages.game) {
         gameCounter++
+        if (gameCounter === 1) {
+            players.forEach(player => initPlayerScore(player.score))
+        }
     }
 
     figures.filter(figure => figure.type === 'cloud').forEach(cloud => destroyContainer(app, cloud))
