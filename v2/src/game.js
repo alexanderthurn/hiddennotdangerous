@@ -5,6 +5,7 @@ var touches = [{pointerType: 'unknown', x: 0, y: 0, xCenter: undefined, yCenter:
 var keyboardPlayers = [];
 var botPlayers = []
 var players = []
+var playersSortedByJoinTime = []
 var keyboards = [{bindings: {
     'KeyA': {playerId: 'k0', action: 'left'},
     'KeyD': {playerId: 'k0', action: 'right'},
@@ -547,6 +548,8 @@ function gameLoop() {
         }
 
         players = collectInputs()
+        playersSortedByJoinTime = players.filter(player => player.joinedTime).sort((player1, player2) => player1.joinedTime - player2.joinedTime || player1.playerId - player2.playerId)
+
         const oldNumberJoinedKeyboardPlayers = keyboardPlayers.filter(k => k.joinedTime >= 0).length
 
         // remove figures without valid playerId

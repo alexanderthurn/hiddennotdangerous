@@ -425,8 +425,7 @@ const addLobbyItems = (app) => {
 
 const getScoreDefaultX = player => {
     const offx = 48*1.2
-    const sortedPlayers = players.filter(player => player.joinedTime >= 0).sort((player1, player2) => player1.joinedTime - player2.joinedTime || player1.playerId - player2.playerId)
-    const playerIndex = sortedPlayers.indexOf(player)
+    const playerIndex = playersSortedByJoinTime.indexOf(player)
     return 32+playerIndex*offx
 }
 
@@ -493,8 +492,6 @@ const animateWinningCeremony = winnerText => {
 
     const playerFiguresSortedByNewPoints = playerFigures.toSorted((f1,f2) => (f1.player.score.points-f1.player.score.oldPoints) - (f2.player.score.points-f2.player.score.oldPoints))
 
-    const sortedPlayers = players.filter(player => player.joinedTime).sort((player1, player2) => player1.joinedTime - player2.joinedTime || player1.playerId - player2.playerId)
-
     const dt3 = dtProcessed - (lastRoundEndThen + playerFigures.length*moveScoreToPlayerDuration);
     const dt4 = dtProcessed - (lastRoundEndThen + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
 
@@ -550,7 +547,7 @@ const animateWinningCeremony = winnerText => {
             winnerText.text = `${teams[finalWinnerTeam].label} win`
         } else {
             const lastFinalWinnerFigure = playerFigures.find(f => lastFinalWinnerPlayerIds?.has(f.playerId))
-            const lastFinalWinnerIndex = sortedPlayers.indexOf(lastFinalWinnerFigure?.player)
+            const lastFinalWinnerIndex = playersSortedByJoinTime.indexOf(lastFinalWinnerFigure?.player)
             const lastFinalWinnerNumber = lastFinalWinnerIndex+1
             if (figureIsBot(lastFinalWinnerFigure)) {
                 winnerText.text = `Player ${lastFinalWinnerNumber} (Bot) wins`
