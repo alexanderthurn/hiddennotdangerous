@@ -58,7 +58,7 @@ const games = {
     rampage: {
         color: colors.purple,
         text: 'RAMPAGE',
-        countdown: 1
+        countdown: 10
     },
     vip: {
         color: colors.blue,
@@ -660,12 +660,14 @@ const handleWinning = () => {
             }
         }
     } else if (game === games.rampage) {
+        const killers = figuresPlayer.filter(f => f.team === 'killer')
         if (!lastFinalWinnerPlayerIds) {
             //countdown
             if (!restartGame && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
-                winRoundFigures([])
-                //restartGame = true
-                //finalWinnerTeam = 'killer'
+                lastWinnerPlayerIds = new Set([])
+                lastRoundEndThen = dtProcessed
+                finalWinnerTeam = 'bla'
+                restartGame = true
             }
         }
     }
@@ -761,7 +763,7 @@ function updateGame(figures, dt, dtProcessed) {
         })
     }
 
-    // bla
+    // shooting range crosshair detaching
     if (stage === stages.gameLobby && game === games.rampage) {
         let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
         figuresAlive.filter(f => f.type === 'crosshair' ).forEach(f => {

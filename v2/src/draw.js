@@ -485,7 +485,11 @@ const addPlayerScore = figure => {
 }
 
 const animateWinningCeremony = winnerText => {
-    const playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
+    let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
+
+    if (game === games.rampage) {
+        playerFigures = playerFigures.filter(f => f.team === 'killer')
+    }
 
     const playerFiguresSortedByNewPoints = playerFigures.toSorted((f1,f2) => (f1.player.score.points-f1.player.score.oldPoints) - (f2.player.score.points-f2.player.score.oldPoints))
 
@@ -537,7 +541,11 @@ const animateWinningCeremony = winnerText => {
     
     if ((lastFinalWinnerPlayerIds || finalWinnerTeam) && dt3 >= 0 && dt3 < showFinalWinnerDuration) {
         winnerText.visible = true
-        if (finalWinnerTeam) {
+        if (game === games.rampage) {
+            console.log('hm', playerFigures, playerFigures[0], playerFigures[0].player.score.shownPoints)
+            const points = playerFigures[0].player.score.shownPoints
+            winnerText.text = `${points} innocents were killed`
+        } else if (finalWinnerTeam) {
             winnerText.tint = teams[finalWinnerTeam].color
             winnerText.text = `${teams[finalWinnerTeam].label} win`
         } else {
