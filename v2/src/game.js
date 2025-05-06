@@ -586,10 +586,7 @@ function gameLoop() {
             handleWinning()
         }
 
-        const figuresPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
-
-        const gameBreakDuration = (figuresPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
-        if (restartStage && (!lastRoundEndThen || ceremonyOver /*dtProcessed - lastRoundEndThen > gameBreakDuration*/)) {
+        if (restartStage && (!lastRoundEndThen || ceremonyOver)) {
             if (gameOver) {
                 nextStage = stages.startLobby
             }
