@@ -29,7 +29,7 @@ var keyboards = [{bindings: {
     'AltRight': {playerId: 'k1', action: 'marker'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var restartStage = false, gameOver, lastWinnerPlayerIds, lastRoundEndThen, lastFinalWinnerPlayerIds, finalWinnerTeam
+var restartStage = false, gameOver, ceremonyOver, lastWinnerPlayerIds, lastRoundEndThen, lastFinalWinnerPlayerIds, finalWinnerTeam
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figuresInitialPool = new Set(), figuresPool = new Set()
@@ -417,9 +417,11 @@ app.textStyleDefault = {
 function initStage() {
     then = Date.now();
     startTime = dtProcessed;
+    ceremonyOver = false
     gameOver = false
     restartStage = false
     stage = nextStage
+    lastRoundEndThen = undefined
     lastFinalWinnerPlayerIds = undefined
     finalWinnerTeam = undefined
     fpsTime = then
@@ -587,7 +589,7 @@ function gameLoop() {
         const figuresPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
 
         const gameBreakDuration = (figuresPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
-        if (restartStage && (!lastRoundEndThen || dtProcessed - lastRoundEndThen > gameBreakDuration)) {
+        if (restartStage && (!lastRoundEndThen || ceremonyOver /*dtProcessed - lastRoundEndThen > gameBreakDuration*/)) {
             if (gameOver) {
                 nextStage = stages.startLobby
             }

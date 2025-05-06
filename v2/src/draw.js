@@ -484,6 +484,10 @@ const addPlayerScore = figure => {
 }
 
 const animateWinningCeremony = winnerText => {
+    if (!lastRoundEndThen) {
+        return
+    }
+
     let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
 
     if (game === games.rampage) {
@@ -499,7 +503,7 @@ const animateWinningCeremony = winnerText => {
         f.player.score.zIndex = i
         const dt2 = dtProcessed - (lastRoundEndThen + i*moveScoreToPlayerDuration);
         
-        if (lastRoundEndThen && dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
+        if (dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
             const lp = dt2 / moveScoreToPlayerDuration
 
             f.player.score = Object.assign(f.player.score, getLinePoint(lp, {x: getScoreDefaultX(f.player), y: f.player.score.yDefault}, f))
@@ -513,7 +517,7 @@ const animateWinningCeremony = winnerText => {
             if (lastWinnerPlayerIds.has(f.playerId)) {
                 f.player.score.getChildAt(0).tint = colors.gold
             }
-        } else if (lastRoundEndThen && dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
+        } else if (dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
             f.player.score.x = f.x
             f.player.score.y = f.y
             if (lastFinalWinnerPlayerIds?.has(f.playerId)) {
@@ -522,7 +526,7 @@ const animateWinningCeremony = winnerText => {
                 f.player.score.scale = 2
             }
             f.player.score.shownPoints = f.player.score.points
-        } else if (lastRoundEndThen && dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
+        } else if (dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
             const lp = dt4 / moveScoreToPlayerDuration
 
             f.player.score = Object.assign(f.player.score, getLinePoint(lp, f, {x: getScoreDefaultX(f.player), y: f.player.score.yDefault}))
@@ -539,7 +543,6 @@ const animateWinningCeremony = winnerText => {
     if (gameOver && dt3 >= 0 && dt3 < showFinalWinnerDuration) {
         winnerText.visible = true
         if (game === games.rampage) {
-            console.log('hm', playerFigures, playerFigures[0], playerFigures[0].player.score.shownPoints)
             const points = playerFigures[0].player.score.shownPoints
             winnerText.text = `${points} innocents were killed`
         } else if (finalWinnerTeam) {
@@ -557,6 +560,10 @@ const animateWinningCeremony = winnerText => {
         }
     } else {
         winnerText.visible = false
+    }
+
+    if (dt4 >= moveScoreToPlayerDuration) {
+        ceremonyOver = true
     }
 }
 
