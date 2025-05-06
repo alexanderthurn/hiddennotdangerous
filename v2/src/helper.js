@@ -532,7 +532,7 @@ const winRoundFigures = winnerFigures =>{
     })
     lastWinnerPlayerIds = new Set(winnerFigures.map(f => f.playerId))
     lastRoundEndThen = dtProcessed
-    restartGame = true
+    restartStage = true
 }
 
 const switchTeam = (figure, team) => {

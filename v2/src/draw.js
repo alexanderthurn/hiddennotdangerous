@@ -436,7 +436,7 @@ const animatePlayerScore = figure => {
         figure.oldTeam = figure.team
     }
 
-    if (!restartGame) {
+    if (!restartStage) {
         var lp = Math.min((dtProcessed - player.joinedTime) / moveNewPlayerDuration, 1)
 
         player.score = Object.assign(player.score, getLinePoint(lp, {x: level.width*0.5, y: level.height*0.5}, {x: getScoreDefaultX(player), y: player.score.yDefault}))
@@ -759,7 +759,7 @@ const animateFigure = (figure, spritesheet) => {
         figureLayer.attach(body)
     }
 
-    if (figure.player?.isMarkerButtonPressed && !restartGame) {
+    if (figure.player?.isMarkerButtonPressed && !restartStage) {
         body.tint = colors.purple
     } else {
         body.tint = undefined
@@ -780,10 +780,10 @@ const animateFigure = (figure, spritesheet) => {
     
     shadow.visible = !figure.isDead
 
-    if (!(figure.speed === 0 || !windowHasFocus || restartGame) && !body.playing) {
+    if (!(figure.speed === 0 || !windowHasFocus || restartStage) && !body.playing) {
         body.play()
         shadow.play()
-    } else if ((figure.speed === 0 || !windowHasFocus || restartGame) && body.playing) {
+    } else if ((figure.speed === 0 || !windowHasFocus || restartStage) && body.playing) {
         if (figure.speed === 0 && body.playing) {
             body.currentFrame = 0
             shadow.currentFrame = 0
@@ -996,7 +996,7 @@ const animateCountdown = countdown => {
     countdown.visible = false
     if (stage === stages.game && game.countdown) {
         countdown.visible = true
-        if (!restartGame ) {
+        if (!restartStage ) {
             countdown.text = getCountdownText(dtProcessed, startTime+game.countdown*1000)
         }
     }
@@ -1178,10 +1178,10 @@ const animateFartCloud = cloud => {
         cloud.scale = cloud.attackDistanceMultiplier
     }
 
-    if (!(!windowHasFocus || restartGame) && !cloud.playing) {
+    if (!(!windowHasFocus || restartStage) && !cloud.playing) {
         cloud.play()
     }
-    if ((!windowHasFocus || restartGame) && cloud.playing) {
+    if ((!windowHasFocus || restartStage) && cloud.playing) {
         cloud.stop()
     }
 }

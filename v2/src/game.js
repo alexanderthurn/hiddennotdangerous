@@ -29,7 +29,7 @@ var keyboards = [{bindings: {
     'AltRight': {playerId: 'k1', action: 'marker'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var restartGame = false, lastWinnerPlayerIds, lastRoundEndThen, lastFinalWinnerPlayerIds, finalWinnerTeam
+var restartStage = false, lastWinnerPlayerIds, lastRoundEndThen, lastFinalWinnerPlayerIds, finalWinnerTeam
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figuresInitialPool = new Set(), figuresPool = new Set()
@@ -154,7 +154,7 @@ const lobbyStartButtonDefinition = () => ({
     outerRadius: level.width*0.15,
     loadingSpeed: 1/3000,
     execute: () => {
-        restartGame = true
+        restartStage = true
         const gamesValues = Object.values(games)
         gamesValues.forEach(game => game.votes = 0)
         Object.values(players).forEach(player => player.vote && games[player.vote].votes++)
@@ -170,7 +170,7 @@ const gameStartButtonDefinition = () => ({
     outerRadius: level.width*0.15,
     loadingSpeed: 1/3000,
     execute: () => {
-        restartGame = true
+        restartStage = true
         nextStage = stages.game
     }
 })
@@ -409,12 +409,12 @@ app.textStyleDefault = {
         addOverlay(app)
         addDebug(app);
 
-        roundInit();
+        initStage();
         window.requestAnimationFrame(gameLoop);
     }
 )();
 
-function roundInit() {
+function initStage() {
     then = Date.now();
     startTime = dtProcessed;
     stage = nextStage
@@ -568,7 +568,7 @@ function gameLoop() {
         dtToProcess += dt
         let counter = 0;
         while(dtToProcess > dtFix) {
-            if (!restartGame) {
+            if (!restartStage) {
                 handleInput(players, figures, dtProcessed) 
                 handleNPCs(figures, dtProcessed, oldNumberJoinedKeyboardPlayers, dtFix)
                 updateGame(figures, dtFix, dtProcessed)
@@ -578,19 +578,19 @@ function gameLoop() {
             counter++
         }
 
-        if (!restartGame && stage === stages.game) {
+        if (!restartStage && stage === stages.game) {
             handleWinning()
         }
 
         const figuresPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
 
         const gameBreakDuration = (figuresPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
-        if (restartGame && (!lastRoundEndThen || dtProcessed - lastRoundEndThen > gameBreakDuration)) {
-            restartGame = false;
+        if (restartStage && (!lastRoundEndThen || dtProcessed - lastRoundEndThen > gameBreakDuration)) {
+            restartStage = false;
             if (lastFinalWinnerPlayerIds || finalWinnerTeam) {
                 nextStage = stages.startLobby
             }
-            roundInit();
+            initStage();
         }
     } else {
         FWNetwork.getInstance().getAllGamepads().filter(x => x && x.connected).map(x => {
@@ -619,7 +619,7 @@ const handleWinning = () => {
             }
 
             //countdown
-            if (!restartGame && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
+            if (!restartStage && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
                 winRoundFigures([])
             }
         
@@ -650,7 +650,7 @@ const handleWinning = () => {
             }
 
             //countdown
-            if (!restartGame && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
+            if (!restartStage && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
                 winRoundTeam('guard')
             }
         
@@ -666,11 +666,11 @@ const handleWinning = () => {
         const killers = figuresPlayer.filter(f => f.team === 'killer')
         if (!lastFinalWinnerPlayerIds) {
             //countdown
-            if (!restartGame && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
+            if (!restartStage && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
                 lastWinnerPlayerIds = new Set([])
                 lastRoundEndThen = dtProcessed
                 finalWinnerTeam = 'bla'
-                restartGame = true
+                restartStage = true
             }
         }
     }
