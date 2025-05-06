@@ -29,11 +29,11 @@ var keyboards = [{bindings: {
     'AltRight': {playerId: 'k1', action: 'marker'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var restartStage = false, gameOver, ceremonyOver, lastWinnerPlayerIds, lastRoundEndThen, lastFinalWinnerPlayerIds, finalWinnerTeam
+var restartStage = false, gameOver, ceremonyOver, lastRoundEndThen, lastWinnerPlayerIds, lastFinalWinnerPlayerIds, finalWinnerTeam
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figuresInitialPool = new Set(), figuresPool = new Set()
-var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000
+var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, roundsToWin = 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = createLevel()
@@ -68,7 +68,7 @@ const games = {
     }
 }
 
-let game, gameCounter = 0
+let game, roundCounter = 0
 
 var btnTouchController = {
     radius: 0,
@@ -432,7 +432,7 @@ function initStage() {
 
     if (stage === stages.startLobby) {
         game = undefined
-        gameCounter = 0
+        roundCounter = 0
         players.forEach(player => {
             destroyContainer(app, player.score)
         })
@@ -455,8 +455,8 @@ function initStage() {
         })
         Object.values(teams).forEach(team => team.points = 0)
     } else if (stage === stages.game) {
-        gameCounter++
-        if (gameCounter === 1) {
+        roundCounter++
+        if (roundCounter === 1) {
             players.forEach(player => initPlayerScore(player.score))
         }
     }
@@ -477,7 +477,7 @@ function initStage() {
 
     let figuresPoolArray = Array.from(figuresPool)
 
-    if (gameCounter === 1 && stage === stages.game && game === games.rampage) {
+    if (roundCounter === 1 && stage === stages.game && game === games.rampage) {
         addSniperFigures(app, figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
     }
 
@@ -514,7 +514,7 @@ function initStage() {
             })
         } else {
             figures.filter(figure => figure.team !== 'sniper').forEach(figure => initRandomPositionFigure(figure))
-            if (gameCounter === 1) {
+            if (roundCounter === 1) {
                 initSniperPositions(figures.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
             }
         } 
@@ -667,14 +667,33 @@ const handleWinning = () => {
             }
         }
     } else if (game === games.rampage) {
+        // players left, quit game
         const killers = figuresPlayer.filter(f => f.team === 'killer')
+        const snipers = figuresPlayer.filter(f => f.team === 'sniper')
+        if (killers.length === 0 || snipers.length === 0) {
+            lastRoundEndThen = dtProcessed
+            gameOver = true
+            restartStage = true
+        }
+
         if (!gameOver) {
+            // round won
+            const noTeamSurvivors = figures.filter(f => !f.team).filter(f => !f.isDead)
+            const killerSurvivors = killers.filter(f => !f.isDead)
+            if (killerSurvivors.length === 0 || noTeamSurvivors.length === 0) {
+                lastRoundEndThen = dtProcessed
+                restartStage = true
+            }
+
             //countdown
             if (!restartStage && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
-                lastWinnerPlayerIds = new Set([])
                 lastRoundEndThen = dtProcessed
-                gameOver = true
                 restartStage = true
+            }
+
+            // max rounds hit
+            if (restartStage && roundCounter >= roundsToWin) {
+                gameOver = true
             }
         }
     }

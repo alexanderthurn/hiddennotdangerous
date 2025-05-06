@@ -514,7 +514,7 @@ const animateWinningCeremony = winnerText => {
                 f.player.score.scale = getIntervalPoint(lp, 1, 2)
             }
 
-            if (lastWinnerPlayerIds.has(f.playerId)) {
+            if (lastWinnerPlayerIds?.has(f.playerId)) {
                 f.player.score.getChildAt(0).tint = colors.gold
             }
         } else if (dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
