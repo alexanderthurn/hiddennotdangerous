@@ -29,7 +29,7 @@ var keyboards = [{bindings: {
     'AltRight': {playerId: 'k1', action: 'marker'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var restartStage = false, lastWinnerPlayerIds, lastRoundEndThen, lastFinalWinnerPlayerIds, finalWinnerTeam
+var restartStage = false, gameOver, lastWinnerPlayerIds, lastRoundEndThen, lastFinalWinnerPlayerIds, finalWinnerTeam
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figuresInitialPool = new Set(), figuresPool = new Set()
@@ -417,6 +417,8 @@ app.textStyleDefault = {
 function initStage() {
     then = Date.now();
     startTime = dtProcessed;
+    gameOver = false
+    restartStage = false
     stage = nextStage
     lastFinalWinnerPlayerIds = undefined
     finalWinnerTeam = undefined
@@ -586,8 +588,7 @@ function gameLoop() {
 
         const gameBreakDuration = (figuresPlayer.length+1)*moveScoreToPlayerDuration + showFinalWinnerDuration;
         if (restartStage && (!lastRoundEndThen || dtProcessed - lastRoundEndThen > gameBreakDuration)) {
-            restartStage = false;
-            if (lastFinalWinnerPlayerIds || finalWinnerTeam) {
+            if (gameOver) {
                 nextStage = stages.startLobby
             }
             initStage();
@@ -608,10 +609,11 @@ const handleWinning = () => {
         // players left, quit game
         if (figuresPlayer.length < 2) {
             lastFinalWinnerPlayerIds = new Set(figuresPlayer.map(f => f.playerId))
+            gameOver = true
             winRoundFigures(figuresPlayer)
         }
 
-        if (!lastFinalWinnerPlayerIds) {
+        if (!gameOver) {
             // round won
             const survivors = figuresPlayer.filter(f => !f.isDead)
             if (survivors.length < 2) {
@@ -628,6 +630,7 @@ const handleWinning = () => {
             if (maxPoints >= pointsToWin) {
                 const playersWithMaxPoints = players.filter(p => p.score?.points === maxPoints)
                 lastFinalWinnerPlayerIds = new Set(playersWithMaxPoints.map(p => p.playerId))
+                gameOver = true
             }
         }
     } else if (game === games.vip) {
@@ -637,10 +640,11 @@ const handleWinning = () => {
         if (assassins.length === 0 || guards.length === 0) {
             finalWinnerTeam = guards.length === 0 ? 'assassin' : 'guard'
             lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.team === finalWinnerTeam).map(f => f.playerId))
+            gameOver = true
             winRoundTeam(finalWinnerTeam)
         }
 
-        if (!lastFinalWinnerPlayerIds) {
+        if (!gameOver) {
             // round won
             const vips = figures.filter(f => f.team === 'vip')
             const assassinSurvivors = assassins.filter(f => !f.isDead)
@@ -660,22 +664,23 @@ const handleWinning = () => {
                 const teamsWithMaxPoints = Object.keys(teams).filter(team => teams[team].points === maxPoints)
                 finalWinnerTeam = teamsWithMaxPoints[0]
                 lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.team === finalWinnerTeam).map(f => f.playerId))
+                gameOver = true
             }
         }
     } else if (game === games.rampage) {
         const killers = figuresPlayer.filter(f => f.team === 'killer')
-        if (!lastFinalWinnerPlayerIds) {
+        if (!gameOver) {
             //countdown
             if (!restartStage && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
                 lastWinnerPlayerIds = new Set([])
                 lastRoundEndThen = dtProcessed
-                finalWinnerTeam = 'bla'
+                gameOver = true
                 restartStage = true
             }
         }
     }
     
-    if (lastFinalWinnerPlayerIds || finalWinnerTeam) {
+    if (gameOver) {
         playAudio(soundWin)
     }
 }

@@ -536,7 +536,7 @@ const animateWinningCeremony = winnerText => {
         }
     })
     
-    if ((lastFinalWinnerPlayerIds || finalWinnerTeam) && dt3 >= 0 && dt3 < showFinalWinnerDuration) {
+    if (gameOver && dt3 >= 0 && dt3 < showFinalWinnerDuration) {
         winnerText.visible = true
         if (game === games.rampage) {
             console.log('hm', playerFigures, playerFigures[0], playerFigures[0].player.score.shownPoints)
