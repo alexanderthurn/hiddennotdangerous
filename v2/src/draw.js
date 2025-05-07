@@ -299,7 +299,7 @@ const addButtons = (app, lobbyContainer) => {
 }
 
 const animateShootingRange = button => {
-    button.visible = game === games.rampage
+    button.visible = game === games.rampage || game === games.rampagev2
 }
 
 const addShootingRange = (app, props, lobbyContainer) => {
@@ -319,7 +319,7 @@ const addShootingRange = (app, props, lobbyContainer) => {
     .rect(newX, newY, width, height)
     .fill({color: colors.white})
     buttonOutside.execute = () => buttonOutside.playersNear.forEach(f => f.justShot = false) 
-    buttonOutside.isInArea = f => stage === stages.gameLobby && game === games.rampage && !(new PIXI.Rectangle(newX, newY, width, height)).contains(f.x, f.y+f.bodyHeight*0.5)
+    buttonOutside.isInArea = f => stage === stages.gameLobby && (game === games.rampage || game === games.rampagev2) && !(new PIXI.Rectangle(newX, newY, width, height)).contains(f.x, f.y+f.bodyHeight*0.5)
 
     const buttonInside = new PIXI.Graphics()
     .rect(newXInside, newYInside, widthInside, heightInside)
@@ -332,14 +332,14 @@ const addShootingRange = (app, props, lobbyContainer) => {
             figures.push(crosshair)
         }
     }) 
-    buttonInside.isInArea = f => stage === stages.gameLobby && game === games.rampage && new PIXI.Rectangle(newXInside, newYInside, widthInside, heightInside).contains(f.x, f.y+f.bodyHeight*0.5)
+    buttonInside.isInArea = f => stage === stages.gameLobby && (game === games.rampage || game === games.rampagev2) && new PIXI.Rectangle(newXInside, newYInside, widthInside, heightInside).contains(f.x, f.y+f.bodyHeight*0.5)
 
     buttons.shootingRangeInside = buttonInside
     buttons.shootingRangeOutside = buttonOutside
     lobbyContainer.addChild(buttonOutside, buttonInside)
     app.ticker.add(() => {
-        buttonInside.visible = game === games.rampage
-        buttonOutside.visible = game === games.rampage
+        buttonInside.visible = game === games.rampage || game === games.rampagev2
+        buttonOutside.visible = game === games.rampage || game === games.rampagev2
     })
 }
 
@@ -490,7 +490,7 @@ const animateWinningCeremony = winnerText => {
 
     let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
 
-    if (game === games.rampage) {
+    if (game === games.rampage || game === games.rampagev2) {
         playerFigures = playerFigures.filter(f => f.team === 'killer')
     }
 

@@ -57,8 +57,13 @@ const games = {
         countdown: 90,
     },
     rampage: {
-        color: colors.purple,
+        color: colors.yellow,
         text: 'RAMPAGE',
+        countdown: 180
+    },
+    rampagev2: {
+        color: colors.purple,
+        text: 'RAMPAGE V2',
         countdown: 180
     },
     vip: {
@@ -250,13 +255,13 @@ const teamSwitchersDefinition = () => ({
     killer: {
         x: level.width*0.4,
         y: level.height*0.75,
-        games: new Set([games.rampage]),
+        games: new Set([games.rampage, games.rampagev2]),
         team: 'killer'
     },
     sniper: {
         x: level.width*0.6,
         y: level.height*0.75,
-        games: new Set([games.rampage]),
+        games: new Set([games.rampage, games.rampagev2]),
         team: 'sniper'
     }
 })
@@ -477,7 +482,7 @@ function initStage() {
 
     let figuresPoolArray = Array.from(figuresPool)
 
-    if (roundCounter === 1 && stage === stages.game && game === games.rampage) {
+    if (roundCounter === 1 && stage === stages.game && (game === games.rampage || game === games.rampagev2)) {
         addSniperFigures(app, figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
     }
 
@@ -491,7 +496,7 @@ function initStage() {
     } else {
         figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team !== 'vip'))
     }
-    if (game === games.rampage) {
+    if (game === games.rampage || game === games.rampagev2) {
         figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'crosshair'))
     }
     if (game === games.food) {
@@ -507,7 +512,7 @@ function initStage() {
         } else {
             initVIPGamePositions(figures)
         }
-    } else if (game === games.rampage) {
+    } else if (game === games.rampage || game === games.rampagev2) {
         if (stage === stages.gameLobby) {
             figures.filter(figure => figure.playerId).forEach(figure => {
                 switchTeam(figure, 'killer')
@@ -687,10 +692,10 @@ const handleWinning = () => {
             // ammo out
             const crosshairs = figures.filter(f => f.type === 'crosshair')
             sumAmmo = crosshairs.reduce((sum, f) => sum + f.ammo, 0)
-            if (sumAmmo === 0) {
+            if (!restartStage && sumAmmo === 0) {
                 killers.forEach(f => {
                     f.player.score.points += noTeamSurvivors.length
-                });
+                })
                 finishRound()
             }
 
@@ -701,6 +706,46 @@ const handleWinning = () => {
 
             // max rounds hit
             if (restartStage && roundCounter >= roundsToWin) {
+                gameOver = true
+            }
+        }
+    } else if (game === games.rampagev2) {
+        // players left, quit game
+        const killers = figuresPlayer.filter(f => f.team === 'killer')
+        const snipers = figuresPlayer.filter(f => f.team === 'sniper')
+        if (killers.length === 0 || snipers.length === 0) {
+            finalWinnerTeam = snipers.length === 0 ? 'killer' : 'sniper'
+            lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.team === finalWinnerTeam).map(f => f.playerId))
+            gameOver = true
+            winRoundTeam(finalWinnerTeam)
+        }
+
+        if (!gameOver) {
+            // team dead
+            const noTeamSurvivors = figures.filter(f => !f.team).filter(f => !f.isDead)
+            const killerSurvivors = killers.filter(f => !f.isDead)
+            if (killerSurvivors.length === 0 || noTeamSurvivors.length === 0) {
+                winRoundTeam(noTeamSurvivors.length === 0 ? 'killer' : 'sniper')
+            }
+
+            // ammo out
+            const crosshairs = figures.filter(f => f.type === 'crosshair')
+            sumAmmo = crosshairs.reduce((sum, f) => sum + f.ammo, 0)
+            if (!restartStage && sumAmmo === 0) {
+                winRoundTeam('killer')
+            }
+
+            //countdown
+            if (!restartStage && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
+                winRoundTeam('sniper')
+            }
+
+            // max points hit
+            const maxPoints = Math.max(...Object.values(teams).map(team => team.points))
+            if (maxPoints >= pointsToWin) {
+                const teamsWithMaxPoints = Object.keys(teams).filter(team => teams[team].points === maxPoints)
+                finalWinnerTeam = teamsWithMaxPoints[0]
+                lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.team === finalWinnerTeam).map(f => f.playerId))
                 gameOver = true
             }
         }
@@ -798,7 +843,7 @@ function updateGame(figures, dt, dtProcessed) {
     }
 
     // shooting range crosshair detaching
-    if (stage === stages.gameLobby && game === games.rampage) {
+    if (stage === stages.gameLobby && (game === games.rampage || game === games.rampagev2)) {
         let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
         figuresAlive.filter(f => f.type === 'crosshair' ).forEach(f => {
             const playerFigure = playerFigures.find(figure => figure.playerId === f.playerId)
@@ -825,7 +870,7 @@ function updateGame(figures, dt, dtProcessed) {
                 }
             });
         })
-    } else if (game === games.rampage) {
+    } else if (game === games.rampage || game === games.rampagev2) {
         const killersAlive = figuresAlive.filter(f => f.team === 'killer')
         const snipersAlive = figuresAlive.filter(f => f.team === 'sniper')
         const noTeamAlive = figuresAlive.filter(f => !f.team)
