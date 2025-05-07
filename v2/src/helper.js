@@ -88,6 +88,12 @@ const initRandomOutsidePositionFigure = figure => {
     figure.inactive = true
 }
 
+const initCrosshair = figure => {
+    Object.assign(figure, {
+        ammo: figure.maxAmmo
+    })
+}
+
 const initFigure = (figure, x, y, direction) => {
     Object.assign(figure, {
         x,

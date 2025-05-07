@@ -59,7 +59,7 @@ const games = {
     rampage: {
         color: colors.purple,
         text: 'RAMPAGE',
-        countdown: 10
+        countdown: 180
     },
     vip: {
         color: colors.blue,
@@ -514,6 +514,7 @@ function initStage() {
             })
         } else {
             figures.filter(figure => figure.team !== 'sniper').forEach(figure => initRandomPositionFigure(figure))
+            figures.filter(figure => figure.type === 'crosshair').forEach(figure => initCrosshair(figure))
             if (roundCounter === 1) {
                 initSniperPositions(figures.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
             }
@@ -613,7 +614,7 @@ const handleWinning = () => {
         }
 
         if (!gameOver) {
-            // round won
+            // last survivor
             const survivors = figuresPlayer.filter(f => !f.isDead)
             if (survivors.length < 2) {
                 winRoundFigures(survivors)
@@ -624,7 +625,7 @@ const handleWinning = () => {
                 winRoundFigures([])
             }
         
-            // game won
+            // max points hit
             const maxPoints = Math.max(...players.map(p => p.score?.points || 0))
             if (maxPoints >= pointsToWin) {
                 const playersWithMaxPoints = players.filter(p => p.score?.points === maxPoints)
@@ -644,7 +645,7 @@ const handleWinning = () => {
         }
 
         if (!gameOver) {
-            // round won
+            // team dead
             const vips = figures.filter(f => f.team === 'vip')
             const assassinSurvivors = assassins.filter(f => !f.isDead)
             const vipSurvivors = vips.filter(f => !f.isDead)
@@ -657,7 +658,7 @@ const handleWinning = () => {
                 winRoundTeam('guard')
             }
         
-            // game won
+            // max points hit
             const maxPoints = Math.max(...Object.values(teams).map(team => team.points))
             if (maxPoints >= pointsToWin) {
                 const teamsWithMaxPoints = Object.keys(teams).filter(team => teams[team].points === maxPoints)
@@ -677,10 +678,21 @@ const handleWinning = () => {
         }
 
         if (!gameOver) {
-            // round won
+            // team dead
             const noTeamSurvivors = figures.filter(f => !f.team).filter(f => !f.isDead)
             const killerSurvivors = killers.filter(f => !f.isDead)
             if (killerSurvivors.length === 0 || noTeamSurvivors.length === 0) {
+                lastRoundEndThen = dtProcessed
+                restartStage = true
+            }
+
+            // ammo out
+            const crosshairs = figures.filter(f => f.type === 'crosshair')
+            sumAmmo = crosshairs.reduce((sum, f) => sum + f.ammo, 0)
+            if (sumAmmo === 0) {
+                killers.forEach(f => {
+                    f.player.score.points += noTeamSurvivors.length
+                });
                 lastRoundEndThen = dtProcessed
                 restartStage = true
             }
@@ -906,6 +918,7 @@ function handleInput(players, figures, dtProcessed) {
                 if (!f.lastAttackTime || dtProcessed-f.lastAttackTime > f.attackBreakDuration) {
 
                     if (f.type === 'crosshair') {
+                        f.ammo--
                         //playAudioPool(soundShootPool);
                     } else {
                         let xyNew = move(f.x, f.y, f.direction+deg2rad(180),f.attackDistance*0.5, 1)

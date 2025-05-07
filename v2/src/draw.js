@@ -890,7 +890,7 @@ const createFigure = (app, spritesheet, props) => {
 const addSniperFigures = (app, sniperFigures) => {
     let spritesheet = PIXI.Assets.get('figureAtlas')
     sniperFigures.forEach(f => {
-        const crosshair = createCrosshair({...f, x: f.x, y: f.y, color: colors.red})
+        const crosshair = createCrosshair({...f, x: f.x, y: f.y, ammo: 3, color: colors.red})
         
         // NPC replacement in level
         const figure = createFigure(app, spritesheet, {
@@ -944,13 +944,15 @@ const addFiguresInitialPool = (app) => {
 }
 
 const createCrosshair = props => {
-    const {x, y, player, team, color} = props
+    const {x, y, player, team, ammo, color} = props
     const crosshair = PIXI.Sprite.from('crosshair')
     crosshair.x = x
     crosshair.y = y
     crosshair.scale = 2
     crosshair.anchor.set(0.5)
     crosshair.alpha = 0.5
+    crosshair.ammo = ammo || Infinity
+    crosshair.maxAmmo = ammo || Infinity
     crosshair.attachRadius = 80
     crosshair.attackBreakDuration = 500
     crosshair.attackDuration = 0
