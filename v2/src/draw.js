@@ -490,7 +490,7 @@ const animateWinningCeremony = winnerText => {
 
     let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
 
-    if (game === games.rampage || game === games.rampagev2) {
+    if (game === games.rampage) {
         playerFigures = playerFigures.filter(f => f.team === 'killer')
     }
 
