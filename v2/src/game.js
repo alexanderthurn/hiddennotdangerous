@@ -672,9 +672,8 @@ const handleWinning = () => {
         const killers = figuresPlayer.filter(f => f.team === 'killer')
         const snipers = figuresPlayer.filter(f => f.team === 'sniper')
         if (killers.length === 0 || snipers.length === 0) {
-            lastRoundEndThen = dtProcessed
+            finishRound()
             gameOver = true
-            restartStage = true
         }
 
         if (!gameOver) {
@@ -682,8 +681,7 @@ const handleWinning = () => {
             const noTeamSurvivors = figures.filter(f => !f.team).filter(f => !f.isDead)
             const killerSurvivors = killers.filter(f => !f.isDead)
             if (killerSurvivors.length === 0 || noTeamSurvivors.length === 0) {
-                lastRoundEndThen = dtProcessed
-                restartStage = true
+                finishRound()
             }
 
             // ammo out
@@ -693,14 +691,12 @@ const handleWinning = () => {
                 killers.forEach(f => {
                     f.player.score.points += noTeamSurvivors.length
                 });
-                lastRoundEndThen = dtProcessed
-                restartStage = true
+                finishRound()
             }
 
             //countdown
             if (!restartStage && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
-                lastRoundEndThen = dtProcessed
-                restartStage = true
+                finishRound()
             }
 
             // max rounds hit

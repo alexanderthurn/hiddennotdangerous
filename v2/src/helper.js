@@ -526,19 +526,23 @@ const killFigure = (figure) => {
     }
 }
 
-const winRoundTeam = team =>{
+const finishRound = () => {
+    lastRoundEndThen = dtProcessed
+    restartStage = true
+}
+
+const winRoundTeam = team => {
     teams[team].points++
     winRoundFigures(figures.filter(f => f.playerId && f.team === team && f.type === 'fighter'))
 }
 
-const winRoundFigures = winnerFigures =>{
+const winRoundFigures = winnerFigures => {
     winnerFigures.forEach(f => {
         f.player.score.oldPoints = f.player.score.points
         f.player.score.points++
     })
     lastWinnerPlayerIds = new Set(winnerFigures.map(f => f.playerId))
-    lastRoundEndThen = dtProcessed
-    restartStage = true
+    finishRound()
 }
 
 const switchTeam = (figure, team) => {
