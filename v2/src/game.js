@@ -48,7 +48,7 @@ let stage, nextStage = stages.startLobby
 
 const games = {
     food: {
-        color: colors.darkgreen,
+        color: colors.green,
         text: 'FOOD'
     },
     battleRoyale: {
@@ -220,7 +220,7 @@ const teams = {
         sprite: 'boy'
     },
     vip: {
-        color: colors.darkgreen,
+        color: colors.green,
         label: 'VIPs',
         walkRectLength: 150,
         maxSpeed: 0.04,
@@ -383,7 +383,7 @@ app.textStyleDefault = {
                 fontSize: level.width*0.1,
                 fill: {
                     alpha: 0.8,
-                    color: colors.lightbrown,
+                    color: colors.lightBrown,
                 },
                 stroke: {
                     color: colors.white,
@@ -877,8 +877,12 @@ function handleInput(players, figures, dtProcessed) {
             var figure = joinedFighters.find(f => f.playerId === p.playerId)
             if (!figure) {
                 // player join first
-                if (p.type === 'bot' && joinedFighters.length === 0) {
-                    return
+                if (p.type === 'bot') {
+                    if (joinedFighters.length === 0) {
+                        return
+                    }
+                } else {
+                    p.crosshairColor = getCrosshairColor()
                 }
                 var figure = figures.find(f => !f.playerId && f.type === 'fighter')
                 p.joinedTime = dtProcessed

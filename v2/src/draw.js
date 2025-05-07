@@ -90,7 +90,7 @@ const createCircleButton = (props, lobbyContainer) => {
 
     const area = new PIXI.Graphics()
     .circle(0, 0, innerRadius)
-    .fill({alpha: 0.5, color: colors.darkbrown})
+    .fill({alpha: 0.5, color: colors.darkBrown})
 
     const loadingCircle = new PIXI.Graphics()
     .circle(0, 0, innerRadius)
@@ -257,7 +257,7 @@ const createRectangleButton = (props, lobbyContainer) => {
 
     const loadingBar = new PIXI.Graphics()
     .rect(0, 0, 0.1, height)
-    .fill({alpha: 0.5, color: colors.darkbrown})
+    .fill({alpha: 0.5, color: colors.darkBrown})
 
     const buttonText = new PIXI.BitmapText({
         style: app.textStyleDefault,
@@ -328,7 +328,7 @@ const addShootingRange = (app, props, lobbyContainer) => {
         if (f.team === 'sniper' && !f.inactive && !f.justShot) {
             f.inactive = true
             f.justShot = true
-            const crosshair = createCrosshair({...f, x: f.x, y: f.y, color: colors.red})
+            const crosshair = createCrosshair({...f, x: f.x, y: f.y})
             figures.push(crosshair)
         }
     }) 
@@ -829,7 +829,7 @@ createFigureMarker = figure => {
     markerContainer.addChild(marker, markerText)
 
     app.ticker.add(() => {
-        marker.tint = figure.playerId ? colors.red : colors.darkgreen
+        marker.tint = figure.playerId ? colors.red : colors.green
         markerText.text = figure.playerId ? figure.playerId + ' ' + figure.beans.size : ''
         markerContainer.visible = showDebug
     })
@@ -890,7 +890,7 @@ const createFigure = (app, spritesheet, props) => {
 const addSniperFigures = (app, sniperFigures) => {
     let spritesheet = PIXI.Assets.get('figureAtlas')
     sniperFigures.forEach(f => {
-        const crosshair = createCrosshair({...f, x: f.x, y: f.y, ammo: 3, color: colors.red})
+        const crosshair = createCrosshair({...f, x: f.x, y: f.y, ammo: 3})
         
         // NPC replacement in level
         const figure = createFigure(app, spritesheet, {
@@ -944,7 +944,8 @@ const addFiguresInitialPool = (app) => {
 }
 
 const createCrosshair = props => {
-    const {x, y, player, team, ammo, color} = props
+    const {x, y, player, team, ammo} = props
+
     const crosshair = PIXI.Sprite.from('crosshair')
     crosshair.x = x
     crosshair.y = y
@@ -962,7 +963,7 @@ const createCrosshair = props => {
     crosshair.playerId = player.playerId
     crosshair.player = player
     crosshair.team = team
-    crosshair.tint = color
+    crosshair.tint = player.crosshairColor
     crosshair.type = 'crosshair'
 
     levelContainer.addChild(crosshair)
@@ -989,7 +990,7 @@ const animateCircleOfDeath = circle => {
     
     if (circle.visible) {
         circle.clear().circle(0, 0, circle.radius)
-        .stroke({alpha: 0.8, color: colors.darkbrown, width: 30})
+        .stroke({alpha: 0.8, color: colors.darkBrown, width: 30})
     }
 }
 
@@ -1041,7 +1042,7 @@ const createPauseOverlay = app => {
     const overlay = new PIXI.Container();
 
     const background = new PIXI.Graphics().rect(0, 0, app.screen.width, app.screen.height)
-    .fill({alpha: 0.3, color: colors.darkbrown})
+    .fill({alpha: 0.3, color: colors.darkBrown})
     background.label = 'background'
 
     const text = new PIXI.BitmapText({
@@ -1207,7 +1208,7 @@ const addFartCloud = (props) => {
         lifetime: 0,
         ...props
     })
-    cloud.tint = colors.lightbrown
+    cloud.tint = colors.lightBrown
     cloud.animationSpeed = 0.1
     figures.push(cloud)
     levelContainer.addChild(cloud)

@@ -1,14 +1,32 @@
 const colors = {
     black: 0x000000,
     blue: 0x0000FF,
-    darkbrown: 0x57412F,
-    darkgreen: 0x008000,
+    cyan: 0x00FFFF,
+    darkBrown: 0x57412F,
+    darkOrange: 0xFF8000,
+    dodgerBlue: 0x0080FF,
+    deepPink: 0xFF0080,
+    electricIndigo: 0x8000FF,
+    green: 0x008000,
     gold: 0xB29146,
     grey: 0x787878,
-    lightbrown: 0x8B4513,
+    lightBrown: 0x8B4513,
+    lime: 0x00FF00,
+    magenta: 0xFF00FF,
+    purple: 0x800080,
     red: 0xFF0000,
     white: 0xFFFFFF,
-    purple: 0x800080,
+    yellow: 0xFFFF00
+}
+const crosshairColors = new Set([colors.blue, colors.black, colors.cyan, colors.darkOrange, colors.deepPink ,colors.dodgerBlue, colors.electricIndigo, colors.magenta, colors.red, colors.yellow, colors.white])
+
+let crosshairColorsInUse = new Set()
+
+const getCrosshairColor = () => {
+    const freeColors = Array.from(crosshairColors.difference(crosshairColorsInUse))
+    const color = freeColors[getRandomInt(freeColors.length)]
+    crosshairColorsInUse.add(color)
+    return color
 }
 
 /**
