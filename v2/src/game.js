@@ -796,11 +796,6 @@ function updateGame(figures, dt, dtProcessed) {
                 loadButton(btn, aimLoadingPercentage)
             }
         })
-
-        figuresDead.forEach(f => {if (dtProcessed-f.killTime > deadDuration) {
-            f.isDead = false
-            f.killTime = 0
-        }})
     }
 
     figuresAlive.filter(f => f.speed > 0).forEach(f => {
