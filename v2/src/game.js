@@ -528,11 +528,6 @@ function initStage() {
         figures.forEach(figure => {
             initRandomPositionFigure(figure)
         })
-        if (stage === stages.startLobby) {
-            figures.forEach(figure => {
-                switchTeam(figure, undefined)
-            })
-        }
     }
 
     if (game === games.food) {

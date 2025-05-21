@@ -119,13 +119,16 @@ const initFigure = (figure, x, y, direction) => {
         direction,
         startWalkTime: Math.random() * 5000 + dtProcessed,
         speed: 0,
-        isDead: false, 
+        isDead: false,
         killTime: 0,
         isAttacking: false,
         lastAttackTime: undefined,
         beans: new Set(),
         beansFarted: new Set()
     })
+    if (stage === stages.startLobby) {
+        switchTeam(figure, undefined)
+    }
 }
 
 const initPlayerScore = score => {
