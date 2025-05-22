@@ -518,6 +518,16 @@ const initVIPGamePositions = figures => {
     })
 }
 
+const detectFigure = (figureDetector, figureDetected) => {
+    const detectRadius = figureDetector.detectRadius
+    if (detectRadius && distance(figureDetector.x,figureDetector.y,figureDetected.x,figureDetected.y) < detectRadius) {
+        console.log('detectFigure', figureDetected.isDead)
+        if (figureDetected.isDead === true) {
+            figureDetected.isDeathDetected = true
+        }
+    }
+}
+
 const attackFigure = (figureAttacker, figureAttacked) => {
     const attackDistance = figureAttacker.attackDistanceMultiplier ? figureAttacker.attackDistanceMultiplier*figureAttacker.attackDistance : figureAttacker.attackDistance
     if (attackDistance && distance(figureAttacker.x,figureAttacker.y,figureAttacked.x,figureAttacked.y) < attackDistance) {
@@ -534,6 +544,7 @@ const attackFigure = (figureAttacker, figureAttacked) => {
 
 const killFigure = (figure) => {
     if (!figure.isDead) {
+        console.log('kill')
         figure.isDead = true
         figure.killTime = dtProcessed
         playAudioPool(soundDeathPool)

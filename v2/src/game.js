@@ -798,7 +798,7 @@ function updateGame(figures, dt, dtProcessed) {
         })
     }
 
-    figuresAlive.filter(f => f.speed > 0).forEach(f => {
+    figures.filter(f => f.speed > 0).forEach(f => {
         let xyNew = move(f.x, f.y, f.direction,f.speed, dt)
         if (xyNew) {
             [f.x, f.y] = cropXY(xyNew.x, xyNew.y, level)
@@ -861,9 +861,18 @@ function updateGame(figures, dt, dtProcessed) {
             });
         })
     } else if (game === games.rampage || game === games.rampagev2) {
+        const killers = figures.filter(f => f.team === 'killer')
+        const snipers = figures.filter(f => f.team === 'sniper')
+        const noTeam = figures.filter(f => !f.team)
         const killersAlive = figuresAlive.filter(f => f.team === 'killer')
         const snipersAlive = figuresAlive.filter(f => f.team === 'sniper')
         const noTeamAlive = figuresAlive.filter(f => !f.team)
+
+        snipers.forEach(f => {
+            [...killers, ...noTeam].forEach(fig => {
+                detectFigure(f, fig)
+            })
+        })
 
         snipersAlive.filter(f => f.isAttacking).forEach(f => {
             [...killersAlive, ...noTeamAlive].forEach(fig => {
@@ -876,6 +885,12 @@ function updateGame(figures, dt, dtProcessed) {
                 attackFigure(f, fig)
             })
         })
+
+        /*snipersAlive.forEach(f => {
+            [...killersAlive, ...noTeamAlive].forEach(fig => {
+                detectFigure(f, fig)
+            })
+        })*/
     } else {
         const assassinsAlive = figuresAlive.filter(f => f.team === 'assassin')
         const guardsAlive = figuresAlive.filter(f => f.team === 'guard')
@@ -983,8 +998,14 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
     const startKeyboardMovement = oldNumberJoinedKeyboardPlayers === 0 && numberJoinedKeyboardPlayers > 0;
     const NPCFigures = figures.filter(f => !f.playerId && f.type === 'fighter');
 
+    NPCFigures.forEach(f => {
+        if (f.isDead === true) {
+            console.log(f.speed, f.isDead, f.isDeathDetected)
+        }
+    })
+
     let stoppedNPCFigures
-    if (game === games.rampage || game === games.rampagev2) {
+    if (stage !== stages.game && (game === games.rampage || game === games.rampagev2)) {
         stoppedNPCFigures = NPCFigures.filter(f => f.isDeathDetected || f.inactive)
     } else {
         stoppedNPCFigures = NPCFigures.filter(f => f.isDead || f.inactive)
@@ -993,7 +1014,7 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
     stoppedNPCFigures.forEach(f => f.speed = 0)
 
     let movingNPCFigures
-    if (game === games.rampage || game === games.rampagev2) {
+    if (stage !== stages.game && (game === games.rampage || game === games.rampagev2)) {
         movingNPCFigures = NPCFigures.filter(f => !f.isDeathDetected && !f.inactive)
     } else {
         movingNPCFigures = NPCFigures.filter(f => !f.isDead && !f.inactive)

@@ -744,10 +744,11 @@ const animateFigure = (figure, spritesheet) => {
     }
     animation = figure.currentSprite + '_' + animation
 
-    if (figure.isDead) {
+    if (figure.isDead && (!(stage !== stages.game && (game === games.rampage || game === games.rampagev2)) || figure.isDeathDetected)) {
         body.angle = 90
         body.y = figure.bodyHeight/4
         figureLayer.detach(body)
+        shadow.visible = false
     } else {
         if (figure.isAttacking) {
             if (distanceAnglesDeg(deg, 0) < 45) {
@@ -764,6 +765,7 @@ const animateFigure = (figure, spritesheet) => {
         }
         body.y = 0
         figureLayer.attach(body)
+        shadow.visible = true
     }
 
     if (figure.player?.isMarkerButtonPressed && !restartStage) {
@@ -785,8 +787,6 @@ const animateFigure = (figure, spritesheet) => {
     shadow.anchor.x = 0.1
     shadow.anchor.y = body.textures[body.currentFrame].defaultAnchor.y
     
-    shadow.visible = !figure.isDead
-
     if (!(figure.speed === 0 || !windowHasFocus || restartStage) && !body.playing) {
         body.play()
         shadow.play()
@@ -959,6 +959,7 @@ const createCrosshair = props => {
     crosshair.attackDuration = 0
     crosshair.attackRectX = 16
     crosshair.attackRectY = 32
+    crosshair.detectRadius = 100
     crosshair.maxSpeed = 0.32
     crosshair.playerId = player.playerId
     crosshair.player = player
