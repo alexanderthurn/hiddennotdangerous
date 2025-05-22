@@ -981,12 +981,29 @@ function handleInput(players, figures, dtProcessed) {
 function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
     const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => k.joinedTime >= 0).length;
     const startKeyboardMovement = oldNumberJoinedKeyboardPlayers === 0 && numberJoinedKeyboardPlayers > 0;
-    const livingActiveNPCFigures = figures.filter(f => !f.playerId && !f.isDead && !f.inactive && f.type === 'fighter');
+    const NPCFigures = figures.filter(f => !f.playerId && f.type === 'fighter');
+
+    let stoppedNPCFigures
+    if (game === games.rampage || game === games.rampagev2) {
+        stoppedNPCFigures = NPCFigures.filter(f => f.isDeathDetected || f.inactive)
+    } else {
+        stoppedNPCFigures = NPCFigures.filter(f => f.isDead || f.inactive)
+    }
+
+    stoppedNPCFigures.forEach(f => f.speed = 0)
+
+    let movingNPCFigures
+    if (game === games.rampage || game === games.rampagev2) {
+        movingNPCFigures = NPCFigures.filter(f => !f.isDeathDetected && !f.inactive)
+    } else {
+        movingNPCFigures = NPCFigures.filter(f => !f.isDead && !f.inactive)
+    }
+
     let shuffledIndexes;
     if (startKeyboardMovement) {
-        shuffledIndexes = shuffle([...Array(livingActiveNPCFigures.length).keys()]);
+        shuffledIndexes = shuffle([...Array(movingNPCFigures.length).keys()]);
     }
-    livingActiveNPCFigures.forEach((f,i,array) => {
+    movingNPCFigures.forEach((f,i,array) => {
         if (((startKeyboardMovement && shuffledIndexes[i] < array.length/2) || distance(f.x,f.y,f.xTarget,f.yTarget) < 5) && f.speed > 0) {
             const breakDuration = startKeyboardMovement ? 0 : Math.random() * f.maxBreakDuration;
             f.startWalkTime = Math.random() * breakDuration + time

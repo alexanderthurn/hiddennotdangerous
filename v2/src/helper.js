@@ -536,7 +536,6 @@ const killFigure = (figure) => {
     if (!figure.isDead) {
         figure.isDead = true
         figure.killTime = dtProcessed
-        figure.speed = 0
         playAudioPool(soundDeathPool)
         if (game === games.rampage && figure.team !== 'killer') {
             figures.filter(f => f.team === 'killer' & f.type === 'fighter').forEach(f => {
