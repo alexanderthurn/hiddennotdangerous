@@ -773,6 +773,7 @@ function updateGame(figures, dt, dtProcessed) {
 
     figuresRevived.forEach(f => {if (dtProcessed-f.killTime > deadDuration) {
         f.isDead = false
+        f.isDeathDetected = false
         f.killTime = 0
     }})
 
@@ -847,7 +848,7 @@ function updateGame(figures, dt, dtProcessed) {
         })
     }
 
-    // attack figures
+    // attack/detect figures
     let numberKilledFigures = 0;
     let killTime;
 
@@ -868,12 +869,6 @@ function updateGame(figures, dt, dtProcessed) {
         const snipersAlive = figuresAlive.filter(f => f.team === 'sniper')
         const noTeamAlive = figuresAlive.filter(f => !f.team)
 
-        snipers.forEach(f => {
-            [...killers, ...noTeam].forEach(fig => {
-                detectFigure(f, fig)
-            })
-        })
-
         snipersAlive.filter(f => f.isAttacking).forEach(f => {
             [...killersAlive, ...noTeamAlive].forEach(fig => {
                 attackFigure(f, fig)
@@ -886,11 +881,13 @@ function updateGame(figures, dt, dtProcessed) {
             })
         })
 
-        /*snipersAlive.forEach(f => {
-            [...killersAlive, ...noTeamAlive].forEach(fig => {
+        const noSnipers = [...killers, ...noTeam]
+        noSnipers.forEach(fig => {
+            fig.isDetected = false
+            snipers.forEach(f => {
                 detectFigure(f, fig)
             })
-        })*/
+        })
     } else {
         const assassinsAlive = figuresAlive.filter(f => f.team === 'assassin')
         const guardsAlive = figuresAlive.filter(f => f.team === 'guard')
@@ -937,6 +934,7 @@ function handleInput(players, figures, dtProcessed) {
                 var figure = figures.find(f => !f.playerId && f.type === 'fighter')
                 p.joinedTime = dtProcessed
                 figure.isDead = false
+                figure.isDeathDetected = false
                 figure.playerId = p.playerId
                 figure.player = p
                 addPlayerScore(figure)
@@ -997,12 +995,6 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
     const numberJoinedKeyboardPlayers = keyboardPlayers.filter(k => k.joinedTime >= 0).length;
     const startKeyboardMovement = oldNumberJoinedKeyboardPlayers === 0 && numberJoinedKeyboardPlayers > 0;
     const NPCFigures = figures.filter(f => !f.playerId && f.type === 'fighter');
-
-    NPCFigures.forEach(f => {
-        if (f.isDead === true) {
-            console.log(f.speed, f.isDead, f.isDeathDetected)
-        }
-    })
 
     let stoppedNPCFigures
     if (stage !== stages.game && (game === games.rampage || game === games.rampagev2)) {

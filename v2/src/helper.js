@@ -120,6 +120,7 @@ const initFigure = (figure, x, y, direction) => {
         startWalkTime: Math.random() * 5000 + dtProcessed,
         speed: 0,
         isDead: false,
+        isDeathDetected: false,
         killTime: 0,
         isAttacking: false,
         lastAttackTime: undefined,
@@ -521,7 +522,7 @@ const initVIPGamePositions = figures => {
 const detectFigure = (figureDetector, figureDetected) => {
     const detectRadius = figureDetector.detectRadius
     if (detectRadius && distance(figureDetector.x,figureDetector.y,figureDetected.x,figureDetected.y) < detectRadius) {
-        console.log('detectFigure', figureDetected.isDead)
+        figureDetected.isDetected = true
         if (figureDetected.isDead === true) {
             figureDetected.isDeathDetected = true
         }

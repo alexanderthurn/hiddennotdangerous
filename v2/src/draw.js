@@ -750,7 +750,7 @@ const animateFigure = (figure, spritesheet) => {
         figureLayer.detach(body)
         shadow.visible = false
     } else {
-        if (figure.isAttacking) {
+        if (figure.isAttacking && (!(stage !== stages.game && (game === games.rampage || game === games.rampagev2)) || figure.isDetected)) {
             if (distanceAnglesDeg(deg, 0) < 45) {
                 body.angle = 20
             } else if (distanceAnglesDeg(deg, 90) <= 45) {
