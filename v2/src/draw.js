@@ -744,13 +744,13 @@ const animateFigure = (figure, spritesheet) => {
     }
     animation = figure.currentSprite + '_' + animation
 
-    if (figure.isDead && (!(stage !== stages.game && (game === games.rampage || game === games.rampagev2)) || figure.isDeathDetected)) {
+    if (figure.isDead && (!(stage === stages.game && (game === games.rampage || game === games.rampagev2)) || figure.isDeathDetected)) {
         body.angle = 90
         body.y = figure.bodyHeight/4
         figureLayer.detach(body)
         shadow.visible = false
     } else {
-        if (figure.isAttacking && (!(stage !== stages.game && (game === games.rampage || game === games.rampagev2)) || figure.isDetected)) {
+        if (figure.isAttacking && (!(stage === stages.game && (game === games.rampage || game === games.rampagev2)) || figure.isDetected)) {
             if (distanceAnglesDeg(deg, 0) < 45) {
                 body.angle = 20
             } else if (distanceAnglesDeg(deg, 90) <= 45) {

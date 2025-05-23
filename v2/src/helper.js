@@ -545,7 +545,6 @@ const attackFigure = (figureAttacker, figureAttacked) => {
 
 const killFigure = (figure) => {
     if (!figure.isDead) {
-        console.log('kill')
         figure.isDead = true
         figure.killTime = dtProcessed
         playAudioPool(soundDeathPool)

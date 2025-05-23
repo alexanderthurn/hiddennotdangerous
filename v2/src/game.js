@@ -997,7 +997,7 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
     const NPCFigures = figures.filter(f => !f.playerId && f.type === 'fighter');
 
     let stoppedNPCFigures
-    if (stage !== stages.game && (game === games.rampage || game === games.rampagev2)) {
+    if (stage === stages.game && (game === games.rampage || game === games.rampagev2)) {
         stoppedNPCFigures = NPCFigures.filter(f => f.isDeathDetected || f.inactive)
     } else {
         stoppedNPCFigures = NPCFigures.filter(f => f.isDead || f.inactive)
@@ -1006,7 +1006,7 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
     stoppedNPCFigures.forEach(f => f.speed = 0)
 
     let movingNPCFigures
-    if (stage !== stages.game && (game === games.rampage || game === games.rampagev2)) {
+    if (stage === stages.game && (game === games.rampage || game === games.rampagev2)) {
         movingNPCFigures = NPCFigures.filter(f => !f.isDeathDetected && !f.inactive)
     } else {
         movingNPCFigures = NPCFigures.filter(f => !f.isDead && !f.inactive)
