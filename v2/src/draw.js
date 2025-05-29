@@ -1,3 +1,31 @@
+const defaultFilterVert = `in vec2 aPosition;
+out vec2 vTextureCoord;
+
+uniform vec4 uInputSize;
+uniform vec4 uOutputFrame;
+uniform vec4 uOutputTexture;
+
+vec4 filterVertexPosition( void )
+{
+    vec2 position = aPosition * uOutputFrame.zw + uOutputFrame.xy;
+    
+    position.x = position.x * (2.0 / uOutputTexture.x) - 1.0;
+    position.y = position.y * (2.0*uOutputTexture.z / uOutputTexture.y) - uOutputTexture.z;
+
+    return vec4(position, 0.0, 1.0);
+}
+
+vec2 filterTextureCoord( void )
+{
+    return aPosition;
+}
+
+void main(void)
+{
+    gl_Position = filterVertexPosition();
+    vTextureCoord = filterTextureCoord();
+}`
+
 const shadowDefinition = {
     alpha: 0.25,
     angle: 0,
@@ -1217,3 +1245,83 @@ const addFartCloud = (props) => {
 
     addAnimation(cloud, () => animateFartCloud(cloud))
 }
+
+const addFog = app => {
+    const fogFilter = new PIXI.Filter({
+        glProgram: new PIXI.GlProgram({
+            fragment: `
+            precision mediump float;
+            in vec2 vTextureCoord;
+
+            uniform sampler2D uTexture;
+            uniform vec2 uResolution;
+            uniform vec2 uViewPoint;
+            uniform int uNumViewPoints;
+
+            uniform float uTime;
+
+            const float baseFog = 0.5;
+            const float radius = 100.0;
+            float visibility = 0.0;
+
+            void updateVisibility(vec2 pixelPos, vec2 center) {
+                float dist = distance(pixelPos, center);
+                float softness = radius * 0.3;
+                float localVis = 1.0-smoothstep(radius-softness, radius, dist);
+                visibility = max(visibility, localVis);
+            }
+
+            void main() {
+                vec2 pixelPos = vTextureCoord.xy*uResolution.xy;
+
+                for (int i = 0; i < 1; i++) {
+                    if (i >= uNumViewPoints) break;
+
+                    updateVisibility(pixelPos, uViewPoint);
+                }
+
+                vec4 fg = texture2D(uTexture, vTextureCoord);
+                fg.a = mix(baseFog, 0.0, visibility);
+
+                gl_FragColor = fg;
+            }`,
+            vertex: defaultFilterVert
+        }),
+        resources: {
+            myUniforms: {
+                uTime: { value: 0.0, type: 'f32' },
+                uResolution: {value: [level.width, level.height], type: 'vec2<f32>'},
+                uViewPoint: {value: [], type: `vec2<f32>`},
+                uNumViewPoints: {value: 0, type: 'i32'}
+            },
+        },
+    });
+
+    const fog = new PIXI.Sprite(PIXI.Texture.WHITE)
+    fog.width = level.width
+    fog.height = level.height
+    fog.tint = 0x000000
+    fog.filters = [fogFilter]
+    levelContainer.addChild(fog)
+    fogLayer.attach(fog)
+
+    app.ticker.add(() =>
+    {
+        fogFilter.resources.myUniforms.uniforms.uViewPoint = [level.width/2, level.height/2]
+        fogFilter.resources.myUniforms.uniforms.uNumViewPoints = 1
+    });
+
+    /*app.ticker.add(() => {
+        fog.visible = game === games.rampage || game === games.rampagev2
+
+        const crosshairs = figures.filter(f => f.playerId && f.type === 'crosshair')
+        //const viewData = fogFilter.uniforms.uViewPoints
+        crosshairs.forEach((f, i) => {
+            viewData[i * 2 + 0] = f.x
+            viewData[i * 2 + 1] = f.y
+        })
+        //fogFilter.uniforms.uNumViewPoints = crosshairs.length
+        numViewPoints = crosshairs.length
+    })*/
+}
+

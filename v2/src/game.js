@@ -310,6 +310,7 @@ var levelContainer;
 const figureShadowLayer = new PIXI.RenderLayer();
 const figureLayer = new PIXI.RenderLayer({sortableChildren: true});
 const cloudLayer = new PIXI.RenderLayer();
+const fogLayer = new PIXI.RenderLayer();
 const crosshairLayer = new PIXI.RenderLayer();
 const scoreLayer = new PIXI.RenderLayer({sortableChildren: true});
 const overlayLayer = new PIXI.RenderLayer();
@@ -401,20 +402,23 @@ app.textStyleDefault = {
         await PIXI.Assets.load( {alias: 'figureAtlas', src: './gfx/figure.json'}); 
         await PIXI.Assets.load( {alias: 'fenceAtlas', src: './gfx/fence.json'}); 
 
+        
+
         destroyContainer(app, loadingText)
         levelContainer = createLevelContainer(app, level);
-        app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, crosshairLayer, scoreLayer, overlayLayer, debugLayer)
-        addGrass();
-        addHeadline();
-        addLobbyItems(app);
-        addFoods(app);
-        addLevelBoundary(app);
-        addFiguresInitialPool(app);
-        addWinningCeremony(app);
+        app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, fogLayer, crosshairLayer, scoreLayer, overlayLayer, debugLayer)
+        addGrass()
+        addHeadline()
+        addLobbyItems(app)
+        addFoods(app)
+        addLevelBoundary(app)
+        addFiguresInitialPool(app)
+        addFog(app)
+        addWinningCeremony(app)
         addOverlay(app)
-        addDebug(app);
+        addDebug(app)
 
-        initStage();
+        initStage()
         window.requestAnimationFrame(gameLoop);
     }
 )();
