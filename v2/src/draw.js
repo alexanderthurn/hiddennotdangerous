@@ -1247,6 +1247,16 @@ const addFartCloud = (props) => {
 }
 
 const addFog = app => {
+    let uViewPointDefinition = ''
+    let uViewPointExecution = ''
+    let uViewPointUniforms = {}
+
+    for (let i = 0; i < 2; i++) {
+        uViewPointDefinition += `uniform vec2 uViewPoint${i};`
+        uViewPointExecution += `if(${i} < uNumViewPoints) {updateVisibility(pixelPos, uViewPoint${i});}`
+        uViewPointUniforms[`uViewPoint${i}`] = {type: 'vec2<f32>'}
+    }
+
     const fogFilter = new PIXI.Filter({
         glProgram: new PIXI.GlProgram({
             fragment: `
@@ -1255,7 +1265,7 @@ const addFog = app => {
 
             uniform sampler2D uTexture;
             uniform vec2 uResolution;
-            uniform vec2 uViewPoint;
+            ${uViewPointDefinition}
             uniform int uNumViewPoints;
             uniform float uRadius;
 
@@ -1272,11 +1282,7 @@ const addFog = app => {
             void main() {
                 vec2 pixelPos = vec2(vTextureCoord.x, 1.0-vTextureCoord.y)*uResolution;
 
-                for (int i = 0; i < 1; i++) {
-                    if (i >= uNumViewPoints) break;
-
-                    updateVisibility(pixelPos, uViewPoint);
-                }
+                ${uViewPointExecution}
 
                 vec4 fg = texture2D(uTexture, vTextureCoord);
                 fg.a = mix(baseFog, 0.0, visibility);
@@ -1289,8 +1295,8 @@ const addFog = app => {
             myUniforms: {
                 uResolution: {value: [level.width, level.height], type: 'vec2<f32>'},
                 uRadius: {value: detectRadius, type: 'f32'},
-                uViewPoint: {type: 'vec2<f32>'},
-                uNumViewPoints: {type: 'i32'}
+                uNumViewPoints: {type: 'i32'},
+                ...uViewPointUniforms
             },
         },
     });
@@ -1308,9 +1314,13 @@ const addFog = app => {
         fog.visible = game === games.rampage || game === games.rampagev2
 
         const crosshairs = figures.filter(f => f.playerId && f.type === 'crosshair')
+        fogFilter.resources.myUniforms.uniforms.uNumViewPoints = crosshairs.length
         if (crosshairs.length > 0) {
-            fogFilter.resources.myUniforms.uniforms.uNumViewPoints = 1
-            fogFilter.resources.myUniforms.uniforms.uViewPoint = [crosshairs[0].x, crosshairs[0].y]
+            fogFilter.resources.myUniforms.uniforms.uViewPoint0 = [crosshairs[0].x, crosshairs[0].y]
+        }
+
+        if (crosshairs.length > 1) {
+            fogFilter.resources.myUniforms.uniforms.uViewPoint1 = [crosshairs[1].x, crosshairs[1].y]
         }
     });
 
