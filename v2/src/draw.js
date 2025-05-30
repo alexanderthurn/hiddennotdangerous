@@ -1251,7 +1251,7 @@ const addFog = app => {
     let uViewPointExecution = ''
     let uViewPointUniforms = {}
 
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < maxPlayerFigures; i++) {
         uViewPointDefinition += `uniform vec2 uViewPoint${i};`
         uViewPointExecution += `if(${i} < uNumViewPoints) {updateVisibility(pixelPos, uViewPoint${i});}`
         uViewPointUniforms[`uViewPoint${i}`] = {type: 'vec2<f32>'}
