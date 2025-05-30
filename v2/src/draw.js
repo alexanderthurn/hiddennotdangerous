@@ -10,7 +10,7 @@ vec4 filterVertexPosition( void )
     vec2 position = aPosition * uOutputFrame.zw + uOutputFrame.xy;
     
     position.x = position.x * (2.0 / uOutputTexture.x) - 1.0;
-    position.y = position.y * (2.0*uOutputTexture.z / uOutputTexture.y) - uOutputTexture.z;
+    position.y = position.y * (2.0 / uOutputTexture.y) - 1.0;
 
     return vec4(position, 0.0, 1.0);
 }
@@ -987,7 +987,7 @@ const createCrosshair = props => {
     crosshair.attackDuration = 0
     crosshair.attackRectX = 16
     crosshair.attackRectY = 32
-    crosshair.detectRadius = 100
+    crosshair.detectRadius = detectRadius
     crosshair.maxSpeed = 0.32
     crosshair.playerId = player.playerId
     crosshair.player = player
@@ -1257,22 +1257,20 @@ const addFog = app => {
             uniform vec2 uResolution;
             uniform vec2 uViewPoint;
             uniform int uNumViewPoints;
-
-            uniform float uTime;
+            uniform float uRadius;
 
             const float baseFog = 0.5;
-            const float radius = 100.0;
             float visibility = 0.0;
 
             void updateVisibility(vec2 pixelPos, vec2 center) {
                 float dist = distance(pixelPos, center);
-                float softness = radius * 0.3;
-                float localVis = 1.0-smoothstep(radius-softness, radius, dist);
+                float softness = uRadius * 0.3;
+                float localVis = 1.0-smoothstep(uRadius-softness, uRadius, dist);
                 visibility = max(visibility, localVis);
             }
 
             void main() {
-                vec2 pixelPos = vTextureCoord.xy*uResolution.xy;
+                vec2 pixelPos = vec2(vTextureCoord.x, 1.0-vTextureCoord.y)*uResolution;
 
                 for (int i = 0; i < 1; i++) {
                     if (i >= uNumViewPoints) break;
@@ -1289,10 +1287,10 @@ const addFog = app => {
         }),
         resources: {
             myUniforms: {
-                uTime: { value: 0.0, type: 'f32' },
                 uResolution: {value: [level.width, level.height], type: 'vec2<f32>'},
-                uViewPoint: {value: [], type: `vec2<f32>`},
-                uNumViewPoints: {value: 0, type: 'i32'}
+                uRadius: {value: detectRadius, type: 'f32'},
+                uViewPoint: {type: 'vec2<f32>'},
+                uNumViewPoints: {type: 'i32'}
             },
         },
     });
@@ -1307,8 +1305,13 @@ const addFog = app => {
 
     app.ticker.add(() =>
     {
-        fogFilter.resources.myUniforms.uniforms.uViewPoint = [level.width/2, level.height/2]
-        fogFilter.resources.myUniforms.uniforms.uNumViewPoints = 1
+        fog.visible = game === games.rampage || game === games.rampagev2
+
+        const crosshairs = figures.filter(f => f.playerId && f.type === 'crosshair')
+        if (crosshairs.length > 0) {
+            fogFilter.resources.myUniforms.uniforms.uNumViewPoints = 1
+            fogFilter.resources.myUniforms.uniforms.uViewPoint = [crosshairs[0].x, crosshairs[0].y]
+        }
     });
 
     /*app.ticker.add(() => {

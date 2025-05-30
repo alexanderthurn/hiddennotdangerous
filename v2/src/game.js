@@ -33,7 +33,8 @@ var restartStage = false, gameOver, ceremonyOver, lastRoundEndThen, lastWinnerPl
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figuresInitialPool = new Set(), figuresPool = new Set()
-var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, roundsToWin = 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000
+var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, roundsToWin = 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000, detectRadius = 100
+
 var showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = createLevel()
