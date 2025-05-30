@@ -1315,26 +1315,9 @@ const addFog = app => {
 
         const crosshairs = figures.filter(f => f.playerId && f.type === 'crosshair')
         fogFilter.resources.myUniforms.uniforms.uNumViewPoints = crosshairs.length
-        if (crosshairs.length > 0) {
-            fogFilter.resources.myUniforms.uniforms.uViewPoint0 = [crosshairs[0].x, crosshairs[0].y]
-        }
-
-        if (crosshairs.length > 1) {
-            fogFilter.resources.myUniforms.uniforms.uViewPoint1 = [crosshairs[1].x, crosshairs[1].y]
-        }
-    });
-
-    /*app.ticker.add(() => {
-        fog.visible = game === games.rampage || game === games.rampagev2
-
-        const crosshairs = figures.filter(f => f.playerId && f.type === 'crosshair')
-        //const viewData = fogFilter.uniforms.uViewPoints
         crosshairs.forEach((f, i) => {
-            viewData[i * 2 + 0] = f.x
-            viewData[i * 2 + 1] = f.y
+            fogFilter.resources.myUniforms.uniforms[`uViewPoint${i}`] = [f.x, f.y]
         })
-        //fogFilter.uniforms.uNumViewPoints = crosshairs.length
-        numViewPoints = crosshairs.length
-    })*/
+    })
 }
 
