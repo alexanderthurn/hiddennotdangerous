@@ -1310,7 +1310,7 @@ const addFog = app => {
 
     app.ticker.add(() =>
     {
-        //fog.visible = game === games.rampage || game === games.rampagev2
+        fog.visible = game === games.rampage || game === games.rampagev2
 
         const crosshairs = figures.filter(f => f.playerId && f.type === 'crosshair')
         fogFilter.resources.myUniforms.uniforms.uNumViewPoints = crosshairs.length
