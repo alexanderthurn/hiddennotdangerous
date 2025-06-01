@@ -7,17 +7,16 @@ uniform vec4 uOutputTexture;
 
 vec4 filterVertexPosition( void )
 {
-    vec2 position = aPosition * uOutputFrame.zw + uOutputFrame.xy;
-    
-    position.x = position.x * (2.0 / uOutputTexture.x) - 1.0;
-    position.y = position.y * (2.0 / uOutputTexture.y) - 1.0;
+    vec2 position = aPosition * (2.0) - 1.0;
+    position.y *= uOutputTexture.z;
 
     return vec4(position, 0.0, 1.0);
 }
 
 vec2 filterTextureCoord( void )
 {
-    return aPosition;
+    vec2 position = (aPosition * uOutputTexture.xy - uOutputFrame.xy) / uOutputFrame.zw ;
+    return position;
 }
 
 void main(void)
@@ -1280,7 +1279,7 @@ const addFog = app => {
             }
 
             void main() {
-                vec2 pixelPos = vec2(vTextureCoord.x, 1.0-vTextureCoord.y)*uResolution;
+                vec2 pixelPos = vec2(vTextureCoord.x, vTextureCoord.y)*uResolution;
 
                 ${uViewPointExecution}
 
@@ -1311,7 +1310,7 @@ const addFog = app => {
 
     app.ticker.add(() =>
     {
-        fog.visible = game === games.rampage || game === games.rampagev2
+        //fog.visible = game === games.rampage || game === games.rampagev2
 
         const crosshairs = figures.filter(f => f.playerId && f.type === 'crosshair')
         fogFilter.resources.myUniforms.uniforms.uNumViewPoints = crosshairs.length
