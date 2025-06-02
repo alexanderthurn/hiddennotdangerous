@@ -1130,7 +1130,7 @@ const createPlayersText = app => {
 const animateFiguresText = (app, figuresText) => {
     const text = ['Figures with player']
     figures.filter(f => f.playerId).forEach(f => {
-        text.push('playerId: ' + f.playerId + ' x: ' + Math.floor(f.x) + ' y: ' + Math.floor(f.y) + ' Beans: ' + f.beans?.size)
+        text.push('playerId: ' + f.playerId + ' x: ' + Math.floor(f.x) + ' y: ' + Math.floor(f.y) + ' Beans: ' + f.beans?.size + ' Team: ' + f.team)
     })
     figuresText.text = text.join('\n')
     figuresText.y = app.screen.height
@@ -1310,7 +1310,7 @@ const addFog = app => {
 
     app.ticker.add(() =>
     {
-        fog.visible = game === games.rampage || game === games.rampagev2
+        fog.visible = stage === stages.game && (game === games.rampage || game === games.rampagev2)
 
         const crosshairs = figures.filter(f => f.playerId && f.type === 'crosshair')
         fogFilter.resources.myUniforms.uniforms.uNumViewPoints = crosshairs.length

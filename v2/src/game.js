@@ -60,12 +60,14 @@ const games = {
     rampage: {
         color: colors.yellow,
         text: 'RAMPAGE',
-        countdown: 180
+        countdown: 180,
+        initialTeam: 'killer'
     },
     rampagev2: {
         color: colors.purple,
         text: 'RAMPAGE V2',
-        countdown: 180
+        countdown: 180,
+        initialTeam: 'killer'
     },
     vip: {
         color: colors.blue,
@@ -942,6 +944,7 @@ function handleInput(players, figures, dtProcessed) {
                 figure.isDeathDetected = false
                 figure.playerId = p.playerId
                 figure.player = p
+                figure.team = game?.initialTeam
                 addPlayerScore(figure)
                 if (stage === stages.startLobby) {
                     figure.x = level.width*0.04+ Math.random() * level.width*0.4
