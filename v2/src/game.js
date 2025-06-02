@@ -512,6 +512,11 @@ function initStage() {
     }
 
     // Figuren initialisieren
+    if (stage === stages.gameLobby && game.initialTeam) {
+        figures.filter(figure => figure.playerId).forEach(figure => {
+            switchTeam(figure, game.initialTeam)
+        })
+    }
     if (game === games.vip) {
         if (stage === stages.gameLobby) {
             figures.filter(figure => figure.team === 'vip').forEach(figure => {
@@ -523,18 +528,11 @@ function initStage() {
     } else if (game === games.rampage || game === games.rampagev2) {
         initRandomSpriteFigures(figures.filter(figure => figure.team !== 'sniper'), ['baby', 'girl', 'vip'])
 
-        if (stage === stages.gameLobby) {
-            figures.filter(figure => figure.playerId).forEach(figure => {
-                //TODO initialTeam
-                switchTeam(figure, 'killer')
-            })
-        } else {
-            figures.filter(figure => figure.team !== 'sniper').forEach(figure => initRandomPositionFigure(figure))
-            figures.filter(figure => figure.type === 'crosshair').forEach(figure => initCrosshair(figure))
-            if (roundCounter === 1) {
-                initSniperPositions(figures.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
-            }
-        } 
+        figures.filter(figure => figure.team !== 'sniper').forEach(figure => initRandomPositionFigure(figure))
+        figures.filter(figure => figure.type === 'crosshair').forEach(figure => initCrosshair(figure))
+        if (roundCounter === 1) {
+            initSniperPositions(figures.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
+        }
     } else if (stage !== stages.gameLobby) {
         figures.forEach(figure => {
             initRandomPositionFigure(figure)
