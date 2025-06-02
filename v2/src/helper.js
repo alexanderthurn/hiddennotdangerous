@@ -430,6 +430,28 @@ const initSniperPositions = figures => {
     figures.forEach(figure => initRandomOutsidePositionFigure(figure))
 }
 
+const initRandomSpriteFigures = (figures, sprites) => {
+    const shuffledFigures = shuffle(figures)
+    const minFiguresPerSprite = Math.floor(shuffledFigures.length/sprites.length)
+    const numberSpritesWithMoreFigures = shuffledFigures.length % sprites.length
+
+    for (let i = 0; i < sprites.length; i++) {
+        for (let j = 0; j < minFiguresPerSprite; j++) {
+            const figure = shuffledFigures[i*minFiguresPerSprite+j]
+            const sprite = sprites[i]
+            figure.currentSprite = sprite
+            figure.defaultSprite = sprite
+        }
+    }
+
+    for (let i = 0; i < numberSpritesWithMoreFigures; i++) {
+        const figure = shuffledFigures[i+sprites.length*minFiguresPerSprite]
+        const sprite = sprites[i]
+        figure.currentSprite = sprite
+        figure.defaultSprite = sprite
+    }
+}
+
 const initVIPGamePositions = figures => {
 
     const neutralPlayerFigures = shuffle(figures.filter(figure => figure.playerId && !figure.team))
@@ -578,7 +600,7 @@ const winRoundFigures = winnerFigures => {
 
 const switchTeam = (figure, team) => {
     figure.team = team
-    figure.currentSprite = teams[team]?.sprite || 'baby'
+    figure.currentSprite = teams[team]?.sprite || figure.defaultSprite
     figure.maxSpeed = teams[team]?.maxSpeed || 0.08
     figure.walkRectLength = teams[team]?.walkRectLength
 }

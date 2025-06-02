@@ -219,8 +219,7 @@ const teams = {
     },
     killer: {
         color: colors.red,
-        label: 'Killers',
-        sprite: 'baby'
+        label: 'Killers'
     },
     sniper: {
         color: colors.blue,
@@ -461,6 +460,8 @@ function initStage() {
         figuresPool = new Set(figuresInitialPool)
 
         figures.filter(figure => figure.type === 'fighter').forEach(figure => {
+            figure.currentSprite = 'baby'
+            figure.defaultSprite = 'baby'
             figure.inactive = false
             figure.playerId = null
             figure.player = null
@@ -520,8 +521,11 @@ function initStage() {
             initVIPGamePositions(figures)
         }
     } else if (game === games.rampage || game === games.rampagev2) {
+        initRandomSpriteFigures(figures.filter(figure => figure.team !== 'sniper'), ['baby', 'girl', 'vip'])
+
         if (stage === stages.gameLobby) {
             figures.filter(figure => figure.playerId).forEach(figure => {
+                //TODO initialTeam
                 switchTeam(figure, 'killer')
             })
         } else {

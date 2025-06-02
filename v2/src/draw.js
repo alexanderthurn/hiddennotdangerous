@@ -904,6 +904,7 @@ const createFigure = (app, spritesheet, props) => {
 
     figure.bodyHeight = body.height
     figure.currentSprite = 'baby'
+    figure.defaultSprite = 'baby'
     figure.addChild(body, attackArc, marker, shadow)
     figureShadowLayer.attach(shadow)
     figureLayer.attach(body)
