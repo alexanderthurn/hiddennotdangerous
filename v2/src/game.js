@@ -888,13 +888,14 @@ function updateGame(figures, dt, dtProcessed) {
             })
         })
 
-        const noSnipers = [...killers, ...noTeam]
-        noSnipers.forEach(fig => {
-            fig.isDetected = false
-            snipers.forEach(f => {
-                detectFigure(f, fig)
+        if (stage === stages.game) {
+            ([...killers, ...noTeam]).forEach(fig => {
+                fig.isDetected = false
+                snipers.forEach(f => {
+                    detectFigure(f, fig)
+                })
             })
-        })
+        }
     } else {
         const assassinsAlive = figuresAlive.filter(f => f.team === 'assassin')
         const guardsAlive = figuresAlive.filter(f => f.team === 'guard')
