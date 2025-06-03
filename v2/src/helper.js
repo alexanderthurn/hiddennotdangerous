@@ -432,21 +432,22 @@ const initSniperPositions = figures => {
 
 const initRandomSpriteFigures = (figures, sprites) => {
     const shuffledFigures = shuffle(figures)
-    const minFiguresPerSprite = Math.floor(shuffledFigures.length/sprites.length)
-    const numberSpritesWithMoreFigures = shuffledFigures.length % sprites.length
+    const shuffledSprites = shuffle(sprites)
+    const minFiguresPerSprite = Math.floor(shuffledFigures.length/shuffledSprites.length)
+    const numberSpritesWithMoreFigures = shuffledFigures.length % shuffledSprites.length
 
-    for (let i = 0; i < sprites.length; i++) {
+    for (let i = 0; i < shuffledSprites.length; i++) {
         for (let j = 0; j < minFiguresPerSprite; j++) {
             const figure = shuffledFigures[i*minFiguresPerSprite+j]
-            const sprite = sprites[i]
+            const sprite = shuffledSprites[i]
             figure.currentSprite = sprite
             figure.defaultSprite = sprite
         }
     }
 
     for (let i = 0; i < numberSpritesWithMoreFigures; i++) {
-        const figure = shuffledFigures[i+sprites.length*minFiguresPerSprite]
-        const sprite = sprites[i]
+        const figure = shuffledFigures[i+shuffledSprites.length*minFiguresPerSprite]
+        const sprite = shuffledSprites[i]
         figure.currentSprite = sprite
         figure.defaultSprite = sprite
     }
