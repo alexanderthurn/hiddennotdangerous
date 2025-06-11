@@ -976,10 +976,11 @@ const createCrosshair = props => {
 
     const sprite = PIXI.Sprite.from('crosshair')
     sprite.anchor.set(0.5)
-    sprite.scale = 2
+    sprite.scale = 3
 
     const ammoText = new PIXI.BitmapText({
         style: app.textStyleDefault,
+        scale: 2,
         anchor: {x: 1, y: 1}
     })
 
