@@ -974,11 +974,18 @@ const addFiguresInitialPool = (app) => {
 const createCrosshair = props => {
     const {x, y, player, team, ammo} = props
 
-    const crosshair = PIXI.Sprite.from('crosshair')
+    const sprite = PIXI.Sprite.from('crosshair')
+    sprite.anchor.set(0.5)
+    sprite.scale = 2
+
+    const ammoText = new PIXI.BitmapText({
+        style: app.textStyleDefault,
+        anchor: {x: 1, y: 1}
+    })
+
+    const crosshair = new PIXI.Container()
     crosshair.x = x
     crosshair.y = y
-    crosshair.scale = 2
-    crosshair.anchor.set(0.5)
     crosshair.alpha = 0.5
     crosshair.ammo = ammo || Infinity
     crosshair.maxAmmo = ammo || Infinity
@@ -992,11 +999,19 @@ const createCrosshair = props => {
     crosshair.playerId = player.playerId
     crosshair.player = player
     crosshair.team = team
-    crosshair.tint = player.crosshairColor
     crosshair.type = 'crosshair'
+    crosshair.tint = player.crosshairColor
 
+    crosshair.addChild(sprite, ammoText)
     levelContainer.addChild(crosshair)
     crosshairLayer.attach(crosshair)
+
+    addAnimation(crosshair, () => {
+        ammoText.x = crosshair.width/2
+        ammoText.y = crosshair.height/2
+        ammoText.visible = crosshair.ammo < Infinity
+        ammoText.text = crosshair.maxAmmo
+    })
 
     return crosshair
 }
@@ -1068,7 +1083,7 @@ const animatePauseOverlay = (app, overlay, time) => {
 }
 
 const createPauseOverlay = app => {
-    const overlay = new PIXI.Container();
+    const overlay = new PIXI.Container()
 
     const background = new PIXI.Graphics().rect(0, 0, app.screen.width, app.screen.height)
     .fill({alpha: 0.3, color: colors.darkBrown})
