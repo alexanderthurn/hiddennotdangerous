@@ -528,13 +528,12 @@ function initStage() {
     } else if (game === games.rampage || game === games.rampagev2) {
         initRandomSpriteFigures(figures.filter(figure => figure.team !== 'sniper'), ['baby', 'girl', 'vip'])
 
-        figures.filter(figure => figure.team !== 'sniper').forEach(figure => initRandomPositionFigure(figure))
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => initCrosshair(figure))
         if (roundCounter === 1) {
             initSniperPositions(figures.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
         }
     } else if (stage !== stages.gameLobby) {
-        figures.forEach(figure => {
+        figures.filter(figure => figure.team !== 'sniper').forEach(figure => {
             initRandomPositionFigure(figure)
         })
     }
