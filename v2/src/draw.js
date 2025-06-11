@@ -1010,7 +1010,7 @@ const createCrosshair = props => {
         ammoText.x = crosshair.width/2
         ammoText.y = crosshair.height/2
         ammoText.visible = crosshair.ammo < Infinity
-        ammoText.text = crosshair.maxAmmo
+        ammoText.text = crosshair.ammo
     })
 
     return crosshair
