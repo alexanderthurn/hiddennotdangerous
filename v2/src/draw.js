@@ -985,8 +985,8 @@ const createCrosshair = props => {
     crosshair.attachRadius = 80
     crosshair.attackBreakDuration = 500
     crosshair.attackDuration = 0
-    crosshair.attackRectX = 16
-    crosshair.attackRectY = 32
+    crosshair.attackRectX = 32
+    crosshair.attackRectY = 64
     crosshair.detectRadius = detectRadius
     crosshair.maxSpeed = 0.32
     crosshair.playerId = player.playerId
