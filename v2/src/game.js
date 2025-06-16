@@ -339,6 +339,8 @@ app.textStyleDefault = {
         PIXI.Assets.addBundle('main', {
             background_grass: './gfx/background_grass.jpg',
             crosshair: './gfx/crosshair.svg',
+            fenceAtlas: './gfx/fence.json',
+            figureAtlas: './gfx/figure.json',
             fontTTF: './gfx/'+fontFamilyName+'.ttf',
         });
         await PIXI.Assets.loadBundle('main');
@@ -398,13 +400,7 @@ app.textStyleDefault = {
                     width: 6,
                 }
             }
-        });
-    
-
-        await PIXI.Assets.load( {alias: 'figureAtlas', src: './gfx/figure.json'}); 
-        await PIXI.Assets.load( {alias: 'fenceAtlas', src: './gfx/fence.json'}); 
-
-        
+        });        
 
         destroyContainer(app, loadingText)
         levelContainer = createLevelContainer(app, level);
