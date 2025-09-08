@@ -828,7 +828,7 @@ function updateGame(figures, dt, dtProcessed) {
     }
 
     // circle of death
-    if (stage !== stages.startLobby && game === games.battleRoyale) {
+    if (stage === stages.game && game === games.battleRoyale) {
         const scale =  1 - (dtProcessed - startTime)/(game.countdown*1000)
         circleOfDeath.radius = scale*circleOfDeath.startRadius
         figuresAlive.filter(f => f.type === 'fighter' ).forEach(f => {
