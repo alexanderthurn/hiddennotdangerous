@@ -326,7 +326,7 @@ const destroyContainer = (app, container) => {
         app.ticker.remove(container.tickerCallback)
 
         const children = [...container.children]
-        children.forEach(child => destroyContainer(app, child.destroy()))
+        children.forEach(child => destroyContainer(app, child))
         
         container.destroy()
     }
