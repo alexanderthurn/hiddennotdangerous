@@ -809,10 +809,11 @@ const animateFigure = (figure, spritesheet) => {
         shadow.textures = spritesheet.animations[animation]
     }
 
-    body.anchor.x = body.textures[body.currentFrame].defaultAnchor.x
-    body.anchor.y = body.textures[body.currentFrame].defaultAnchor.y
-    shadow.anchor.x = 0.1
-    shadow.anchor.y = body.textures[body.currentFrame].defaultAnchor.y
+    let anchor = body.textures[body.currentFrame].defaultAnchor || {x: 0.5, y: 0.75}
+    body.anchor.x = anchor.x
+    body.anchor.y = anchor.y
+    shadow.anchor.x = 0.3
+    shadow.anchor.y = anchor.y
     
     if (!(figure.speed === 0 || !windowHasFocus || restartStage) && !body.playing) {
         body.play()

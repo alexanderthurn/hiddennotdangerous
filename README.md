@@ -4,8 +4,7 @@ __Blow your way to freedom, just don’t blow your cover!__
 
 ## Preview
 
-[V1 Live Preview](https://alexanderthurn.github.io/hiddennotdangerous/v1)
-
+[V1 Live Preview](https://alexanderthurn.github.io/hiddennotdangerous/v1)  
 [V2 Live Preview](https://alexanderthurn.github.io/hiddennotdangerous/v2)
 
 ## Game Description
@@ -26,6 +25,21 @@ Will you be the last baby standing... or the first one blown away?
 - Install python3
 - Open a terminal and run `python3 -m http.server 3333`
 - Open `http://localhost:3333` in your webbrowser. If it says it is insecure due to http, open it in another browser or in private mode
+
+To generate characters:
+- Go to https://vitruvianstudio.github.io/
+- Create your character and export current animation while walking is active
+- Rename the zip file to your character name, e.g. professor.zip
+- Save it in misc/lpc/vitruvian/
+- Open a terminal and cd into misc/lpc
+- run vitruvianstudio.sh vitruvian/professor.zip
+- It exports all sprites into misc/lpc/in/professor/
+- Run tpall.sh
+- It packs all images in all subdirectories of /misc/lpc/in/ and puts them in /misc/lpc/out
+- Open figure.tps with Texture Packer
+- Publish spritesheet
+- It exports a new figure.json and figure.png in v2/gfx/
+
 
 ## Resources
 
@@ -53,6 +67,27 @@ Will you be the last baby standing... or the first one blown away?
 
 ## Licenses
 
-- Code: [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-- Pixabay Resources: <a href="https://pixabay.com/service/license-summary/">pixabay.com</a>
-- OpenGameArt Resources: <a href="https://opengameart.org/content/faq">opengameart.org</a>
+### Code
+- [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)  
+- This project is licensed under the **GNU GPL v3.0 _or (at your option) any later version_**.  
+- See the `LICENSE` file for details.  
+
+### Assets
+- Assets come from multiple authors and carry various licenses (GPL-3.0, CC-BY 3.0, CC-BY-SA 3.0, OGA-BY 3.0, etc.).  
+- **Full attribution is provided in [`CREDITS.csv`](./CREDITS.csv).**  
+- Sources and license terms:  
+  - OpenGameArt: https://opengameart.org/content/faq  
+  - Pixabay: https://pixabay.com/service/license-summary/  
+  - Vecteezy: https://www.vecteezy.com/terms  
+
+
+# TODO 
+
+  - https://vitruvianstudio.github.io/  add more characters
+  - add credits screen including:
+
+  Sprites by: Johannes Sjölund (wulax), Michael Whitlock (bigbeargames), Matthew Krohn (makrohn), Nila122, David Conway Jr. (JaidynReiman), Carlo Enrico Victoria (Nemisys), Thane Brimhall (pennomi), laetissima, bluecarrot16, Luke Mehl, Benjamin K. Smith (BenCreating), MuffinElZangano, Durrani, kheftel, Stephen Challener (Redshrike), William.Thompsonj, Marcel van de Steeg (MadMarcel), TheraHedwig, Evert, Pierre Vigier (pvigier), Eliza Wyatt (ElizaWy), Johannes Sjölund (wulax), Sander Frenken (castelonia), dalonedrau, Lanea Zimmerman (Sharm), Manuel Riecke (MrBeast), Barbara Riviera, Joe White, Mandi Paugh, Shaun Williams, Daniel Eddeland (daneeklu), Emilio J. Sanchez-Sierra, drjamgo, gr3yh47, tskaufma, Fabzy, Yamilian, Skorpio, kheftel, Tuomo Untinen (reemax), Tracy, thecilekli, LordNeo, Stafford McIntyre, PlatForge project, DCSS authors, DarkwallLKE, Charles Sanchez (CharlesGabriel), Radomir Dopieralski, macmanmatty, Cobra Hubbard (BlueVortexGames), Inboxninja, kcilds/Rocetti/Eredah, Napsio (Vitruvian Studio), The Foreman, AntumDeluge
+Sprites contributed as part of the Liberated Pixel Cup project from OpenGameArt.org: http://opengameart.org/content/lpc-collection
+License: Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA 3.0) http://creativecommons.org/licenses/by-sa/3.0/
+Detailed credits: [LINK TO CREDITS.CSV FILE]
+- https://github.com/liberatedpixelcup/Universal-LPC-Spritesheet-Character-Generator/blob/master/README.md
