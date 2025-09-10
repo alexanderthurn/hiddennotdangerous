@@ -828,7 +828,7 @@ const animateFigure = (figure, spritesheet) => {
     }
 
     if (figure.speed > 0) {
-        const animationSpeedFactor = 1.5
+        const animationSpeedFactor = 2.5
         body.animationSpeed = animationSpeedFactor * figure.speed
         shadow.animationSpeed = animationSpeedFactor * figure.speed
     }

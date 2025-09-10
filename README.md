@@ -31,12 +31,13 @@ To generate characters:
 - Create your character and export current animation while walking is active
 - Rename the zip file to your character name, e.g. professor.zip
 - Save it in misc/lpc/vitruvian/
-- Open a terminal and cd into misc/lpc
-- run vitruvianstudio.sh vitruvian/professor.zip
+- Open a terminal 
+- `cd misc/lpc`
+- `sh vitruvianstudio.sh vitruvian/professor.zip`
 - It exports all sprites into misc/lpc/in/professor/
-- Run tpall.sh
+- `sh tpall.sh`
 - It packs all images in all subdirectories of /misc/lpc/in/ and puts them in /misc/lpc/out
-- Open figure.tps with Texture Packer
+- `TexturePacker figure.tps`
 - Publish spritesheet
 - It exports a new figure.json and figure.png in v2/gfx/
 
@@ -85,7 +86,9 @@ To generate characters:
 
   - https://vitruvianstudio.github.io/  add more characters
   - add credits screen including:
+  - more animations with https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator
 
+  
   Sprites by: Johannes Sjölund (wulax), Michael Whitlock (bigbeargames), Matthew Krohn (makrohn), Nila122, David Conway Jr. (JaidynReiman), Carlo Enrico Victoria (Nemisys), Thane Brimhall (pennomi), laetissima, bluecarrot16, Luke Mehl, Benjamin K. Smith (BenCreating), MuffinElZangano, Durrani, kheftel, Stephen Challener (Redshrike), William.Thompsonj, Marcel van de Steeg (MadMarcel), TheraHedwig, Evert, Pierre Vigier (pvigier), Eliza Wyatt (ElizaWy), Johannes Sjölund (wulax), Sander Frenken (castelonia), dalonedrau, Lanea Zimmerman (Sharm), Manuel Riecke (MrBeast), Barbara Riviera, Joe White, Mandi Paugh, Shaun Williams, Daniel Eddeland (daneeklu), Emilio J. Sanchez-Sierra, drjamgo, gr3yh47, tskaufma, Fabzy, Yamilian, Skorpio, kheftel, Tuomo Untinen (reemax), Tracy, thecilekli, LordNeo, Stafford McIntyre, PlatForge project, DCSS authors, DarkwallLKE, Charles Sanchez (CharlesGabriel), Radomir Dopieralski, macmanmatty, Cobra Hubbard (BlueVortexGames), Inboxninja, kcilds/Rocetti/Eredah, Napsio (Vitruvian Studio), The Foreman, AntumDeluge
 Sprites contributed as part of the Liberated Pixel Cup project from OpenGameArt.org: http://opengameart.org/content/lpc-collection
 License: Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA 3.0) http://creativecommons.org/licenses/by-sa/3.0/

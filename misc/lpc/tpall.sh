@@ -6,7 +6,7 @@ OUT="./out"
 mkdir -p "$OUT"
 
 # Ranges und Richtungen (Ihre Reihenfolge)
-starts=(0 10 16 24)
+starts=(0 8 16 24)
 dirs=(up left down right)
 
 shopt -s nullglob
@@ -21,7 +21,7 @@ for SRC in "$IN"/*; do
   for i in "${!starts[@]}"; do
     start="${starts[$i]}"
     dir="${dirs[$i]}"
-    for offset in 0 1 2 3; do
+    for offset in 0 1 2 3 4 5 6 7; do
       idx=$((start + offset))
       src="$SRC/walk-$idx.png"
       dst="$OUT/${NAME}_${dir}_${offset}.png"
