@@ -378,11 +378,12 @@ const animateTeamSwitcher = (button, games) => {
 }
 
 const createTeamSwitcher = (app, props, lobbyContainer) => {
-    const {x, y, games, team} = props
+    const {x, y, team} = props
     const width = 128
     const height = 128
     const newX = x - width/2
     const newY = y - height/2
+    const games = teams[team].games
 
     const button = new PIXI.Container()
 

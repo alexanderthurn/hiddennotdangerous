@@ -55,7 +55,7 @@ const games = {
     battleRoyale: {
         color: colors.red,
         text: 'BATTLE ROYALE',
-        countdown: 90,
+        countdown: 90
     },
     rampage: {
         color: colors.yellow,
@@ -178,8 +178,11 @@ const gameStartButtonDefinition = () => ({
     outerRadius: level.width*0.15,
     loadingSpeed: 1/3000,
     execute: () => {
-        restartStage = true
-        nextStage = stages.game
+        const maxPlayers = figures.filter(f => f.playerId && f.type === 'fighter').length
+        if (!Object.values(teams).filter(team => team.playerTeam && team.games.has(game)).some(team => team.size == maxPlayers)) {
+            restartStage = true
+            nextStage = stages.game
+        }
     }
 })
 
@@ -205,33 +208,48 @@ const rectangleButtonsDefinition = () => ({
 const teams = {
     assassin: {
         color: colors.red,
+        games: new Set([games.vip]),
         label: 'Assassins',
         walkRectLength: 300,
         maxSpeed: 0.08,
-        sprite: 'girl'
+        playerTeam: true,
+        sprite: 'girl',
+        size: 0
     },
     guard: {
         color: colors.blue,
+        games: new Set([games.vip]),
         label: 'Guards',
         walkRectLength: 300,
         maxSpeed: 0.06,
-        sprite: 'boy'
+        playerTeam: true,
+        sprite: 'boy',
+        size: 0
     },
     killer: {
         color: colors.red,
-        label: 'Killers'
+        games: new Set([games.rampage, games.rampagev2]),
+        label: 'Killers',
+        playerTeam: true,
+        size: 0
     },
     sniper: {
         color: colors.blue,
+        games: new Set([games.rampage, games.rampagev2]),
         label: 'Snipers',
-        sprite: 'boy'
+        playerTeam: true,
+        sprite: 'boy',
+        size: 0
     },
     vip: {
         color: colors.green,
+        games: new Set([games.vip]),
         label: 'VIPs',
         walkRectLength: 150,
         maxSpeed: 0.04,
-        sprite: 'vip'
+        playerTeam: false,
+        sprite: 'vip',
+        size: 0
     }
 }
 
@@ -245,25 +263,21 @@ const teamSwitchersDefinition = () => ({
     assassin: {
         x: level.width*0.25,
         y: level.height*0.5,
-        games: new Set([games.vip]),
         team: 'assassin'
     },
     guard: {
         x: level.width*0.75,
         y: level.height*0.5,
-        games: new Set([games.vip]),
         team: 'guard'
     },
     killer: {
         x: level.width*0.4,
         y: level.height*0.75,
-        games: new Set([games.rampage, games.rampagev2]),
         team: 'killer'
     },
     sniper: {
         x: level.width*0.6,
         y: level.height*0.75,
-        games: new Set([games.rampage, games.rampagev2]),
         team: 'sniper'
     }
 })
