@@ -811,6 +811,7 @@ function updateGame(figures, dt, dtProcessed) {
                 if (allPlayersSameTeam) {
                     btn.loadingSpeed = 0
                 }
+                console.log(allPlayersSameTeam, btn.loadingSpeed, teams['killer'].size, allPlayers)
                 aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers);
             } else {
                 aimLoadingPercentage = btn.playersNear.length > 0 ? 1 : 0;
@@ -961,7 +962,7 @@ function handleInput(players, figures, dtProcessed) {
                 figure.isDeathDetected = false
                 figure.playerId = p.playerId
                 figure.player = p
-                figure.team = game?.initialTeam
+                switchTeam(figure, game?.initialTeam)
                 addPlayerScore(figure)
                 if (stage === stages.startLobby) {
                     figure.x = level.width*0.04+ Math.random() * level.width*0.4
