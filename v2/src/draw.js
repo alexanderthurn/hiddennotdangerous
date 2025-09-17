@@ -99,6 +99,8 @@ const animateGameStartButton = button => {
     let text = 'Walk here to\nSTART\n\n'+button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
     if (dtProcessed - startTime <= 5000) {
         text = 'PREPARE\nfor the game'
+    } else if (button.allPlayersSameTeam) {
+        text = 'SWITCH TEAM\nAll players in same team'
     } else if (button.playersPossible?.length === 1) {
         text = 'Walk here to\nSTART\n\nmin 2 players\nor 1 player +1 bot'
     } else if (button.playersPossible?.length > 1 && button.playersNear?.length === button.playersPossible?.length ) {

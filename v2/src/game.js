@@ -811,7 +811,6 @@ function updateGame(figures, dt, dtProcessed) {
                 if (allPlayersSameTeam) {
                     btn.loadingSpeed = 0
                 }
-                console.log(allPlayersSameTeam, btn.loadingSpeed, teams['killer'].size, allPlayers)
                 aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers);
             } else {
                 aimLoadingPercentage = btn.playersNear.length > 0 ? 1 : 0;
