@@ -296,7 +296,7 @@ function toggleMusic() {
 }
 
 const loadButton = (btn, aimLoadingPercentage) => {
-    if (btn.loadingSpeed) {
+    if (btn.loadingSpeed !== undefined) {
         if (btn.loadingPercentage < aimLoadingPercentage) {
             btn.loadingPercentage += btn.loadingSpeed * dt;
             btn.loadingPercentage = Math.min(btn.loadingPercentage, aimLoadingPercentage);

@@ -151,7 +151,7 @@ const gameVoteButtonDefinition = () => ({
     y: level.height*0.5,
     innerRadius: level.width*0.1,
     outerRadius: level.width*0.15,
-    loadingSpeed: 1/3000,
+    defaultLoadingSpeed: 1/3000,
     getExecute: button => () => button.playersNear.forEach(figure => figure.player.vote = button.gameId)
 })
 
@@ -160,7 +160,7 @@ const lobbyStartButtonDefinition = () => ({
     y: level.height*0.5,
     innerRadius: level.width*0.1,
     outerRadius: level.width*0.15,
-    loadingSpeed: 1/3000,
+    defaultLoadingSpeed: 1/3000,
     execute: () => {
         restartStage = true
         const gamesValues = Object.values(games)
@@ -176,13 +176,10 @@ const gameStartButtonDefinition = () => ({
     y: level.height*0.5,
     innerRadius: level.width*0.1,
     outerRadius: level.width*0.15,
-    loadingSpeed: 1/3000,
+    defaultLoadingSpeed: 1/3000,
     execute: () => {
-        const maxPlayers = figures.filter(f => f.playerId && f.type === 'fighter').length
-        if (!Object.values(teams).filter(team => team.playerTeam && team.games.has(game)).some(team => team.size == maxPlayers)) {
-            restartStage = true
-            nextStage = stages.game
-        }
+        restartStage = true
+        nextStage = stages.game
     }
 })
 
@@ -192,7 +189,7 @@ const rectangleButtonsDefinition = () => ({
         y: level.height*0.12,
         width: level.width*0.15,
         height: level.height*0.1,
-        loadingSpeed: 1/2500,
+        defaultLoadingSpeed: 1/2500,
         execute: toggleMusic
     },
     bots: {
@@ -200,7 +197,7 @@ const rectangleButtonsDefinition = () => ({
         y: level.height*0.12 + level.height*0.1 + 20,
         width: level.width*0.15,
         height: level.height*0.1,
-        loadingSpeed: 1/2000,
+        defaultLoadingSpeed: 1/2000,
         execute: toggleBots
     }
 })
@@ -799,14 +796,21 @@ function updateGame(figures, dt, dtProcessed) {
     if (stage === stages.startLobby || stage === stages.gameLobby) {
         const minimumPlayers = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
         const playersPossible = figures.filter(f => f.playerId && f.playerId[0] !== 'b' && f.type === 'fighter')
+        const allPlayers = figures.filter(f => f.playerId && f.type === 'fighter')
+        const allPlayersSameTeam = Object.values(teams).filter(team => team.playerTeam && team.games.has(game)).some(team => team.size == allPlayers.length)
 
         Object.values(buttons).forEach(btn => {
             if (!btn.visible) return
+            btn.loadingSpeed = btn.defaultLoadingSpeed
             btn.playersPossible = playersPossible
             btn.playersNear = playersPossible.filter(f => !f.isDead && btn.isInArea(f))
             
             let aimLoadingPercentage
             if (btn === buttons.startGame || btn === buttons.selectGame) {
+                btn.allPlayersSameTeam = allPlayersSameTeam
+                if (allPlayersSameTeam) {
+                    btn.loadingSpeed = 0
+                }
                 aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers);
             } else {
                 aimLoadingPercentage = btn.playersNear.length > 0 ? 1 : 0;

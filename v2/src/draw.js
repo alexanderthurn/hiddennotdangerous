@@ -276,10 +276,10 @@ const animateRectangleButton = button => {
 }
 
 const createRectangleButton = (props, lobbyContainer) => {
-    const {x, y, width, height, loadingPercentage, loadingSpeed, execute} = props
+    const {x, y, width, height, loadingPercentage, defaultLoadingSpeed, execute} = props
 
     let button = new PIXI.Container()
-    button = Object.assign(button, {x, y, loadingPercentage, loadingSpeed, execute})
+    button = Object.assign(button, {x, y, loadingPercentage, defaultLoadingSpeed, execute})
     button.isInArea = f => new PIXI.Rectangle(x, y, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
 
     const loadingBar = new PIXI.Graphics()
