@@ -35,7 +35,7 @@ var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figuresInitialPool = new Set(), figuresPool = new Set()
 var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, roundsToWin = 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000, detectRadius = 200
 
-var showDebug = false
+var allPlayersSameTeam, showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = createLevel()
 
@@ -797,7 +797,7 @@ function updateGame(figures, dt, dtProcessed) {
         const minimumPlayers = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
         const playersPossible = figures.filter(f => f.playerId && f.playerId[0] !== 'b' && f.type === 'fighter')
         const allPlayers = figures.filter(f => f.playerId && f.type === 'fighter')
-        const allPlayersSameTeam = Object.values(teams).filter(team => team.playerTeam && team.games.has(game)).some(team => team.size == allPlayers.length)
+        allPlayersSameTeam = Object.values(teams).filter(team => team.playerTeam && team.games.has(game)).some(team => team.size == allPlayers.length)
 
         Object.values(buttons).forEach(btn => {
             if (!btn.visible) return
@@ -807,7 +807,6 @@ function updateGame(figures, dt, dtProcessed) {
             
             let aimLoadingPercentage
             if (btn === buttons.startGame || btn === buttons.selectGame) {
-                btn.allPlayersSameTeam = allPlayersSameTeam
                 if (allPlayersSameTeam) {
                     btn.loadingSpeed = 0
                 }
