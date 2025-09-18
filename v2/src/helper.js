@@ -559,7 +559,7 @@ const attackFigure = (figureAttacker, figureAttacked) => {
             killFigure(figureAttacked)
             return true
         }
-    } else if (new PIXI.Rectangle(figureAttacker.x-figureAttacker.attackRectX/2, figureAttacker.y-figureAttacker.attackRectY/2, figureAttacker.attackRectX, figureAttacker.attackRectY).contains(figureAttacked.x, figureAttacked.y)) {
+    } else if (new PIXI.Rectangle(figureAttacker.lastAttackX-figureAttacker.attackRectX/2, figureAttacker.lastAttackY-figureAttacker.attackRectY/2, figureAttacker.attackRectX, figureAttacker.attackRectY).contains(figureAttacked.x, figureAttacked.y)) {
         killFigure(figureAttacked)
         return true
     }

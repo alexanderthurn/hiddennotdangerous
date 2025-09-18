@@ -821,8 +821,24 @@ function updateGame(figures, dt, dtProcessed) {
         })
     }
 
-    figures.filter(f => f.speed > 0).forEach(f => {
-        let xyNew = move(f.x, f.y, f.direction,f.speed, dt)
+    figures.filter(f => f.speed > 0 || f.recoilSpeed).forEach(f => {
+        let xyNew = {x: f.x, y: f.y}
+
+        // player movement
+        if (f.speed > 0) {
+            xyNew = move(xyNew.x, xyNew.y, f.direction,f.speed, dt)
+        }
+        
+        // recoil movement
+        if (f.recoilSpeed && dtProcessed-f.lastAttackTime <= f.recoilDuration) {
+            if (!f.recoilAngle) {
+                f.recoilAngle = Math.random()*2*Math.PI
+            }
+            xyNew = move(xyNew.x, xyNew.y, f.recoilAngle, f.recoilSpeed, dt)
+        } else if (f.recoilSpeed && dtProcessed-f.lastAttackTime > f.recoilDuration) {
+            f.recoilAngle = undefined
+        }
+        
         if (xyNew) {
             [f.x, f.y] = cropXY(xyNew.x, xyNew.y, level)
         }
@@ -991,6 +1007,8 @@ function handleInput(players, figures, dtProcessed) {
 
                     if (f.type === 'crosshair') {
                         f.ammo--
+                        f.lastAttackX = f.x
+                        f.lastAttackY = f.y
                         //playAudioPool(soundShootPool);
                     } else {
                         let xyNew = move(f.x, f.y, f.direction+deg2rad(180),f.attackDistance*0.5, 1)
