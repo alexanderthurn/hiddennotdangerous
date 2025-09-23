@@ -172,7 +172,6 @@ const gameStartButtonDefinition = () => ({
     x: level.width*0.5,
     y: level.height*0.5,
     innerRadius: level.width*0.1,
-    outerRadius: level.width*0.15,
     defaultLoadingSpeed: 1/3000,
     execute: () => {
         restartStage = true

@@ -270,6 +270,39 @@ const addNetworkQrCode = (app, lobbyContainer) => {
         qrCodeContainer.visible = (stage === stages.startLobby)
     })
 }
+
+const addGameDescription = (app, lobbyContainer) => { 
+    const gameDescription = new PIXI.BitmapText({
+        text: '',
+        style: {...app.textStyleDefault}
+    });
+
+    gameDescription.anchor.set(0, 0)
+    gameDescription.x = level.width*0.65
+    gameDescription.y = level.height*0.12
+
+    lobbyContainer.addChild(gameDescription)
+
+    app.ticker.add(() => {
+        gameDescription.visible = stage === stages.gameLobby
+        switch (game) {
+            case games.vip:
+                gameDescription.text = 'Piggies unter attack!'
+                    + '\n '
+                    + '\nBOYS: Guard the piggies!'
+                    + '\nGirls farts are lethal for piggies,'
+                    + '\nboys still get stunned.'
+                    + '\n '
+                    + '\nGIRLS: Assassinate the piggies!'
+                    + '\nTimer is ticking, so better hurry girls.'
+                    + '\nBut beware of boys lethal farts.'
+                break
+            default:
+                break
+        }
+    })
+}
+
 const animateRectangleButton = button => {
     button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime >= 0).length > 0
 
@@ -428,6 +461,7 @@ const addLobbyItems = (app) => {
     addShootingRange(app, shootingRangeDefinition(), lobbyContainer)
     addTeamSwitchers(app, lobbyContainer)
     addNetworkQrCode(app, lobbyContainer)
+    addGameDescription(app, lobbyContainer)
 
     const fontHeight = 32
     const howToPlay = new PIXI.BitmapText({
