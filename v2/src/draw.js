@@ -672,11 +672,6 @@ const addGrass = () => {
 
 const addLevelBoundary = (app) => {
     const spritesheet = PIXI.Assets.get('fenceAtlas')
-
-    const tree1 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree1'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.3, y: level.height * 0.1 }, options: {} });
-    const tree2 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree2'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.8, y: level.height * 0.6 }, options: {} });
-    const tree3 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree3'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.9, y: level.height * 0.9 }, options: {} });
-
     
     const fenceLower = createSpriteWithShadowContainer({ texture: spritesheet.textures['fence_horizontal'], scaleFactor: { x: 1, y: 1.3 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.0, y: level.height * 1 }, anchor: { x: 0.0, y: 0.9 }, options: { tilingSprite: { tileScale: { x: 0.28, y: 0.28 }, tilePosition: { x: 0, y: 0 } } } });
     fenceLower.shadow.width = fenceLower.sprite.width=level.width
@@ -692,12 +687,21 @@ const addLevelBoundary = (app) => {
     fenceLeft.shadow.height = fenceLeft.sprite.height=level.height
     fenceLeft.sprite.zIndex = level.height
    // fenceLeft.shadow.position.x = 5
-
     
     const fenceRight = createSpriteWithShadowContainer({ texture: spritesheet.textures['fence_horizontal'], scaleFactor: { x: 1.5 / shadowDefinition.scale.x, y: 1 / shadowDefinition.scale.y }, skewFactor: { x: 0, y: 0 }, position: { x: level.width * 1, y: level.height * 0.00 }, anchor: { x: 1, y: 0.0 }, options: { tilingSprite: { tileScale: { x: 0.4, y: 0.4 }, tilePosition: { x: 0, y: 0 } } } });
     fenceRight.shadow.width = fenceRight.sprite.width=level.width*0.006
     fenceRight.shadow.height = fenceRight.sprite.height=level.height
     fenceRight.sprite.zIndex = level.height
+
+    levelContainer.addChild(fenceLower, fenceUpper, fenceLeft, fenceRight)
+}
+
+const addLevelDecoration = (app) => {
+    const spritesheet = PIXI.Assets.get('fenceAtlas')
+
+    const tree1 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree1'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.3, y: level.height * 0.1 }, options: {} });
+    const tree2 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree2'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.8, y: level.height * 0.6 }, options: {} });
+    const tree3 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree3'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.9, y: level.height * 0.9 }, options: {} });
     
     const randomStuffTextureNames = ['bush1', 'bush2', 'bush3', 'chair', 'bush4', 'bush5', 'bush6', 'flower1', 'flower2', 'mushroom', 'lamp']
     const randomStuffTextureNamesFlat = ['butterfly', 'cap', 'kite']
@@ -718,10 +722,7 @@ const addLevelBoundary = (app) => {
         randomStuff.addChild(elem)
     }
 
-
-
-
-    levelContainer.addChild(randomStuff, tree1, tree2, tree3, fenceLower, fenceUpper, fenceLeft, fenceRight)
+    levelContainer.addChild(randomStuff, tree1, tree2, tree3)
 }
 
 const createSpriteWithShadowContainer = ({texture, scaleFactor, skewFactor, position, anchor, options}) => { 
