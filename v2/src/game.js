@@ -163,10 +163,7 @@ const lobbyStartButtonDefinition = () => ({
     defaultLoadingSpeed: 1/3000,
     execute: () => {
         restartStage = true
-        const gamesValues = Object.values(games)
-        gamesValues.forEach(game => game.votes = 0)
-        Object.values(players).forEach(player => player.vote && games[player.vote].votes++)
-        game = gamesValues[getRandomIndex(gamesValues.map(game => game.votes))]
+        game = voteGame()
         nextStage = stages.gameLobby
     }
 })
@@ -979,7 +976,7 @@ function handleInput(players, figures, dtProcessed) {
                 switchTeam(figure, game?.initialTeam)
                 addPlayerScore(figure)
                 if (stage === stages.startLobby) {
-                    figure.x = level.width*0.04+ Math.random() * level.width*0.4
+                    figure.x = level.width*0.04+ Math.random() * level.width*0.3
                     figure.y = level.height*0.05+Math.random() * level.height*0.42
                 }
                 playAudio(soundJoin);

@@ -285,7 +285,7 @@ const toggleBots = () => {
     return count
 }
 
-function toggleMusic() {
+const toggleMusic = () => {
     if (isMusicMuted()) {
         unmuteAudio()
         playMusicPlaylist(musicLobby)
@@ -293,6 +293,13 @@ function toggleMusic() {
         muteAudio()
         stopMusicPlaylist()
     }
+}
+
+const voteGame = () => {
+    const gamesValues = Object.values(games)
+    gamesValues.forEach(game => game.votes = 0)
+    Object.values(players).forEach(player => player.vote && games[player.vote].votes++)
+    return gamesValues[getRandomIndex(gamesValues.map(game => game.votes))]
 }
 
 const loadButton = (btn, aimLoadingPercentage) => {
