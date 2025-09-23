@@ -263,7 +263,7 @@ const addNetworkQrCode = (app, lobbyContainer) => {
         qrCodeContainer.label.width =  qrCodeContainer.sprite.width*0.8
         qrCodeContainer.label.scale.y = qrCodeContainer.label.scale.x
 
-        qrCodeContainer.visible = stage === stages.startLobby
+        qrCodeContainer.visible = stage === stages.startLobby && nw.qrCodeTexture && wnw.qrCodeBaseUrl && nw.roomNumber
     })
 }
 
