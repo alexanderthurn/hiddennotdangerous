@@ -350,7 +350,7 @@ app.textStyleDefault = {
             figureAtlas: './gfx/figure.json',
             fontTTF: './gfx/'+fontFamilyName+'.ttf',
         });
-        await PIXI.Assets.loadBundle('main');
+        await PIXI.Assets.loadBundle('main')
 
         document.fonts.add(PIXI.Assets.get('fontTTF'))
 
@@ -362,7 +362,7 @@ app.textStyleDefault = {
                 fontSize: 32,
                 fill: colors.white
             }
-        });
+        })
 
         PIXI.BitmapFontManager.install({
             name: 'KnallStroke', 
@@ -375,7 +375,7 @@ app.textStyleDefault = {
                     width: 1,
                 }
             }
-        });
+        })
 
         PIXI.BitmapFontManager.install({
             name: 'KnallTitle', 
@@ -390,7 +390,7 @@ app.textStyleDefault = {
                     width: 12,
                 }
             }
-        });
+        })
 
         PIXI.BitmapFontManager.install({
             name: 'KnallWinning', 
@@ -407,8 +407,9 @@ app.textStyleDefault = {
                     width: 6,
                 }
             }
-        });        
+        })
 
+        initNetwork()
         destroyContainer(app, loadingText)
         levelContainer = createLevelContainer(app, level);
         app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, fogLayer, crosshairLayer, scoreLayer, overlayLayer, debugLayer)

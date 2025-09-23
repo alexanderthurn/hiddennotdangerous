@@ -44,6 +44,8 @@ const createLoadingText = app => {
 }
 
 const addHeadline = () => {
+    const nw = FWNetwork.getInstance()
+
     const title = new PIXI.BitmapText({
         text: 'KNIRPS UND KNALL',
         style: app.textStyleDefault,
@@ -69,9 +71,12 @@ const addHeadline = () => {
         position: {x: 0, y: -level.width*0.005}
     });
 
-  
     levelContainer.addChild(title, authors, code);
-    levelContainer.code = code
+
+    app.ticker.add(() => {
+        code.visible = stage !== stages.startLobby
+        code.text = nw.roomNumber && nw.qrCodeBaseUrl + " " + nw.roomNumber || ''
+    })
 }
 
 const animateCircleButton = button => {
@@ -234,14 +239,7 @@ const addGameStartButton = (app, lobbyContainer) => {
 }
 
 const addNetworkQrCode = (app, lobbyContainer) => { 
-
-    const nw = FWNetwork.getInstance();
-    nw.qrCodeOptions.background = 'green',
-    nw.qrCodeOptions.backgroundAlpha = 1.0,
-    nw.qrCodeOptions.foreground = 'white',
-    nw.qrCodeOptions.foregroundAlpha = 1.0,
-    nw.gamepadLayout = 'simple'
-    nw.hostRoom();
+    const nw = FWNetwork.getInstance()
 
     const qrCodeContainer = new PIXI.Container()
     qrCodeContainer.sprite = new PIXI.Sprite()
@@ -258,16 +256,14 @@ const addNetworkQrCode = (app, lobbyContainer) => {
         const qrWidth = Math.min(level.width,level.height) * 0.25;
         qrCodeContainer.position.set(level.width*0.05, level.height*0.6)
         qrCodeContainer.sprite.texture = nw.qrCodeTexture
-        qrCodeContainer.sprite.width = qrCodeContainer.sprite.height = qrWidth;
+        qrCodeContainer.sprite.width = qrCodeContainer.sprite.height = qrWidth
 
         qrCodeContainer.label.text = nw.qrCodeBaseUrl + "\n" + nw.roomNumber
         qrCodeContainer.label.position.set(qrCodeContainer.sprite.width*0.5, qrCodeContainer.sprite.height*1)
-        qrCodeContainer.label.width =  qrCodeContainer.sprite.width*0.8;
-        qrCodeContainer.label.scale.y = qrCodeContainer.label.scale.x;
+        qrCodeContainer.label.width =  qrCodeContainer.sprite.width*0.8
+        qrCodeContainer.label.scale.y = qrCodeContainer.label.scale.x
 
-        levelContainer.code.text = (nw.roomNumber && nw.qrCodeBaseUrl + " " + nw.roomNumber || '')
-        levelContainer.code.visible = (stage !== stages.startLobby)
-        qrCodeContainer.visible = (stage === stages.startLobby)
+        qrCodeContainer.visible = stage === stages.startLobby
     })
 }
 

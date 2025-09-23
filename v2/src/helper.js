@@ -618,3 +618,13 @@ const switchTeam = (figure, team) => {
         teams[figure.team].size++
     }
 }
+
+const initNetwork = () => {
+    const nw = FWNetwork.getInstance()
+    nw.qrCodeOptions.background = 'green'
+    nw.qrCodeOptions.backgroundAlpha = 1.0
+    nw.qrCodeOptions.foreground = 'white'
+    nw.qrCodeOptions.foregroundAlpha = 1.0
+    nw.gamepadLayout = 'simple'
+    nw.hostRoom()
+}
