@@ -416,7 +416,7 @@ function getRandomXYInRectangle(x, y, w, h) {
 
 const distanceToBorder = (x, y, angleX, angleY) => {
     const xBorder = angleX > 0 ? level.width-level.padding[2] : level.padding[0]
-    const yBorder = angleY > 0 ? level.height-level.padding[2] : level.padding[1]
+    const yBorder = angleY > 0 ? level.height-level.padding[3] : level.padding[1]
     const tX = (xBorder-x)/angleX
     const tY = (yBorder-y)/angleY
 
