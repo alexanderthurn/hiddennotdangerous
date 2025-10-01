@@ -160,7 +160,7 @@ function collectInputs() {
                 } else {
                     beans.forEach((b, i, beans) => {
                         if (!f.beans.has(b.id) && (i < beans.length-1 || f.beans.size !== 1)) {
-                            const beanTarget = {x: b.x, y: b.y-f.bodyHeight*0.5}
+                            const beanTarget = {x: b.x, y: b.y}
                             let d1 = distance(f.x,f.y,beanTarget.x,beanTarget.y);
                             let d2 = distance(f.x,f.y,xTarget,yTarget);
                             if (f.beans.size === 0 && i === beans.length-1) {

@@ -846,7 +846,7 @@ function updateGame(figures, dt, dtProcessed) {
         let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter');
         figures.filter(b => b.type === 'bean').forEach(b => {
             playerFigures.forEach(fig => {
-                if (distance(b.x,b.y,fig.x,fig.y + b.height*0.5) < b.attackDistance) {
+                if (distance(b.x,b.y,fig.x,fig.y) < b.attackDistance) {
                     if (!fig.beans.has(b.id)) {                    
                         playAudioPool(soundEatPool[fig.beans.size]);
                         fig.beans.add(b.id);
@@ -1008,6 +1008,7 @@ function handleInput(players, figures, dtProcessed) {
                         f.lastAttackY = f.y
                         //playAudioPool(soundShootPool);
                     } else {
+
                         let xyNew = move(f.x, f.y, f.direction+deg2rad(180),f.attackDistance*0.5, 1)
 
                         if (f.beans.size > 0) {
@@ -1071,19 +1072,19 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
                     discreteAngle = getNextDiscreteAngle(angle(f.x, f.y, f.xTarget, f.yTarget), 8);
                     const direction = {x: Math.cos(discreteAngle), y: Math.sin(discreteAngle)};
                     if (direction.x !== 0) {
-                        const xBorder = direction.x > 0 ? level.width-level.padding : level.padding;
+                        const xBorder = direction.x > 0 ? level.width-level.padding[2] : level.padding[0];
                         let t = (xBorder - f.x)/direction.x;
                         let y = t*direction.y + f.y;
-                        if (y >= level.padding && y < level.height-level.padding) {
+                        if (y >= level.padding[1] && y < level.height-level.padding[3]) {
                             t = (f.xTarget - f.x)/direction.x;
                             f.yTarget = t*direction.y + f.y;
                         }
                     }
                     if (direction.y !== 0) {
-                        const yBorder = direction.y > 0 ? level.height-level.padding : level.padding;
+                        const yBorder = direction.y > 0 ? level.height-level.padding[3] : level.padding[1];
                         let t = (yBorder - f.y)/direction.y;
                         let x = t*direction.x + f.x;
-                        if (x >= level.padding && x < level.width-level.padding) {
+                        if (x >= level.padding[0] && x < level.width-level.padding[2]) {
                             t = (f.yTarget - f.y)/direction.y;
                             f.xTarget = t*direction.x + f.x;
                         }

@@ -183,7 +183,7 @@ const createRingPartButton = (props, lobbyContainer) => {
 
     let button = new PIXI.Container()
     button = Object.assign(button, {x, y, startAngle, endAngle, innerRadius, outerRadius, gameId, execute: getExecute(button)})
-    button.isInArea = f => new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y+f.bodyHeight*0.5) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y+f.bodyHeight*0.5) && (distanceAnglesRad(angle(x, y, f.x, f.y+f.bodyHeight*0.5), centerAngle) < width/2)
+    button.isInArea = f => new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y) && (distanceAnglesRad(angle(x, y, f.x, f.y), centerAngle) < width/2)
 
     const area = new PIXI.Graphics()
     .arc(0, 0, innerRadius, startAngle, endAngle)
@@ -221,7 +221,7 @@ const addGameRing = (lobbyContainer) => {
 
 const addGameSelection = (app, lobbyContainer) => {
     const circleButton = createCircleButton(lobbyStartButtonDefinition(), lobbyContainer)
-    circleButton.isInArea = f => stage === stages.startLobby && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius).contains(f.x, f.y+f.bodyHeight*0.5)
+    circleButton.isInArea = f => stage === stages.startLobby && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius).contains(f.x, f.y)
     addGameRing(lobbyContainer)
 
     buttons.selectGame = circleButton
@@ -231,7 +231,7 @@ const addGameSelection = (app, lobbyContainer) => {
 
 const addGameStartButton = (app, lobbyContainer) => {
     const circleButton = createCircleButton(gameStartButtonDefinition(), lobbyContainer)
-    circleButton.isInArea = f => stage === stages.gameLobby && dtProcessed - startTime > 5000 && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius).contains(f.x, f.y+f.bodyHeight*0.5)
+    circleButton.isInArea = f => stage === stages.gameLobby && dtProcessed - startTime > 5000 && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius).contains(f.x, f.y)
 
     buttons.startGame = circleButton
 
@@ -311,7 +311,7 @@ const createRectangleButton = (props, lobbyContainer) => {
 
     let button = new PIXI.Container()
     button = Object.assign(button, {x, y, loadingPercentage, defaultLoadingSpeed, execute})
-    button.isInArea = f => new PIXI.Rectangle(x, y, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
+    button.isInArea = f => new PIXI.Rectangle(x, y, width, height).contains(f.x, f.y)
 
     const loadingBar = new PIXI.Graphics()
     .rect(0, 0, 0.1, height)
@@ -377,7 +377,7 @@ const addShootingRange = (app, props, lobbyContainer) => {
     .rect(newX, newY, width, height)
     .fill({color: colors.white})
     buttonOutside.execute = () => buttonOutside.playersNear.forEach(f => f.justShot = false) 
-    buttonOutside.isInArea = f => stage === stages.gameLobby && (game === games.rampage || game === games.rampagev2) && !(new PIXI.Rectangle(newX, newY, width, height)).contains(f.x, f.y+f.bodyHeight*0.5)
+    buttonOutside.isInArea = f => stage === stages.gameLobby && (game === games.rampage || game === games.rampagev2) && !(new PIXI.Rectangle(newX, newY, width, height)).contains(f.x, f.y)
 
     const buttonInside = new PIXI.Graphics()
     .rect(newXInside, newYInside, widthInside, heightInside)
@@ -390,7 +390,7 @@ const addShootingRange = (app, props, lobbyContainer) => {
             figures.push(crosshair)
         }
     }) 
-    buttonInside.isInArea = f => stage === stages.gameLobby && (game === games.rampage || game === games.rampagev2) && new PIXI.Rectangle(newXInside, newYInside, widthInside, heightInside).contains(f.x, f.y+f.bodyHeight*0.5)
+    buttonInside.isInArea = f => stage === stages.gameLobby && (game === games.rampage || game === games.rampagev2) && new PIXI.Rectangle(newXInside, newYInside, widthInside, heightInside).contains(f.x, f.y)
 
     buttons.shootingRangeInside = buttonInside
     buttons.shootingRangeOutside = buttonOutside
@@ -432,7 +432,7 @@ const createTeamSwitcher = (app, props, lobbyContainer) => {
 
     button.house = house
     button.execute = () => button.playersNear.forEach(f => switchTeam(f, team)) 
-    button.isInArea = f => stage === stages.gameLobby && games.has(game) && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y+f.bodyHeight*0.5)
+    button.isInArea = f => stage === stages.gameLobby && games.has(game) && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y)
     button.addChild(marker, house)
     lobbyContainer.addChild(button)
 
@@ -824,7 +824,8 @@ const animateFigure = (figure, spritesheet) => {
         } else {
             body.angle = 0
         }
-        body.y = 0
+        body.y = 0//-figure.bodyHeight/5
+        shadow.y = 0//-figure.bodyHeight/5
         figureLayer.attach(body)
         shadow.visible = true
     }
@@ -843,10 +844,10 @@ const animateFigure = (figure, spritesheet) => {
         shadow.textures = spritesheet.animations[animation]
     }
 
-    let anchor = body.textures[body.currentFrame].defaultAnchor || {x: 0.5, y: 0.75}
+    let anchor = body.textures[body.currentFrame].defaultAnchor || {x: 0.5, y: 0.9}
     body.anchor.x = anchor.x
     body.anchor.y = anchor.y
-    shadow.anchor.x = 0.3
+    shadow.anchor.x = anchor.x
     shadow.anchor.y = anchor.y
     
     if (!(figure.speed === 0 || !windowHasFocus || restartStage) && !body.playing) {
@@ -936,7 +937,7 @@ const createFigure = (app, spritesheet, props) => {
     attackArc.label = 'attackArc'
     const marker = createFigureMarker(figure)
     marker.label = 'marker'
-
+    console.log(body.height, body.scale.y)
     figure.bodyHeight = body.height
     figure.currentSprite = 'baby'
     figure.defaultSprite = 'baby'

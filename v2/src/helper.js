@@ -357,8 +357,8 @@ const createLevelContainer = (app, level) => {
 }
 
 function createLevel() {
-    const level = {width: 1920, height: 1080, padding: 20}
-    level.rectangle = new PIXI.Rectangle(level.padding, level.padding, level.width-2*level.padding, level.height-2*level.padding)
+    const level = {width: 1920, height: 1080, padding: [15, 40, 15, 10]}
+    level.rectangle = new PIXI.Rectangle(level.padding[0], level.padding[1], level.width-level.padding[0]-level.padding[2], level.height-level.padding[1]-level.padding[3])
     level.shortestPathNotBean5 = 2*0.6*level.height+2*0.3*Math.hypot(level.height, level.width);
     level.shortestPathBean5 = 2*0.6*level.height+0.6*level.width+0.3*Math.hypot(level.height, level.width);
 
@@ -415,8 +415,8 @@ function getRandomXYInRectangle(x, y, w, h) {
 }
 
 const distanceToBorder = (x, y, angleX, angleY) => {
-    const xBorder = angleX > 0 ? level.width-level.padding : level.padding
-    const yBorder = angleY > 0 ? level.height-level.padding : level.padding
+    const xBorder = angleX > 0 ? level.width-level.padding[2] : level.padding[0]
+    const yBorder = angleY > 0 ? level.height-level.padding[2] : level.padding[1]
     const tX = (xBorder-x)/angleX
     const tY = (yBorder-y)/angleY
 
@@ -424,10 +424,10 @@ const distanceToBorder = (x, y, angleX, angleY) => {
 }
 
 function cropXY(x,y,level) {
-    if (x > level.width-level.padding) x = level.width-level.padding
-    if (y > level.height-level.padding) y = level.height-level.padding
-    if (x < level.padding) x = level.padding
-    if (y < level.padding) y = level.padding
+    if (x > level.width-level.padding[2]) x = level.width-level.padding[2]
+    if (y > level.height-level.padding[3]) y = level.height-level.padding[3]
+    if (x < level.padding[0]) x = level.padding[0]
+    if (y < level.padding[1]) y = level.padding[1]
     return [x,y]
 }
 
