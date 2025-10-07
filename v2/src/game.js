@@ -48,14 +48,14 @@ const stages = {
 let stage, nextStage = stages.startLobby
 
 const games = {
-    food: {
-        color: colors.green,
-        text: 'FOOD'
-    },
     battleRoyale: {
         color: colors.red,
         text: 'BATTLE ROYALE',
         countdown: 90
+    },
+    food: {
+        color: colors.green,
+        text: 'FOOD'
     },
     rampage: {
         color: colors.yellow,

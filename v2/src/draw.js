@@ -282,12 +282,41 @@ const addGameDescription = (app, lobbyContainer) => {
     app.ticker.add(() => {
         gameDescription.visible = stage === stages.gameLobby
         switch (game) {
+            case games.battleRoyale:
+                gameDescription.text = 'Last one standing!'
+                    + '\n '
+                    + '\nContamination is spreading,'
+                    + '\nonly the center is safe.'
+                    + '\n '
+                    + `\nStay in the centre and`
+                    + '\nsurvive as long as possible!'
+                break
+            case games.food:
+                gameDescription.text = 'Food is served!'
+                    + '\n '
+                    + '\nThe food stimulates digestion:'
+                    + '\nThe more you eat, the stronger you fart!'
+                    + '\n '
+                    + `\nOther players won't let`
+                    + '\nyou snatch the food though.'
+                break
+            case games.rampage:
+                gameDescription.text = 'Murderous killers on rampage!'
+                    + '\n '
+                    + '\nSNIPERS: Take out the killers!'
+                    + '\nRemember, your ammo is finite.'
+                    + '\nAvoid shooting innocents.'
+                    + '\n '
+                    + '\nKILLERS: Kill all of them!'
+                    + '\nUse the fog for stealthy kills,'
+                    + '\nSnipers wont spot you there.'
+                break
             case games.vip:
                 gameDescription.text = 'Piggies unter attack!'
                     + '\n '
                     + '\nBOYS: Guard the piggies!'
-                    + '\nGirls farts are lethal for piggies,'
-                    + '\nboys still get stunned.'
+                    + '\nGirl farts are lethal for piggies,'
+                    + '\nboys will get stunned.'
                     + '\n '
                     + '\nGIRLS: Assassinate the piggies!'
                     + '\nTimer is ticking, so better hurry girls.'
