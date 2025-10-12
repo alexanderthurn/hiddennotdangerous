@@ -293,24 +293,24 @@ var circleOfDeath
 
 const foodDefinition = () => ({
     oreo: {
-        x: stage === stages.gameLobby ? level.width*4.4/5 : level.width*4/5,
-        y: stage === stages.gameLobby ? level.height*2.6/5 : level.height*4/5,
+        x: stage === stages.gameLobby ? level.width*1.4/5 : level.width*4/5,
+        y: stage === stages.gameLobby ? level.height*3/5 : level.height*4/5,
     },
     broccoli: {
-        x: stage === stages.gameLobby ? level.width*3.6/5 : level.width/5,
-        y: stage === stages.gameLobby ? level.height*1.8/5 : level.height/5,
+        x: stage === stages.gameLobby ? level.width*0.6/5 : level.width/5,
+        y: stage === stages.gameLobby ? level.height*2/5 : level.height/5,
     },
     onion: {
-        x: stage === stages.gameLobby ? level.width*3.6/5 : level.width/5,
-        y: stage === stages.gameLobby ? level.height*2.6/5 : level.height*4/5,
+        x: stage === stages.gameLobby ? level.width*0.6/5 : level.width/5,
+        y: stage === stages.gameLobby ? level.height*3/5 : level.height*4/5,
     },
     salad: {
-        x: stage === stages.gameLobby ? level.width*4.4/5 : level.width*4/5,
-        y: stage === stages.gameLobby ? level.height*1.8/5 : level.height/5,
+        x: stage === stages.gameLobby ? level.width*1.4/5 : level.width*4/5,
+        y: stage === stages.gameLobby ? level.height*2/5 : level.height/5,
     },
     taco: {
-        x: stage === stages.gameLobby ? level.width*4.0/5 : level.width/2,
-        y: stage === stages.gameLobby ? level.height*2.2/5 : level.height/2,
+        x: stage === stages.gameLobby ? level.width*1/5 : level.width/2,
+        y: stage === stages.gameLobby ? level.height*2.5/5 : level.height/2,
     }
 })
 
