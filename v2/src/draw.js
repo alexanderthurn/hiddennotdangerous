@@ -268,59 +268,69 @@ const addNetworkQrCode = (app, lobbyContainer) => {
 }
 
 const addGameDescription = (app, lobbyContainer) => { 
-    const gameDescription = new PIXI.BitmapText({
+    const gameDescriptionLeft = new PIXI.BitmapText({
         text: '',
-        style: {...app.textStyleDefault}
-    });
+        style: {...app.textStyleDefault},
+        scale: {x: 2, y: 2}
+    })
+    const gameDescriptionRight = new PIXI.BitmapText({
+        text: '',
+        style: {...app.textStyleDefault},
+        scale: {x: 2, y: 2}
+    })
 
-    gameDescription.anchor.set(0, 0)
-    gameDescription.x = level.width*0.65
-    gameDescription.y = level.height*0.12
+    gameDescriptionLeft.anchor.set(0, 0.5)
+    gameDescriptionLeft.x = level.width*0.05
+    gameDescriptionLeft.y = level.height*0.5
 
-    lobbyContainer.addChild(gameDescription)
+    gameDescriptionRight.anchor.set(0, 0.5)
+    gameDescriptionRight.x = level.width*0.65
+    gameDescriptionRight.y = level.height*0.5
+
+    lobbyContainer.addChild(gameDescriptionLeft, gameDescriptionRight)
 
     app.ticker.add(() => {
-        gameDescription.visible = stage === stages.gameLobby
+        gameDescriptionLeft.visible = stage === stages.gameLobby
         switch (game) {
-            case games.battleRoyale:
-                gameDescription.text = 'Last one standing!'
-                    + '\n '
-                    + '\nContamination is spreading,'
-                    + '\nonly the center is safe.'
-                    + '\n '
-                    + `\nStay in the centre and`
-                    + '\nsurvive as long as possible!'
-                break
-            case games.food:
-                gameDescription.text = 'Food is served!'
-                    + '\n '
-                    + '\nThe food stimulates digestion:'
-                    + '\nThe more you eat, the stronger you fart!'
-                    + '\n '
-                    + `\nOther players won't let`
-                    + '\nyou snatch the food though.'
-                break
             case games.rampage:
-                gameDescription.text = 'Murderous killers on rampage!'
-                    + '\n '
-                    + '\nSNIPERS: Take out the killers!'
-                    + '\nRemember, your ammo is finite.'
-                    + '\nAvoid shooting innocents.'
-                    + '\n '
-                    + '\nKILLERS: Kill all of them!'
-                    + '\nUse the fog for stealthy kills,'
-                    + '\nSnipers wont spot you there.'
+                gameDescriptionLeft.text = 'KILLERS:'
+                    + '\nKill the innocents'
+                    + '\nExploit the fog'
+                    + '\nTimer is ticking'
                 break
             case games.vip:
-                gameDescription.text = 'Piggies unter attack!'
-                    + '\n '
-                    + '\nBOYS: Guard the piggies!'
-                    + '\nGirl farts are lethal for piggies,'
-                    + '\nboys will get stunned.'
-                    + '\n '
-                    + '\nGIRLS: Assassinate the piggies!'
-                    + '\nTimer is ticking, so better hurry girls.'
-                    + '\nBut beware of boys lethal farts.'
+                gameDescriptionLeft.text = 'GIRLS:'
+                    + '\nKill the piggies in time'
+                    + '\nStun the boys'
+                    + '\nTimer is ticking'
+                break
+            default:
+                break
+        }
+
+        gameDescriptionRight.visible = stage === stages.gameLobby
+        switch (game) {
+            case games.battleRoyale:
+                gameDescriptionRight.text = 'Kill other players'
+                    + '\nStay in centre'
+                    + '\nSurvivor wins'
+                break
+            case games.food:
+                gameDescriptionRight.text = 'Kill other players'
+                    + '\nEat food, fart strong'
+                    + '\nSurvivor wins'
+                break
+            case games.rampage:
+                gameDescriptionRight.text = 'SNIPERS:'
+                    + '\nTake out the killers'
+                    + '\nAvoid shooting innocents'
+                    + '\nAmmo is finite' 
+                break
+            case games.vip:
+                gameDescriptionRight.text = 'BOYS:'
+                    + '\nSave the piggies'
+                    + '\nNeutralize the girls'
+                    + '\nGirls can stun you'
                 break
             default:
                 break

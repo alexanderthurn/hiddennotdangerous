@@ -254,13 +254,13 @@ const shootingRangeDefinition = () => ({
 
 const teamSwitchersDefinition = () => ({
     assassin: {
-        x: level.width*0.25,
-        y: level.height*0.5,
+        x: level.width*0.4,
+        y: level.height*0.75,
         team: 'assassin'
     },
     guard: {
-        x: level.width*0.75,
-        y: level.height*0.5,
+        x: level.width*0.6,
+        y: level.height*0.75,
         team: 'guard'
     },
     killer: {
