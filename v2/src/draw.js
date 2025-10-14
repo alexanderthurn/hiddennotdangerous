@@ -1064,8 +1064,9 @@ const createCrosshair = props => {
     crosshair.maxSpeed = 0.32
     crosshair.playerId = player.playerId
     crosshair.player = player
-    crosshair.recoilDuration = 5
-    crosshair.recoilSpeed = 7
+    crosshair.recoilDuration = 200
+    crosshair.recoilForce = 15
+    crosshair.recoilOffset = 5
     crosshair.team = team
     crosshair.type = 'crosshair'
     crosshair.tint = player.crosshairColor

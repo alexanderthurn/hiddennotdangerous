@@ -818,7 +818,7 @@ function updateGame(figures, dt, dtProcessed) {
         })
     }
 
-    figures.filter(f => f.speed > 0 || f.recoilSpeed).forEach(f => {
+    figures.filter(f => f.speed > 0 || f.recoilForce).forEach(f => {
         let xyNew = {x: f.x, y: f.y}
 
         // player movement
@@ -827,12 +827,12 @@ function updateGame(figures, dt, dtProcessed) {
         }
         
         // recoil movement
-        if (f.recoilSpeed && dtProcessed-f.lastAttackTime <= f.recoilDuration) {
+        if (f.recoilForce && dtProcessed-f.lastAttackTime <= f.recoilDuration) {
             if (!f.recoilAngle) {
                 f.recoilAngle = Math.random()*2*Math.PI
             }
-            xyNew = move(xyNew.x, xyNew.y, f.recoilAngle, f.recoilSpeed, dt)
-        } else if (f.recoilSpeed && dtProcessed-f.lastAttackTime > f.recoilDuration) {
+            xyNew = move(xyNew.x, xyNew.y, f.recoilAngle, f.recoilForce/(f.recoilOffset+dtProcessed-f.lastAttackTime), dt)
+        } else if (f.recoilForce && dtProcessed-f.lastAttackTime > f.recoilDuration) {
             f.recoilAngle = undefined
         }
         
