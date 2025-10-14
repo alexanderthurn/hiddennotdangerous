@@ -836,7 +836,6 @@ const animateFigure = (figure, spritesheet) => {
 
     if (figure.isDead && (!(stage === stages.game && (game === games.rampage || game === games.rampagev2)) || figure.isDeathDetected)) {
         body.angle = 90
-        body.y = figure.bodyHeight/4
         figureLayer.detach(body)
         shadow.visible = false
     } else {
