@@ -41,7 +41,8 @@ window.addEventListener('touchmove', event => {
 
 window.addEventListener('keyup', event => {
     keyboards.forEach(k => {
-        k.pressed.delete(event.code);
+        k.pressed.delete(event.code)
+        k.waspressed.delete(event.code)
     });
 });
 window.addEventListener("contextmenu", e => e.preventDefault());
@@ -220,6 +221,9 @@ function collectInputs() {
             if (g.buttons[2].pressed) {
                 g.isMarkerButtonPressed = true
             }
+            if (g.buttons[16].startpressed) {
+                isRestartButtonPressed = true
+            }
         }
         let x = g.axes[0];
         let y = g.axes[1];
@@ -246,16 +250,37 @@ function collectInputs() {
     keyboardPlayers = keyboardPlayers.map(kp => (Object.assign(kp, defaultkeyboardPlayer)));
     keyboards.forEach(k => {
         Array.from(k.pressed.values()).forEach(pressedButton => {
+            if (!k.waspressed.has(pressedButton)) {
+                k.startpressed.add(pressedButton)
+            } else {
+                k.startpressed.delete(pressedButton)
+            }
+            k.waspressed.add(pressedButton)
+
+            switch (pressedButton) {
+                case 'Delete':
+                    if (k.startpressed.has(pressedButton)) {
+                        isRestartButtonPressed = true
+                    }
+                    break;
+                default:
+                    break;
+            }
+
             const binding = k.bindings[pressedButton];
             if (binding) {
                 const action = binding.action;
-                let p = keyboardPlayers.find(kp => binding.playerId ===  kp.playerId);
+                let p
                 let isNew = false
-                if (!p) {
-                    isNew = true
-                    p = {...defaultkeyboardPlayer, playerId: 'k' + keyboardPlayers.length};
+                if (binding.playerId) {
+                    p = keyboardPlayers.find(kp => binding.playerId ===  kp.playerId);
+                    if (!p) {
+                        isNew = true
+                        p = {...defaultkeyboardPlayer, playerId: 'k' + keyboardPlayers.length};
+                    }
+                    p.isAnyButtonPressed = true
                 }
-                p.isAnyButtonPressed = true
+                
                 switch (action) {
                     case 'left':
                         p.xAxis--;
@@ -281,9 +306,11 @@ function collectInputs() {
                     default:
                         break;
                 }
-                [p.xAxis, p.yAxis] = clampStick(p.xAxis, p.yAxis)
-                isNew && keyboardPlayers.push(p)
-                p.isMoving = p.xAxis !== 0 || p.yAxis !== 0;
+                if (p) {
+                    [p.xAxis, p.yAxis] = clampStick(p.xAxis, p.yAxis)
+                    p.isMoving = p.xAxis !== 0 || p.yAxis !== 0
+                    isNew && keyboardPlayers.push(p)
+                }
             }
         })
     });

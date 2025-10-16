@@ -21,10 +21,16 @@ class FWNetworkGamepad {
     setButton(index, pressed) {
         if (index >= 0 && index < this.buttons.length) {
             if (pressed) {
+                if (!this.buttons[index].pressed) {
+                    this.buttons[index].startpressed = true
+                } else {
+                    this.buttons[index].startpressed = false
+                }
                 this.buttons[index].pressed = true
                 this.buttons[index].touched = true
                 this.buttons[index].value = 1.0
             } else {
+                this.buttons[index].startpressed = false
                 this.buttons[index].pressed = false
                 this.buttons[index].touched = false
                 this.buttons[index].value = 0.0

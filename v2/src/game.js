@@ -17,6 +17,7 @@ var keyboards = [{bindings: {
     'Digit1': {playerId: 'k0', action: 'attack'},
     'Digit2': {playerId: 'k0', action: 'speed'},
     'Digit3': {playerId: 'k0', action: 'marker'},
+    'Delete': {action: 'restart'},
     'ArrowLeft': {playerId: 'k1', action: 'left'},
     'ArrowRight': {playerId: 'k1', action: 'right'},
     'ArrowUp': {playerId: 'k1', action: 'up'},
@@ -26,10 +27,10 @@ var keyboards = [{bindings: {
     'Numpad2': {playerId: 'k1', action: 'speed'},
     'ShiftRight': {playerId: 'k1', action: 'attack'},
     'ControlRight': {playerId: 'k1', action: 'speed'},
-    'AltRight': {playerId: 'k1', action: 'marker'}}, pressed: new Set()}];
+    'AltRight': {playerId: 'k1', action: 'marker'}}, pressed: new Set(), startpressed: new Set(), waspressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
-var restartStage = false, gameOver, ceremonyOver, lastRoundEndThen, lastWinnerPlayerIds, lastFinalWinnerPlayerIds, finalWinnerTeam
+var isRestartButtonPressed, restartStage = false, gameOver, ceremonyOver, lastRoundEndThen, lastWinnerPlayerIds, lastFinalWinnerPlayerIds, finalWinnerTeam
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figuresInitialPool = new Set(), figuresPool = new Set()
@@ -434,6 +435,7 @@ function initStage() {
     startTime = dtProcessed;
     ceremonyOver = false
     gameOver = false
+    isRestartButtonPressed = false
     restartStage = false
     stage = nextStage
     lastRoundEndThen = undefined
@@ -953,6 +955,10 @@ function updateGame(figures, dt, dtProcessed) {
 }
 
 function handleInput(players, figures, dtProcessed) {
+    if (isRestartButtonPressed) {
+        nextStage = stages.startLobby
+        initStage()
+    }
     if (stage !== stages.game) {
         var joinedFighters = figures.filter(f => f.playerId && f.type === 'fighter')
         // join by doing anything
