@@ -42,7 +42,7 @@ window.addEventListener('touchmove', event => {
 window.addEventListener('keyup', event => {
     keyboards.forEach(k => {
         k.pressed.delete(event.code)
-        k.waspressed.delete(event.code)
+        //k.waspressed.delete(event.code)
     });
 });
 window.addEventListener("contextmenu", e => e.preventDefault());
@@ -249,8 +249,8 @@ function collectInputs() {
     };
     keyboardPlayers = keyboardPlayers.map(kp => (Object.assign(kp, defaultkeyboardPlayer)));
     keyboards.forEach(k => {
-        Array.from(k.pressed.values()).forEach(pressedButton => {
-            if (!k.waspressed.has(pressedButton)) {
+        Object.keys(k.keys).forEach(code => {
+            /*if (!k.waspressed.has(pressedButton)) {
                 k.startpressed.add(pressedButton)
             } else {
                 k.startpressed.delete(pressedButton)
@@ -265,17 +265,19 @@ function collectInputs() {
                     break;
                 default:
                     break;
-            }
+            }*/
 
-            const binding = k.bindings[pressedButton];
-            if (binding) {
-                const action = binding.action;
+            const key = k.keys[code]
+            if (k.pressed.has(code)) {
+                key.pressed = true
+
+                const action = key.action;
                 let p
-                let isNew = false
-                if (binding.playerId) {
-                    p = keyboardPlayers.find(kp => binding.playerId ===  kp.playerId);
+                let isNewPlayer = false
+                if (key.playerId) {
+                    p = keyboardPlayers.find(kp => key.playerId ===  kp.playerId);
                     if (!p) {
-                        isNew = true
+                        isNewPlayer = true
                         p = {...defaultkeyboardPlayer, playerId: 'k' + keyboardPlayers.length};
                     }
                     p.isAnyButtonPressed = true
@@ -303,14 +305,23 @@ function collectInputs() {
                     case 'speed':
                         p.isSpeedButtonPressed = true
                         break;
+                    case 'restart':
+                        if (!key.waspressed) {
+                            isRestartButtonPressed = true
+                        }
+                        break;
                     default:
                         break;
                 }
                 if (p) {
                     [p.xAxis, p.yAxis] = clampStick(p.xAxis, p.yAxis)
                     p.isMoving = p.xAxis !== 0 || p.yAxis !== 0
-                    isNew && keyboardPlayers.push(p)
+                    isNewPlayer && keyboardPlayers.push(p)
                 }
+                key.waspressed = true
+            } else {
+                key.pressed = false
+                key.waspressed = false
             }
         })
     });
