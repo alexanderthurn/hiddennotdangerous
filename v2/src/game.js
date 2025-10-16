@@ -46,7 +46,7 @@ const stages = {
     startLobby: 'startLobby',
 }
 
-let stage, nextStage = stages.startLobby
+let stage
 
 const games = {
     battleRoyale: {
@@ -163,9 +163,8 @@ const lobbyStartButtonDefinition = () => ({
     outerRadius: level.width*0.15,
     defaultLoadingSpeed: 1/3000,
     execute: () => {
-        restartStage = true
         game = voteGame()
-        nextStage = stages.gameLobby
+        initStage(stages.gameLobby)
     }
 })
 
@@ -175,8 +174,7 @@ const gameStartButtonDefinition = () => ({
     innerRadius: level.width*0.1,
     defaultLoadingSpeed: 1/3000,
     execute: () => {
-        restartStage = true
-        nextStage = stages.game
+        initStage(stages.game)
     }
 })
 
@@ -425,12 +423,12 @@ app.textStyleDefault = {
         addOverlay(app)
         addDebug(app)
 
-        initStage()
+        initStage(stages.startLobby)
         window.requestAnimationFrame(gameLoop);
     }
 )();
 
-function initStage() {
+function initStage(nextStage) {
     then = Date.now();
     startTime = dtProcessed;
     ceremonyOver = false
@@ -604,9 +602,9 @@ function gameLoop() {
 
         if (restartStage && (!lastRoundEndThen || ceremonyOver)) {
             if (gameOver) {
-                nextStage = stages.startLobby
+                initStage(stages.startLobby)
             }
-            initStage();
+            initStage(stage)
         }
     } else {
         FWNetwork.getInstance().getAllGamepads().filter(x => x && x.connected).map(x => {
@@ -956,8 +954,7 @@ function updateGame(figures, dt, dtProcessed) {
 
 function handleInput(players, figures, dtProcessed) {
     if (isRestartButtonPressed) {
-        nextStage = stages.startLobby
-        initStage()
+        initStage(stages.startLobby)
     }
     if (stage !== stages.game) {
         var joinedFighters = figures.filter(f => f.playerId && f.type === 'fighter')
