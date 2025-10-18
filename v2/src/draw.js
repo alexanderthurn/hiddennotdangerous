@@ -444,7 +444,7 @@ const animateTeamSwitcher = (button, games) => {
     button.visible = games.has(game)
    
     //put in createSpriteWithShadowContainer later
-    button.house.sprite.zIndex = button.house.y + (1-button.house.sprite.anchor.y)*button.house.sprite.height
+    button.house.sprite.zIndex = -100000 //button.house.y + (1-button.house.sprite.anchor.y)*button.house.sprite.height
 }
 
 const createTeamSwitcher = (app, props, lobbyContainer) => {
@@ -463,7 +463,7 @@ const createTeamSwitcher = (app, props, lobbyContainer) => {
 
     const house = createSpriteWithShadowContainer({
         texture: PIXI.Assets.get('house_' + team),
-        scaleFactor: { x: 1, y: 1 },
+        scaleFactor: { x: 0, y: 0 },
         skewFactor: { x: 1, y: 1 },
         position: { x: newX + width * 0.5, y: newY + height + 3},
         options: {} // ggf. Optionen einfügen
