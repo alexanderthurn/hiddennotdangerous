@@ -314,6 +314,9 @@ const foodDefinition = () => ({
 })
 
 const app = new PIXI.Application();
+window.__PIXI_DEVTOOLS__ = {
+    app
+  };
 var levelContainer;
 const figureShadowLayer = new PIXI.RenderLayer();
 const figureLayer = new PIXI.RenderLayer({sortableChildren: true});
