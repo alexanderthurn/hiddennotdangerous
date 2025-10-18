@@ -975,8 +975,7 @@ const createFigure = (app, spritesheet, props) => {
     attackArc.label = 'attackArc'
     const marker = createFigureMarker(figure)
     marker.label = 'marker'
-    console.log(body.height, body.scale.y)
-    figure.bodyHeight = body.height
+    figure.bodyHeight = body.height / body.scale.y
     figure.currentSprite = 'baby'
     figure.defaultSprite = 'baby'
     figure.addChild(body, attackArc, marker, shadow)
