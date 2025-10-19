@@ -609,6 +609,10 @@ function gameLoop() {
             }
             initStage(stage)
         }
+
+        if (isRestartButtonPressed) {
+            initStage(stages.startLobby)
+        }
     } else {
         FWNetwork.getInstance().getAllGamepads().filter(x => x && x.connected).map(x => {
             windowHasFocus = true
@@ -956,9 +960,6 @@ function updateGame(figures, dt, dtProcessed) {
 }
 
 function handleInput(players, figures, dtProcessed) {
-    if (isRestartButtonPressed) {
-        initStage(stages.startLobby)
-    }
     if (stage !== stages.game) {
         var joinedFighters = figures.filter(f => f.playerId && f.type === 'fighter')
         // join by doing anything

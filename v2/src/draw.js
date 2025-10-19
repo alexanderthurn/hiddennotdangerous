@@ -530,6 +530,9 @@ const getScoreDefaultX = player => {
 
 const animatePlayerScore = figure => {
     const {player} = figure
+    if (!player) {
+        return
+    }
     if (figure.team !== figure.oldTeam) {
         player.score.getChildAt(0).tint = teams[figure.team]?.color || colors.black
         figure.oldTeam = figure.team
