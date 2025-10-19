@@ -567,7 +567,6 @@ const attackFigure = (figureAttacker, figureAttacked) => {
             return true
         }
     } else if (new PIXI.Rectangle(figureAttacker.lastAttackX-figureAttacker.attackRectX/2, figureAttacker.lastAttackY-figureAttacker.attackRectY/2, figureAttacker.attackRectX, figureAttacker.attackRectY).contains(figureAttacked.x, figureAttacked.y - figureAttacked.bodyHeight*0.5 )) {
-        console.log('attackFigure', figureAttacker.lastAttackX, figureAttacker.lastAttackY, figureAttacker.attackRectX, figureAttacker.attackRectY, figureAttacked.x, figureAttacked.y - figureAttacked.bodyHeight*0.5, figureAttacked.bodyHeight)
         killFigure(figureAttacked)
         return true
     }

@@ -27,7 +27,7 @@ var keyboards = [{keys: {
     'Numpad2': {playerId: 'k1', action: 'speed'},
     'ShiftRight': {playerId: 'k1', action: 'attack'},
     'ControlRight': {playerId: 'k1', action: 'speed'},
-    'AltRight': {playerId: 'k1', action: 'marker'}}, pressed: new Set()/*, startpressed: new Set(), waspressed: new Set()*/}];
+    'AltRight': {playerId: 'k1', action: 'marker'}}, pressed: new Set()}];
 var virtualGamepads = []
 var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
 var isRestartButtonPressed, restartStage = false, gameOver, ceremonyOver, lastRoundEndThen, lastWinnerPlayerIds, lastFinalWinnerPlayerIds, finalWinnerTeam

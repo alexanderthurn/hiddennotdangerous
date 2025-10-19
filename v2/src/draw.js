@@ -1156,10 +1156,11 @@ const animatePauseOverlay = (app, overlay, time) => {
     background.height = app.screen.height
     background.width = app.screen.width
     background.y = 0
-    text.text = (stage !== stages.startLobby) ? 'Pause' : '   Welcome to\nKnirps und Knall\n \n Press any key'
+    const numberJoinedPlayer = players.filter(p => p.joinedTime >= 0).length
+    text.text = (numberJoinedPlayer > 0) ? 'Pause' : '   Welcome to\nKnirps und Knall\n \n Press any key'
     text.x = Math.sin(time.lastTime/1000)*10 + app.screen.width/2
     text.y = Math.cos(time.lastTime/1000)*10 + app.screen.height/2
-    overlay.visible = !windowHasFocus
+    overlay.visible = !windowHasFocus || numberJoinedPlayer === 0
 }
 
 const createPauseOverlay = app => {

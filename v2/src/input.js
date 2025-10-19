@@ -42,7 +42,6 @@ window.addEventListener('touchmove', event => {
 window.addEventListener('keyup', event => {
     keyboards.forEach(k => {
         k.pressed.delete(event.code)
-        //k.waspressed.delete(event.code)
     });
 });
 window.addEventListener("contextmenu", e => e.preventDefault());
@@ -250,23 +249,6 @@ function collectInputs() {
     keyboardPlayers = keyboardPlayers.map(kp => (Object.assign(kp, defaultkeyboardPlayer)));
     keyboards.forEach(k => {
         Object.keys(k.keys).forEach(code => {
-            /*if (!k.waspressed.has(pressedButton)) {
-                k.startpressed.add(pressedButton)
-            } else {
-                k.startpressed.delete(pressedButton)
-            }
-            k.waspressed.add(pressedButton)
-
-            switch (pressedButton) {
-                case 'Delete':
-                    if (k.startpressed.has(pressedButton)) {
-                        isRestartButtonPressed = true
-                    }
-                    break;
-                default:
-                    break;
-            }*/
-
             const key = k.keys[code]
             if (k.pressed.has(code)) {
                 key.pressed = true
