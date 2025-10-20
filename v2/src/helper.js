@@ -564,10 +564,12 @@ const attackFigure = (figureAttacker, figureAttacked) => {
     if (attackDistance && distance(figureAttacker.x,figureAttacker.y,figureAttacked.x,figureAttacked.y) < attackDistance) {
         if (2*distanceAnglesDeg(rad2deg(figureAttacker.direction), rad2deg(angle(figureAttacker.x,figureAttacker.y,figureAttacked.x,figureAttacked.y))+180) <= figureAttacker.attackAngle) {
             killFigure(figureAttacked)
+            figureAttacker.hasHit = true
             return true
         }
     } else if (new PIXI.Rectangle(figureAttacker.lastAttackX-figureAttacker.attackRectX/2, figureAttacker.lastAttackY-figureAttacker.attackRectY/2, figureAttacker.attackRectX, figureAttacker.attackRectY).contains(figureAttacked.x, figureAttacked.y - figureAttacked.bodyHeight*0.5 )) {
         killFigure(figureAttacked)
+        figureAttacker.hasHit = true
         return true
     }
     return false
@@ -576,8 +578,8 @@ const attackFigure = (figureAttacker, figureAttacked) => {
 const killFigure = (figure) => {
     if (!figure.isDead) {
         figure.isDead = true
+        figure.died = true
         figure.killTime = dtProcessed
-        playAudioPool(soundDeathPool)
         if (game === games.rampage && figure.team !== 'killer') {
             figures.filter(f => f.team === 'killer' & f.type === 'fighter').forEach(f => {
                 f.player.score.points++

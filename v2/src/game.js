@@ -916,17 +916,9 @@ function updateGame(figures, dt, dtProcessed) {
         const noTeamAlive = figuresAlive.filter(f => !f.team)
 
         snipersAlive.filter(f => f.isAttacking).forEach(f => {
-            let isHit = false;
             [...killersAlive, ...noTeamAlive].forEach(fig => {
-                if (attackFigure(f, fig)) {
-                    isHit = true
-                }
+                attackFigure(f, fig)
             })
-            if (isHit) {
-                playAudioPool(soundShootHitPool)
-            } else {
-                playAudioPool(soundShootMissPool)
-            }
         })
 
         killersAlive.filter(f => f.isAttacking).forEach(f => {
@@ -968,10 +960,40 @@ function updateGame(figures, dt, dtProcessed) {
         })
     }
     
+    figures.filter(f => f.type === 'fighter').forEach(f => {
+        if (f.attacked) {
+            if (f.beansFarted.size === 0) {
+                playAudioPool(soundFartPool)
+            } else {
+                playAudioPool(soundBeanFartPool)
+            }
+        }
+        if (f.died) {
+            playAudioPool(soundDeathPool)
+        }
+    })
+    figures.filter(f => f.type === 'crosshair').forEach(f => {
+        if (f.attacked) {
+            if (f.hasHit) {
+                playAudioPool(soundShootHitPool)
+            } else {
+                console.log('play audio miss')
+                playAudioPool(soundShootMissPool)
+            }
+        }
+    })
+
     playKillingSounds(numberKilledFigures, killTime);
 }
 
 function handleInput(players, figures, dtProcessed) {
+    figures.filter(f => f.type === 'crosshair' || f.type === 'fighter').forEach(f => {
+        f.beansFarted?.clear()
+        f.died = false
+        f.attacked = false
+        f.hasHit = false
+    })
+
     if (stage !== stages.game) {
         var joinedFighters = figures.filter(f => f.playerId && f.type === 'fighter')
         // join by doing anything
@@ -1025,20 +1047,17 @@ function handleInput(players, figures, dtProcessed) {
                         f.ammo--
                         f.lastAttackX = f.x
                         f.lastAttackY = f.y
-                        //playAudioPool(soundShootPool);
                     } else {
 
                         let xyNew = move(f.x, f.y, f.direction+deg2rad(180),f.attackDistance*0.5, 1)
 
                         if (f.beans.size > 0) {
-                            playAudioPool(soundBeanFartPool);
                             addFartCloud({x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size})
-                        } else {
-                            playAudioPool(soundFartPool);
                         }
                         f.beans.forEach(b => f.beansFarted.add(b))
                         f.beans.clear()
                     }
+                    f.attacked = true
                     f.lastAttackTime = dtProcessed
                 }
             }
