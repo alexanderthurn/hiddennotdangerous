@@ -90,8 +90,10 @@ var btnTouchAction = {
 let tileArea = []
 const tileWidth = 120;
 const audio = {
-    attack: {title: './sfx/sound2.mp3', currentTime: 0.15},
-    attack2: {title: './sfx/sound1.mp3', currentTime: 0.15},
+    fart: {title: './sfx/sound2.mp3', currentTime: 0.15},
+    beanFart: {title: './sfx/sound1.mp3', currentTime: 0.15},
+    shootHit: {title: './sfx/slingshotHit.mp3', currentTime: 1.5},
+    shootMiss: {title: './sfx/slingshotMiss.mp3', currentTime: 1.5},
     death: {title: './sfx/gag-reflex-41207.mp3', currentTime: 0.0},
     join: {title: './sfx/sounddrum.mp3'},
     firstBlood: {title: './sfx/first-blood.mp3', volume: 0.2},
@@ -132,8 +134,10 @@ const audio = {
     ]
 }
 
-var soundAttackPool = loadAudioPool(audio.attack, 10);
-var soundAttack2Pool = loadAudioPool(audio.attack2, 10);
+var soundFartPool = loadAudioPool(audio.fart, 10);
+var soundBeanFartPool = loadAudioPool(audio.beanFart, 10);
+var soundShootHitPool = loadAudioPool(audio.shootHit, 10);
+var soundShootMissPool = loadAudioPool(audio.shootMiss, 10);
 var soundDeathPool = loadAudioPool(audio.death, 10);
 var soundEatPool = audio.eat.map(audio => loadAudioPool(audio, 4));
 
@@ -230,7 +234,7 @@ const teams = {
         games: new Set([games.rampage, games.rampagev2]),
         label: 'Snipers',
         playerTeam: true,
-        sprite: 'boy',
+        sprite: 'sniper',
         size: 0
     },
     vip: {
@@ -912,9 +916,17 @@ function updateGame(figures, dt, dtProcessed) {
         const noTeamAlive = figuresAlive.filter(f => !f.team)
 
         snipersAlive.filter(f => f.isAttacking).forEach(f => {
+            let isHit = false;
             [...killersAlive, ...noTeamAlive].forEach(fig => {
-                attackFigure(f, fig)
+                if (attackFigure(f, fig)) {
+                    isHit = true
+                }
             })
+            if (isHit) {
+                playAudioPool(soundShootHitPool)
+            } else {
+                playAudioPool(soundShootMissPool)
+            }
         })
 
         killersAlive.filter(f => f.isAttacking).forEach(f => {
@@ -1019,10 +1031,10 @@ function handleInput(players, figures, dtProcessed) {
                         let xyNew = move(f.x, f.y, f.direction+deg2rad(180),f.attackDistance*0.5, 1)
 
                         if (f.beans.size > 0) {
-                            playAudioPool(soundAttack2Pool);
+                            playAudioPool(soundBeanFartPool);
                             addFartCloud({x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size})
                         } else {
-                            playAudioPool(soundAttackPool);
+                            playAudioPool(soundFartPool);
                         }
                         f.beans.forEach(b => f.beansFarted.add(b))
                         f.beans.clear()

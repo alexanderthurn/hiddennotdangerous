@@ -49,6 +49,8 @@ To generate characters:
 - music1: https://incompetech.com/music/royalty-free/mp3-royaltyfree/Ranz%20des%20Vaches.mp3
 - music2: https://suno.com/song/90760bdb-d4c5-42d3-8066-7f4597b8e1d4
 - music3: https://pixabay.com/de/music/schlaflieder-brahms-lullaby-wiegenlied-op49-no4-music-box-version-2-229418/
+- slingshotHit: https://pixabay.com/sound-effects/slingshot-2-40485/
+- slingshotMiss: https://pixabay.com/sound-effects/slingshot-1-40486/
 - sound1: https://pixabay.com/de/sound-effects/fart-9-228245/
 - sound2: https://pixabay.com/de/sound-effects/fart-83471/
 - sounddrum: https://pixabay.com/de/sound-effects/awesome-kick-drum-41824/
