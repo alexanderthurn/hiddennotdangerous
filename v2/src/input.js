@@ -193,10 +193,6 @@ function collectInputs() {
             }
         } else {
             Object.assign(gamepadPlayers[gamepadPlayerIndex],x)
-          
-            //gamepadPlayers[gamepadPlayerIndex] = x
-            //gamepadPlayers[gamepadPlayerIndex].buttons = x.buttons
-            //gamepadPlayers[gamepadPlayerIndex].axes = x.axes
         }
     })
 

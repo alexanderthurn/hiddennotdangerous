@@ -710,7 +710,7 @@ const handleWinning = () => {
 
             // ammo out
             const crosshairs = figures.filter(f => f.type === 'crosshair')
-            sumAmmo = crosshairs.reduce((sum, f) => sum + f.ammo, 0)
+            const sumAmmo = crosshairs.reduce((sum, f) => sum + f.ammo, 0)
             if (!restartStage && sumAmmo === 0) {
                 killers.forEach(f => {
                     f.player.score.points += noTeamSurvivors.length
@@ -749,7 +749,7 @@ const handleWinning = () => {
 
             // ammo out
             const crosshairs = figures.filter(f => f.type === 'crosshair')
-            sumAmmo = crosshairs.reduce((sum, f) => sum + f.ammo, 0)
+            const sumAmmo = crosshairs.reduce((sum, f) => sum + f.ammo, 0)
             if (!restartStage && sumAmmo === 0) {
                 winRoundTeam('killer')
             }

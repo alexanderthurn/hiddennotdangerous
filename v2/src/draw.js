@@ -444,7 +444,7 @@ const animateTeamSwitcher = (button, games) => {
     button.visible = games.has(game)
    
     //put in createSpriteWithShadowContainer later
-    button.house.sprite.zIndex = -100000 //button.house.y + (1-button.house.sprite.anchor.y)*button.house.sprite.height
+    button.house.sprite.zIndex = -1000
 }
 
 const createTeamSwitcher = (app, props, lobbyContainer) => {
@@ -758,7 +758,6 @@ const addLevelBoundary = (app) => {
     fenceLeft.shadow.width = fenceLeft.sprite.width=level.width*0.006
     fenceLeft.shadow.height = fenceLeft.sprite.height=level.height
     fenceLeft.sprite.zIndex = level.height
-   // fenceLeft.shadow.position.x = 5
     
     const fenceRight = createSpriteWithShadowContainer({ texture: spritesheet.textures['fence_horizontal'], scaleFactor: { x: 1.5 / shadowDefinition.scale.x, y: 1 / shadowDefinition.scale.y }, skewFactor: { x: 0, y: 0 }, position: { x: level.width * 1, y: level.height * 0.00 }, anchor: { x: 1, y: 0.0 }, options: { tilingSprite: { tileScale: { x: 0.4, y: 0.4 }, tilePosition: { x: 0, y: 0 } } } });
     fenceRight.shadow.width = fenceRight.sprite.width=level.width*0.006
@@ -865,8 +864,8 @@ const animateFigure = (figure, spritesheet) => {
         } else {
             body.angle = 0
         }
-        body.y = 0//-figure.bodyHeight/5
-        shadow.y = 0//-figure.bodyHeight/5
+        body.y = 0
+        shadow.y = 0
         figureLayer.attach(body)
         shadow.visible = true
     }
