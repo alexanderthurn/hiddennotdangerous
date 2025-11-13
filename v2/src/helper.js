@@ -213,20 +213,38 @@ const isMusicMuted = () => {
     return window.localStorage.getItem('mute') === 'true'
 }
 
+var musicPlaylistEndHandlers = [];
+
 const getPlayAudio = (audio) => () => playAudio(audio)
 
 const playPlaylist = (playlist, isShuffled) => {
     if (playlist) {
+        // Entferne alte Event-Listener
+        musicPlaylistEndHandlers.forEach(({track, handler}) => {
+            track.file.removeEventListener("ended", handler);
+        });
+        musicPlaylistEndHandlers = [];
+        
         if (isShuffled) {
             playlist = shuffle(playlist)
         }
-        playlist.forEach((track, index, list) => track.file.addEventListener("ended", getPlayAudio(playlist[(index+1)%list.length])));
+        playlist.forEach((track, index, list) => {
+            const handler = getPlayAudio(playlist[(index+1)%list.length]);
+            track.file.addEventListener("ended", handler);
+            musicPlaylistEndHandlers.push({track, handler});
+        });
         playAudio(playlist[0]);
     }
 }
 
 const stopPlaylist = (playlist) => {
     if (playlist) {
+        // Entferne alle Event-Listener
+        musicPlaylistEndHandlers.forEach(({track, handler}) => {
+            track.file.removeEventListener("ended", handler);
+        });
+        musicPlaylistEndHandlers = [];
+        
         playlist.forEach(track => track.file.load());
     }
 }
