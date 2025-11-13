@@ -471,8 +471,14 @@ function initStage(nextStage) {
         figuresPool = new Set(figuresInitialPool)
 
         figures.filter(figure => figure.type === 'fighter').forEach(figure => {
-            figure.currentSprite = 'baby'
-            figure.defaultSprite = 'baby'
+            // Stelle sicher, dass VIPs ihren VIP-Sprite behalten
+            if (figure.team === 'vip') {
+                figure.currentSprite = teams.vip.sprite
+                figure.defaultSprite = teams.vip.sprite
+            } else {
+                figure.currentSprite = 'baby'
+                figure.defaultSprite = 'baby'
+            }
             figure.inactive = false
             figure.playerId = null
             figure.player = null
@@ -799,6 +805,10 @@ function updateGame(figures, dt, dtProcessed) {
         f.isDead = false
         f.isDeathDetected = false
         f.killTime = 0
+        // Stelle sicher, dass der Sprite basierend auf dem Team korrekt gesetzt ist
+        if (f.team) {
+            f.currentSprite = teams[f.team]?.sprite || f.defaultSprite
+        }
     }})
 
     if (stage === stages.startLobby || stage === stages.gameLobby) {
