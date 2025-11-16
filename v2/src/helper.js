@@ -29,6 +29,8 @@ const getCrosshairColor = () => {
     return color
 }
 
+let musicPlaylistEndHandlers = [];
+
 /**
  * Set a value based on the deadzone
  */
@@ -213,18 +215,10 @@ const isMusicMuted = () => {
     return window.localStorage.getItem('mute') === 'true'
 }
 
-var musicPlaylistEndHandlers = [];
-
 const getPlayAudio = (audio) => () => playAudio(audio)
 
 const playPlaylist = (playlist, isShuffled) => {
     if (playlist) {
-        // Entferne alte Event-Listener
-        musicPlaylistEndHandlers.forEach(({track, handler}) => {
-            track.file.removeEventListener("ended", handler);
-        });
-        musicPlaylistEndHandlers = [];
-        
         if (isShuffled) {
             playlist = shuffle(playlist)
         }
