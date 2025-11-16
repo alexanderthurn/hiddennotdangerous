@@ -34,7 +34,7 @@ var isRestartButtonPressed, restartStage = false, gameOver, ceremonyOver, lastRo
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figuresInitialPool = new Set(), figuresPool = new Set()
-var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, roundsToWin = 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000, baseAmmoFactor = 2, bonusAmmoFactor = 0.5, detectRadius = 200
+var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, defaultMaxSpeed = 0.12, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, roundsToWin = 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000, baseAmmoFactor = 2, bonusAmmoFactor = 0.5, detectRadius = 200
 
 var allPlayersSameTeam, isDebugMode = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
@@ -207,7 +207,7 @@ const teams = {
         games: new Set([games.vip]),
         label: 'Assassins',
         walkRectLength: 300,
-        maxSpeed: 0.08,
+        maxSpeed: defaultMaxSpeed,
         playerTeam: true,
         sprite: 'boy',
         size: 0
@@ -217,7 +217,7 @@ const teams = {
         games: new Set([games.vip]),
         label: 'Guards',
         walkRectLength: 300,
-        maxSpeed: 0.06,
+        maxSpeed: 0.75*defaultMaxSpeed,
         playerTeam: true,
         sprite: 'girl',
         size: 0
@@ -242,7 +242,7 @@ const teams = {
         games: new Set([games.vip]),
         label: 'VIPs',
         walkRectLength: 150,
-        maxSpeed: 0.04,
+        maxSpeed: 0.5*defaultMaxSpeed,
         playerTeam: false,
         sprite: 'vip',
         size: 0

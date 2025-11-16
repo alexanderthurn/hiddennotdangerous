@@ -988,7 +988,7 @@ const addSniperFigures = (app, sniperFigures, ammo) => {
         // NPC replacement in level
         const figure = createFigure(app, spritesheet, {
             maxBreakDuration: 5000,
-            maxSpeed: 0.08,
+            maxSpeed: defaultMaxSpeed,
             attackDuration: 500,
             attackBreakDuration: 2000,
             points: 0,
@@ -1007,7 +1007,7 @@ const addFiguresInitialPool = (app) => {
     for (var i = 0; i < maxPlayerFigures; i++) {
         const figure = createFigure(app, spritesheet, {
             maxBreakDuration: 5000,
-            maxSpeed: 0.08,
+            maxSpeed: defaultMaxSpeed,
             attackDuration: 500,
             attackBreakDuration: 2000,
             points: 0,
@@ -1061,7 +1061,7 @@ const createCrosshair = props => {
     crosshair.attackRectX = 32
     crosshair.attackRectY = 64
     crosshair.detectRadius = detectRadius
-    crosshair.maxSpeed = 0.32
+    crosshair.maxSpeed = 4*defaultMaxSpeed
     crosshair.playerId = player.playerId
     crosshair.player = player
     crosshair.recoilDuration = 200
