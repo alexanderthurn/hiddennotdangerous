@@ -990,10 +990,10 @@ const createFigure = (app, spritesheet, props) => {
     return figure
 }
 
-const addSniperFigures = (app, sniperFigures) => {
+const addSniperFigures = (app, sniperFigures, ammo) => {
     let spritesheet = PIXI.Assets.get('figureAtlas')
     sniperFigures.forEach(f => {
-        const crosshair = createCrosshair({...f, x: f.x, y: f.y, ammo: 3})
+        const crosshair = createCrosshair({...f, x: f.x, y: f.y, ammo})
         
         // NPC replacement in level
         const figure = createFigure(app, spritesheet, {

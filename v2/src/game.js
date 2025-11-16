@@ -34,7 +34,7 @@ var isRestartButtonPressed, restartStage = false, gameOver, ceremonyOver, lastRo
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figuresInitialPool = new Set(), figuresPool = new Set()
-var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, roundsToWin = 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000, detectRadius = 200
+var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, roundsToWin = 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000, baseAmmoFactor = 2, bonusAmmoFactor = 0.5, detectRadius = 200
 
 var allPlayersSameTeam, showDebug = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
@@ -502,7 +502,10 @@ function initStage(nextStage) {
     let figuresPoolArray = Array.from(figuresPool)
 
     if (roundCounter === 1 && stage === stages.game && (game === games.rampage || game === games.rampagev2)) {
-        addSniperFigures(app, figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
+        const killerFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'killer')
+        const sniperFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'sniper');
+        const ammo = Math.ceil(baseAmmoFactor * killerFigures.length/sniperFigures.length + bonusAmmoFactor*Math.sqrt(maxPlayerFigures/killerFigures.length))
+        addSniperFigures(app, sniperFigures, ammo)
     }
 
     figuresPoolArray = Array.from(figuresPool)
