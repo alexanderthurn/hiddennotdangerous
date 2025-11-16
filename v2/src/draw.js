@@ -442,9 +442,6 @@ const addShootingRange = (app, props, lobbyContainer) => {
 
 const animateTeamSwitcher = (button, games) => {
     button.visible = games.has(game)
-   
-    //put in createSpriteWithShadowContainer later
-    button.house.sprite.zIndex = -1000
 }
 
 const createTeamSwitcher = (app, props, lobbyContainer) => {
@@ -461,18 +458,14 @@ const createTeamSwitcher = (app, props, lobbyContainer) => {
     .rect(newX, newY, width, height)
     .fill({color: teams[team]?.color >= 0 ? teams[team].color : colors.white})
 
-    const house = createSpriteWithShadowContainer({
-        texture: PIXI.Assets.get('house_' + team),
-        scaleFactor: { x: 0, y: 0 },
-        skewFactor: { x: 1, y: 1 },
-        position: { x: newX + width * 0.5, y: newY + height + 3},
-        options: {} // ggf. Optionen einfügen
-    });
+    const area = new PIXI.Sprite(PIXI.Assets.get('house_' + team))
+    area.x = newX + width * 0.5
+    area.y = newY + height + 3
 
-    button.house = house
+    button.area = area
     button.execute = () => button.playersNear.forEach(f => switchTeam(f, team)) 
     button.isInArea = f => stage === stages.gameLobby && games.has(game) && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y)
-    button.addChild(marker, house)
+    button.addChild(marker, area)
     lobbyContainer.addChild(button)
 
     app.ticker.add(() => animateTeamSwitcher(button, games))
