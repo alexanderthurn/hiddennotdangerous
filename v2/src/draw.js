@@ -686,7 +686,7 @@ const animateFood = figure => {
     }
 
     const marker = figure.getChildByLabel('marker')
-    marker.visible = showDebug
+    marker.visible = isDebugMode
 }
 
 const addFood = (app, texture, props) => {
@@ -906,7 +906,7 @@ const figureMarker = new PIXI.GraphicsContext().circle(0, 0, 5).fill()
 
 const animateFigureMarker = (attackArc, figure) => {
     attackArc.rotation = figure.direction
-    attackArc.visible = showDebug && figure.isAttacking
+    attackArc.visible = isDebugMode && figure.isAttacking
 }
 
 createFigureMarker = figure => {
@@ -924,14 +924,14 @@ createFigureMarker = figure => {
     app.ticker.add(() => {
         marker.tint = figure.playerId ? colors.red : colors.green
         markerText.text = figure.playerId ? figure.playerId + ' ' + figure.beans.size : ''
-        markerContainer.visible = showDebug
+        markerContainer.visible = isDebugMode
     })
     return markerContainer
 }
 
 const animateAttackArc = (attackArc, figure) => {
     attackArc.rotation = figure.direction + Math.PI
-    attackArc.visible = showDebug && figure.isAttacking
+    attackArc.visible = isDebugMode && figure.isAttacking
 }
 
 const createAttackArc = figure => {
@@ -1293,7 +1293,7 @@ const addDebug = app => {
     debugLayer.attach(debugContainer)
 
     app.ticker.add(() => {
-        debugContainer.visible = showDebug
+        debugContainer.visible = isDebugMode
     })
 }
 

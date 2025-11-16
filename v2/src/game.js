@@ -36,7 +36,7 @@ var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figuresInitialPool = new Set(), figuresPool = new Set()
 var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, roundsToWin = 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000, baseAmmoFactor = 2, bonusAmmoFactor = 0.5, detectRadius = 200
 
-var allPlayersSameTeam, showDebug = false
+var allPlayersSameTeam, isDebugMode = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
 var level = createLevel()
 
@@ -1043,7 +1043,7 @@ function handleInput(players, figures, dtProcessed) {
         if (!f.isDead && !f.inactive) {
             if (p.isMoving) {
                 f.direction = angle(0,0,p.xAxis,p.yAxis)
-                f.speed = f.maxSpeed * (f.player.isSpeedButtonPressed ? 2.2 : 1)
+                f.speed = f.maxSpeed * (f.player.isSpeedButtonPressed && isDebugMode ? 2.2 : 1)
             }
             if (p.isAttackButtonPressed && !f.isAttacking) {
                 if (!f.lastAttackTime || dtProcessed-f.lastAttackTime > f.attackBreakDuration) {

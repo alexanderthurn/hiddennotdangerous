@@ -9,7 +9,7 @@ window.addEventListener('keydown', event => {
     });
 
     if (event.code === 'Escape') {
-        showDebug =!showDebug
+        isDebugMode =!isDebugMode
     }
 
     if (event.code === 'ArrowDown' || event.code === 'ArrowUp') { /* prevent scrolling of website */
