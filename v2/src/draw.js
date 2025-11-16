@@ -412,15 +412,18 @@ const addShootingRange = (app, props, lobbyContainer) => {
     const newXInside = x - widthInside/2
     const newYInside = y - heightInside/2
 
-    const buttonOutside = new PIXI.Graphics()
-    .rect(newX, newY, width, height)
-    .fill({color: colors.white})
+    const area = new PIXI.Sprite(PIXI.Assets.get('house_shootingrange'))
+    area.x = newX 
+    area.y = newY
+    area.width = width 
+    area.height = height 
+
+    const buttonOutside = new PIXI.Container()
     buttonOutside.execute = () => buttonOutside.playersNear.forEach(f => f.justShot = false) 
     buttonOutside.isInArea = f => stage === stages.gameLobby && (game === games.rampage || game === games.rampagev2) && !(new PIXI.Rectangle(newX, newY, width, height)).contains(f.x, f.y)
+    buttonOutside.addChild(area)
 
-    const buttonInside = new PIXI.Graphics()
-    .rect(newXInside, newYInside, widthInside, heightInside)
-    .fill({color: teams[team].color})
+    const buttonInside = new PIXI.Container()
     buttonInside.execute = () => buttonInside.playersNear.forEach(f => {
         if (f.team === 'sniper' && !f.inactive && !f.justShot) {
             f.inactive = true
@@ -440,10 +443,6 @@ const addShootingRange = (app, props, lobbyContainer) => {
     })
 }
 
-const animateTeamSwitcher = (button, games) => {
-    button.visible = games.has(game)
-}
-
 const createTeamSwitcher = (app, props, lobbyContainer) => {
     const {x, y, team} = props
     const width = 128
@@ -452,23 +451,21 @@ const createTeamSwitcher = (app, props, lobbyContainer) => {
     const newY = y - height/2
     const games = teams[team].games
 
-    const button = new PIXI.Container()
-
-    const marker = new PIXI.Graphics()
-    .rect(newX, newY, width, height)
-    .fill({color: teams[team]?.color >= 0 ? teams[team].color : colors.white})
-
     const area = new PIXI.Sprite(PIXI.Assets.get('house_' + team))
-    area.x = newX + width * 0.5
-    area.y = newY + height + 3
+    area.x = newX 
+    area.y = newY
+    area.width = width 
+    area.height = height 
 
-    button.area = area
+    const button = new PIXI.Container()
     button.execute = () => button.playersNear.forEach(f => switchTeam(f, team)) 
     button.isInArea = f => stage === stages.gameLobby && games.has(game) && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y)
-    button.addChild(marker, area)
+    button.addChild(area)
     lobbyContainer.addChild(button)
 
-    app.ticker.add(() => animateTeamSwitcher(button, games))
+    app.ticker.add(() => {
+        button.visible = games.has(game)
+    })
 
     return button
 }
