@@ -471,8 +471,10 @@ function initStage(nextStage) {
         figuresPool = new Set(figuresInitialPool)
 
         figures.filter(figure => figure.type === 'fighter').forEach(figure => {
-            figure.currentSprite = 'baby'
-            figure.defaultSprite = 'baby'
+            if (figure.team !== 'vip') {
+                figure.currentSprite = 'baby'
+                figure.defaultSprite = 'baby'
+            }
             figure.inactive = false
             figure.playerId = null
             figure.player = null
