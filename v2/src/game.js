@@ -1044,6 +1044,11 @@ function handleInput(players, figures, dtProcessed) {
             if (p.isMoving) {
                 f.direction = angle(0,0,p.xAxis,p.yAxis)
                 f.speed = f.maxSpeed * (f.player.isSpeedButtonPressed && isDebugMode ? 2.2 : 1)
+                if (f.type === 'crosshair') {
+                    f.speed = f.maxSpeed * Math.hypot(p.xAxis, p.yAxis);
+                } else {
+                    f.speed = f.maxSpeed * (f.player.isSpeedButtonPressed && isDebugMode ? 2.2 : 1)
+                }
             }
             if (p.isAttackButtonPressed && !f.isAttacking) {
                 if (!f.lastAttackTime || dtProcessed-f.lastAttackTime > f.attackBreakDuration) {
