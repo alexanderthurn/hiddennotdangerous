@@ -590,10 +590,15 @@ function gameLoop() {
                 f.playerId = null
                 f.player = null
                 if (f.type === 'crosshair') {
-                    // will be deleted
                     f.isDead = true
                 }
             }
+        })
+
+        // delete dead crosshair and cloud figures
+        figures = figures.filter(f => !((f.type === 'cloud' || f.type === 'crosshair') && f.isDead))
+        figures.filter(f => (f.type === 'cloud' || f.type === 'crosshair') && f.isDead).forEach(f => {
+            destroyContainer(app, f)
         })
 
         dtToProcess += dt
@@ -1176,13 +1181,4 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
 
         }
     })
-
-    var toDeleteIndex = figures.findIndex(f => (f.type === 'cloud' || f.type === 'crosshair') && f.isDead)
-    figures.filter(f => (f.type === 'cloud' || f.type === 'crosshair') && f.isDead).forEach(f => {
-        destroyContainer(app, f)
-    })
-    if (toDeleteIndex >= 0) {
-        figures.splice(toDeleteIndex,1)
-    }
-       
 }
