@@ -430,6 +430,7 @@ const addShootingRange = (app, props, lobbyContainer) => {
             f.justShot = true
             const crosshair = createCrosshair({...f, x: f.x, y: f.y})
             figures.push(crosshair)
+            figuresPool.add(crosshair)
         }
     }) 
     buttonInside.isInArea = f => stage === stages.gameLobby && (game === games.rampage || game === games.rampagev2) && new PIXI.Rectangle(newXInside, newYInside, widthInside, heightInside).contains(f.x, f.y)

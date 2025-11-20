@@ -583,7 +583,7 @@ function gameLoop() {
         const oldNumberJoinedKeyboardPlayers = keyboardPlayers.filter(k => k.joinedTime >= 0).length
 
         // remove figures without valid playerId
-        figures.filter(f => f.playerId).forEach((f) => {
+        figures.filter(f => f.playerId).forEach(f => {
             if (!players.some(p => p.playerId === f.playerId)) {
                 destroyContainer(app, f.player.score)
                 f.playerId = null
@@ -982,7 +982,6 @@ function updateGame(figures, dt, dtProcessed) {
             if (f.hasHit) {
                 playAudioPool(soundShootHitPool)
             } else {
-                console.log('play audio miss')
                 playAudioPool(soundShootMissPool)
             }
         }
@@ -1175,11 +1174,15 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
             }
 
         }
-        
-        
     })
+
     var toDeleteIndex = figures.findIndex(f => (f.type === 'cloud' || f.type === 'crosshair') && f.isDead)
-    figures.filter(f => (f.type === 'cloud' || f.type === 'crosshair') && f.isDead).forEach(f => destroyContainer(app, f))
-    if (toDeleteIndex >= 0)
+    figures.filter(f => (f.type === 'cloud' || f.type === 'crosshair') && f.isDead).forEach(f => {
+        destroyContainer(app, f),
+        figuresPool.remove(f)
+    })
+    if (toDeleteIndex >= 0) {
         figures.splice(toDeleteIndex,1)
+    }
+       
 }
