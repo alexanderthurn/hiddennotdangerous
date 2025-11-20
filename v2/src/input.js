@@ -181,7 +181,7 @@ function collectInputs() {
         }
 
         let m = Math.hypot(bot.xAxis, bot.yAxis)
-        m = setDeadzone(m, 0.2)
+        m = setDeadzone(m, 1)
         m = clampStick(m)
         bot.direction = angle(0, 0, bot.xAxis, bot.yAxis)
         bot.speed = m
