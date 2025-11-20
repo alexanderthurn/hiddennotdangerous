@@ -596,10 +596,10 @@ function gameLoop() {
         })
 
         // delete dead crosshair and cloud figures
-        figures = figures.filter(f => !((f.type === 'cloud' || f.type === 'crosshair') && f.isDead))
         figures.filter(f => (f.type === 'cloud' || f.type === 'crosshair') && f.isDead).forEach(f => {
             destroyContainer(app, f)
         })
+        figures = figures.filter(f => !((f.type === 'cloud' || f.type === 'crosshair') && f.isDead))
 
         dtToProcess += dt
         let counter = 0;
