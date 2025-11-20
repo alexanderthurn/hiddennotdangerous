@@ -31,36 +31,17 @@ const getCrosshairColor = () => {
 
 let musicPlaylistEndHandlers = [];
 
-/**
- * Set a value based on the deadzone
- */
-function setDeadzone(x, y, deadzone=0.2) {
-    let m = Math.hypot(x, y);
-
+function setDeadzone(m, deadzone=0.2) {
     if (m < deadzone)
-        return [0, 0];
+        return 0
 
-    let over = m - deadzone;  // 0 -> 1 - deadzone
-    let nover = over / (1 - deadzone);  // 0 -> 1
-
-    let nx = x / m;
-    let ny = y / m;
-
-    return [nx * nover, ny * nover];
+    let over = m - deadzone  // 0 -> 1 - deadzone
+    let nover = over / (1 - deadzone)  // 0 -> 1
+    return nover
 }
 
-function clampStick(x, y) {
-    // Compute magnitude (length) of vector
-    let m = Math.hypot(x, y);
-
-    // If the length greater than 1, normalize it (set it to 1)
-    if (m > 1) {
-        x /= m;
-        y /= m;
-    }
-
-    // Return the (possibly normalized) vector
-    return [x, y];
+function clampStick(m) {
+    return Math.min(1, m);
 }
 
 const pad = (num, size) => {

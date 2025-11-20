@@ -180,8 +180,13 @@ function collectInputs() {
             bot.yAxis = yTarget - f.y
         }
 
-        bot.isMoving = Math.abs(bot.xAxis) + Math.abs(bot.yAxis) > 4;
-       
+        let m = Math.hypot(bot.xAxis, bot.yAxis)
+        m = setDeadzone(m, 0.2)
+        m = clampStick(m)
+        bot.direction = angle(0, 0, bot.xAxis, bot.yAxis)
+        bot.speed = m
+        bot.isMoving = m > 0
+
         isNew && botPlayers.push(bot)
     }
 
@@ -222,11 +227,14 @@ function collectInputs() {
         }
         let x = g.axes[0];
         let y = g.axes[1];
-        [x, y] = setDeadzone(x, y,0.2);
-        [x, y] = clampStick(x, y);
+        let m = Math.hypot(x, y)
+        m = setDeadzone(m, 0.2)
+        m = clampStick(m)
+        g.direction = angle(0, 0, x, y)
+        g.speed = m
         g.xAxis = x
         g.yAxis = y
-        g.isMoving = x !== 0 || y !== 0;
+        g.isMoving = m > 0
         g.type = 'gamepad'
         g.playerId = 'g' + g.index // id does not work as it returns just XBOX Controller
         return g
@@ -292,8 +300,11 @@ function collectInputs() {
                         break;
                 }
                 if (p) {
-                    [p.xAxis, p.yAxis] = clampStick(p.xAxis, p.yAxis)
-                    p.isMoving = p.xAxis !== 0 || p.yAxis !== 0
+                    let m = Math.hypot(p.xAxis, p.yAxis)
+                    m = clampStick(m)
+                    p.direction = angle(0, 0, p.xAxis, p.yAxis)
+                    p.speed = m
+                    p.isMoving = m > 0
                     isNewPlayer && keyboardPlayers.push(p)
                 }
                 key.waspressed = true
@@ -324,9 +335,11 @@ function collectInputs() {
                     mp.yAxis = 0
                 }
                 mp.isAttackButtonPressed = mp.pressed.has(1)
-
-                mp.isMoving = Math.abs(mp.xAxis) + Math.abs(mp.yAxis) > 4
-               
+                let m = Math.hypot(mp.xAxis, mp.yAxis)
+                m = clampStick(m)
+                mp.direction = angle(0, 0, p.xAxis, p.yAxis)
+                mp.speed = m
+                mp.isMoving = m > 0               
             }
         }
     })

@@ -1047,10 +1047,10 @@ function handleInput(players, figures, dtProcessed) {
         f.speed = 0.0
         if (!f.isDead && !f.inactive) {
             if (p.isMoving) {
-                f.direction = angle(0,0,p.xAxis,p.yAxis)
-                f.speed = f.maxSpeed * (f.player.isSpeedButtonPressed && isDebugMode ? 2.2 : 1)
+                f.direction = p.direction
+                //f.speed = f.maxSpeed * (f.player.isSpeedButtonPressed && isDebugMode ? 2.2 : 1)
                 if (f.type === 'crosshair') {
-                    f.speed = f.maxSpeed * Math.hypot(p.xAxis, p.yAxis);
+                    f.speed = f.maxSpeed * p.speed
                 } else {
                     f.speed = f.maxSpeed * (f.player.isSpeedButtonPressed && isDebugMode ? 2.2 : 1)
                 }
