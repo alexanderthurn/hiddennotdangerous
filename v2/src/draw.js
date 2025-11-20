@@ -998,7 +998,6 @@ const addSniperFigures = (app, sniperFigures, ammo) => {
             type: 'fighter',
         })
 
-        figuresPool.add(crosshair)
         figuresPool.add(figure)
     })
 }

@@ -470,6 +470,7 @@ function initStage(nextStage) {
 
         figuresPool = new Set(figuresInitialPool)
 
+        figures.filter(figure => figure.type === 'crosshair').forEach(figure => destroyContainer(app, figure))
         figures.filter(figure => figure.type === 'fighter').forEach(figure => {
             if (figure.team !== 'vip') {
                 figure.currentSprite = 'baby'
@@ -1178,8 +1179,7 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
 
     var toDeleteIndex = figures.findIndex(f => (f.type === 'cloud' || f.type === 'crosshair') && f.isDead)
     figures.filter(f => (f.type === 'cloud' || f.type === 'crosshair') && f.isDead).forEach(f => {
-        destroyContainer(app, f),
-        figuresPool.remove(f)
+        destroyContainer(app, f)
     })
     if (toDeleteIndex >= 0) {
         figures.splice(toDeleteIndex,1)
