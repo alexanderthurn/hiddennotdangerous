@@ -182,7 +182,6 @@ function collectInputs() {
 
         let m = Math.hypot(bot.xAxis, bot.yAxis)
         m = setDeadzone(m, 1)
-        m = clampStick(m)
         bot.direction = angle(0, 0, bot.xAxis, bot.yAxis)
         bot.speed = m
         bot.isMoving = m > 0
@@ -229,7 +228,6 @@ function collectInputs() {
         let y = g.axes[1];
         let m = Math.hypot(x, y)
         m = setDeadzone(m, 0.2)
-        m = clampStick(m)
         g.direction = angle(0, 0, x, y)
         g.speed = m
         g.xAxis = x
@@ -301,7 +299,6 @@ function collectInputs() {
                 }
                 if (p) {
                     let m = Math.hypot(p.xAxis, p.yAxis)
-                    m = clampStick(m)
                     p.direction = angle(0, 0, p.xAxis, p.yAxis)
                     p.speed = m
                     p.isMoving = m > 0
@@ -321,6 +318,7 @@ function collectInputs() {
         mp.isAttackButtonPressed = mp.pressed.has(0)
         mp.xAxis = 0
         mp.yAxis = 0
+        mp.direction = 0
         mp.isMoving = 0
 
         var f = figures.find(f => f.playerId ===  mp.playerId && f.type === 'fighter')
@@ -336,8 +334,7 @@ function collectInputs() {
                 }
                 mp.isAttackButtonPressed = mp.pressed.has(1)
                 let m = Math.hypot(mp.xAxis, mp.yAxis)
-                m = clampStick(m)
-                mp.direction = angle(0, 0, p.xAxis, p.yAxis)
+                mp.direction = angle(0, 0, mp.xAxis, mp.yAxis)
                 mp.speed = m
                 mp.isMoving = m > 0               
             }

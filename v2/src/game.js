@@ -1048,11 +1048,11 @@ function handleInput(players, figures, dtProcessed) {
         if (!f.isDead && !f.inactive) {
             if (p.isMoving) {
                 f.direction = p.direction
-                //f.speed = f.maxSpeed * (f.player.isSpeedButtonPressed && isDebugMode ? 2.2 : 1)
+                f.speed = f.maxSpeed
                 if (f.type === 'crosshair') {
-                    f.speed = f.maxSpeed * p.speed
-                } else {
-                    f.speed = f.maxSpeed * (f.player.isSpeedButtonPressed && isDebugMode ? 2.2 : 1)
+                    f.speed *= Math.min(p.speed, 1)
+                } else if (f.player.isSpeedButtonPressed && isDebugMode) {
+                    f.speed *= 2.2
                 }
             }
             if (p.isAttackButtonPressed && !f.isAttacking) {

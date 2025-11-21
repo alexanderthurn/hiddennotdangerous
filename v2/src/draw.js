@@ -1272,7 +1272,7 @@ const createTouchControl = app => {
         attackControl.x = app.screen.width - distanceToBorder
         attackControl.y = app.screen.height - distanceToBorder
 
-        const xy = move(0, 0, angle(0, 0, mp.xAxis, mp.yAxis), radius/2, mp.isMoving)
+        const xy = move(0, 0, mp.direction, radius/2, mp.isMoving)
         moveControlStick.x = xy.x || 0
         moveControlStick.y = xy.y || 0
         attackControl.alpha = mp.isAttackButtonPressed ? 1 : 0.75

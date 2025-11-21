@@ -40,10 +40,6 @@ function setDeadzone(m, deadzone=0.2) {
     return nover
 }
 
-function clampStick(m) {
-    return Math.min(1, m);
-}
-
 const pad = (num, size) => {
     num = num.toString()
     while (num.length < size) num = "0" + num
