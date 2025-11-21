@@ -868,7 +868,7 @@ function updateGame(figures, dt, dtProcessed) {
         let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter');
         figures.filter(b => b.type === 'bean').forEach(b => {
             playerFigures.forEach(fig => {
-                if (distance(b.x,b.y,fig.x,fig.y) < b.attackDistance) {
+                if (squaredDistance(b.x,b.y,fig.x,fig.y) < b.attackDistance*b.attackDistance) {
                     if (!fig.beans.has(b.id)) {                    
                         playAudioPool(soundEatPool[fig.beans.size]);
                         fig.beans.add(b.id);
@@ -884,7 +884,7 @@ function updateGame(figures, dt, dtProcessed) {
         const scale =  1 - (dtProcessed - startTime)/(game.countdown*1000)
         circleOfDeath.radius = scale*circleOfDeath.startRadius
         figuresAlive.filter(f => f.type === 'fighter' ).forEach(f => {
-            if (distance(f.x, f.y, level.width/2, level.height/2) > circleOfDeath.radius) {
+            if (squaredDistance(f.x, f.y, level.width/2, level.height/2) > circleOfDeath.radius*circleOfDeath.radius) {
                 killFigure(f)
             }
         })
@@ -895,11 +895,11 @@ function updateGame(figures, dt, dtProcessed) {
         let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
         figuresAlive.filter(f => f.type === 'crosshair' ).forEach(f => {
             const playerFigure = playerFigures.find(figure => figure.playerId === f.playerId)
-            const dist = distance(f.x, f.y, playerFigure.x, playerFigure.y)
-            if (f.detached && dist <= f.attachRadius) {
+            const inAttachRadius = squaredDistance(f.x, f.y, playerFigure.x, playerFigure.y) <= f.attachRadius*f.attachRadius
+            if (f.detached && inAttachRadius) {
                 playerFigure.inactive = false
                 f.isDead = true
-            } else if (!f.detached && dist > f.attachRadius) {
+            } else if (!f.detached && !inAttachRadius) {
                 f.detached = true
             }
         })
@@ -1110,7 +1110,7 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
         shuffledIndexes = shuffle([...Array(movingNPCFigures.length).keys()]);
     }
     movingNPCFigures.forEach((f,i,array) => {
-        if (((startKeyboardMovement && shuffledIndexes[i] < array.length/2) || distance(f.x,f.y,f.xTarget,f.yTarget) < 5) && f.speed > 0) {
+        if (((startKeyboardMovement && shuffledIndexes[i] < array.length/2) || squaredDistance(f.x,f.y,f.xTarget,f.yTarget) < 25) && f.speed > 0) {
             const breakDuration = startKeyboardMovement ? 0 : Math.random() * f.maxBreakDuration;
             f.startWalkTime = Math.random() * breakDuration + time
             f.speed = 0

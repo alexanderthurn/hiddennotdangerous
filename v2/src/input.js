@@ -151,7 +151,7 @@ function collectInputs() {
                     //go to center of other players
                     xTarget = otherPlayerFigures.reduce((prevValue, fig) => prevValue+fig.x, 0)/otherPlayerFigures.length;
                     yTarget = otherPlayerFigures.reduce((prevValue, fig) => prevValue+fig.y, 0)/otherPlayerFigures.length;
-                    if (distance(f.x,f.y,xTarget, yTarget) < 50) {
+                    if (squaredDistance(f.x,f.y,xTarget, yTarget) < 250) {
                         //turn around and fart
                         xTarget *= -1
                         yTarget *= -1

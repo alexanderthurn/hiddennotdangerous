@@ -122,7 +122,8 @@ const shuffle = (arr) => arr
     .sort((a, b) => a.sort - b.sort)
     .map(({ value }) => value)
 
-const distance = (x1, y1, x2, y2) => Math.hypot(x2 - x1, y2 - y1); 
+const distance = (x1, y1, x2, y2) => Math.hypot(x2 - x1, y2 - y1);
+const squaredDistance = (x1, y1, x2, y2) => (x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1);
 const angle = (x1, y1, x2, y2) => Math.atan2(y2 - y1, x2 - x1); 
 const move = (x1, y1, angle, speed, dt) => ({x: x1 + Math.cos(angle)*speed*dt, y: y1 + Math.sin(angle)*speed*dt});
 // Function ]-∞;∞[ -> ]-∞;∞[
@@ -540,7 +541,7 @@ const initVIPGamePositions = figures => {
 
 const detectFigure = (figureDetector, figureDetected) => {
     const detectRadius = figureDetector.detectRadius
-    if (detectRadius && distance(figureDetector.x,figureDetector.y,figureDetected.x,figureDetected.y) < detectRadius) {
+    if (detectRadius && squaredDistance(figureDetector.x,figureDetector.y,figureDetected.x,figureDetected.y) < detectRadius*detectRadius) {
         figureDetected.isDetected = true
         if (figureDetected.isDead === true) {
             figureDetected.isDeathDetected = true
@@ -550,7 +551,7 @@ const detectFigure = (figureDetector, figureDetected) => {
 
 const attackFigure = (figureAttacker, figureAttacked) => {
     const attackDistance = figureAttacker.attackDistanceMultiplier ? figureAttacker.attackDistanceMultiplier*figureAttacker.attackDistance : figureAttacker.attackDistance
-    if (attackDistance && distance(figureAttacker.x,figureAttacker.y,figureAttacked.x,figureAttacked.y) < attackDistance) {
+    if (attackDistance && squaredDistance(figureAttacker.x,figureAttacker.y,figureAttacked.x,figureAttacked.y) < attackDistance*attackDistance) {
         if (2*distanceAnglesDeg(rad2deg(figureAttacker.direction), rad2deg(angle(figureAttacker.x,figureAttacker.y,figureAttacked.x,figureAttacked.y))+180) <= figureAttacker.attackAngle) {
             killFigure(figureAttacked)
             figureAttacker.hasHit = true
