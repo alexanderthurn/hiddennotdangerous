@@ -536,6 +536,7 @@ const initVIPGamePositions = figures => {
     }
     vips.forEach((f, i) => {
         initFigure(f, vipPositions[i].x, vipPositions[i].y, deg2rad(90))
+        f.currentSprite = teams.vip.sprites[i]
     })
 }
 
@@ -605,7 +606,6 @@ const switchTeam = (figure, team) => {
     figure.team = team
     
     figure.currentSprite = teams[team]?.sprites[0] || figure.defaultSprite
-
     figure.maxSpeed = teams[team]?.maxSpeed || defaultMaxSpeed
     figure.walkRectLength = teams[team]?.walkRectLength
     if (figure.team) {

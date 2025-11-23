@@ -227,6 +227,7 @@ const teams = {
         games: new Set([games.rampage, games.rampagev2]),
         label: 'Killers',
         playerTeam: true,
+        sprites: ['sniper'],
         size: 0
     },
     sniper: {
@@ -543,7 +544,7 @@ function initStage(nextStage) {
             initVIPGamePositions(figures)
         }
     } else if (game === games.rampage || game === games.rampagev2) {
-        initRandomSpriteFigures(figures.filter(figure => figure.team !== 'sniper'), ['father', 'grandpa', 'guard', 'mother', 'samurai', 'zombie'])
+        initRandomSpriteFigures(figures.filter(figure => figure.team !== 'sniper'), ['father', 'grandpa', 'mother', 'fat', 'robot', 'teddy'])
 
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => initCrosshair(figure))
         if (stage !== stages.gameLobby) {
