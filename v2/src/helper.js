@@ -605,7 +605,8 @@ const switchTeam = (figure, team) => {
     }
     figure.team = team
     
-    figure.currentSprite = teams[team]?.sprites[0] || figure.defaultSprite
+    let randomIndex = teams[team]? getRandomInt(teams[team]?.sprites.length) : 0
+    figure.currentSprite = teams[team]?.sprites[randomIndex] || figure.defaultSprite
     figure.maxSpeed = teams[team]?.maxSpeed || defaultMaxSpeed
     figure.walkRectLength = teams[team]?.walkRectLength
     if (figure.team) {

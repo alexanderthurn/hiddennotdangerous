@@ -209,7 +209,7 @@ const teams = {
         walkRectLength: 300,
         maxSpeed: defaultMaxSpeed,
         playerTeam: true,
-        sprites: ['boy'],
+        sprites: ['girl'],
         size: 0
     },
     guard: {
@@ -219,7 +219,7 @@ const teams = {
         walkRectLength: 300,
         maxSpeed: 0.75*defaultMaxSpeed,
         playerTeam: true,
-        sprites: ['girl'],
+        sprites: ['boy'],
         size: 0
     },
     killer: {
@@ -227,7 +227,7 @@ const teams = {
         games: new Set([games.rampage, games.rampagev2]),
         label: 'Killers',
         playerTeam: true,
-        sprites: ['sniper'],
+        sprites: ['father', 'grandpa', 'mother', 'fat', 'robot', 'teddy', 'boy', 'girl'],
         size: 0
     },
     sniper: {
@@ -544,7 +544,7 @@ function initStage(nextStage) {
             initVIPGamePositions(figures)
         }
     } else if (game === games.rampage || game === games.rampagev2) {
-        initRandomSpriteFigures(figures.filter(figure => figure.team !== 'sniper'), ['father', 'grandpa', 'mother', 'fat', 'robot', 'teddy'])
+        initRandomSpriteFigures(figures.filter(figure => figure.team !== 'sniper'), ['father', 'grandpa', 'mother', 'fat', 'robot', 'teddy', 'boy', 'girl'])
 
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => initCrosshair(figure))
         if (stage !== stages.gameLobby) {
