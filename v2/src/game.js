@@ -209,7 +209,7 @@ const teams = {
         walkRectLength: 300,
         maxSpeed: defaultMaxSpeed,
         playerTeam: true,
-        sprite: 'boy',
+        sprites: ['boy'],
         size: 0
     },
     guard: {
@@ -219,7 +219,7 @@ const teams = {
         walkRectLength: 300,
         maxSpeed: 0.75*defaultMaxSpeed,
         playerTeam: true,
-        sprite: 'girl',
+        sprites: ['girl'],
         size: 0
     },
     killer: {
@@ -234,7 +234,7 @@ const teams = {
         games: new Set([games.rampage, games.rampagev2]),
         label: 'Snipers',
         playerTeam: true,
-        sprite: 'sniper',
+        sprites: ['sniper'],
         size: 0
     },
     vip: {
@@ -244,7 +244,7 @@ const teams = {
         walkRectLength: 150,
         maxSpeed: 0.5*defaultMaxSpeed,
         playerTeam: false,
-        sprite: 'vip',
+        sprites: ['mother', 'father', 'grandpa'],
         size: 0
     }
 }

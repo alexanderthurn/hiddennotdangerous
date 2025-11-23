@@ -893,13 +893,13 @@ const animateFigure = (figure, spritesheet) => {
     }
 
     if (figure.speed > 0) {
-        const animationSpeedFactor = 2.5
+        const animationSpeedFactor = 1.2
         body.animationSpeed = animationSpeedFactor * figure.speed
         shadow.animationSpeed = animationSpeedFactor * figure.speed
     }
    
     body.zIndex = figure.y + (1-body.anchor.y)*body.height
-    marker.zIndex = figure.y
+    marker.zIndex = figure.yd
 }
 
 const figureMarker = new PIXI.GraphicsContext().circle(0, 0, 5).fill()
@@ -952,13 +952,13 @@ const createFigure = (app, spritesheet, props) => {
 
     const body = new PIXI.AnimatedSprite(spritesheet.animations.baby_down)
     //body.anchor.set(0.5)
-    body.scale = 2
+    body.scale = 0.5
     body.label = 'body'
 
     const shadow = new PIXI.AnimatedSprite(spritesheet.animations.baby_down)
     //shadow.anchor.set(0.1, 0.5)
     shadow.alpha = shadowDefinition.alpha
-    shadow.scale.set(2*shadowDefinition.scale.x, 2*shadowDefinition.scale.y)
+    shadow.scale.set(shadowDefinition.scale.x*body.scale.x, shadowDefinition.scale.y*body.scale.y)
     shadow.skew.set(shadowDefinition.skew.x, shadowDefinition.skew.y)
     shadow.tint = shadowDefinition.color
     shadow.label = 'shadow'

@@ -603,7 +603,9 @@ const switchTeam = (figure, team) => {
         teams[figure.team].size--
     }
     figure.team = team
-    figure.currentSprite = teams[team]?.sprite || figure.defaultSprite
+    
+    figure.currentSprite = teams[team]?.sprites[0] || figure.defaultSprite
+
     figure.maxSpeed = teams[team]?.maxSpeed || defaultMaxSpeed
     figure.walkRectLength = teams[team]?.walkRectLength
     if (figure.team) {
