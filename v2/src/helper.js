@@ -571,7 +571,7 @@ const attackFigure = (figureAttacker, figureAttacked) => {
             return true
         }
     }
-    else if (reduceBounds(figureAttacked.getBounds(), { left: 0.15, right: 0.35, top: 0.25, bottom: 0.25 }).contains(figureAttacker.worldTransform.tx, figureAttacker.worldTransform.ty)) {
+    else if (reduceBounds(figureAttacked.getBounds(), { left: 0.15, right: 0.45, top: 0.15, bottom: 0.15 }).contains(figureAttacker.worldTransform.tx, figureAttacker.worldTransform.ty)) {
        killFigure(figureAttacked)
         figureAttacker.hasHit = true
         return true
