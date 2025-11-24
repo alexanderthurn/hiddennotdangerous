@@ -550,6 +550,18 @@ const detectFigure = (figureDetector, figureDetected) => {
     }
 }
 
+function reduceBounds(bounds, { left = 0, right = 0, top = 0, bottom = 0 }) {
+    const w = bounds.width;
+    const h = bounds.height;
+
+    return new PIXI.Rectangle(
+        bounds.x + w * left,
+        bounds.y + h * top,
+        w * (1 - left - right),
+        h * (1 - top - bottom)
+    );
+}
+
 const attackFigure = (figureAttacker, figureAttacked) => {
     const attackDistance = figureAttacker.attackDistanceMultiplier ? figureAttacker.attackDistanceMultiplier*figureAttacker.attackDistance : figureAttacker.attackDistance
     if (attackDistance && squaredDistance(figureAttacker.x,figureAttacker.y,figureAttacked.x,figureAttacked.y) < attackDistance*attackDistance) {
@@ -558,11 +570,12 @@ const attackFigure = (figureAttacker, figureAttacked) => {
             figureAttacker.hasHit = true
             return true
         }
-    } else if (new PIXI.Rectangle(figureAttacker.lastAttackX-figureAttacker.attackRectX/2, figureAttacker.lastAttackY-figureAttacker.attackRectY/2, figureAttacker.attackRectX, figureAttacker.attackRectY).contains(figureAttacked.x, figureAttacked.y - figureAttacked.bodyHeight*0.5 )) {
-        killFigure(figureAttacked)
+    }
+    else if (reduceBounds(figureAttacked.getBounds(), { left: 0.15, right: 0.35, top: 0.25, bottom: 0.25 }).contains(figureAttacker.worldTransform.tx, figureAttacker.worldTransform.ty)) {
+       killFigure(figureAttacked)
         figureAttacker.hasHit = true
         return true
-    }
+    } 
     return false
 }
 
