@@ -447,6 +447,21 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">fence/house_killer.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>31,31,63,63</rect>
+                <key>scale9Paddings</key>
+                <rect>31,31,63,63</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">fence/house_shootingrange.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -474,21 +489,6 @@
                 <rect>53,93,29,22</rect>
                 <key>scale9Paddings</key>
                 <rect>96,99,191,198</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">fence/house_walker.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0,0</point_f>
-                <key>spriteScale</key>
-                <double>1</double>
-                <key>scale9Enabled</key>
-                <true/>
-                <key>scale9Borders</key>
-                <rect>64,70,12,9</rect>
-                <key>scale9Paddings</key>
-                <rect>95,99,189,198</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

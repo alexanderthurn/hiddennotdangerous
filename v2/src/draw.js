@@ -854,8 +854,7 @@ const animateFigure = (figure, spritesheet) => {
         } else {
             body.angle = 0
         }
-        body.y = 0
-        shadow.y = 0
+       
         figureLayer.attach(body)
         shadow.visible = true
     }
@@ -874,12 +873,14 @@ const animateFigure = (figure, spritesheet) => {
         shadow.textures = spritesheet.animations[animation]
     }
 
-    let anchor = body.textures[body.currentFrame].defaultAnchor || {x: 0.5, y: 0.9}
-    body.anchor.x = anchor.x
-    body.anchor.y = anchor.y
-    shadow.anchor.x = anchor.x
-    shadow.anchor.y = anchor.y
+    let rotationAnchor = {x: 0.5, y: 0.5}
+    let frameAnchor = body.textures[body.currentFrame].defaultAnchor || {x: 0.5, y: 0.5}
+    body.anchor = shadow.anchor = rotationAnchor
+
+    body.y = shadow.y = -body.height* (frameAnchor.y - rotationAnchor.y)
+    shadow.x = body.x+body.width*0.5*body.scale.x
     
+
     if (!(figure.speed === 0 || !windowHasFocus || restartStage) && !body.playing) {
         body.play()
         shadow.play()

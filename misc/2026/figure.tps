@@ -169,7 +169,7 @@
             <key>defaultPivotPoint</key>
             <point_f>0,0</point_f>
             <key>writePivotPoints</key>
-            <false/>
+            <true/>
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
@@ -236,38 +236,6 @@
             <key type="filename">out/girl_up_1.png</key>
             <key type="filename">out/girl_up_2.png</key>
             <key type="filename">out/girl_up_3.png</key>
-            <key type="filename">out/grandpa_down_0.png</key>
-            <key type="filename">out/grandpa_down_1.png</key>
-            <key type="filename">out/grandpa_down_2.png</key>
-            <key type="filename">out/grandpa_down_3.png</key>
-            <key type="filename">out/grandpa_left_0.png</key>
-            <key type="filename">out/grandpa_left_1.png</key>
-            <key type="filename">out/grandpa_left_2.png</key>
-            <key type="filename">out/grandpa_left_3.png</key>
-            <key type="filename">out/grandpa_right_0.png</key>
-            <key type="filename">out/grandpa_right_1.png</key>
-            <key type="filename">out/grandpa_right_2.png</key>
-            <key type="filename">out/grandpa_right_3.png</key>
-            <key type="filename">out/grandpa_up_0.png</key>
-            <key type="filename">out/grandpa_up_1.png</key>
-            <key type="filename">out/grandpa_up_2.png</key>
-            <key type="filename">out/grandpa_up_3.png</key>
-            <key type="filename">out/mother_down_0.png</key>
-            <key type="filename">out/mother_down_1.png</key>
-            <key type="filename">out/mother_down_2.png</key>
-            <key type="filename">out/mother_down_3.png</key>
-            <key type="filename">out/mother_left_0.png</key>
-            <key type="filename">out/mother_left_1.png</key>
-            <key type="filename">out/mother_left_2.png</key>
-            <key type="filename">out/mother_left_3.png</key>
-            <key type="filename">out/mother_right_0.png</key>
-            <key type="filename">out/mother_right_1.png</key>
-            <key type="filename">out/mother_right_2.png</key>
-            <key type="filename">out/mother_right_3.png</key>
-            <key type="filename">out/mother_up_0.png</key>
-            <key type="filename">out/mother_up_1.png</key>
-            <key type="filename">out/mother_up_2.png</key>
-            <key type="filename">out/mother_up_3.png</key>
             <key type="filename">out/sniper_down_0.png</key>
             <key type="filename">out/sniper_down_1.png</key>
             <key type="filename">out/sniper_down_2.png</key>
@@ -286,7 +254,7 @@
             <key type="filename">out/sniper_up_3.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0,0</point_f>
+                <point_f>0.5,0.78125</point_f>
                 <key>spriteScale</key>
                 <double>1</double>
                 <key>scale9Enabled</key>
@@ -299,6 +267,20 @@
                 <false/>
             </struct>
             <key type="filename">out/baby_left_4.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.78125</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>64,64,128,128</rect>
+                <key>scale9Paddings</key>
+                <rect>64,64,128,128</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">out/fat_down_0.png</key>
             <key type="filename">out/fat_down_1.png</key>
             <key type="filename">out/fat_down_2.png</key>
@@ -315,22 +297,6 @@
             <key type="filename">out/fat_up_1.png</key>
             <key type="filename">out/fat_up_2.png</key>
             <key type="filename">out/fat_up_3.png</key>
-            <key type="filename">out/robot_down_0.png</key>
-            <key type="filename">out/robot_down_1.png</key>
-            <key type="filename">out/robot_down_2.png</key>
-            <key type="filename">out/robot_down_3.png</key>
-            <key type="filename">out/robot_left_0.png</key>
-            <key type="filename">out/robot_left_1.png</key>
-            <key type="filename">out/robot_left_2.png</key>
-            <key type="filename">out/robot_left_3.png</key>
-            <key type="filename">out/robot_right_0.png</key>
-            <key type="filename">out/robot_right_1.png</key>
-            <key type="filename">out/robot_right_2.png</key>
-            <key type="filename">out/robot_right_3.png</key>
-            <key type="filename">out/robot_up_0.png</key>
-            <key type="filename">out/robot_up_1.png</key>
-            <key type="filename">out/robot_up_2.png</key>
-            <key type="filename">out/robot_up_3.png</key>
             <key type="filename">out/teddy_down_0.png</key>
             <key type="filename">out/teddy_down_1.png</key>
             <key type="filename">out/teddy_down_2.png</key>
@@ -349,7 +315,97 @@
             <key type="filename">out/teddy_up_3.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0,0</point_f>
+                <point_f>0.5,0.878906</point_f>
+                <key>spriteScale</key>
+                <double>0.85</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>64,64,128,128</rect>
+                <key>scale9Paddings</key>
+                <rect>64,64,128,128</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">out/grandpa_down_0.png</key>
+            <key type="filename">out/grandpa_down_1.png</key>
+            <key type="filename">out/grandpa_down_2.png</key>
+            <key type="filename">out/grandpa_down_3.png</key>
+            <key type="filename">out/grandpa_left_0.png</key>
+            <key type="filename">out/grandpa_left_1.png</key>
+            <key type="filename">out/grandpa_left_2.png</key>
+            <key type="filename">out/grandpa_left_3.png</key>
+            <key type="filename">out/grandpa_right_0.png</key>
+            <key type="filename">out/grandpa_right_1.png</key>
+            <key type="filename">out/grandpa_right_2.png</key>
+            <key type="filename">out/grandpa_right_3.png</key>
+            <key type="filename">out/grandpa_up_0.png</key>
+            <key type="filename">out/grandpa_up_1.png</key>
+            <key type="filename">out/grandpa_up_2.png</key>
+            <key type="filename">out/grandpa_up_3.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.839844</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,16,32,32</rect>
+                <key>scale9Paddings</key>
+                <rect>16,16,32,32</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">out/mother_down_0.png</key>
+            <key type="filename">out/mother_down_1.png</key>
+            <key type="filename">out/mother_down_2.png</key>
+            <key type="filename">out/mother_down_3.png</key>
+            <key type="filename">out/mother_left_0.png</key>
+            <key type="filename">out/mother_left_1.png</key>
+            <key type="filename">out/mother_left_2.png</key>
+            <key type="filename">out/mother_left_3.png</key>
+            <key type="filename">out/mother_right_0.png</key>
+            <key type="filename">out/mother_right_1.png</key>
+            <key type="filename">out/mother_right_2.png</key>
+            <key type="filename">out/mother_right_3.png</key>
+            <key type="filename">out/mother_up_0.png</key>
+            <key type="filename">out/mother_up_1.png</key>
+            <key type="filename">out/mother_up_2.png</key>
+            <key type="filename">out/mother_up_3.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.878906</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,16,32,32</rect>
+                <key>scale9Paddings</key>
+                <rect>16,16,32,32</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">out/robot_down_0.png</key>
+            <key type="filename">out/robot_down_1.png</key>
+            <key type="filename">out/robot_down_2.png</key>
+            <key type="filename">out/robot_down_3.png</key>
+            <key type="filename">out/robot_left_0.png</key>
+            <key type="filename">out/robot_left_1.png</key>
+            <key type="filename">out/robot_left_2.png</key>
+            <key type="filename">out/robot_left_3.png</key>
+            <key type="filename">out/robot_right_0.png</key>
+            <key type="filename">out/robot_right_1.png</key>
+            <key type="filename">out/robot_right_2.png</key>
+            <key type="filename">out/robot_right_3.png</key>
+            <key type="filename">out/robot_up_0.png</key>
+            <key type="filename">out/robot_up_1.png</key>
+            <key type="filename">out/robot_up_2.png</key>
+            <key type="filename">out/robot_up_3.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.859375</point_f>
                 <key>spriteScale</key>
                 <double>1</double>
                 <key>scale9Enabled</key>
