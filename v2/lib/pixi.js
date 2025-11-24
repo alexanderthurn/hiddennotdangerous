@@ -1,6 +1,6 @@
 /*!
- * PixiJS - v8.14.0
- * Compiled Mon, 06 Oct 2025 21:31:20 UTC
+ * PixiJS - v8.14.3
+ * Compiled Thu, 20 Nov 2025 12:37:45 UTC
  *
  * PixiJS is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -10,8 +10,8 @@ var PIXI = (function (exports) {
 
     "use strict";
     var __defProp$1g = Object.defineProperty;
-    var __defProps$t = Object.defineProperties;
-    var __getOwnPropDescs$t = Object.getOwnPropertyDescriptors;
+    var __defProps$u = Object.defineProperties;
+    var __getOwnPropDescs$u = Object.getOwnPropertyDescriptors;
     var __getOwnPropSymbols$1h = Object.getOwnPropertySymbols;
     var __hasOwnProp$1h = Object.prototype.hasOwnProperty;
     var __propIsEnum$1h = Object.prototype.propertyIsEnumerable;
@@ -27,7 +27,7 @@ var PIXI = (function (exports) {
         }
       return a;
     };
-    var __spreadProps$t = (a, b) => __defProps$t(a, __getOwnPropDescs$t(b));
+    var __spreadProps$u = (a, b) => __defProps$u(a, __getOwnPropDescs$u(b));
     var ExtensionType = /* @__PURE__ */ ((ExtensionType2) => {
       ExtensionType2["Application"] = "application";
       ExtensionType2["WebGLPipes"] = "webgl-pipes";
@@ -58,7 +58,7 @@ var PIXI = (function (exports) {
           throw new Error("Extension class must have an extension object");
         }
         const metadata = typeof ext.extension !== "object" ? { type: ext.extension } : ext.extension;
-        ext = __spreadProps$t(__spreadValues$1g({}, metadata), { ref: ext });
+        ext = __spreadProps$u(__spreadValues$1g({}, metadata), { ref: ext });
       }
       if (typeof ext === "object") {
         ext = __spreadValues$1g({}, ext);
@@ -2896,6 +2896,7 @@ Deprecated since v${version}`;
           item = this._pool[--this._index];
         } else {
           item = new this._classType();
+          this._count++;
         }
         (_a = item.init) == null ? void 0 : _a.call(item, data);
         return item;
@@ -6244,8 +6245,8 @@ Deprecated since v${version}`;
 
     "use strict";
     var __defProp$1b = Object.defineProperty;
-    var __defProps$s = Object.defineProperties;
-    var __getOwnPropDescs$s = Object.getOwnPropertyDescriptors;
+    var __defProps$t = Object.defineProperties;
+    var __getOwnPropDescs$t = Object.getOwnPropertyDescriptors;
     var __getOwnPropSymbols$1c = Object.getOwnPropertySymbols;
     var __hasOwnProp$1c = Object.prototype.hasOwnProperty;
     var __propIsEnum$1c = Object.prototype.propertyIsEnumerable;
@@ -6261,7 +6262,7 @@ Deprecated since v${version}`;
         }
       return a;
     };
-    var __spreadProps$s = (a, b) => __defProps$s(a, __getOwnPropDescs$s(b));
+    var __spreadProps$t = (a, b) => __defProps$t(a, __getOwnPropDescs$t(b));
     class BufferImageSource extends TextureSource {
       constructor(options) {
         const buffer = options.resource || new Float32Array(options.width * options.height * 4);
@@ -6283,7 +6284,7 @@ Deprecated since v${version}`;
             format = "bgra8unorm";
           }
         }
-        super(__spreadProps$s(__spreadValues$1b({}, options), {
+        super(__spreadProps$t(__spreadValues$1b({}, options), {
           resource: buffer,
           format
         }));
@@ -6523,6 +6524,7 @@ Deprecated since v${version}`;
        */
       destroy(destroySource = false) {
         if (this._source) {
+          this._source.off("resize", this.update, this);
           if (destroySource) {
             this._source.destroy();
             this._source = null;
@@ -6573,8 +6575,8 @@ Deprecated since v${version}`;
 
     "use strict";
     var __defProp$1a = Object.defineProperty;
-    var __defProps$r = Object.defineProperties;
-    var __getOwnPropDescs$r = Object.getOwnPropertyDescriptors;
+    var __defProps$s = Object.defineProperties;
+    var __getOwnPropDescs$s = Object.getOwnPropertyDescriptors;
     var __getOwnPropSymbols$1b = Object.getOwnPropertySymbols;
     var __hasOwnProp$1b = Object.prototype.hasOwnProperty;
     var __propIsEnum$1b = Object.prototype.propertyIsEnumerable;
@@ -6590,7 +6592,7 @@ Deprecated since v${version}`;
         }
       return a;
     };
-    var __spreadProps$r = (a, b) => __defProps$r(a, __getOwnPropDescs$r(b));
+    var __spreadProps$s = (a, b) => __defProps$s(a, __getOwnPropDescs$s(b));
     let count = 0;
     class TexturePoolClass {
       /**
@@ -6611,7 +6613,7 @@ Deprecated since v${version}`;
        * @param antialias
        */
       createTexture(pixelWidth, pixelHeight, antialias) {
-        const textureSource = new TextureSource(__spreadProps$r(__spreadValues$1a({}, this.textureOptions), {
+        const textureSource = new TextureSource(__spreadProps$s(__spreadValues$1a({}, this.textureOptions), {
           width: pixelWidth,
           height: pixelHeight,
           resolution: 1,
@@ -9485,6 +9487,7 @@ Deprecated since v${version}`;
        * @private
        */
       _deactivate() {
+        var _a, _b;
         if (!this._isActive || this._isMobileAccessibility) {
           return;
         }
@@ -9495,7 +9498,7 @@ Deprecated since v${version}`;
         }
         this._renderer.runners.postrender.remove(this);
         for (const child of this._children) {
-          if (child._accessibleDiv && child._accessibleDiv.parentNode) {
+          if ((_a = child._accessibleDiv) == null ? void 0 : _a.parentNode) {
             child._accessibleDiv.parentNode.removeChild(child._accessibleDiv);
             child._accessibleDiv = null;
           }
@@ -9510,7 +9513,7 @@ Deprecated since v${version}`;
           });
           delete this._pools[accessibleType];
         }
-        if (this._div && this._div.parentNode) {
+        if ((_b = this._div) == null ? void 0 : _b.parentNode) {
           this._div.parentNode.removeChild(this._div);
         }
         this._pools = {};
@@ -9915,6 +9918,7 @@ Deprecated since v${version}`;
           this,
           "resizeTo",
           {
+            configurable: true,
             set(dom) {
               globalThis.removeEventListener("resize", this.queueResize);
               this._resizeTo = dom;
@@ -9995,6 +9999,7 @@ Deprecated since v${version}`;
           this,
           "ticker",
           {
+            configurable: true,
             set(ticker) {
               if (this._ticker) {
                 this._ticker.remove(this.render, this);
@@ -13112,6 +13117,8 @@ Deprecated since v${version}`;
 
     "use strict";
     var __defProp$16 = Object.defineProperty;
+    var __defProps$r = Object.defineProperties;
+    var __getOwnPropDescs$r = Object.getOwnPropertyDescriptors;
     var __getOwnPropSymbols$17 = Object.getOwnPropertySymbols;
     var __hasOwnProp$17 = Object.prototype.hasOwnProperty;
     var __propIsEnum$17 = Object.prototype.propertyIsEnumerable;
@@ -13127,6 +13134,7 @@ Deprecated since v${version}`;
         }
       return a;
     };
+    var __spreadProps$r = (a, b) => __defProps$r(a, __getOwnPropDescs$r(b));
     class Resolver {
       constructor() {
         this._defaultBundleIdentifierOptions = {
@@ -13437,19 +13445,18 @@ Deprecated since v${version}`;
           const aliasesToUse = this.getAlias(asset);
           Array.isArray(aliasesToUse) ? aliasesToUse.forEach(keyCheck) : keyCheck(aliasesToUse);
           const resolvedAssets = [];
+          const parseUrl = (url) => {
+            const parser = this._parsers.find((p) => p.test(url));
+            return __spreadProps$r(__spreadValues$16({}, parser == null ? void 0 : parser.parse(url)), {
+              src: url
+            });
+          };
           srcsToUse.forEach((srcs) => {
             srcs.forEach((src2) => {
               var _a, _b, _c, _d;
               let formattedAsset = {};
               if (typeof src2 !== "object") {
-                formattedAsset.src = src2;
-                for (let i = 0; i < this._parsers.length; i++) {
-                  const parser = this._parsers[i];
-                  if (parser.test(src2)) {
-                    formattedAsset = parser.parse(src2);
-                    break;
-                  }
-                }
+                formattedAsset = parseUrl(src2);
               } else {
                 data = (_a = src2.data) != null ? _a : data;
                 format = (_b = src2.format) != null ? _b : format;
@@ -13457,7 +13464,7 @@ Deprecated since v${version}`;
                   userDefinedLoadParser = (_c = src2.loadParser) != null ? _c : userDefinedLoadParser;
                   userDefinedParser = (_d = src2.parser) != null ? _d : userDefinedParser;
                 }
-                formattedAsset = __spreadValues$16(__spreadValues$16({}, formattedAsset), src2);
+                formattedAsset = __spreadValues$16(__spreadValues$16({}, parseUrl(src2.src)), src2);
               }
               if (!aliasesToUse) {
                 throw new Error(`[Resolver] alias is undefined for this asset: ${formattedAsset.src}`);
@@ -14414,6 +14421,8 @@ Deprecated since v${version}`;
         this.mask.measurable = false;
       }
       reset() {
+        if (this.mask === null)
+          return;
         this.mask.measurable = true;
         this.mask = null;
       }
@@ -14473,6 +14482,8 @@ Deprecated since v${version}`;
         this.mask.measurable = false;
       }
       reset() {
+        if (this.mask === null)
+          return;
         this.mask.measurable = true;
         this.mask.includeInBuild = true;
         this.mask = null;
@@ -15281,13 +15292,15 @@ Deprecated since v${version}`;
       /** Destroys all buffer references. Do not use after calling this. */
       destroy() {
         this.rawBinaryData = null;
+        this.uint32View = null;
+        this.float32View = null;
+        this.uint16View = null;
         this._int8View = null;
         this._uint8View = null;
         this._int16View = null;
-        this.uint16View = null;
         this._int32View = null;
-        this.uint32View = null;
-        this.float32View = null;
+        this._float64Array = null;
+        this._bigUint64Array = null;
       }
       /**
        * Returns the size of the given type in bytes.
@@ -15784,13 +15797,25 @@ Deprecated since v${version}`;
           indexBuffer[index++] = indicesOffset + indices[i + indexOffset] - attributeOffset;
         }
       }
-      destroy() {
+      /**
+       * Destroys the batch and its resources.
+       * @param options - destruction options
+       * @param options.shader - whether to destroy the associated shader
+       */
+      destroy(options = {}) {
+        var _a;
         if (this.batches === null)
           return;
         for (let i = 0; i < this.batches.length; i++) {
           returnBatchToPool(this.batches[i]);
         }
         this.batches = null;
+        this.geometry.destroy(true);
+        this.geometry = null;
+        if (options.shader) {
+          (_a = this.shader) == null ? void 0 : _a.destroy();
+          this.shader = null;
+        }
         for (let i = 0; i < this._elements.length; i++) {
           if (this._elements[i])
             this._elements[i]._batch = null;
@@ -16151,11 +16176,13 @@ Deprecated since v${version}`;
        * @param destroyBuffers - destroy the buffers associated with this geometry
        */
       destroy(destroyBuffers = false) {
+        var _a;
         this.emit("destroy", this);
         this.removeAllListeners();
         if (destroyBuffers) {
           this.buffers.forEach((buffer) => buffer.destroy());
         }
+        (_a = this.indexBuffer) == null ? void 0 : _a.destroy();
         this.attributes = null;
         this.buffers = null;
         this.indexBuffer = null;
@@ -17554,6 +17581,8 @@ ${parts.join("\n")}
          */
         this._uniformBindMap = /* @__PURE__ */ Object.create(null);
         this._ownedBindGroups = [];
+        /** @internal */
+        this._destroyed = false;
         let {
           gpuProgram,
           glProgram,
@@ -17682,6 +17711,9 @@ ${parts.join("\n")}
        */
       destroy(destroyPrograms = false) {
         var _a, _b;
+        if (this._destroyed)
+          return;
+        this._destroyed = true;
         this.emit("destroy", this);
         if (destroyPrograms) {
           (_a = this.gpuProgram) == null ? void 0 : _a.destroy();
@@ -17741,6 +17773,7 @@ ${parts.join("\n")}
             batchSamplers: getBatchSamplersUniformGroup(maxTextures)
           }
         });
+        this.maxTextures = maxTextures;
       }
     }
 
@@ -17838,6 +17871,21 @@ ${parts.join("\n")}
         float32View[index + 21] = uvs.y3;
         uint32View[index + 22] = argb;
         uint32View[index + 23] = textureIdAndRound;
+      }
+      /**
+       * Updates the maximum number of textures that can be used in the shader.
+       * @param maxTextures - The maximum number of textures that can be used in the shader.
+       * @internal
+       */
+      _updateMaxTextures(maxTextures) {
+        if (this.shader.maxTextures === maxTextures)
+          return;
+        defaultShader = new DefaultShader(maxTextures);
+        this.shader = defaultShader;
+      }
+      destroy() {
+        this.shader = null;
+        super.destroy();
       }
     };
     /** @ignore */
@@ -19799,10 +19847,9 @@ ${parts.join("\n")}
       constructor() {
         this.instructions = new InstructionSet();
       }
-      init(maxTextures) {
-        this.batcher = new DefaultBatcher({
-          maxTextures
-        });
+      init(options) {
+        const maxTextures = options.maxTextures;
+        this.batcher ? this.batcher._updateMaxTextures(maxTextures) : this.batcher = new DefaultBatcher({ maxTextures });
         this.instructions.reset();
       }
       /**
@@ -19952,6 +19999,9 @@ ${parts.join("\n")}
             this.onGraphicsContextDestroy(this._gpuContextHash[i].context);
           }
         }
+        this._gpuContextHash = {};
+        this._graphicsDataContextHash = {};
+        this._renderer = null;
       }
     };
     /** @ignore */
@@ -24595,7 +24645,7 @@ ${parts.join("\n")}
       fill(style, alpha) {
         let path;
         const lastInstruction = this.instructions[this.instructions.length - 1];
-        if (this._tick === 0 && lastInstruction && lastInstruction.action === "stroke") {
+        if (this._tick === 0 && (lastInstruction == null ? void 0 : lastInstruction.action) === "stroke") {
           path = lastInstruction.data.path;
         } else {
           path = this._activePath.clone();
@@ -24633,7 +24683,7 @@ ${parts.join("\n")}
       stroke(style) {
         let path;
         const lastInstruction = this.instructions[this.instructions.length - 1];
-        if (this._tick === 0 && lastInstruction && lastInstruction.action === "fill") {
+        if (this._tick === 0 && (lastInstruction == null ? void 0 : lastInstruction.action) === "fill") {
           path = lastInstruction.data.path;
         } else {
           path = this._activePath.clone();
@@ -30923,6 +30973,9 @@ ${parts.join("\n")}
         this.blendRequired = options.blendRequired;
         this.clipToViewport = options.clipToViewport;
         this.addResource("uTexture", 0, 1);
+        if (options.blendRequired) {
+          this.addResource("uBackTexture", 0, 3);
+        }
       }
       /**
        * Applies the filter
@@ -32298,12 +32351,12 @@ ${parts.join("\n")}
       destroy(options = false) {
         this.runners.destroy.items.reverse();
         this.runners.destroy.emit(options);
-        Object.values(this.runners).forEach((runner) => {
-          runner.destroy();
-        });
         if (options === true || typeof options === "object" && options.releaseGlobalResources) {
           GlobalResourceRegistry.release();
         }
+        Object.values(this.runners).forEach((runner) => {
+          runner.destroy();
+        });
         this._systemsHash = null;
         this.renderPipes = null;
       }
@@ -32515,7 +32568,7 @@ ${parts.join("\n")}
 
     "use strict";
     const DATA_URI = /^\s*data:(?:([\w-]+)\/([\w+.-]+))?(?:;charset=([\w-]+))?(?:;(base64))?,(.*)/i;
-    const VERSION = "8.14.0";
+    const VERSION = "8.14.3";
 
     "use strict";
     class ApplicationInitHook {
@@ -32609,6 +32662,7 @@ ${parts.join("\n")}
        */
       async init(options) {
         options = __spreadValues$K({}, options);
+        this.stage || (this.stage = new Container());
         this.renderer = await autoDetectRenderer(options);
         _Application._plugins.forEach((plugin) => {
           plugin.init.call(this, options);
@@ -33059,7 +33113,7 @@ ${parts.join("\n")}
     "use strict";
     const bitmapFontXMLStringParser = {
       test(data) {
-        if (typeof data === "string" && data.includes("<font>")) {
+        if (typeof data === "string" && data.match(/<font(\s|>)/)) {
           return bitmapFontXMLParser.test(DOMAdapter.get().parseXML(data));
         }
         return false;
@@ -34069,12 +34123,15 @@ ${e}`);
        * @param data - Result data from the worker containing uuid, data, and optional error
        */
       _complete(data) {
+        if (!this._resolveHash[data.uuid]) {
+          return;
+        }
         if (data.error !== void 0) {
           this._resolveHash[data.uuid].reject(data.error);
         } else {
           this._resolveHash[data.uuid].resolve(data.data);
         }
-        this._resolveHash[data.uuid] = null;
+        delete this._resolveHash[data.uuid];
       }
       /**
        * Executes a task using the worker pool system.
@@ -34135,7 +34192,7 @@ ${e}`);
         this._workerPool.forEach((worker) => worker.terminate());
         this._workerPool.length = 0;
         Object.values(this._resolveHash).forEach(({ reject }) => {
-          reject == null ? void 0 : reject(new Error("WorkerManager destroyed"));
+          reject == null ? void 0 : reject(new Error("WorkerManager has been reset before completion"));
         });
         this._resolveHash = {};
         this._queue.length = 0;
@@ -35466,8 +35523,8 @@ ${e}`);
 
     "use strict";
     const basisTranscoderUrls = {
-      jsUrl: "https://files.pixijs.download/transcoders/basis/basis_transcoder.js",
-      wasmUrl: "https://files.pixijs.download/transcoders/basis/basis_transcoder.wasm"
+      jsUrl: "https://cdn.jsdelivr.net/npm/pixi.js/transcoders/basis/basis_transcoder.js",
+      wasmUrl: "https://cdn.jsdelivr.net/npm/pixi.js/transcoders/basis/basis_transcoder.wasm"
     };
     function setBasisTranscoderPath(config) {
       Object.assign(basisTranscoderUrls, config);
@@ -36547,8 +36604,8 @@ ${e}`);
 
     "use strict";
     const ktxTranscoderUrls = {
-      jsUrl: "https://files.pixijs.download/transcoders/ktx/libktx.js",
-      wasmUrl: "https://files.pixijs.download/transcoders/ktx/libktx.wasm"
+      jsUrl: "https://cdn.jsdelivr.net/npm/pixi.js/transcoders/ktx/libktx.js",
+      wasmUrl: "https://cdn.jsdelivr.net/npm/pixi.js/transcoders/ktx/libktx.wasm"
     };
     function setKTXTranscoderPath(config) {
       Object.assign(ktxTranscoderUrls, config);
@@ -42615,6 +42672,8 @@ ${e}`);
         return hitTestFn(mask, point);
       }
       reset() {
+        if (this.mask === null)
+          return;
         this.mask.measurable = true;
         this.mask = null;
       }
@@ -42782,10 +42841,11 @@ ${e}`);
       }
       /** @ignore */
       destroy() {
+        this.destroyAll();
         this._renderer = null;
         this._gl = null;
-        this._gpuBuffers = null;
-        this._boundBufferBases = null;
+        this._gpuBuffers = {};
+        this._boundBufferBases = {};
       }
       /** Sets up the renderer context and necessary buffers. */
       contextChange() {
@@ -42913,7 +42973,8 @@ ${e}`);
       destroyAll() {
         const gl = this._gl;
         for (const id in this._gpuBuffers) {
-          gl.deleteBuffer(this._gpuBuffers[id].buffer);
+          if (this._gpuBuffers[id])
+            gl.deleteBuffer(this._gpuBuffers[id].buffer);
         }
         this._gpuBuffers = /* @__PURE__ */ Object.create(null);
       }
@@ -42923,11 +42984,14 @@ ${e}`);
        * @param {boolean} [contextLost=false] - If context was lost, we suppress deleteVertexArray
        */
       onBufferDestroy(buffer, contextLost) {
+        if (!this._gpuBuffers[buffer.uid])
+          return;
         const glBuffer = this._gpuBuffers[buffer.uid];
         const gl = this._gl;
         if (!contextLost) {
           gl.deleteBuffer(glBuffer.buffer);
         }
+        buffer.off("destroy", this.onBufferDestroy, this);
         this._gpuBuffers[buffer.uid] = null;
       }
       /**
@@ -43672,7 +43736,7 @@ ${e}`);
         this.gl = null;
         this._activeVao = null;
         this._activeGeometry = null;
-        this._geometryVaoHash = null;
+        this._geometryVaoHash = {};
       }
     }
     /** @ignore */
@@ -45394,6 +45458,7 @@ ${e}`);
         }
         this.emit("change", this);
         this.buffer = null;
+        this.removeAllListeners();
       }
     }
 
@@ -49608,7 +49673,6 @@ ${e}`);
     class GpuBufferSystem {
       constructor(renderer) {
         this._gpuBuffers = /* @__PURE__ */ Object.create(null);
-        this._managedBuffers = [];
         renderer.renderableGC.addManagedHash(this, "_gpuBuffers");
       }
       contextChange(gpu) {
@@ -49635,8 +49699,9 @@ ${e}`);
       }
       /** dispose all WebGL resources of all managed buffers */
       destroyAll() {
+        var _a;
         for (const id in this._gpuBuffers) {
-          this._gpuBuffers[id].destroy();
+          (_a = this._gpuBuffers[id]) == null ? void 0 : _a.destroy();
         }
         this._gpuBuffers = {};
       }
@@ -49645,7 +49710,6 @@ ${e}`);
           buffer.on("update", this.updateBuffer, this);
           buffer.on("change", this.onBufferChange, this);
           buffer.on("destroy", this.onBufferDestroy, this);
-          this._managedBuffers.push(buffer);
         }
         const gpuBuffer = this._gpu.device.createBuffer(buffer.descriptor);
         buffer._updateID = 0;
@@ -49667,20 +49731,20 @@ ${e}`);
        * @param buffer - buffer with data
        */
       onBufferDestroy(buffer) {
-        this._managedBuffers.splice(this._managedBuffers.indexOf(buffer), 1);
         this._destroyBuffer(buffer);
       }
       destroy() {
-        this._managedBuffers.forEach((buffer) => this._destroyBuffer(buffer));
-        this._managedBuffers = null;
-        this._gpuBuffers = null;
+        this.destroyAll();
+        this._gpuBuffers = {};
       }
       _destroyBuffer(buffer) {
-        const gpuBuffer = this._gpuBuffers[buffer.uid];
-        gpuBuffer.destroy();
         buffer.off("update", this.updateBuffer, this);
         buffer.off("change", this.onBufferChange, this);
         buffer.off("destroy", this.onBufferDestroy, this);
+        if (!this._gpuBuffers[buffer.uid])
+          return;
+        const gpuBuffer = this._gpuBuffers[buffer.uid];
+        gpuBuffer.destroy();
         this._gpuBuffers[buffer.uid] = null;
       }
     }
@@ -51026,7 +51090,7 @@ ${e}`);
           {
             offset: 0,
             rowsPerImage: source.pixelHeight,
-            bytesPerRow: source.pixelHeight * bytesPerPixel
+            bytesPerRow: source.pixelWidth * bytesPerPixel
           },
           {
             width: source.pixelWidth,
@@ -51473,6 +51537,7 @@ ${e}`);
           bindGroup == null ? void 0 : bindGroup.destroy();
           this._bindGroupHash[key] = null;
         }
+        this._renderer = null;
         this._gpu = null;
         this._mipmapGenerator = null;
         this._gpuSources = null;
