@@ -153,7 +153,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":125,"h":125},
 	"sourceSize": {"w":125,"h":125},
 	"anchor": {"x":0,"y":0},
-	"borders": {"left":56,"top":57,"right":57,"bottom":56}
+	"borders": {"left":6,"top":7,"right":6,"bottom":5}
 },
 "house_guard":
 {
@@ -163,7 +163,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":125,"h":125},
 	"sourceSize": {"w":125,"h":125},
 	"anchor": {"x":0,"y":0},
-	"borders": {"left":74,"top":79,"right":41,"bottom":43}
+	"borders": {"left":4,"top":6,"right":7,"bottom":7}
 },
 "house_killer":
 {
@@ -172,7 +172,8 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":125,"h":125},
 	"sourceSize": {"w":125,"h":125},
-	"anchor": {"x":0,"y":0}
+	"anchor": {"x":0,"y":0},
+	"borders": {"left":1,"top":4,"right":5,"bottom":7}
 },
 "house_shootingrange":
 {
@@ -182,7 +183,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":250,"h":125},
 	"sourceSize": {"w":250,"h":125},
 	"anchor": {"x":0,"y":0},
-	"borders": {"left":116,"top":52,"right":117,"bottom":53}
+	"borders": {"left":8,"top":6,"right":7,"bottom":6}
 },
 "house_sniper":
 {
@@ -192,7 +193,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":125,"h":125},
 	"sourceSize": {"w":125,"h":125},
 	"anchor": {"x":0,"y":0},
-	"borders": {"left":53,"top":93,"right":43,"bottom":10}
+	"borders": {"left":5,"top":5,"right":4,"bottom":10}
 },
 "kite":
 {
@@ -450,6 +451,6 @@
 	"format": "RGBA8888",
 	"size": {"w":1727,"h":502},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:80d71d1f9a169c2524b827edbc8d6d01:57816b0ad4bfeea88fa7e0e4d37ba80c:e3867cbbfd361286286f4009cb6c9220$"
+	"smartupdate": "$TexturePacker:SmartUpdate:186f615b9fe85785558497b7101e34a7:57816b0ad4bfeea88fa7e0e4d37ba80c:e3867cbbfd361286286f4009cb6c9220$"
 }
 }

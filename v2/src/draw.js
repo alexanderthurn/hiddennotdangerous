@@ -200,7 +200,11 @@ const createRingPartButton = (props, lobbyContainer) => {
     buttonText.x = Math.cos(centerAngle)*((innerRadius+outerRadius)/2)
     buttonText.y = Math.sin(centerAngle)*((innerRadius+outerRadius)/2)
     buttonText.anchor.set(0.5)
-
+    buttonText.angle = (startAngle*180/Math.PI+135) % 360
+    if (buttonText.angle > 90 && buttonText.angle < 270) {
+        buttonText.angle += 180
+    }
+    console.log(buttonText.angle, buttonText.text)
     button.addChild(area, loadingArea, buttonText)
     lobbyContainer.addChild(button)
 
@@ -396,7 +400,7 @@ const addButtons = (app, lobbyContainer) => {
 }
 
 const animateShootingRange = button => {
-    button.visible = game === games.rampage || game === games.rampagev2
+    button.visible = game === games.rampage
 }
 
 const addShootingRange = (app, props, lobbyContainer) => {
@@ -412,7 +416,7 @@ const addShootingRange = (app, props, lobbyContainer) => {
     const newXInside = x - widthInside/2
     const newYInside = y - heightInside/2
 
-    const area = new PIXI.Sprite(PIXI.Assets.get('house_shootingrange'))
+    const area = new PIXI.NineSliceSprite(PIXI.Assets.get('house_shootingrange'))
     area.x = newX 
     area.y = newY
     area.width = width 
@@ -420,7 +424,7 @@ const addShootingRange = (app, props, lobbyContainer) => {
 
     const buttonOutside = new PIXI.Container()
     buttonOutside.execute = () => buttonOutside.playersNear.forEach(f => f.justShot = false) 
-    buttonOutside.isInArea = f => stage === stages.gameLobby && (game === games.rampage || game === games.rampagev2) && !(new PIXI.Rectangle(newX, newY, width, height)).contains(f.x, f.y)
+    buttonOutside.isInArea = f => stage === stages.gameLobby && (game === games.rampage) && !(new PIXI.Rectangle(newX, newY, width, height)).contains(f.x, f.y)
     buttonOutside.addChild(area)
 
     const buttonInside = new PIXI.Container()
@@ -432,14 +436,14 @@ const addShootingRange = (app, props, lobbyContainer) => {
             figures.push(crosshair)
         }
     }) 
-    buttonInside.isInArea = f => stage === stages.gameLobby && (game === games.rampage || game === games.rampagev2) && new PIXI.Rectangle(newXInside, newYInside, widthInside, heightInside).contains(f.x, f.y)
+    buttonInside.isInArea = f => stage === stages.gameLobby && (game === games.rampage) && new PIXI.Rectangle(newXInside, newYInside, widthInside, heightInside).contains(f.x, f.y)
 
     buttons.shootingRangeInside = buttonInside
     buttons.shootingRangeOutside = buttonOutside
     lobbyContainer.addChild(buttonOutside, buttonInside)
     app.ticker.add(() => {
-        buttonInside.visible = game === games.rampage || game === games.rampagev2
-        buttonOutside.visible = game === games.rampage || game === games.rampagev2
+        buttonInside.visible = game === games.rampage
+        buttonOutside.visible = game === games.rampage
     })
 }
 
@@ -451,7 +455,7 @@ const createTeamSwitcher = (app, props, lobbyContainer) => {
     const newY = y - height/2
     const games = teams[team].games
 
-    const area = new PIXI.Sprite(PIXI.Assets.get('house_' + team))
+    const area = new PIXI.NineSliceSprite(PIXI.Assets.get('house_' + team))
     area.x = newX 
     area.y = newY
     area.width = width 
@@ -836,12 +840,12 @@ const animateFigure = (figure, spritesheet) => {
     }
     animation = figure.currentSprite + '_' + animation
 
-    if (figure.isDead && (!(stage === stages.game && (game === games.rampage || game === games.rampagev2)) || figure.isDeathDetected)) {
+    if (figure.isDead && (!(stage === stages.game && (game === games.rampage)) || figure.isDeathDetected)) {
         body.angle = 90
         figureLayer.detach(body)
         shadow.visible = false
     } else {
-        if (figure.isAttacking && (!(stage === stages.game && (game === games.rampage || game === games.rampagev2)) || figure.isDetected)) {
+        if (figure.isAttacking && (!(stage === stages.game && (game === games.rampage )) || figure.isDetected)) {
             if (distanceAnglesDeg(deg, 0) < 45) {
                 body.angle = 20
             } else if (distanceAnglesDeg(deg, 90) <= 45) {
@@ -1396,7 +1400,7 @@ const addFog = app => {
 
     app.ticker.add(() =>
     {
-        fog.visible = stage === stages.game && (game === games.rampage || game === games.rampagev2)
+        fog.visible = stage === stages.game && (game === games.rampage)
 
         const crosshairs = figures.filter(f => f.playerId && f.type === 'crosshair')
         fogFilter.resources.myUniforms.uniforms.uNumViewPoints = crosshairs.length

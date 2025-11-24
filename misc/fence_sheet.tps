@@ -426,7 +426,7 @@
                 <key>scale9Enabled</key>
                 <true/>
                 <key>scale9Borders</key>
-                <rect>56,57,12,12</rect>
+                <rect>6,7,113,113</rect>
                 <key>scale9Paddings</key>
                 <rect>133,138,266,276</rect>
                 <key>scale9FromFile</key>
@@ -441,7 +441,7 @@
                 <key>scale9Enabled</key>
                 <true/>
                 <key>scale9Borders</key>
-                <rect>74,79,10,3</rect>
+                <rect>4,6,114,112</rect>
                 <key>scale9Paddings</key>
                 <rect>138,138,276,277</rect>
                 <key>scale9FromFile</key>
@@ -454,9 +454,9 @@
                 <key>spriteScale</key>
                 <double>1</double>
                 <key>scale9Enabled</key>
-                <false/>
+                <true/>
                 <key>scale9Borders</key>
-                <rect>31,31,63,63</rect>
+                <rect>1,4,119,114</rect>
                 <key>scale9Paddings</key>
                 <rect>31,31,63,63</rect>
                 <key>scale9FromFile</key>
@@ -471,7 +471,7 @@
                 <key>scale9Enabled</key>
                 <true/>
                 <key>scale9Borders</key>
-                <rect>116,52,17,20</rect>
+                <rect>8,6,235,113</rect>
                 <key>scale9Paddings</key>
                 <rect>63,31,125,63</rect>
                 <key>scale9FromFile</key>
@@ -486,7 +486,7 @@
                 <key>scale9Enabled</key>
                 <true/>
                 <key>scale9Borders</key>
-                <rect>53,93,29,22</rect>
+                <rect>5,5,116,110</rect>
                 <key>scale9Paddings</key>
                 <rect>96,99,191,198</rect>
                 <key>scale9FromFile</key>

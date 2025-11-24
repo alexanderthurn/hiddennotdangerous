@@ -64,12 +64,6 @@ const games = {
         countdown: 180,
         initialTeam: 'killer'
     },
-    rampagev2: {
-        color: colors.purple,
-        text: 'RAMPAGE V2',
-        countdown: 180,
-        initialTeam: 'killer'
-    },
     vip: {
         color: colors.blue,
         text: 'VIP',
@@ -224,7 +218,7 @@ const teams = {
     },
     killer: {
         color: colors.red,
-        games: new Set([games.rampage, games.rampagev2]),
+        games: new Set([games.rampage]),
         label: 'Killers',
         playerTeam: true,
         sprites: ['father', 'grandpa', 'mother', 'fat', 'robot', 'teddy', 'boy', 'girl'],
@@ -232,7 +226,7 @@ const teams = {
     },
     sniper: {
         color: colors.blue,
-        games: new Set([games.rampage, games.rampagev2]),
+        games: new Set([games.rampage]),
         label: 'Snipers',
         playerTeam: true,
         sprites: ['sniper'],
@@ -505,7 +499,7 @@ function initStage(nextStage) {
 
     let figuresPoolArray = Array.from(figuresPool)
 
-    if (roundCounter === 1 && stage === stages.game && (game === games.rampage || game === games.rampagev2)) {
+    if (roundCounter === 1 && stage === stages.game && (game === games.rampage)) {
         const killerFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'killer')
         const sniperFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'sniper');
         const ammo = Math.ceil(baseAmmoFactor * killerFigures.length/sniperFigures.length + bonusAmmoFactor*Math.sqrt(maxPlayerFigures/killerFigures.length))
@@ -522,7 +516,7 @@ function initStage(nextStage) {
     } else {
         figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team !== 'vip'))
     }
-    if (game === games.rampage || game === games.rampagev2) {
+    if (game === games.rampage) {
         figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'crosshair'))
     }
     if (game === games.food) {
@@ -543,7 +537,7 @@ function initStage(nextStage) {
         } else {
             initVIPGamePositions(figures)
         }
-    } else if (game === games.rampage || game === games.rampagev2) {
+    } else if (game === games.rampage) {
         initRandomSpriteFigures(figures.filter(figure => figure.team !== 'sniper'), ['father', 'grandpa', 'mother', 'fat', 'robot', 'teddy', 'boy', 'girl'])
 
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => initCrosshair(figure))
@@ -740,46 +734,6 @@ const handleWinning = () => {
                 gameOver = true
             }
         }
-    } else if (game === games.rampagev2) {
-        // players left, quit game
-        const killers = figuresPlayer.filter(f => f.team === 'killer')
-        const snipers = figuresPlayer.filter(f => f.team === 'sniper')
-        if (killers.length === 0 || snipers.length === 0) {
-            finalWinnerTeam = snipers.length === 0 ? 'killer' : 'sniper'
-            lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.team === finalWinnerTeam).map(f => f.playerId))
-            gameOver = true
-            winRoundTeam(finalWinnerTeam)
-        }
-
-        if (!gameOver) {
-            // team dead
-            const noTeamSurvivors = figures.filter(f => !f.team).filter(f => !f.isDead)
-            const killerSurvivors = killers.filter(f => !f.isDead)
-            if (killerSurvivors.length === 0 || noTeamSurvivors.length === 0) {
-                winRoundTeam(noTeamSurvivors.length === 0 ? 'killer' : 'sniper')
-            }
-
-            // ammo out
-            const crosshairs = figures.filter(f => f.type === 'crosshair')
-            const sumAmmo = crosshairs.reduce((sum, f) => sum + f.ammo, 0)
-            if (!restartStage && sumAmmo === 0) {
-                winRoundTeam('killer')
-            }
-
-            //countdown
-            if (!restartStage && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
-                winRoundTeam('sniper')
-            }
-
-            // max points hit
-            const maxPoints = Math.max(...Object.values(teams).map(team => team.points))
-            if (maxPoints >= pointsToWin) {
-                const teamsWithMaxPoints = Object.keys(teams).filter(team => teams[team].points === maxPoints)
-                finalWinnerTeam = teamsWithMaxPoints[0]
-                lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.team === finalWinnerTeam).map(f => f.playerId))
-                gameOver = true
-            }
-        }
     }
     
     if (gameOver) {
@@ -892,7 +846,7 @@ function updateGame(figures, dt, dtProcessed) {
     }
 
     // shooting range crosshair detaching
-    if (stage === stages.gameLobby && (game === games.rampage || game === games.rampagev2)) {
+    if (stage === stages.gameLobby && (game === games.rampage)) {
         let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
         figuresAlive.filter(f => f.type === 'crosshair' ).forEach(f => {
             const playerFigure = playerFigures.find(figure => figure.playerId === f.playerId)
@@ -919,7 +873,7 @@ function updateGame(figures, dt, dtProcessed) {
                 }
             });
         })
-    } else if (game === games.rampage || game === games.rampagev2) {
+    } else if (game === games.rampage) {
         const killers = figures.filter(f => f.team === 'killer')
         const snipers = figures.filter(f => f.team === 'sniper')
         const noTeam = figures.filter(f => !f.team)
@@ -1091,7 +1045,7 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
     const NPCFigures = figures.filter(f => !f.playerId && f.type === 'fighter');
 
     let stoppedNPCFigures
-    if (stage === stages.game && (game === games.rampage || game === games.rampagev2)) {
+    if (stage === stages.game && (game === games.rampage)) {
         stoppedNPCFigures = NPCFigures.filter(f => f.isDeathDetected || f.inactive)
     } else {
         stoppedNPCFigures = NPCFigures.filter(f => f.isDead || f.inactive)
@@ -1100,7 +1054,7 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
     stoppedNPCFigures.forEach(f => f.speed = 0)
 
     let movingNPCFigures
-    if (stage === stages.game && (game === games.rampage || game === games.rampagev2)) {
+    if (stage === stages.game && (game === games.rampage)) {
         movingNPCFigures = NPCFigures.filter(f => !f.isDeathDetected && !f.inactive)
     } else {
         movingNPCFigures = NPCFigures.filter(f => !f.isDead && !f.inactive)
