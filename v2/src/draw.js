@@ -200,11 +200,10 @@ const createRingPartButton = (props, lobbyContainer) => {
     buttonText.x = Math.cos(centerAngle)*((innerRadius+outerRadius)/2)
     buttonText.y = Math.sin(centerAngle)*((innerRadius+outerRadius)/2)
     buttonText.anchor.set(0.5)
-    buttonText.angle = (startAngle*180/Math.PI+135) % 360
+    buttonText.angle = (rad2limiteddeg(centerAngle) + 90)
     if (buttonText.angle > 90 && buttonText.angle < 270) {
         buttonText.angle += 180
     }
-    console.log(buttonText.angle, buttonText.text)
     button.addChild(area, loadingArea, buttonText)
     lobbyContainer.addChild(button)
 
