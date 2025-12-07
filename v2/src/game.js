@@ -252,8 +252,18 @@ const rectangleButtonsDefinition = () => ({
 const shootingRangeDefinition = () => ({
     x: level.width*0.5,
     y: level.height*0.9,
+    width: 512,
+    height: 128,
     team: 'sniper'
 })
+
+const raceLineDefinition = () => ({
+    xStart: level.width*0.1,
+    xFinish: level.width*0.9,
+    y: level.height*0.1,
+    height: level.height*0.8
+})
+
 
 const teamSwitchersDefinition = () => ({
     assassin: {
@@ -551,7 +561,7 @@ function initStage(nextStage) {
 
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => initCrosshair(figure))
         if (stage !== stages.gameLobby) {
-            figures.filter(figure => figure.team !== 'crosshair').forEach(figure => initRandomPositionFigure(figure))
+            shuffle(figures.filter(figure => figure.team !== 'crosshair')).forEach((figure, i) => initStartPositionFigure(figure, i))
         }
     } else if (game === games.rampage) {
         initRandomSpriteFigures(figures.filter(figure => figure.team !== 'sniper'))
@@ -710,6 +720,36 @@ const handleWinning = () => {
                 const teamsWithMaxPoints = Object.keys(teams).filter(team => teams[team].points === maxPoints)
                 finalWinnerTeam = teamsWithMaxPoints[0]
                 lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.team === finalWinnerTeam).map(f => f.playerId))
+                gameOver = true
+            }
+        }
+    } else if (game === games.race) {
+        // players left, quit game
+        if (figuresPlayer.length < 2) {
+            lastFinalWinnerPlayerIds = new Set(figuresPlayer.map(f => f.playerId))
+            gameOver = true
+            winRoundFigures(figuresPlayer)
+        }
+
+        if (!gameOver) {
+            // last survivor
+            const survivors = figuresPlayer.filter(f => !f.isDead)
+            if (survivors.length < 2) {
+                winRoundFigures(survivors)
+            }
+
+            // first at finish
+            const xFinish = raceLineDefinition().xFinish
+            playerInFinish = figuresPlayer.find(f => f.x > xFinish);
+            if (!restartStage && playerInFinish) {
+                winRoundFigures([playerInFinish])
+            }
+        
+            // max points hit
+            const maxPoints = Math.max(...players.map(p => p.score?.points || 0))
+            if (maxPoints >= pointsToWin) {
+                const playersWithMaxPoints = players.filter(p => p.score?.points === maxPoints)
+                lastFinalWinnerPlayerIds = new Set(playersWithMaxPoints.map(p => p.playerId))
                 gameOver = true
             }
         }

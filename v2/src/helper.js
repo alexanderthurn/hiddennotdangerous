@@ -85,6 +85,13 @@ const initRandomOutsidePositionFigure = figure => {
     figure.inactive = true
 }
 
+const initStartPositionFigure = (figure, i) => {
+    let {xStart: x, y, height} = raceLineDefinition()
+    y = y+i/maxPlayerFigures*height
+
+    initFigure(figure, x, y, 0)
+}
+
 const initCrosshair = figure => {
     Object.assign(figure, {
         ammo: figure.maxAmmo

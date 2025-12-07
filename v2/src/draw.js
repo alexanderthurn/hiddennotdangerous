@@ -403,9 +403,7 @@ const animateShootingRange = button => {
 }
 
 const addShootingRange = (app, props, lobbyContainer) => {
-    const {x, y, team} = props
-    const width = 512
-    const height = 128
+    const {x, y, width, height, team} = props
     const newX = x - width/2
     const newY = y - height/2
 
@@ -428,7 +426,7 @@ const addShootingRange = (app, props, lobbyContainer) => {
 
     const buttonInside = new PIXI.Container()
     buttonInside.execute = () => buttonInside.playersNear.forEach(f => {
-        if (f.team === 'sniper' && !f.inactive && !f.justShot) {
+        if (f.team === team && !f.inactive && !f.justShot) {
             f.inactive = true
             f.justShot = true
             const crosshair = createCrosshair({...f, x: f.x, y: f.y})
