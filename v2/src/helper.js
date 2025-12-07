@@ -427,9 +427,9 @@ const initSniperPositions = figures => {
     figures.forEach(figure => initRandomOutsidePositionFigure(figure))
 }
 
-const initRandomSpriteFigures = (figures, sprites) => {
+const initRandomSpriteFigures = figures => {
     const shuffledFigures = shuffle(figures)
-    const shuffledSprites = shuffle(sprites)
+    const shuffledSprites = shuffle(game.sprites)
     const minFiguresPerSprite = Math.floor(shuffledFigures.length/shuffledSprites.length)
     const numberSpritesWithMoreFigures = shuffledFigures.length % shuffledSprites.length
 

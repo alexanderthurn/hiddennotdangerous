@@ -984,6 +984,13 @@ const createFigure = (app, spritesheet, props) => {
     return figure
 }
 
+const addCrosshairs = (sniperFigures, ammo) => {
+    sniperFigures.forEach(f => {
+        const crosshair = createCrosshair({...f, x: f.x, y: f.y, ammo})
+        figuresPool.add(crosshair)
+    })
+}
+
 const addSniperFigures = (app, sniperFigures, ammo) => {
     let spritesheet = PIXI.Assets.get('figureAtlas')
     sniperFigures.forEach(f => {

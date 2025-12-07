@@ -58,11 +58,17 @@ const games = {
         color: colors.green,
         text: 'FOOD'
     },
+    race: {
+        color: colors.black,
+        text: 'RACE',
+        sprites: ['father', 'grandpa', 'mother', 'fat', 'robot', 'teddy', 'boy', 'girl']
+    },
     rampage: {
         color: colors.yellow,
         text: 'RAMPAGE',
         countdown: 180,
-        initialTeam: 'killer'
+        initialTeam: 'killer',
+        sprites: ['father', 'grandpa', 'mother', 'fat', 'robot', 'teddy', 'boy', 'girl']
     },
     vip: {
         color: colors.blue,
@@ -72,6 +78,54 @@ const games = {
 }
 
 let game, roundCounter = 0
+
+const teams = {
+    assassin: {
+        color: colors.red,
+        games: new Set([games.vip]),
+        label: 'Assassins',
+        walkRectLength: 300,
+        maxSpeed: defaultMaxSpeed,
+        playerTeam: true,
+        sprites: ['girl'],
+        size: 0
+    },
+    guard: {
+        color: colors.blue,
+        games: new Set([games.vip]),
+        label: 'Guards',
+        walkRectLength: 300,
+        maxSpeed: 0.75*defaultMaxSpeed,
+        playerTeam: true,
+        sprites: ['boy'],
+        size: 0
+    },
+    killer: {
+        color: colors.red,
+        games: new Set([games.rampage]),
+        label: 'Killers',
+        playerTeam: true,
+        size: 0
+    },
+    sniper: {
+        color: colors.blue,
+        games: new Set([games.rampage]),
+        label: 'Snipers',
+        playerTeam: true,
+        sprites: ['sniper'],
+        size: 0
+    },
+    vip: {
+        color: colors.green,
+        games: new Set([games.vip]),
+        label: 'VIPs',
+        walkRectLength: 150,
+        maxSpeed: 0.5*defaultMaxSpeed,
+        playerTeam: false,
+        sprites: ['mother', 'father', 'grandpa'],
+        size: 0
+    }
+}
 
 var btnTouchController = {
     radius: 0,
@@ -194,55 +248,6 @@ const rectangleButtonsDefinition = () => ({
         execute: toggleBots
     }
 })
-
-const teams = {
-    assassin: {
-        color: colors.red,
-        games: new Set([games.vip]),
-        label: 'Assassins',
-        walkRectLength: 300,
-        maxSpeed: defaultMaxSpeed,
-        playerTeam: true,
-        sprites: ['girl'],
-        size: 0
-    },
-    guard: {
-        color: colors.blue,
-        games: new Set([games.vip]),
-        label: 'Guards',
-        walkRectLength: 300,
-        maxSpeed: 0.75*defaultMaxSpeed,
-        playerTeam: true,
-        sprites: ['boy'],
-        size: 0
-    },
-    killer: {
-        color: colors.red,
-        games: new Set([games.rampage]),
-        label: 'Killers',
-        playerTeam: true,
-        sprites: ['father', 'grandpa', 'mother', 'fat', 'robot', 'teddy', 'boy', 'girl'],
-        size: 0
-    },
-    sniper: {
-        color: colors.blue,
-        games: new Set([games.rampage]),
-        label: 'Snipers',
-        playerTeam: true,
-        sprites: ['sniper'],
-        size: 0
-    },
-    vip: {
-        color: colors.green,
-        games: new Set([games.vip]),
-        label: 'VIPs',
-        walkRectLength: 150,
-        maxSpeed: 0.5*defaultMaxSpeed,
-        playerTeam: false,
-        sprites: ['mother', 'father', 'grandpa'],
-        size: 0
-    }
-}
 
 const shootingRangeDefinition = () => ({
     x: level.width*0.5,
@@ -499,11 +504,15 @@ function initStage(nextStage) {
 
     let figuresPoolArray = Array.from(figuresPool)
 
-    if (roundCounter === 1 && stage === stages.game && (game === games.rampage)) {
-        const killerFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'killer')
-        const sniperFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'sniper');
-        const ammo = Math.ceil(baseAmmoFactor * killerFigures.length/sniperFigures.length + bonusAmmoFactor*Math.sqrt(maxPlayerFigures/killerFigures.length))
-        addSniperFigures(app, sniperFigures, ammo)
+    if (roundCounter === 1 && stage === stages.game) {
+        if (game === games.race) {
+            addCrosshairs(figuresPoolArray.filter(figure => figure.playerId), 1)
+        } else if (game === games.rampage) {
+            const killerFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'killer')
+            const sniperFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'sniper')
+            const ammo = Math.ceil(baseAmmoFactor * killerFigures.length/sniperFigures.length + bonusAmmoFactor*Math.sqrt(maxPlayerFigures/killerFigures.length))
+            addSniperFigures(app, sniperFigures, ammo)
+        }
     }
 
     figuresPoolArray = Array.from(figuresPool)
@@ -516,7 +525,7 @@ function initStage(nextStage) {
     } else {
         figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team !== 'vip'))
     }
-    if (game === games.rampage) {
+    if (game === games.race || game === games.rampage) {
         figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'crosshair'))
     }
     if (game === games.food) {
@@ -537,8 +546,15 @@ function initStage(nextStage) {
         } else {
             initVIPGamePositions(figures)
         }
+    } else if (game === games.race) {
+        initRandomSpriteFigures(figures.filter(figure => figure.type !== 'crosshair'))
+
+        figures.filter(figure => figure.type === 'crosshair').forEach(figure => initCrosshair(figure))
+        if (stage !== stages.gameLobby) {
+            figures.filter(figure => figure.team !== 'crosshair').forEach(figure => initRandomPositionFigure(figure))
+        }
     } else if (game === games.rampage) {
-        initRandomSpriteFigures(figures.filter(figure => figure.team !== 'sniper'), ['father', 'grandpa', 'mother', 'fat', 'robot', 'teddy', 'boy', 'girl'])
+        initRandomSpriteFigures(figures.filter(figure => figure.team !== 'sniper'))
 
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => initCrosshair(figure))
         if (stage !== stages.gameLobby) {
@@ -1115,17 +1131,14 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
                     f.attackDistanceMultiplier = 2*f.size
                 } else {
                     f.attackDistanceMultiplier = 1.5*f.size
-                }
-                
+                }   
             }
             f.attackDistanceMultiplier*=Math.pow(0.999,dt)
             if (f.attackDistanceMultiplier < 0.1) {
                 f.attackDistanceMultiplier = 0
                 f.isDead = true
             }
-
         } else {
-           
             if (f.size === 5) {
                 f.attackDistanceMultiplier= f.lifetime/fartGrowDuration * 3*f.size
             } else if (f.size === 1) {
@@ -1133,7 +1146,6 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
             } else {
                 f.attackDistanceMultiplier= f.lifetime/fartGrowDuration * 1.5*f.size
             }
-
         }
     })
 }
