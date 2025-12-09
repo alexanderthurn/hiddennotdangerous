@@ -452,34 +452,16 @@ const initVIPGamePositions = figures => {
         // distribute neutral players evenly
         const numberPlayerAssassins = figures.filter(figure => figure.playerId && figure.team === 'assassin').length
         const numberPlayerGuards = figures.filter(figure => figure.playerId && figure.team === 'guard').length
-        const numberJoinSmallerTeam = Math.min(Math.abs(numberPlayerAssassins - numberPlayerGuards), neutralPlayerFigures.length)
-        const numberEvenlyJoinTeam = Math.floor((neutralPlayerFigures.length-numberJoinSmallerTeam)/2)
         const smallerTeam = numberPlayerAssassins > numberPlayerGuards ? 'guard' : 'assassin'
-        const randomTeam = getRandomInt(2) > 0 ? 'guard' : 'assassin'
-        for (let i = 0; i < numberJoinSmallerTeam; i++) {
-            switchTeam(neutralPlayerFigures[i], smallerTeam)
-        }
-        for (let i = 0; i < numberEvenlyJoinTeam; i++) {
-            switchTeam(neutralPlayerFigures[i+numberJoinSmallerTeam], 'guard')
-        }
-        for (let i = 0; i < numberEvenlyJoinTeam; i++) {
-            switchTeam(neutralPlayerFigures[i+numberJoinSmallerTeam+numberEvenlyJoinTeam], 'assassin')
-        }
-        for (let i = 0; i < (neutralPlayerFigures.length-numberJoinSmallerTeam) % 2; i++) {
-            switchTeam(neutralPlayerFigures[i+neutralPlayerFigures.length-1], randomTeam)
-        }
+        const shuffledTeams = shuffle(['assassin', 'guard'])
+
+        neutralPlayerFigures.forEach((f, i) => switchTeam(f, i < Math.abs(numberPlayerAssassins - numberPlayerGuards) ? smallerTeam : shuffledTeams[i%2]))
     }
 
     // put NPC neutrals in teams
     const numberMissingGuards = numberGuards - figures.filter(figure => figure.team === 'guard').length
     const neutralFigures = shuffle(figures.filter(figure => !figure.team))
-    for (let i = 0; i < numberMissingGuards; i++) {
-        switchTeam(neutralFigures[i], 'guard')
-    }
-
-    for (let i = numberMissingGuards; i < neutralFigures.length; i++) {
-        switchTeam(neutralFigures[i], 'assassin')
-    }
+    neutralFigures.forEach((f, i) =>  switchTeam(f, i < numberMissingGuards ? 'guard' : 'assassin'))
 
     // assassin positions
     const assassins = shuffle(figures.filter(figure => figure.team === 'assassin'))
@@ -608,6 +590,7 @@ const winRoundFigures = winnerFigures => {
 }
 
 const switchTeam = (figure, team) => {
+    console.log('switchTeam', figure, team)
     if (figure.team) {
         teams[figure.team].size--
     }
