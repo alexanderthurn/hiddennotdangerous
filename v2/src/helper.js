@@ -437,24 +437,12 @@ const initSniperPositions = figures => {
 const initRandomSpriteFigures = figures => {
     const shuffledFigures = shuffle(figures)
     const shuffledSprites = shuffle(game.sprites)
-    const minFiguresPerSprite = Math.floor(shuffledFigures.length/shuffledSprites.length)
-    const numberSpritesWithMoreFigures = shuffledFigures.length % shuffledSprites.length
 
-    for (let i = 0; i < shuffledSprites.length; i++) {
-        for (let j = 0; j < minFiguresPerSprite; j++) {
-            const figure = shuffledFigures[i*minFiguresPerSprite+j]
-            const sprite = shuffledSprites[i]
-            figure.currentSprite = sprite
-            figure.defaultSprite = sprite
-        }
-    }
-
-    for (let i = 0; i < numberSpritesWithMoreFigures; i++) {
-        const figure = shuffledFigures[i+shuffledSprites.length*minFiguresPerSprite]
-        const sprite = shuffledSprites[i]
-        figure.currentSprite = sprite
-        figure.defaultSprite = sprite
-    }
+    shuffledFigures.forEach((f, i) => {
+        const sprite = shuffledSprites[i % shuffledSprites.length]
+        f.currentSprite = sprite
+        f.defaultSprite = sprite
+    })
 }
 
 const initVIPGamePositions = figures => {
@@ -624,7 +612,7 @@ const switchTeam = (figure, team) => {
         teams[figure.team].size--
     }
     figure.team = team
-    figure.currentSprite = teams[team]?.sprites?.[0] || figure.defaultSprite
+    figure.currentSprite = teams[team]?.sprites?.[teams[team]?.size % teams[team]?.sprites.length] || figure.defaultSprite
     figure.maxSpeed = teams[team]?.maxSpeed || defaultMaxSpeed
     figure.walkRectLength = teams[team]?.walkRectLength
     if (figure.team) {
