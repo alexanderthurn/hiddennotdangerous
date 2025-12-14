@@ -1081,18 +1081,9 @@ function handleInput(players, figures, dtProcessed) {
             // attacking
             if (p.isAttackButtonPressed && !f.isAttacking && !f.isInRace) {
                 if (!f.lastAttackTime || dtProcessed-f.lastAttackTime > f.attackBreakDuration) {
-
-                    if (f.type === 'crosshair') {
-                        f.ammo--
-                        f.lastAttackX = f.x
-                        f.lastAttackY = f.y
-                    } else {
-
+                    if (f.beans?.size > 0) {
                         let xyNew = move(f.x, f.y, f.direction+deg2rad(180),f.attackDistance*0.5, 1)
-
-                        if (f.beans.size > 0) {
-                            addFartCloud({x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size})
-                        }
+                        addFartCloud({x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size})
                         f.beans.forEach(b => f.beansFarted.add(b))
                         f.beans.clear()
                     }
