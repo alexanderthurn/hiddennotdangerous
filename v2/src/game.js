@@ -208,7 +208,7 @@ var actualMusicPlaylist;
 const gameVoteButtonDefinition = () => ({
     x: level.width*0.5,
     y: level.height*0.5,
-    innerRadius: level.width*0.1,
+    innerRadius: level.width*0.0,
     outerRadius: level.width*0.15,
     defaultLoadingSpeed: 1/3000,
     getExecute: button => () => button.playersNear.forEach(figure => figure.player.vote = button.gameId)
@@ -217,9 +217,9 @@ const gameVoteButtonDefinition = () => ({
 const lobbyStartButtonDefinition = () => ({
     x: level.width*0.5,
     y: level.height*0.5,
-    innerRadius: level.width*0.1,
+    innerRadius: level.width*0.15,
     outerRadius: level.width*0.15,
-    defaultLoadingSpeed: 1/3000,
+    defaultLoadingSpeed: 0.2/3000,
     execute: () => {
         game = voteGame()
         initStage(stages.gameLobby)

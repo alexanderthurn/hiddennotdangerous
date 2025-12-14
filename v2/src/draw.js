@@ -124,11 +124,11 @@ const createCircleButton = (props, lobbyContainer) => {
 
     const area = new PIXI.Graphics()
     .circle(0, 0, innerRadius)
-    .fill({alpha: 0.5, color: colors.darkBrown})
+    .fill({alpha: 1, color: colors.darkBrown})
 
     const loadingCircle = new PIXI.Graphics()
     .circle(0, 0, innerRadius)
-    .fill({alpha: 0.5, color: colors.grey})
+    .fill({alpha: 1, color: colors.grey})
 
     const buttonText = new PIXI.BitmapText({
         style: {...app.textStyleDefault, align: 'center'},
@@ -159,7 +159,7 @@ const animateRingPartButton = button => {
             const height = button.outerRadius - button.innerRadius
             const rel = 8
             const partHeight = rel * height / (button.playersPossible.length*rel+button.playersPossible.length-1)
-            const margin = partHeight / rel
+            const margin = 0*partHeight / rel
 
             let startRadius = button.innerRadius
             for (let index = 0; index < votes; index++) {
@@ -197,8 +197,8 @@ const createRingPartButton = (props, lobbyContainer) => {
         text: games[gameId].text,
         style: {...app.textStyleDefault, align: 'center'}
     });
-    buttonText.x = Math.cos(centerAngle)*((innerRadius+outerRadius)/2)
-    buttonText.y = Math.sin(centerAngle)*((innerRadius+outerRadius)/2)
+    buttonText.x = Math.cos(centerAngle)*((innerRadius+outerRadius)*0.75)
+    buttonText.y = Math.sin(centerAngle)*((innerRadius+outerRadius)*0.75)
     buttonText.anchor.set(0.5)
     buttonText.angle = (rad2limiteddeg(centerAngle) + 90)
     if (buttonText.angle > 90 && buttonText.angle < 270) {
