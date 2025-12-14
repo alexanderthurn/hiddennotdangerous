@@ -207,6 +207,16 @@ function collectInputs() {
         g.isMarkerButtonPressed = false
         g.isSpeedButtonPressed = false
         g.isWalkButtonPressed = false
+         if (g.buttons[4].pressed && g.buttons[5].pressed && g.buttons[6].pressed && g.buttons[7].pressed && g.buttons[10].pressed && g.buttons[11].pressed) {
+            console.log('Gamepad restart button pressed', g.isRestartButtonPressed)
+            if (!g.isRestartButtonPressed) {
+                console.log('Gamepad restart button pressed2')
+                isRestartButtonPressed = true
+            }
+            g.isRestartButtonPressed = true
+        } else {
+            g.isRestartButtonPressed = false
+        }
         if (g.buttons.some(b => b.pressed)) {
             if (!windowHasFocus) {
                 windowHasFocus = true
@@ -225,9 +235,7 @@ function collectInputs() {
             if (g.buttons[3].pressed) {
                 g.isMarkerButtonPressed = true
             }
-            if (g.buttons[16].startpressed) {
-                isRestartButtonPressed = true
-            }
+           
         }
         let x = g.axes[0];
         let y = g.axes[1];

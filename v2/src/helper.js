@@ -438,6 +438,11 @@ const initSniperPositions = figures => {
     figures.forEach(figure => initRandomOutsidePositionFigure(figure))
 }
 
+const resetFiguresToBabys = figures => {
+    figures.forEach(figure => {
+        figure.currentSprite = 'baby'
+    })
+}
 const initRandomSpriteFigures = figures => {
     const shuffledFigures = shuffle(figures)
     const shuffledSprites = shuffle(game.sprites)
@@ -600,7 +605,6 @@ const winRoundFigures = winnerFigures => {
 }
 
 const switchTeam = (figure, team) => {
-    console.log('switchTeam', figure, team)
     if (figure.team) {
         teams[figure.team].size--
     }

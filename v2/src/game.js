@@ -51,6 +51,8 @@ const stages = {
 
 let stage
 
+const mostFigures = ['girl', 'robot', 'teddy', 'fat', 'boy',  'father', 'grandpa', 'mother']
+
 const games = {
     battleRoyale: {
         color: colors.red,
@@ -64,7 +66,7 @@ const games = {
     race: {
         color: colors.black,
         text: 'RACE',
-        sprites: ['father', 'grandpa', 'mother', 'fat', 'robot', 'teddy', 'boy', 'girl'],
+        sprites: mostFigures,
         walkRectLength: 100
     },
     rampage: {
@@ -72,7 +74,7 @@ const games = {
         text: 'RAMPAGE',
         countdown: 180,
         initialTeam: 'killer',
-        sprites: ['father', 'grandpa', 'mother', 'fat', 'robot', 'teddy', 'boy', 'girl']
+        sprites: mostFigures
     },
     vip: {
         color: colors.blue,
@@ -547,10 +549,14 @@ function initStage(nextStage) {
     }
 
     // Figuren initialisieren
-    if (stage === stages.gameLobby && game.initialTeam) {
-        figures.filter(figure => figure.playerId).forEach(figure => {
-            switchTeam(figure, game.initialTeam)
-        })
+
+    if (stage === stages.gameLobby) {
+        resetFiguresToBabys(figures.filter(figure => figure.playerId && figure.type === 'fighter'))
+        if (game.initialTeam) {
+            figures.filter(figure => figure.playerId).forEach(figure => {
+                switchTeam(figure, game.initialTeam)
+            })
+        }
     }
     if (game === games.vip) {
         if (stage === stages.gameLobby) {
@@ -1040,6 +1046,8 @@ function handleInput(players, figures, dtProcessed) {
                 figure.playerId = p.playerId
                 figure.player = p
                 switchTeam(figure, game?.initialTeam)
+                figure.currentSprite = mostFigures[joinedFighters.length % mostFigures.length]
+
                 addPlayerScore(figure)
                 if (stage === stages.startLobby) {
                     figure.x = level.width*0.04+ Math.random() * level.width*0.3
@@ -1094,7 +1102,9 @@ function handleInput(players, figures, dtProcessed) {
             f.isAttacking = f.lastAttackTime && (dtProcessed-f.lastAttackTime <= f.attackDuration) ? true : false;
         } else if (f.isAiming) {
             const crosshairFigure = figures.find(fig => fig.playerId === f.playerId && fig.type === 'crosshair')
-            f.direction = angle(f.x,f.y,crosshairFigure.x,crosshairFigure.y)
+            if (crosshairFigure) {
+                f.direction = angle(f.x,f.y,crosshairFigure.x,crosshairFigure.y)
+            } 
         }
     })
 }
