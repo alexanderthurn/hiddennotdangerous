@@ -562,12 +562,6 @@ const attackFigure = (figureAttacker, figureAttacked) => {
         figureAttacker.hasHit = true
         return true
     }
-    if (figureAttacker.type == 'crosshair') {
-        figureAttacker.ammo--
-        if (figureAttacker.ammo <= 0) {
-            figureAttacker.isDead = true
-        }
-    }
     return false
 }
 

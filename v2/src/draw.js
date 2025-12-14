@@ -1084,6 +1084,7 @@ const createCrosshair = props => {
     crosshairLayer.attach(crosshair)
 
     addAnimation(crosshair, () => {
+        crosshair.visible = crosshair.ammo > 0
         ammoText.x = crosshair.width/2
         ammoText.y = crosshair.height/2
         ammoText.visible = crosshair.ammo < Infinity
@@ -1406,7 +1407,7 @@ const addFog = app => {
     {
         fog.visible = stage === stages.game && (game === games.rampage)
 
-        const crosshairs = figures.filter(f => f.playerId && f.type === 'crosshair')
+        const crosshairs = figures.filter(f => f.playerId && f.type === 'crosshair' && f.ammo > 0)
         fogFilter.resources.myUniforms.uniforms.uNumViewPoints = crosshairs.length
         crosshairs.forEach((f, i) => {
             fogFilter.resources.myUniforms.uniforms[`uViewPoint${i}`] = [f.x, f.y]

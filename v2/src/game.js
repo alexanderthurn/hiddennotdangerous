@@ -219,7 +219,7 @@ const lobbyStartButtonDefinition = () => ({
     y: level.height*0.5,
     innerRadius: level.width*0.15,
     outerRadius: level.width*0.15,
-    defaultLoadingSpeed: 0.2/3000,
+    defaultLoadingSpeed: 0.5/3000,
     execute: () => {
         game = voteGame()
         initStage(stages.gameLobby)
@@ -1068,7 +1068,7 @@ function handleInput(players, figures, dtProcessed) {
         var p = f.player
 
         f.speed = 0.0
-        if (!f.isDead && !f.isAiming) {
+        if (!f.isDead && !f.isAiming && !(f.ammo <= 0)) {
             // moving
             if (f.isInRace) {
                 if (f.player.isSpeedButtonPressed) {
@@ -1089,6 +1089,9 @@ function handleInput(players, figures, dtProcessed) {
             // attacking
             if (p.isAttackButtonPressed && !f.isAttacking && !f.isInRace) {
                 if (!f.lastAttackTime || dtProcessed-f.lastAttackTime > f.attackBreakDuration) {
+                    if (f.type === 'crosshair') {
+                        f.ammo--
+                    }
                     if (f.beans?.size > 0) {
                         let xyNew = move(f.x, f.y, f.direction+deg2rad(180),f.attackDistance*0.5, 1)
                         addFartCloud({x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size})
@@ -1101,7 +1104,7 @@ function handleInput(players, figures, dtProcessed) {
             }
             f.isAttacking = f.lastAttackTime && (dtProcessed-f.lastAttackTime <= f.attackDuration) ? true : false;
         } else if (f.isAiming) {
-            const crosshairFigure = figures.find(fig => fig.playerId === f.playerId && fig.type === 'crosshair')
+            const crosshairFigure = figures.find(fig => fig.playerId === f.playerId && fig.type === 'crosshair' && fig.ammo > 0)
             if (crosshairFigure) {
                 f.direction = angle(f.x,f.y,crosshairFigure.x,crosshairFigure.y)
             } 
