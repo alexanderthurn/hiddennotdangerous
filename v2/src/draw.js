@@ -426,8 +426,8 @@ const addShootingRange = (app, props, lobbyContainer) => {
 
     const buttonInside = new PIXI.Container()
     buttonInside.execute = () => buttonInside.playersNear.forEach(f => {
-        if (f.team === team && !f.inactive && !f.justShot) {
-            f.inactive = true
+        if (f.team === team && !f.isAiming && !f.justShot) {
+            f.isAiming = true
             f.justShot = true
             const crosshair = createCrosshair({...f, x: f.x, y: f.y})
             figures.push(crosshair)

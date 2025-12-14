@@ -12,19 +12,22 @@ var keyboards = [{keys: {
     'KeyW': {playerId: 'k0', action: 'up'},
     'KeyS': {playerId: 'k0', action: 'down'},
     'KeyT': {playerId: 'k0', action: 'attack'},
+    'KeyF': {playerId: 'k0', action: 'walk'},
     'ShiftLeft': {playerId: 'k0', action: 'speed'},
     'KeyR': {playerId: 'k0', action: 'marker'},
     'Digit1': {playerId: 'k0', action: 'attack'},
-    'Digit2': {playerId: 'k0', action: 'speed'},
-    'Digit3': {playerId: 'k0', action: 'marker'},
+    'Digit2': {playerId: 'k0', action: 'walk'},
+    'Digit3': {playerId: 'k0', action: 'speed'},
+    'Digit4': {playerId: 'k0', action: 'marker'},
     'Delete': {action: 'restart'},
     'ArrowLeft': {playerId: 'k1', action: 'left'},
     'ArrowRight': {playerId: 'k1', action: 'right'},
     'ArrowUp': {playerId: 'k1', action: 'up'},
     'ArrowDown': {playerId: 'k1', action: 'down'},
     'Numpad0': {playerId: 'k1', action: 'attack'},
-    'Numpad1': {playerId: 'k1', action: 'marker'},
+    'Numpad1': {playerId: 'k1', action: 'walk'},
     'Numpad2': {playerId: 'k1', action: 'speed'},
+    'Numpad3': {playerId: 'k1', action: 'marker'},
     'ShiftRight': {playerId: 'k1', action: 'attack'},
     'ControlRight': {playerId: 'k1', action: 'speed'},
     'AltRight': {playerId: 'k1', action: 'marker'}}, pressed: new Set()}];
@@ -61,7 +64,8 @@ const games = {
     race: {
         color: colors.black,
         text: 'RACE',
-        sprites: ['father', 'grandpa', 'mother', 'fat', 'robot', 'teddy', 'boy', 'girl']
+        sprites: ['father', 'grandpa', 'mother', 'fat', 'robot', 'teddy', 'boy', 'girl'],
+        walkRectLength: 100
     },
     rampage: {
         color: colors.yellow,
@@ -486,7 +490,7 @@ function initStage(nextStage) {
                 figure.currentSprite = 'baby'
                 figure.defaultSprite = 'baby'
             }
-            figure.inactive = false
+            figure.isAiming = false
             figure.playerId = null
             figure.player = null
         })
@@ -561,7 +565,7 @@ function initStage(nextStage) {
 
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => initCrosshair(figure))
         if (stage !== stages.gameLobby) {
-            shuffle(figures.filter(figure => figure.team !== 'crosshair')).forEach((figure, i) => initStartPositionFigure(figure, i))
+            shuffle(figures.filter(figure => figure.type !== 'crosshair')).forEach((figure, i) => initStartPositionFigure(figure, i, games.race.walkRectLength))
         }
     } else if (game === games.rampage) {
         initRandomSpriteFigures(figures.filter(figure => figure.team !== 'sniper'))
@@ -908,7 +912,7 @@ function updateGame(figures, dt, dtProcessed) {
             const playerFigure = playerFigures.find(figure => figure.playerId === f.playerId)
             const inAttachRadius = squaredDistance(f.x, f.y, playerFigure.x, playerFigure.y) <= f.attachRadius*f.attachRadius
             if (f.detached && inAttachRadius) {
-                playerFigure.inactive = false
+                playerFigure.isAiming = false
                 f.isDead = true
             } else if (!f.detached && !inAttachRadius) {
                 f.detached = true
@@ -1056,8 +1060,16 @@ function handleInput(players, figures, dtProcessed) {
         var p = f.player
 
         f.speed = 0.0
-        if (!f.isDead && !f.inactive) {
-            if (p.isMoving) {
+        if (!f.isDead && !f.isAiming) {
+            // moving
+            if (f.isInRace) {
+                if (f.player.isSpeedButtonPressed) {
+                    f.speed = 2.2*f.maxSpeed
+                } else if (p.isWalkButtonPressed) {
+                    f.speed = f.maxSpeed
+                }
+                f.direction = 0
+            } else if (p.isMoving) {
                 f.direction = p.direction
                 f.speed = f.maxSpeed
                 if (f.type === 'crosshair') {
@@ -1066,7 +1078,8 @@ function handleInput(players, figures, dtProcessed) {
                     f.speed *= 2.2
                 }
             }
-            if (p.isAttackButtonPressed && !f.isAttacking) {
+            // attacking
+            if (p.isAttackButtonPressed && !f.isAttacking && !f.isInRace) {
                 if (!f.lastAttackTime || dtProcessed-f.lastAttackTime > f.attackBreakDuration) {
 
                     if (f.type === 'crosshair') {
@@ -1088,7 +1101,7 @@ function handleInput(players, figures, dtProcessed) {
                 }
             }
             f.isAttacking = f.lastAttackTime && (dtProcessed-f.lastAttackTime <= f.attackDuration) ? true : false;
-        } else if (f.inactive) {
+        } else if (f.isAiming) {
             const crosshairFigure = figures.find(fig => fig.playerId === f.playerId && fig.type === 'crosshair')
             f.direction = angle(f.x,f.y,crosshairFigure.x,crosshairFigure.y)
         }
@@ -1102,18 +1115,18 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
 
     let stoppedNPCFigures
     if (stage === stages.game && (game === games.rampage)) {
-        stoppedNPCFigures = NPCFigures.filter(f => f.isDeathDetected || f.inactive)
+        stoppedNPCFigures = NPCFigures.filter(f => f.isDeathDetected || f.isAiming)
     } else {
-        stoppedNPCFigures = NPCFigures.filter(f => f.isDead || f.inactive)
+        stoppedNPCFigures = NPCFigures.filter(f => f.isDead || f.isAiming)
     }
 
     stoppedNPCFigures.forEach(f => f.speed = 0)
 
     let movingNPCFigures
     if (stage === stages.game && (game === games.rampage)) {
-        movingNPCFigures = NPCFigures.filter(f => !f.isDeathDetected && !f.inactive)
+        movingNPCFigures = NPCFigures.filter(f => !f.isDeathDetected && !f.isAiming)
     } else {
-        movingNPCFigures = NPCFigures.filter(f => !f.isDead && !f.inactive)
+        movingNPCFigures = NPCFigures.filter(f => !f.isDead && !f.isAiming)
     }
 
     let shuffledIndexes;

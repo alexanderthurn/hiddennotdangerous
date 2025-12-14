@@ -82,14 +82,16 @@ const initRandomOutsidePositionFigure = figure => {
     const [x, y] = getRandomOutsideLevelXY()
 
     initFigure(figure, x, y)
-    figure.inactive = true
+    figure.isAiming = true
 }
 
-const initStartPositionFigure = (figure, i) => {
+const initStartPositionFigure = (figure, i, walkRectLength) => {
     let {xStart: x, y, height} = raceLineDefinition()
     y = y+i/maxPlayerFigures*height
 
     initFigure(figure, x, y, 0)
+    figure.isInRace = true
+    figure.walkRectLength = walkRectLength
 }
 
 const initCrosshair = figure => {
@@ -366,8 +368,15 @@ function getRandomXY() {
     return [level.rectangle.x+Math.random()*level.rectangle.width, level.rectangle.y+Math.random()*level.rectangle.height]
 }
 
+function getRandomXYInRectangle(x, y, w, h) {
+    const rectangle = new PIXI.Rectangle(x, y, w, h).fit(level.rectangle)
+    return [rectangle.x+Math.random()*rectangle.width, rectangle.y+Math.random()*rectangle.height]
+}
+
 function getCloseRandomXY(figure) {
-    if (figure.walkRectLength) {
+    if (figure.isInRace) {
+        return [figure.x+Math.random()*figure.walkRectLength, figure.y]
+    } else if (figure.walkRectLength) {
         return getRandomXYInRectangle(figure.x-figure.walkRectLength, figure.y-figure.walkRectLength, 2*figure.walkRectLength, 2*figure.walkRectLength)
     }
     return getRandomXY()
@@ -404,11 +413,6 @@ const getRandomOutsideLevelXY = () => {
     x *= level.width
     y *= level.height
     return [x, y]
-}
-
-function getRandomXYInRectangle(x, y, w, h) {
-    const rectangle = new PIXI.Rectangle(x, y, w, h).fit(level.rectangle)
-    return [rectangle.x+Math.random()*rectangle.width, rectangle.y+Math.random()*rectangle.height]
 }
 
 const distanceToBorder = (x, y, angleX, angleY) => {

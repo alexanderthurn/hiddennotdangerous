@@ -116,6 +116,7 @@ function collectInputs() {
         isAttackButtonPressed: false,
         isMarkerButtonPressed: false,
         isSpeedButtonPressed: false,
+        isWalkButtonPressed: false,
         isAnyButtonPressed: stage !== stages.game,
         xAxis: 0,
         yAxis: 0,
@@ -205,6 +206,7 @@ function collectInputs() {
         g.isAnyButtonPressed = false
         g.isMarkerButtonPressed = false
         g.isSpeedButtonPressed = false
+        g.isWalkButtonPressed = false
         if (g.buttons.some(b => b.pressed)) {
             if (!windowHasFocus) {
                 windowHasFocus = true
@@ -218,6 +220,9 @@ function collectInputs() {
                 g.isSpeedButtonPressed = true
             }
             if (g.buttons[2].pressed) {
+                g.isWalkButtonPressed = true
+            }
+            if (g.buttons[3].pressed) {
                 g.isMarkerButtonPressed = true
             }
             if (g.buttons[16].startpressed) {
@@ -246,7 +251,8 @@ function collectInputs() {
         isAnyButtonPressed: false,
         isAttackButtonPressed: false,
         isMarkerButtonPressed: false,
-        isSpeedButtonPressed: false
+        isSpeedButtonPressed: false,
+        isWalkButtonPressed: false
     };
     keyboardPlayers = keyboardPlayers.map(kp => (Object.assign(kp, defaultkeyboardPlayer)));
     keyboards.forEach(k => {
@@ -288,6 +294,9 @@ function collectInputs() {
                         break;
                     case 'speed':
                         p.isSpeedButtonPressed = true
+                        break;
+                    case 'walk':
+                        p.isWalkButtonPressed = true
                         break;
                     case 'restart':
                         if (!key.waspressed) {
