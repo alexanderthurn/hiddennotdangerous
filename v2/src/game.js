@@ -493,6 +493,7 @@ function initStage(nextStage) {
                 figure.defaultSprite = 'baby'
             }
             figure.isAiming = false
+            figure.isInRace = false
             figure.playerId = null
             figure.player = null
         })
@@ -749,10 +750,9 @@ const handleWinning = () => {
             }
 
             // first at finish
-            const xFinish = raceLineDefinition().xFinish
-            playerInFinish = figuresPlayer.find(f => f.x > xFinish);
-            if (!restartStage && playerInFinish) {
-                winRoundFigures([playerInFinish])
+            const figuresInFinish = figures.filter(f => f.x > raceLineDefinition().xFinish && f.type === 'fighter')
+            if (!restartStage && figuresInFinish.length > 0) {
+                winRoundFigures(figuresInFinish.filter(f => f.playerId))
             }
         
             // max points hit
@@ -939,6 +939,12 @@ function updateGame(figures, dt, dtProcessed) {
                 }
             });
         })
+    } else if (game === games.race) {
+        figuresAlive.filter(f => f.isAttacking).forEach(f => {
+            figuresAlive.filter(fig => fig.type === 'fighter').forEach(fig => {
+                attackFigure(f, fig)
+            })
+        })
     } else if (game === games.rampage) {
         const killers = figures.filter(f => f.team === 'killer')
         const snipers = figures.filter(f => f.team === 'sniper')
@@ -967,7 +973,7 @@ function updateGame(figures, dt, dtProcessed) {
                 })
             })
         }
-    } else {
+    } else if (game === games.vip) {
         const assassinsAlive = figuresAlive.filter(f => f.team === 'assassin')
         const guardsAlive = figuresAlive.filter(f => f.team === 'guard')
         const vipsAlive = figuresAlive.filter(f => f.team === 'vip')
