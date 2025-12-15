@@ -1,7 +1,5 @@
 var loadPromises = []
 var gamepadPlayers = []
-var touchPlayers = [];
-var touches = [{pointerType: 'unknown', x: 0, y: 0, xCenter: undefined, yCenter: undefined, pressed: new Set()}]
 var keyboardPlayers = [];
 var botPlayers = []
 var players = []
@@ -131,14 +129,6 @@ const teams = {
         sprites: ['mother', 'father', 'grandpa'],
         size: 0
     }
-}
-
-var btnTouchController = {
-    radius: 0,
-}
-
-var btnTouchAction = {
-    radius:0
 }
 
 let tileArea = []
@@ -346,6 +336,8 @@ const crosshairLayer = new PIXI.RenderLayer();
 const scoreLayer = new PIXI.RenderLayer({sortableChildren: true});
 const overlayLayer = new PIXI.RenderLayer();
 const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
+const touchControl = new FWTouchControl(app, {isPassive: true, layout: 'simple'});
+
 app.textStyleDefault = {
     fontFamily: 'Knall',
     fontSize: 32
@@ -476,7 +468,6 @@ function initStage(nextStage) {
         })
         botPlayers = []
         gamepadPlayers = []
-        touchPlayers = []
         keyboardPlayers = []
         players = []
 

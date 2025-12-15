@@ -20,7 +20,6 @@ async function init() {
     const network = FWNetwork.getInstance();
     network.hostRoom();
 
-    app.color = color;
     app.roomNumber = 0;
     app.url = ''
 
@@ -42,6 +41,8 @@ async function init() {
     app.qrCodeSprite.anchor.set(0.5);
     app.containerQrCode.addChild(app.qrCodeSprite);
 
+    app.touchControl = new FWTouchControl(app, {isPassive: true, layout: 'simple', color: color});
+    app.containerGame.addChild(app.touchControl);
     // Container für Figuren
     app.figures = {};
     app.containerFigures = new PIXI.Container();
@@ -56,9 +57,6 @@ async function init() {
     app.ticker.add((ticker) => {
         app.isPortrait = app.screen.width < app.screen.height;
         app.tickerInstance = ticker;
-        app.containerGame.screenWidth = app.screen.width;
-        app.containerGame.screenHeight = app.screen.height;
-
         main(app);
     });
 
@@ -84,35 +82,34 @@ function main(app) {
     BR:  ${nwStats.reported.bytesReceived} / ${nwStats.bytesReceived} BS: ${nwStats.reported.bytesSent} / ${nwStats.bytesReceived}
     RT:  ${(1000*nwStats.reported.currentRoundTripTime).toFixed(4)} / ${(1000*nwStats.reported.totalRoundTripTime).toFixed(4)}
     `;
-    app.textNetwork.position.set(app.containerGame.screenWidth, app.containerGame.screenHeight * 0.0);
+    app.textNetwork.position.set(app.screen.width, app.screen.height * 0.0);
 
     app.textUrl.text = nw.qrCodeBaseUrl + "\n" + nw.roomNumber
     app.qrCodeSprite.texture = nw.qrCodeTexture
 
 
-    app.qrCodeSprite.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 0.5);
-    const qrWidth = Math.min(app.containerGame.screenHeight, app.containerGame.screenWidth) * 0.5;
+    app.qrCodeSprite.position.set(app.screen.width * 0.75, app.screen.height * 0.5);
+    const qrWidth = Math.min(app.screen.height, app.screen.width) * 0.5;
     app.qrCodeSprite.width = qrWidth;
     app.qrCodeSprite.height = qrWidth;
 
     app.textUrl.width =  app.qrCodeSprite.width*0.8;
     app.textUrl.scale.y = app.textUrl.scale.x;
-    app.textUrl.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 1.0);
+    app.textUrl.position.set(app.screen.width * 0.5, app.screen.height * 1.0);
 
-    
-
+    app.touchControl.update(app, {x: app.screen.width * 0.1 + qrWidth*0.1, y: app.screen.height * 0.25+ qrWidth*0.1, wantedWidth: qrWidth*0.8, wantedHeight: qrWidth*0.8});
    
 
     // Figuren aktualisieren
     Object.keys(app.figures).forEach((key) => {
         const figure = app.figures[key];
         figure.visible = true;
-        figure.body.scale.set(app.containerGame.screenWidth * 0.05);
+        figure.body.scale.set(app.screen.width * 0.05);
         figure.x += app.tickerInstance.deltaTime * figure.gamepad.axes[0] * 2;
         figure.y += app.tickerInstance.deltaTime * figure.gamepad.axes[1] * 2;
         figure.body.tint = figure.gamepad.buttons.some(b => b.pressed) ? 0x000000 : 0xffffff;
 
-        figure.arm.scale.set(app.containerGame.screenWidth * 0.01);
+        figure.arm.scale.set(app.screen.width * 0.01);
         figure.arm.position.set(figure.gamepad.axes[2]*figure.body.scale.x, figure.gamepad.axes[3]*figure.body.scale.y)
         figure.arm.tint = figure.gamepad.buttons.some(b => b.pressed) ? 0x444444 : 0xffffff;
         figure.gamepadFoundInCurrentLoop = false;
@@ -132,7 +129,7 @@ function main(app) {
                     })
                 figure.playerName.anchor.set(0.5, 0.5)
                 figure.addChild(figure.body, figure.arm, figure.playerName);
-                figure.position.set(app.containerGame.screenWidth * 0.5, app.containerGame.screenHeight * 0.5);
+                figure.position.set(app.screen.width * 0.5, app.screen.height * 0.5);
                 
                 app.containerFigures.addChild(figure);
                 app.figures[key] = figure;

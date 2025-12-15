@@ -1,10 +1,6 @@
-const CONNECTION_STATUS_OFF = 0
-const CONNECTION_STATUS_INITIALIZNG = 1
-const CONNECTION_STATUS_WORKING = 2
-const CONNECTION_STATUS_ERROR = 3
+
 
 const angle = (x1, y1, x2, y2) => Math.atan2(y2 - y1, x2 - x1); 
-const version = '1.1.0';
 const getQueryParam = (key) => {
     const params = new URLSearchParams(window.location.search);
     return params.get(key);
@@ -28,21 +24,14 @@ function setUrlParam(name, value) {
     window.history.replaceState({}, '', url);
 }
 
-function getPixelPerCentimeter() {
-    const pxPerCm = document.getElementById('1cm').offsetWidth
-    return pxPerCm
-}
 
-function centimeterToPixel(cm) {
-    return cm * getPixelPerCentimeter()
-}
 
 async function init() {
 
     const app = new FWApplication();
     await app.init({
         title: 'F-Mote',  
-        version: version,
+        version: FMOTE_VERSION,
         width: window.innerWidth,
         height: window.innerHeight,
         backgroundColor: 0xf4b400,
@@ -59,14 +48,15 @@ async function init() {
 
     app.serverPrefix = 'hidden'
     app.serverId = getQueryParam('id') || '';
-    app.color = new PIXI.Color(getQueryParam('color') || 'ff0000');
-    app.layout = getQueryParam('layout') || 'simple';
+    touchControl.color = new PIXI.Color(getQueryParam('color') || 'ff0000');
+    touchControl.layout = getQueryParam('layout') || 'simple';
+    
     app.mode = getQueryParam('mode') || 'default';
-    app.connectionStatus = CONNECTION_STATUS_OFF;
+    app.connectionStatus = FMOTE_CONNECTION_STATUS_OFF;
 
     const network = FWNetwork.getInstance();
    
-    app.connectionStatus = CONNECTION_STATUS_INITIALIZNG;
+    app.connectionStatus = FMOTE_CONNECTION_STATUS_INITIALIZNG;
 
     if (app.serverId && app.serverId !== '') {
         network.connectToRoom(app.serverPrefix + app.serverId);
@@ -87,14 +77,14 @@ async function init() {
         if (app.isPortrait) {
             app.containerGame.angle = -270 - ticker.lastTime * 0.0;
             app.containerGame.x = app.screen.width;
-            app.containerGame.screenWidth = app.screen.height;
-            app.containerGame.screenHeight = app.screen.width;    
+            touchControl.wantedWidth = app.screen.height;
+            touchControl.wantedHeight = app.screen.width;    
         } else {
             app.containerGame.angle = 0;
             app.containerGame.x = 0;
             app.containerGame.scale.set(1, 1);
-            app.containerGame.screenWidth = app.screen.width;
-            app.containerGame.screenHeight = app.screen.height;
+            touchControl.wantedWidth = app.screen.width;
+            touchControl.wantedHeight = app.screen.height;
         }
 
         main(app);
@@ -110,22 +100,22 @@ function main(app) {
 
     switch (networkStatus) {
         case 'connected':
-            app.connectionStatus = CONNECTION_STATUS_WORKING
+            app.connectionStatus = FMOTE_CONNECTION_STATUS_WORKING
             break;
         case 'disconnected':
-            app.connectionStatus = CONNECTION_STATUS_OFF
+            app.connectionStatus = FMOTE_CONNECTION_STATUS_OFF
             break;
         case 'connecting':
-            app.connectionStatus = CONNECTION_STATUS_INITIALIZNG
+            app.connectionStatus = FMOTE_CONNECTION_STATUS_INITIALIZNG
             break;
         case 'error': 
-            app.connectionStatus = CONNECTION_STATUS_ERROR
+            app.connectionStatus = FMOTE_CONNECTION_STATUS_ERROR
             break;
         case 'open':
-            app.connectionStatus = CONNECTION_STATUS_INITIALIZNG
+            app.connectionStatus = FMOTE_CONNECTION_STATUS_INITIALIZNG
             break;  
         case 'hosting':
-            app.connectionStatus = CONNECTION_STATUS_WORKING
+            app.connectionStatus = FMOTE_CONNECTION_STATUS_WORKING
             break;       
     }
 
@@ -150,7 +140,7 @@ function main(app) {
         messageCount < maxMessagesPerSecond && 
         now - lastSentTime >= minDelay)
         ) {
-        if (app.connectionStatus === CONNECTION_STATUS_WORKING) {
+        if (app.connectionStatus === FMOTE_CONNECTION_STATUS_WORKING) {
             const network = FWNetwork.getInstance();
             network.sendGamepadData(currentState);
             messageCount++; // Zähler erhöhen

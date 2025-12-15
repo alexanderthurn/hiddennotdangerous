@@ -476,6 +476,7 @@ const addTeamSwitchers = (app, lobbyContainer) => {
 }
 
 const animateLobbyItems = lobbyContainer => {
+
     lobbyContainer.visible = stage === stages.startLobby || stage === stages.gameLobby
 }
 
@@ -506,6 +507,13 @@ const addLobbyItems = (app) => {
     howToPlay.x = level.width*0.22+fontHeight
     howToPlay.y = level.height*0.1
     howToPlay.visible = false
+
+
+    const qrWidth = Math.min(level.width,level.height) * 0.25;
+
+    touchControl.update(app, {x: level.width*0.05, y: level.height*0.1, wantedWidth: qrWidth, wantedHeight: qrWidth*0.7})
+
+    lobbyContainer.addChild(touchControl)
 
     lobbyContainer.addChild(howToPlay)
     levelContainer.addChild(lobbyContainer)
@@ -1097,14 +1105,13 @@ const createCrosshair = props => {
 const addOverlay = app => {
     const circleOfDeathGraphic = createCircleOfDeath(app)
     const countdown = createCountdown(app)
-    const touchControl = createTouchControl(app)
     const fpsText = createFpsText(app)
     const pauseOverlay = createPauseOverlay(app)
 
     circleOfDeath = circleOfDeathGraphic
     levelContainer.addChild(circleOfDeathGraphic, countdown)
-    app.stage.addChild(touchControl, fpsText, pauseOverlay)
-    overlayLayer.attach(circleOfDeathGraphic, countdown, touchControl, fpsText, pauseOverlay)
+    app.stage.addChild(fpsText, pauseOverlay)
+    overlayLayer.attach(circleOfDeathGraphic, countdown, fpsText, pauseOverlay)
 }
 
 const animateCircleOfDeath = circle => {
@@ -1241,54 +1248,6 @@ const createFiguresText = app => {
 
     app.ticker.add(() => animateFiguresText(app, figuresText))
     return figuresText
-}
-
-const createTouchControl = app => {
-    const touchControl = new PIXI.Container()
-
-    let minHeightWidth = Math.min(app.screen.width, app.screen.height)
-    const radius = 0.18*minHeightWidth
-
-    const moveControl = new PIXI.Container()
-    const moveControlBackground = new PIXI.Graphics().circle(0, 0, radius).fill({alpha: 0.3, color: colors.white})
-    const moveControlStick = new PIXI.Graphics().circle(0, 0, radius/2).fill({alpha: 0.3, color: colors.white})
-    moveControl.addChild(moveControlBackground, moveControlStick)
-    moveControl.startRadius = radius
-
-    const attackControl = new PIXI.Container()
-    const attackControlButton = new PIXI.Graphics().circle(0, 0, radius).fill({alpha: 0.4, color: colors.white})
-    attackControl.addChild(attackControlButton)
-    attackControl.startRadius = radius
-
-    btnTouchController = moveControl
-    btnTouchAction = attackControl
-    touchControl.addChild(moveControl, attackControl)
-
-    app.ticker.add(() => {
-        let minHeightWidth = Math.min(app.screen.width, app.screen.height)
-        const distanceToBorder = 0.3*minHeightWidth
-        const radius = 0.18*minHeightWidth
-
-        const mp = touchPlayers.length > 0 ? touchPlayers[0] : touches[0]
-        touchControl.visible = false // mp.pointerType === 'touch' TODO: Alex touch not working nicely
-
-        moveControl.radius = radius
-        moveControl.scale = radius/moveControl.startRadius
-        moveControl.x = distanceToBorder
-        moveControl.y = app.screen.height - distanceToBorder
-
-        attackControl.radius = radius
-        attackControl.scale = radius/attackControl.startRadius
-        attackControl.x = app.screen.width - distanceToBorder
-        attackControl.y = app.screen.height - distanceToBorder
-
-        const xy = move(0, 0, mp.direction, radius/2, mp.isMoving)
-        moveControlStick.x = xy.x || 0
-        moveControlStick.y = xy.y || 0
-        attackControl.alpha = mp.isAttackButtonPressed ? 1 : 0.75
-    })
-
-    return touchControl
 }
 
 const addDebug = app => {

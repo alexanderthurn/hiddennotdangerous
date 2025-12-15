@@ -25,19 +25,6 @@ window.addEventListener('focus', () => {
     setTimeout(() => {windowHasFocus = true}, 100)
 }, { passive: false })
 
-window.addEventListener('touchstart', event => {
-    if (touchPlayers.length > 0) {touchPlayers[0].pointerType = 'touch'}
-    touches[0].pointerType = 'touch'
-
-    event.preventDefault();
-}, { passive: false });
-window.addEventListener('touchend', event => {
-    event.preventDefault();
-}, { passive: false });
-window.addEventListener('touchmove', event => {
-    event.preventDefault();
-}, { passive: false });
-
 
 window.addEventListener('keyup', event => {
     keyboards.forEach(k => {
@@ -46,29 +33,7 @@ window.addEventListener('keyup', event => {
 });
 window.addEventListener("contextmenu", e => e.preventDefault());
 
-var pointerEvents = {}
 var windowHasFocus = false
-
-window.addEventListener('pointerdown', event => {
-    if (!windowHasFocus) {
-        return
-    }
-
-    if (event.pointerType === 'touch') {
-        if (touchPlayers.length === 0) {touchPlayers.push(touches[0]);}
-
-        if (event.clientX < (btnTouchAction.radius > 0 ? (btnTouchAction.x + btnTouchController.x) >> 1 : app.screen.width*0.7) || event.clientY < app.screen.height * 0.5) {
-            touchPlayers[0].pressed.add(0);
-            pointerEvents[event.pointerId] = 0
-        } else {
-            touchPlayers[0].pressed.add(1);
-            pointerEvents[event.pointerId] = 1
-        }
-    } 
-
-    event.preventDefault();
-    event.stopPropagation();
-});
 
 
 window.addEventListener('pointerup', event => {
@@ -77,34 +42,9 @@ window.addEventListener('pointerup', event => {
         return
     }
 
-    if (event.pointerType === 'touch') {
-        touchPlayers[0].pressed.delete( pointerEvents[event.pointerId]);
-        delete pointerEvents[event.pointerId]
-    } 
-
     event.preventDefault();
     event.stopPropagation();
 });
-
-window.addEventListener('pointermove', event => {
-    if (!windowHasFocus) {
-        return
-    }
-
-    touches[0].x = event.clientX
-    touches[0].y = event.clientY
-
-    if (touchPlayers.length > 0) {
-        touchPlayers[0].x = touches[0].x
-        touchPlayers[0].y =  touches[0].y
-    } else {
-        touches[0].xCenter = touches[0].x
-        touches[0].yCenter = touches[0].y
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-}, false);
 
 
 function collectInputs() {
@@ -329,34 +269,6 @@ function collectInputs() {
         })
     });
     
-    touchPlayers.forEach((mp,i) => {
-        mp.type = 'touch'
-        mp.playerId = 't' + i
-        mp.isAttackButtonPressed = mp.pressed.has(0)
-        mp.xAxis = 0
-        mp.yAxis = 0
-        mp.direction = 0
-        mp.isMoving = 0
 
-        var f = figures.find(f => f.playerId ===  mp.playerId && f.type === 'fighter')
-        if (f) {
-            if (mp.pointerType === 'touch') {
-                let x = mp.x - btnTouchController.x
-                let y = mp.y - btnTouchController.y
-                mp.xAxis = x
-                mp.yAxis = y   
-                if (!mp.pressed.has(0)) {
-                    mp.xAxis = 0
-                    mp.yAxis = 0
-                }
-                mp.isAttackButtonPressed = mp.pressed.has(1)
-                let m = Math.hypot(mp.xAxis, mp.yAxis)
-                mp.direction = angle(0, 0, mp.xAxis, mp.yAxis)
-                mp.speed = m
-                mp.isMoving = m > 0               
-            }
-        }
-    })
-
-    return [...gamepadPlayers, ...keyboardPlayers, ...botPlayers]; // ...touchPlayers  TODO: Alex touch not working nicely
+    return [...gamepadPlayers, ...keyboardPlayers, ...botPlayers];
 }
