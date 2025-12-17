@@ -48,31 +48,42 @@ class FWTouchControl extends PIXI.Container {
         super(options);
         let self = this;
         
-        this.wantedWidth = options?.wantedWidth || window.innerWidth;
-        this.wantedHeight = options?.wantedHeight || window.innerHeight;
-        this.isPassive = options?.isPassive || false;
-        this.layout = options?.layout || 'simple';
-        this.color = options?.color || new PIXI.Color(0xff0000);
-        const textStyle = new PIXI.TextStyle({
+        this.x = options?.x || this.x;
+        this.y = options?.y || this.y;
+        this.wantedWidth = options?.wantedWidth ?? window.innerWidth;
+        this.wantedHeight = options?.wantedHeight ?? window.innerHeight;
+        this.isPassive = options?.isPassive ?? false;
+        this.layout = options?.layout ?? 'simple';
+        this.color = options?.color ?? new PIXI.Color(0xff0000);
+        this.showButtonLabels = options?.showButtonLabels ?? true;
+        this.showButtonHints = options?.showButtonHints ?? false;
+        this.isBitmapFont = options?.isBitmapFont ?? false;
+
+
+        this.textStyle = options?.textStyle ?? new PIXI.TextStyle({
             fontFamily: 'Xolonium',
             fontStyle: 'Bold',
             fontSize: 64,
             fill: '#000'
         });
 
-        const textStyleSmall = new PIXI.TextStyle({
+
+        this.textStyleSmall = options?.textStyleSmall ?? new PIXI.TextStyle({
             fontFamily: 'Xolonium',
             fontStyle: 'Bold',
             fontSize: 48,
             fill: '#000'
         });
 
-        const textStyleTitle = new PIXI.TextStyle({
+        this.textStyleTitle = options?.textStyleTitle ?? new PIXI.TextStyle({
             fontFamily: 'Xolonium',
             fontStyle: 'Bold',
             fontSize: 32,
             fill: '#000'
         });
+
+    
+        this.textStyleHints = options?.textStyleHints ?? this.textStyle
         
         this.pointer = {pointerType: 'unknown', x: 0, y: 0, xCenter: undefined, yCenter: undefined, pressed: new Set(), events: {}};
         this.buttonContainers = [];
@@ -82,7 +93,7 @@ class FWTouchControl extends PIXI.Container {
         this.border = new PIXI.Graphics();
         this.addChild(this.border);
 
-        this.title = new PIXI.Text({text: app.version ? 'F-Mote ' + app.version : 'F-Mote', style: textStyleTitle});
+        this.title = new PIXI.Text({text: app.version ? 'F-Mote ' + app.version : 'F-Mote', style: this.textStyleTitle});
         this.title.anchor.set(0.5, 1);
         this.title.alpha = 0.5;
         this.addChild(this.title);
@@ -105,7 +116,7 @@ class FWTouchControl extends PIXI.Container {
             } else {
                 buttonContainer.buttonBackground.circle(0, 0, radius).fill({alpha: 1.0, color: 0xFFFFFF}).stroke({alpha: 0.5, color: 0x000000, width: radius/10});
             }
-            buttonContainer.buttonText = new PIXI.Text({text: i, style: (i === 8 || i === 9 || i === 16 || i === 17) ? textStyleSmall : textStyle});
+            buttonContainer.buttonText = this.createTextElement({text: i, style: (i === 8 || i === 9 || i === 16 || i === 17) ? this.textStyleSmall : this.textStyle});
             buttonContainer.buttonText.anchor.set(0.5);
             buttonContainer.addChild(buttonContainer.buttonBackground, buttonContainer.buttonText);
             buttonContainer.startRadius = radius;
@@ -113,7 +124,10 @@ class FWTouchControl extends PIXI.Container {
             buttonContainer.rPos = [0,0];
             buttonContainer.pressed = false;
             buttonContainer.interactive = true;
-
+            buttonContainer.hintText = this.createTextElement({text: '', style: this.textStyleHints});
+            buttonContainer.hintText.anchor.set(0.5, 0.5);
+            buttonContainer.addChild(buttonContainer.hintText);
+            buttonContainer.hintText.visible = self.showButtonHints;
             
             buttonContainer.addEventListener('pointerdown', {
                 handleEvent: function(event) {
@@ -164,7 +178,7 @@ class FWTouchControl extends PIXI.Container {
             this.addChild(buttonContainer);
 
             switch(i) {
-                case 0: buttonContainer.buttonText.text = 'A'; buttonContainer.key = 'k';  break;
+                case 0: buttonContainer.buttonText.text = 'A'; buttonContainer.key = 'k'; break;
                 case 1: buttonContainer.buttonText.text = 'B'; buttonContainer.key = 'l'; break;
                 case 2: buttonContainer.buttonText.text = 'X'; buttonContainer.key = 'j'; break;
                 case 3: buttonContainer.buttonText.text = 'Y'; buttonContainer.key = 'i'; break;
@@ -295,6 +309,13 @@ class FWTouchControl extends PIXI.Container {
                 }
             }); 
 
+
+
+            axisContainer.hintText = this.createTextElement({text: '', style: this.textStyleHints});
+            axisContainer.hintText.anchor.set(0.5, 0.5);
+            axisContainer.addChild(axisContainer.hintText);
+            axisContainer.hintText.visible = self.showButtonHints;
+
             this.axesContainers.push(axisContainer);
             this.addChild(axisContainer);
         }
@@ -334,7 +355,50 @@ class FWTouchControl extends PIXI.Container {
         });
     }
 
+    createTextElement(settings) {
+        if (this.isBitmapFont) {
+            return new PIXI.BitmapText(settings);
+        }
+        return new PIXI.Text(settings);
+    }
+
+    setHintForButton(buttonIndex, hint) {
+        this.buttonContainers[buttonIndex].hintText.text = hint?.text;
+        this.buttonContainers[buttonIndex].hintText.visible = hint?.visible;
+        this.buttonContainers[buttonIndex].hintText.scale = hint?.scale || 1;
+        this.buttonContainers[buttonIndex].hintText.tint = hint?.tint || 0xffffff;
+        this.buttonContainers[buttonIndex].hintText.alpha = hint?.alpha || 1;
+        this.buttonContainers[buttonIndex].hintText.anchor.set(hint?.anchorX || 0.5, hint?.anchorY || 0.5);
+        this.buttonContainers[buttonIndex].hintText.position.set(hint?.x || 0, hint?.y || 0);
+        this.buttonContainers[buttonIndex].hintText.rotation = hint?.rotation || 0;
+        this.buttonContainers[buttonIndex].hintText.skew.set(hint?.skewX || 0, hint?.skewY || 0);
+    }
+
+    setHintForAxis(axisIndex, hint) {
+        this.axesContainers[axisIndex].hintText.text = hint?.text;
+        this.axesContainers[axisIndex].hintText.visible = hint?.visible;
+        this.axesContainers[axisIndex].hintText.scale = hint?.scale || 1;
+        this.axesContainers[axisIndex].hintText.tint = hint?.tint || 0xffffff;
+        this.axesContainers[axisIndex].hintText.alpha = hint?.alpha || 1;
+        this.axesContainers[axisIndex].hintText.anchor.set(hint?.anchorX || 0.5, hint?.anchorY || 0.5);
+        this.axesContainers[axisIndex].hintText.position.set(hint?.x || 0, hint?.y || 0);
+        this.axesContainers[axisIndex].hintText.rotation = hint?.rotation || 0;
+        this.axesContainers[axisIndex].hintText.skew.set(hint?.skewX || 0, hint?.skewY || 0);
+    }
+
+    setButton(buttonIndex, button) {
+        this.buttonContainers[buttonIndex].buttonText.text = button?.text;
+        this.buttonContainers[buttonIndex].buttonText.visible = button?.visible;
+        this.buttonContainers[buttonIndex].buttonText.scale = button?.scale || 1;
+        this.buttonContainers[buttonIndex].buttonText.tint = button?.tint || 0xffffff;
+        this.buttonContainers[buttonIndex].buttonText.alpha = button?.alpha || 1;
+        this.buttonContainers[buttonIndex].buttonText.anchor.set(button?.anchorX || 0.5, button?.anchorY || 0.5);
+        this.buttonContainers[buttonIndex].buttonText.position.set(button?.x || 0, button?.y || 0);
+    }
+
+    
     update(app, options) {
+        let self = this;
         this.x = options?.x || this.x;
         this.y = options?.y || this.y;
         this.wantedWidth = options?.wantedWidth || this.wantedWidth;
@@ -345,15 +409,18 @@ class FWTouchControl extends PIXI.Container {
 
 
         const R_POS_INVISIBLE = [- 10.0, -10.0, 0.0, 0.0];
-        const goodButtonSizeinPixel = 1.2 * getPixelPerCentimeter()
 
-        const goodButtonSizeInRelative = Math.min(0.12, goodButtonSizeinPixel / minHeightWidth)
         if (this.layout === 'simple') {
+            const goodButtonSizeinPixel = 1.2 * getPixelPerCentimeter()
+            const goodButtonSizeInRelative = Math.min(0.12, goodButtonSizeinPixel / minHeightWidth)
+            const goodLeftAxisSizeInRelative = Math.min(0.24, 1.2*goodButtonSizeinPixel / minHeightWidth)
+
+
             this.dpadCenterContainer.rPos = R_POS_INVISIBLE;
 
             this.axesContainers.forEach((axisContainer, i) => {
                 switch(i) {
-                    case 0: axisContainer.rPos = [0.0, 1, goodButtonSizeInRelative*1.2, 0.25, -0.25]; break;
+                    case 0: axisContainer.rPos = [0.0, 1, goodLeftAxisSizeInRelative, 0.25, -0.25]; break;
                     case 1: axisContainer.rPos = R_POS_INVISIBLE; break;
                 }
             })
@@ -371,8 +438,8 @@ class FWTouchControl extends PIXI.Container {
                     case 7:  buttonContainer.rPos = R_POS_INVISIBLE; break;
                     case 8: buttonContainer.rPos = R_POS_INVISIBLE; break;
                     case 9: buttonContainer.rPos = R_POS_INVISIBLE; break;
-                    case 10:; buttonContainer.rPos = [-2.5, 1.0, 0.05, -0.5]; break;
-                    case 11:; buttonContainer.rPos = [-2.5, 1.0, 0.05, 0.5]; break;
+                    case 10:; buttonContainer.rPos = R_POS_INVISIBLE; break;
+                    case 11:; buttonContainer.rPos = R_POS_INVISIBLE; break;
                     case 12: buttonContainer.rPos = R_POS_INVISIBLE; break;
                     case 13: buttonContainer.rPos = R_POS_INVISIBLE; break;
                     case 14: buttonContainer.rPos = R_POS_INVISIBLE; break;
@@ -425,7 +492,14 @@ class FWTouchControl extends PIXI.Container {
             container.stick.position.set(container.xAxis * (container.startRadius), container.yAxis * (container.startRadius));
             container.stick.tint = (this.buttonContainers[container.clickIndex].pressed ? 0x000000 : 0xffffff);
             container.stick.alpha = (this.buttonContainers[container.clickIndex].pressed ? 0.5 : 1.0);
+       
+            if (self.showHintLabels) {
+                container.hintText.visible = true;
+            } else {
+                container.hintText.visible = false;
+            }
         });
+
 
         this.buttonContainers.forEach((container, index) => {
             container.radius = container.rPos[2] * minHeightWidth;
@@ -434,6 +508,18 @@ class FWTouchControl extends PIXI.Container {
             container.tint = (container.pressed ? 0x000000 : 0xffffff);
             container.x = (distanceToBorderX + container.radius) + container.rPos[0] * (this.wantedWidth - distanceToBorderX * 2 - container.radius * 2) + (container.rPos.length > 3 ? container.rPos[3] * container.radius * 2 : 0);
             container.y = (distanceToBorderY + container.radius) + container.rPos[1] * (this.wantedHeight - distanceToBorderY * 2 - container.radius * 2) + (container.rPos.length > 4 ? container.rPos[4] * container.radius * 2 : 0);
+        
+            if (self.showButtonLabels) {
+                container.buttonText.visible = true;
+            } else {
+                container.buttonText.visible = false;
+            }
+
+            if (self.showHintLabels) {
+                container.hintText.visible = true;
+            } else {
+                container.hintText.visible = false;
+            }
         });
 
         this.buttonContainers[17].buttonText.text = app.serverId || '';

@@ -509,11 +509,39 @@ const addLobbyItems = (app) => {
     howToPlay.visible = false
 
 
-    const qrWidth = Math.min(level.width,level.height) * 0.25;
-
-    touchControl.update(app, {x: level.width*0.05, y: level.height*0.1, wantedWidth: qrWidth, wantedHeight: qrWidth*0.7})
-
+    touchControl.setHintForButton(0, {text: 'FART', scale: 4});
+    touchControl.setHintForButton(3, {text: 'SHOW', scale: 4});
+    touchControl.setHintForAxis(0, {text: 'WALK', scale: 2});
+    const qrWidth = Math.min(level.width,level.height) * 0.3;
+    touchControl.update(app, {x: level.width*0.05, y: level.height*0.1, wantedWidth: qrWidth*1.2, wantedHeight: qrWidth*0.8})
     lobbyContainer.addChild(touchControl)
+    touchControl.label = new PIXI.BitmapText( {
+        text: 'Controls', 
+        style: {...app.textStyleDefault, align: 'center'},
+    })
+    touchControl.label.anchor.set(0.5, 0)
+    touchControl.label.x = touchControl.wantedWidth*0.5
+    touchControl.label.y = touchControl.wantedHeight
+    touchControlSniper.setHintForButton(0, {text: 'SHOOT', scale: 3});
+    touchControlSniper.setHintForAxis(0, {text: 'AIM', scale: 2});
+    touchControlSniper.visible = true;
+    touchControlSniper.update(app, {x: level.width*0.95 - qrWidth*1.2, y: level.height*0.1, wantedWidth: qrWidth*1.2, wantedHeight: qrWidth*0.8})
+    touchControlSniper.label = new PIXI.BitmapText( {
+        text: 'Sniper', 
+        style: {...app.textStyleDefault, align: 'center'},
+    })
+    touchControlSniper.label.anchor.set(0.5, 0)
+    touchControlSniper.label.x = touchControlSniper.wantedWidth*0.5
+    touchControlSniper.label.y = touchControlSniper.wantedHeight
+    touchControlSniper.addChild(touchControlSniper.label)
+
+
+
+    touchControl.addChild(touchControl.label)
+    lobbyContainer.addChild(touchControlSniper)
+
+
+
 
     lobbyContainer.addChild(howToPlay)
     levelContainer.addChild(lobbyContainer)
@@ -886,7 +914,7 @@ const animateFigure = (figure, spritesheet) => {
     let frameAnchor = body.textures[body.currentFrame].defaultAnchor || {x: 0.5, y: 0.5}
     body.anchor = shadow.anchor = rotationAnchor
 
-    body.y = shadow.y = -body.height* (frameAnchor.y - rotationAnchor.y)
+    body.y = shadow.y = figure.isDead ? 0 : -body.height* (frameAnchor.y - rotationAnchor.y)
     shadow.x = body.x+body.width*0.5*body.scale.x
     
 

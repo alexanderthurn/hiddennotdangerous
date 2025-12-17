@@ -43,7 +43,7 @@ async function init() {
 
     initDialog(app);
     app.setLoading(0.0, 'Loading');
-    touchControl = new FWTouchControl(app);
+    touchControl = new FWTouchControl(app, {showButtonLabels: true, showHintLabels: true});
     app.containerGame.addChild(touchControl);
 
     app.serverPrefix = 'hidden'

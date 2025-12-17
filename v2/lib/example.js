@@ -41,7 +41,8 @@ async function init() {
     app.qrCodeSprite.anchor.set(0.5);
     app.containerQrCode.addChild(app.qrCodeSprite);
 
-    app.touchControl = new FWTouchControl(app, {isPassive: true, layout: 'simple', color: color});
+    app.touchControl = new FWTouchControl(app, {isPassive: true, layout: 'simple', color: color, showButtonLabels: false, showHintLabels: true});
+    app.touchControl.setHintForButton(0, {text: 'Jump', visible: true});
     app.containerGame.addChild(app.touchControl);
     // Container für Figuren
     app.figures = {};
@@ -97,7 +98,7 @@ function main(app) {
     app.textUrl.scale.y = app.textUrl.scale.x;
     app.textUrl.position.set(app.screen.width * 0.5, app.screen.height * 1.0);
 
-    app.touchControl.update(app, {x: app.screen.width * 0.1 + qrWidth*0.1, y: app.screen.height * 0.25+ qrWidth*0.1, wantedWidth: qrWidth*0.8, wantedHeight: qrWidth*0.8});
+    app.touchControl.update(app, {x: app.screen.width * 0.1 + qrWidth*0.1, y: app.screen.height * 0.25+ qrWidth*0.1, wantedWidth: qrWidth, wantedHeight: qrWidth*0.8});
    
 
     // Figuren aktualisieren

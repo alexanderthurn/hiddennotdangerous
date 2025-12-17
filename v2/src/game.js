@@ -336,12 +336,21 @@ const crosshairLayer = new PIXI.RenderLayer();
 const scoreLayer = new PIXI.RenderLayer({sortableChildren: true});
 const overlayLayer = new PIXI.RenderLayer();
 const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
-const touchControl = new FWTouchControl(app, {isPassive: true, layout: 'simple'});
 
 app.textStyleDefault = {
     fontFamily: 'Knall',
     fontSize: 32
 };
+
+app.textStyleController= {
+    fontFamily: 'Knall',
+    fontSize: 32,
+    fill: '#000'
+};
+
+const touchControl = new FWTouchControl(app, {isBitmapFont: true, textStyle: app.textStyleController, textStyleSmall: app.textStyleController, textStyleTitle: app.textStyleController, isPassive: true, layout: 'simple', showButtonLabels: false, showHintLabels: true });
+const touchControlSniper = new FWTouchControl(app, {color: new PIXI.Color(0x3355ff), isBitmapFont: true, textStyle: app.textStyleController, textStyleSmall: app.textStyleController, textStyleTitle: app.textStyleController, isPassive: true, layout: 'simple', showButtonLabels: false, showHintLabels: true });
+
 
 (async () =>
     {
@@ -459,6 +468,8 @@ function initStage(nextStage) {
     multikillCounter = 0;
     lastTotalkillAudio = 0;
     totalkillCounter = 0;
+    touchControl.visible = stage === stages.startLobby || (stage === stages.gameLobby && game === games.rampage)
+    touchControlSniper.visible = (stage === stages.gameLobby && game === games.rampage)
 
     if (stage === stages.startLobby) {
         game = undefined
