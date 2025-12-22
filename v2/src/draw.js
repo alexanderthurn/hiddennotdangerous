@@ -159,8 +159,7 @@ const animateRingPartButton = button => {
             const height = button.outerRadius - button.innerRadius
             const rel = 8
             const partHeight = rel * height / (button.playersPossible.length*rel+button.playersPossible.length-1)
-            const margin = 0*partHeight / rel
-
+            const margin = partHeight / rel
             let startRadius = button.innerRadius
             for (let index = 0; index < votes; index++) {
                 const innerRadius = startRadius
@@ -715,7 +714,6 @@ const addWinningCeremony = app => {
 const animateFood = figure => {
     figure.visible = stage !== stages.startLobby && game === games.food
 
-    const plate = figure.getChildByLabel('plate')
     let durationLastAttack = dtProcessed-figure.lastAttackTime
     if (figure.lastAttackTime && durationLastAttack < figure.attackDuration) {
         const perc = durationLastAttack/figure.attackDuration

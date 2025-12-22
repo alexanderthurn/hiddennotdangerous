@@ -943,7 +943,7 @@ function updateGame(figures, dt, dtProcessed) {
         })
     } else if (game === games.race) {
         figuresAlive.filter(f => f.isAttacking).forEach(f => {
-            figuresAlive.filter(fig => fig.type === 'fighter').forEach(fig => {
+            figuresAlive.filter(fig => (fig.playerId !== f.playerId || fig.isInRace) && fig.type === 'fighter').forEach(fig => {
                 attackFigure(f, fig)
             })
         })
