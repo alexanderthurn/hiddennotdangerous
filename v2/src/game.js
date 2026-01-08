@@ -201,8 +201,93 @@ const gameVoteButtonDefinition = () => ({
     innerRadius: level.width*0.0,
     outerRadius: level.width*0.15,
     defaultLoadingSpeed: 1/3000,
-    getExecute: button => () => button.playersNear.forEach(figure => figure.player.vote = button.gameId)
+    getExecute: button => () => button.playersNear.forEach(figure => { 
+        if (figure.player.vote != button.gameId) {
+            figure.player.vote = button.gameId
+            initSpinningWheel()
+        }
+    })
 })
+
+const spinningWheel = {
+    acceleration: -1,
+    constantSpeedThreshold: 1,
+    startSpeed: 10,
+    maxTurnsToStop: 10
+}
+
+const initSpinningWheel = () => {
+    if (!spinningWheel.position) {
+        spinningWheel.position = 0
+    }
+    spinningWheel.startTime = dtProcessed
+    spinningWheel.speed = spinningWheel.startSpeed
+    spinningWheel.turn = 0
+
+    const gamesValues = Object.values(games)
+    gamesValues.forEach(game => game.votes = 0)
+    Object.values(players).forEach(player => player.vote && games[player.vote].votes++)
+
+    // [0, 1, 0, 3, 2] 
+    spinningWheel.positions = gamesValues.map(game => game.votes)
+    const activePositions = spinningWheel.positions.filter(position => position > 0)
+
+    if (activePositions.length === 1) {
+        spinningWheel.mode = 'single'
+        spinningWheel.turnsToStop = 1
+    } else {
+        spinningWheel.mode = 'multi'
+        spinningWheel.turnsToStop = getRandomInt(spinningWheel.maxTurnsToStop)
+    }
+    spinningWheel.winner = getRandomIndex(spinningWheel.positions)
+    console.log('initSpinningWheel', spinningWheel.winner, activePositions, spinningWheel.positions)
+    game = gamesValues[spinningWheel.winner]
+}
+
+const stepSpinningWheel = dt => {
+    if (!spinningWheel.mode) {
+        return
+    }
+
+    if ((spinningWheel.turn === spinningWheel.turnsToStop && (spinningWheel.position === undefined || spinningWheel.position > spinningWheel.winner)) || spinningWheel.turn > spinningWheel.turnsToStop) {
+        spinningWheel.mode = null
+        initStage(stages.gameLobby)
+        console.log('stop')
+        return
+    }
+
+    if (spinningWheel.speed > spinningWheel.constantSpeedThreshold) {
+        spinningWheel.speed += 0.001*spinningWheel.acceleration * dt
+    } else {
+        spinningWheel.speed = spinningWheel.constantSpeedThreshold
+    }
+
+    let distance = 1
+    let position = spinningWheel.position
+    if (position !== undefined) {
+        distance = spinningWheel.positions[position]
+    }
+    if (0.001*spinningWheel.speed * (dtProcessed - spinningWheel.startTime) > distance) {
+        if (spinningWheel.mode === 'single' && position !== undefined) {
+            position = undefined
+        } else {
+            position = position ?? 0
+            for (let index = 0; index < spinningWheel.positions.length; index++) {
+                if (position === 0 && spinningWheel.speed === spinningWheel.constantSpeedThreshold) {
+                    spinningWheel.turn +=1
+                }
+                position = (position+1) % spinningWheel.positions.length
+                if (spinningWheel.positions[position] > 0) {
+                    break
+                }
+            }
+        }
+        spinningWheel.position = position
+        spinningWheel.startTime = dtProcessed
+    }
+
+    console.log('stepSpinningWheel2', spinningWheel.mode, spinningWheel.speed, spinningWheel.winner, spinningWheel.turnsToStop, spinningWheel.position, spinningWheel.turn)
+}
 
 const lobbyStartButtonDefinition = () => ({
     x: level.width*0.5,
@@ -211,8 +296,8 @@ const lobbyStartButtonDefinition = () => ({
     outerRadius: level.width*0.15,
     defaultLoadingSpeed: 0.5/3000,
     execute: () => {
-        game = voteGame()
-        initStage(stages.gameLobby)
+        //game = voteGame()
+        //initStage(stages.gameLobby)
     }
 })
 
@@ -814,6 +899,10 @@ function updateGame(figures, dt, dtProcessed) {
     let figuresDead = figures.filter(f => f.isDead);
     let figuresRevived = []
 
+    if (stage === stages.startLobby) {
+        stepSpinningWheel(dt)
+    }
+
     if (stage === stages.startLobby || stage === stages.gameLobby) {
         figuresRevived = figuresDead
     } else {
@@ -845,6 +934,7 @@ function updateGame(figures, dt, dtProcessed) {
             if (!btn.visible) return
             btn.loadingSpeed = btn.defaultLoadingSpeed
             btn.playersPossible = playersPossible
+            btn.playersPreviouslyNear = btn.playersNear
             btn.playersNear = playersPossible.filter(f => !f.isDead && btn.isInArea(f))
             
             let aimLoadingPercentage
