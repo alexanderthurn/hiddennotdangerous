@@ -224,24 +224,30 @@ const initSpinningWheel = () => {
     spinningWheel.speed = spinningWheel.startSpeed
     spinningWheel.turn = 0
 
-    const gamesValues = Object.values(games)
-    gamesValues.forEach(game => game.votes = 0)
+    //const gamesValues = Object.values(games)
+    const gamesEntries = Object.entries(games)
+    gamesEntries.forEach(([_, game]) => game.votes = 0)
     Object.values(players).forEach(player => player.vote && games[player.vote].votes++)
 
     // [0, 1, 0, 3, 2] 
-    spinningWheel.positions = gamesValues.map(game => game.votes)
-    const activePositions = spinningWheel.positions.filter(position => position > 0)
+    spinningWheel.parts = gamesEntries.map(([key, game], index) => ({
+        game: key,
+        position: index,
+        votes: game.votes
+    }))
+    activeParts = spinningWheel.parts.filter(part => part.votes > 0)
 
-    if (activePositions.length === 1) {
+    if (activeParts.length === 1) {
         spinningWheel.mode = 'single'
         spinningWheel.turnsToStop = 1
     } else {
         spinningWheel.mode = 'multi'
         spinningWheel.turnsToStop = getRandomInt(spinningWheel.maxTurnsToStop)
     }
-    spinningWheel.winner = getRandomIndex(spinningWheel.positions)
-    console.log('initSpinningWheel', spinningWheel.winner, activePositions, spinningWheel.positions)
-    game = gamesValues[spinningWheel.winner]
+    spinningWheel.winner = activeParts[getRandomIndex(activeParts.map(part => part.votes))]
+    spinningWheel.activeParts = spinningWheel.parts.filter(part => part.votes > 0)
+    console.log('initSpinningWheel', spinningWheel.winner, activeParts, spinningWheel.parts)
+    game = games[spinningWheel.winner.game]
 }
 
 const stepSpinningWheel = dt => {
@@ -249,7 +255,7 @@ const stepSpinningWheel = dt => {
         return
     }
 
-    if ((spinningWheel.turn === spinningWheel.turnsToStop && (spinningWheel.position === undefined || spinningWheel.position > spinningWheel.winner)) || spinningWheel.turn > spinningWheel.turnsToStop) {
+    if ((spinningWheel.turn === spinningWheel.turnsToStop && (spinningWheel.position === undefined || spinningWheel.position > spinningWheel.winner.position)) || spinningWheel.turn > spinningWheel.turnsToStop) {
         spinningWheel.mode = null
         initStage(stages.gameLobby)
         console.log('stop')
@@ -265,28 +271,29 @@ const stepSpinningWheel = dt => {
     let distance = 1
     let position = spinningWheel.position
     if (position !== undefined) {
-        distance = spinningWheel.positions[position]
+        distance = spinningWheel.parts[position].votes
     }
     if (0.001*spinningWheel.speed * (dtProcessed - spinningWheel.startTime) > distance) {
         if (spinningWheel.mode === 'single' && position !== undefined) {
             position = undefined
         } else {
             position = position ?? 0
-            for (let index = 0; index < spinningWheel.positions.length; index++) {
+            for (let index = 0; index < spinningWheel.parts.length; index++) {
                 if (position === 0 && spinningWheel.speed === spinningWheel.constantSpeedThreshold) {
                     spinningWheel.turn +=1
                 }
-                position = (position+1) % spinningWheel.positions.length
-                if (spinningWheel.positions[position] > 0) {
+                position = (position+1) % spinningWheel.parts.length
+                if (spinningWheel.parts[position].votes > 0) {
                     break
                 }
             }
         }
+        spinningWheel.selectedPart = spinningWheel.parts[position]
         spinningWheel.position = position
         spinningWheel.startTime = dtProcessed
     }
 
-    console.log('stepSpinningWheel2', spinningWheel.mode, spinningWheel.speed, spinningWheel.winner, spinningWheel.turnsToStop, spinningWheel.position, spinningWheel.turn)
+    console.log('stepSpinningWheel2', spinningWheel.mode, spinningWheel.speed, spinningWheel.winner.position, spinningWheel.turnsToStop, spinningWheel.position, spinningWheel.selectedGame, spinningWheel.turn)
 }
 
 const lobbyStartButtonDefinition = () => ({
