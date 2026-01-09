@@ -255,7 +255,7 @@ const stepSpinningWheel = dt => {
         return
     }
 
-    if ((spinningWheel.turn === spinningWheel.turnsToStop && (spinningWheel.position === undefined || spinningWheel.position > spinningWheel.winner.position)) || spinningWheel.turn > spinningWheel.turnsToStop) {
+    if (spinningWheel.turn === spinningWheel.turnsToStop && spinningWheel.part !== spinningWheel.winner) {
         spinningWheel.mode = null
         initStage(stages.gameLobby)
         console.log('stop')
@@ -269,31 +269,30 @@ const stepSpinningWheel = dt => {
     }
 
     let distance = 1
-    let position = spinningWheel.position
-    if (position !== undefined) {
-        distance = spinningWheel.parts[position].votes
+    let part = spinningWheel.part
+    if (part !== undefined) {
+        distance = part.votes
     }
     if (0.001*spinningWheel.speed * (dtProcessed - spinningWheel.startTime) > distance) {
-        if (spinningWheel.mode === 'single' && position !== undefined) {
-            position = undefined
+        if (spinningWheel.mode === 'single' && part !== undefined) {
+            part = undefined
         } else {
-            position = position ?? 0
+            part = part || spinningWheel.winner
             for (let index = 0; index < spinningWheel.parts.length; index++) {
-                if (position === 0 && spinningWheel.speed === spinningWheel.constantSpeedThreshold) {
+                if (part === spinningWheel.winner && spinningWheel.speed === spinningWheel.constantSpeedThreshold) {
                     spinningWheel.turn +=1
                 }
-                position = (position+1) % spinningWheel.parts.length
-                if (spinningWheel.parts[position].votes > 0) {
+                part = spinningWheel.parts[(part.position+1) % spinningWheel.parts.length]
+                if (part.votes > 0) {
                     break
                 }
             }
         }
-        spinningWheel.selectedPart = spinningWheel.parts[position]
-        spinningWheel.position = position
+        spinningWheel.part = part
         spinningWheel.startTime = dtProcessed
     }
 
-    console.log('stepSpinningWheel2', spinningWheel.mode, spinningWheel.speed, spinningWheel.winner.position, spinningWheel.turnsToStop, spinningWheel.position, spinningWheel.selectedGame, spinningWheel.turn)
+    console.log('stepSpinningWheel2', spinningWheel.mode, spinningWheel.speed, spinningWheel.winner, spinningWheel.turnsToStop, spinningWheel.part, spinningWheel.turn)
 }
 
 const lobbyStartButtonDefinition = () => ({
