@@ -173,6 +173,8 @@ const animateRingPartButton = button => {
             }
         }
     }
+
+    button.getChildAt(0).tint = spinningWheel.part?.game !== button.gameId ? games[button.gameId].color : colors.white
 }
 
 const createRingPartButton = (props, lobbyContainer) => {
@@ -188,7 +190,8 @@ const createRingPartButton = (props, lobbyContainer) => {
     .arc(0, 0, innerRadius, startAngle, endAngle)
     .lineTo(Math.cos(endAngle)*outerRadius, Math.sin(endAngle)*outerRadius)
     .arc(0, 0, outerRadius, endAngle, startAngle, true)
-    .fill({alpha: 0.5, color: games[gameId].color})
+    //.fill({alpha: 0.1, color: games[button.gameId].color})
+    .fill({alpha: 0.5, color: colors.white})
 
     const loadingArea = new PIXI.Graphics()
 
@@ -208,6 +211,10 @@ const createRingPartButton = (props, lobbyContainer) => {
 
     addAnimation(button, () => animateRingPartButton(button))
     return button
+}
+
+animateSpinningWheel = () => {
+
 }
 
 const addGameRing = (lobbyContainer) => {

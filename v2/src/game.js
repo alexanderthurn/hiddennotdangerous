@@ -210,10 +210,10 @@ const gameVoteButtonDefinition = () => ({
 })
 
 const spinningWheel = {
-    acceleration: -1,
+    acceleration: -0.5,
     constantSpeedThreshold: 1,
-    startSpeed: 10,
-    maxTurnsToStop: 10
+    startSpeed: 5,
+    maxTurnsToStop: 5
 }
 
 const initSpinningWheel = () => {
@@ -224,12 +224,10 @@ const initSpinningWheel = () => {
     spinningWheel.speed = spinningWheel.startSpeed
     spinningWheel.turn = 0
 
-    //const gamesValues = Object.values(games)
     const gamesEntries = Object.entries(games)
     gamesEntries.forEach(([_, game]) => game.votes = 0)
     Object.values(players).forEach(player => player.vote && games[player.vote].votes++)
 
-    // [0, 1, 0, 3, 2] 
     spinningWheel.parts = gamesEntries.map(([key, game], index) => ({
         game: key,
         position: index,
@@ -242,12 +240,11 @@ const initSpinningWheel = () => {
         spinningWheel.turnsToStop = 1
     } else {
         spinningWheel.mode = 'multi'
-        spinningWheel.turnsToStop = getRandomInt(spinningWheel.maxTurnsToStop)
+        spinningWheel.turnsToStop = getRandomInt(spinningWheel.maxTurnsToStop)+1
     }
     spinningWheel.winner = activeParts[getRandomIndex(activeParts.map(part => part.votes))]
     spinningWheel.activeParts = spinningWheel.parts.filter(part => part.votes > 0)
     console.log('initSpinningWheel', spinningWheel.winner, activeParts, spinningWheel.parts)
-    game = games[spinningWheel.winner.game]
 }
 
 const stepSpinningWheel = dt => {
@@ -257,8 +254,9 @@ const stepSpinningWheel = dt => {
 
     if (spinningWheel.turn === spinningWheel.turnsToStop && spinningWheel.part !== spinningWheel.winner) {
         spinningWheel.mode = null
+        game = games[spinningWheel.winner.game]
         initStage(stages.gameLobby)
-        console.log('stop')
+        console.log('spinning wheel stop')
         return
     }
 
@@ -280,7 +278,7 @@ const stepSpinningWheel = dt => {
             part = part || spinningWheel.winner
             for (let index = 0; index < spinningWheel.parts.length; index++) {
                 if (part === spinningWheel.winner && spinningWheel.speed === spinningWheel.constantSpeedThreshold) {
-                    spinningWheel.turn +=1
+                    spinningWheel.turn++
                 }
                 part = spinningWheel.parts[(part.position+1) % spinningWheel.parts.length]
                 if (part.votes > 0) {
