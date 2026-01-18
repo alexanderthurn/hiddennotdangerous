@@ -216,6 +216,7 @@ const gameVoteButtonDefinition = () => ({
 })
 
 const lobbyStartButtonDefinition = () => ({
+    alphaArea: 0,
     x: level.width * 0.5,
     y: level.height * 0.5,
     innerRadius: level.width * 0.15,
@@ -223,6 +224,7 @@ const lobbyStartButtonDefinition = () => ({
 })
 
 const gameStartButtonDefinition = () => ({
+    alphaArea: 1,
     x: level.width * 0.5,
     y: level.height * 0.5,
     innerRadius: level.width * 0.1,

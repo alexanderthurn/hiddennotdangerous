@@ -117,18 +117,18 @@ const animateGameStartButton = button => {
 }
 
 const createCircleButton = (props, lobbyContainer) => {
-    const { innerRadius } = props
+    const { alphaArea, innerRadius } = props
 
     let button = new PIXI.Container()
     button = Object.assign(button, props)
 
     const area = new PIXI.Graphics()
         .circle(0, 0, innerRadius)
-        .fill({ alpha: 1, color: colors.darkBrown })
+        .fill({ alpha: alphaArea, color: colors.darkBrown })
 
     const loadingCircle = new PIXI.Graphics()
         .circle(0, 0, innerRadius)
-        .fill({ alpha: 1, color: colors.grey })
+        .fill({ alpha: alphaArea, color: colors.grey })
 
     const buttonText = new PIXI.BitmapText({
         style: { ...app.textStyleDefault, align: 'center' },
@@ -142,12 +142,26 @@ const createCircleButton = (props, lobbyContainer) => {
     return button
 }
 
-const animateRingPartButton = button => {
+const animateRingSegmentButton = button => {
     button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime >= 0).length > 0
-    button.getChildAt(0).tint = spinningWheel.part?.game !== button.gameId ? games[button.gameId].color : colors.lightBrown
+
+    const isCurrentSegment = spinningWheel.segment?.game === button.gameId
+    const isWinner = spinningWheel.finishTime && spinningWheel.segment?.game === button.gameId
+
+    // Pulse effect for winner segment
+    if (isWinner) {
+        const pulseSpeed = 0.005
+        const pulseAmount = 0.15
+        const pulse = 1.15 + Math.sin(dtProcessed * pulseSpeed) * pulseAmount
+        button.scale.set(pulse)
+        button.getChildAt(0).tint = colors.darkBrown
+    } else {
+        button.scale.set(1)
+        button.getChildAt(0).tint = isCurrentSegment ? colors.darkBrown : games[button.gameId].color
+    }
 }
 
-const createRingPartButton = (props, lobbyContainer) => {
+const createRingSegmentButton = (props, lobbyContainer) => {
     const { x, y, startAngle, endAngle, innerRadius, outerRadius, gameId, getExecute } = props
     const width = distanceAnglesRad(startAngle, endAngle)
     const centerAngle = startAngle + width / 2
@@ -160,7 +174,7 @@ const createRingPartButton = (props, lobbyContainer) => {
         .arc(0, 0, innerRadius, startAngle, endAngle)
         .lineTo(Math.cos(endAngle) * outerRadius, Math.sin(endAngle) * outerRadius)
         .arc(0, 0, outerRadius, endAngle, startAngle, true)
-        .fill({ alpha: 0.5, color: colors.white })
+        .fill({ alpha: 0.75, color: colors.white })
 
     const loadingArea = new PIXI.Graphics()
 
@@ -178,12 +192,8 @@ const createRingPartButton = (props, lobbyContainer) => {
     button.addChild(area, loadingArea, buttonText)
     lobbyContainer.addChild(button)
 
-    addAnimation(button, () => animateRingPartButton(button))
+    addAnimation(button, () => animateRingSegmentButton(button))
     return button
-}
-
-animateSpinningWheel = () => {
-
 }
 
 const addGameRing = (lobbyContainer) => {
@@ -192,16 +202,15 @@ const addGameRing = (lobbyContainer) => {
     const diffAngle = 360 / gameIds.length
 
     gameIds.forEach((gameId, index) => {
-        const button = createRingPartButton({ ...gameVoteButtonDefinition(), startAngle: deg2limitedrad(startAngle + index * diffAngle), endAngle: deg2limitedrad(startAngle + (index + 1) * diffAngle), gameId }, lobbyContainer);
+        const button = createRingSegmentButton({ ...gameVoteButtonDefinition(), startAngle: deg2limitedrad(startAngle + index * diffAngle), endAngle: deg2limitedrad(startAngle + (index + 1) * diffAngle), gameId }, lobbyContainer);
         buttons['vote_' + gameId] = button
     })
 }
 
 const addGameSelection = (app, lobbyContainer) => {
+    addGameRing(lobbyContainer)
     const circleButton = createCircleButton(lobbyStartButtonDefinition(), lobbyContainer)
     circleButton.isInArea = f => stage === stages.startLobby && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius).contains(f.x, f.y)
-    addGameRing(lobbyContainer)
-
     buttons.selectGame = circleButton
 
     app.ticker.add(() => animateLobbyStartButton(circleButton))
