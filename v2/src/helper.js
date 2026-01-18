@@ -682,7 +682,7 @@ const processSpinningWheel = dtProcessed => {
         return
     }
 
-    if (!spinningWheel.finishTime && spinningWheel.turn === spinningWheel.turnsToStop && spinningWheel.part !== spinningWheel.winner) {
+    if (!spinningWheel.finishTime && spinningWheel.turn === spinningWheel.turnsToStop && spinningWheel.part === spinningWheel.winner) {
         spinningWheel.finishTime = dtProcessed
     }
     if (dtProcessed - spinningWheel.finishTime > 2000) {
