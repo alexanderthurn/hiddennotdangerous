@@ -155,9 +155,16 @@ const animateRingSegmentButton = button => {
         const pulse = 1.15 + Math.sin(dtProcessed * pulseSpeed) * pulseAmount
         button.scale.set(pulse)
         button.getChildAt(0).tint = colors.darkBrown
+        button.getChildAt(0).alpha = 1
     } else {
         button.scale.set(1)
-        button.getChildAt(0).tint = isCurrentSegment ? colors.darkBrown : games[button.gameId].color
+        if (isCurrentSegment) {
+            button.getChildAt(0).tint = colors.darkBrown
+            button.getChildAt(0).alpha = 1
+        } else {
+            button.getChildAt(0).tint = games[button.gameId].color
+            button.getChildAt(0).alpha = 0.75
+        }
     }
 }
 
@@ -174,7 +181,7 @@ const createRingSegmentButton = (props, lobbyContainer) => {
         .arc(0, 0, innerRadius, startAngle, endAngle)
         .lineTo(Math.cos(endAngle) * outerRadius, Math.sin(endAngle) * outerRadius)
         .arc(0, 0, outerRadius, endAngle, startAngle, true)
-        .fill({ alpha: 0.75, color: colors.white })
+        .fill({ color: colors.white })
 
     const loadingArea = new PIXI.Graphics()
 
