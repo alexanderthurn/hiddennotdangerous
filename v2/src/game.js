@@ -4,33 +4,36 @@ var keyboardPlayers = [];
 var botPlayers = []
 var players = []
 var playersSortedByJoinTime = []
-var keyboards = [{keys: {
-    'KeyA': {playerId: 'k0', action: 'left'},
-    'KeyD': {playerId: 'k0', action: 'right'},
-    'KeyW': {playerId: 'k0', action: 'up'},
-    'KeyS': {playerId: 'k0', action: 'down'},
-    'KeyT': {playerId: 'k0', action: 'attack'},
-    'KeyF': {playerId: 'k0', action: 'walk'},
-    'ShiftLeft': {playerId: 'k0', action: 'speed'},
-    'KeyR': {playerId: 'k0', action: 'marker'},
-    'Digit1': {playerId: 'k0', action: 'attack'},
-    'Digit2': {playerId: 'k0', action: 'walk'},
-    'Digit3': {playerId: 'k0', action: 'speed'},
-    'Digit4': {playerId: 'k0', action: 'marker'},
-    'Delete': {action: 'restart'},
-    'ArrowLeft': {playerId: 'k1', action: 'left'},
-    'ArrowRight': {playerId: 'k1', action: 'right'},
-    'ArrowUp': {playerId: 'k1', action: 'up'},
-    'ArrowDown': {playerId: 'k1', action: 'down'},
-    'Numpad0': {playerId: 'k1', action: 'attack'},
-    'Numpad1': {playerId: 'k1', action: 'walk'},
-    'Numpad2': {playerId: 'k1', action: 'speed'},
-    'Numpad3': {playerId: 'k1', action: 'marker'},
-    'ShiftRight': {playerId: 'k1', action: 'attack'},
-    'ControlRight': {playerId: 'k1', action: 'speed'},
-    'AltRight': {playerId: 'k1', action: 'marker'}}, pressed: new Set()}];
+var keyboards = [{
+    keys: {
+        'KeyA': { playerId: 'k0', action: 'left' },
+        'KeyD': { playerId: 'k0', action: 'right' },
+        'KeyW': { playerId: 'k0', action: 'up' },
+        'KeyS': { playerId: 'k0', action: 'down' },
+        'KeyT': { playerId: 'k0', action: 'attack' },
+        'KeyF': { playerId: 'k0', action: 'walk' },
+        'ShiftLeft': { playerId: 'k0', action: 'speed' },
+        'KeyR': { playerId: 'k0', action: 'marker' },
+        'Digit1': { playerId: 'k0', action: 'attack' },
+        'Digit2': { playerId: 'k0', action: 'walk' },
+        'Digit3': { playerId: 'k0', action: 'speed' },
+        'Digit4': { playerId: 'k0', action: 'marker' },
+        'Delete': { action: 'restart' },
+        'ArrowLeft': { playerId: 'k1', action: 'left' },
+        'ArrowRight': { playerId: 'k1', action: 'right' },
+        'ArrowUp': { playerId: 'k1', action: 'up' },
+        'ArrowDown': { playerId: 'k1', action: 'down' },
+        'Numpad0': { playerId: 'k1', action: 'attack' },
+        'Numpad1': { playerId: 'k1', action: 'walk' },
+        'Numpad2': { playerId: 'k1', action: 'speed' },
+        'Numpad3': { playerId: 'k1', action: 'marker' },
+        'ShiftRight': { playerId: 'k1', action: 'attack' },
+        'ControlRight': { playerId: 'k1', action: 'speed' },
+        'AltRight': { playerId: 'k1', action: 'marker' }
+    }, pressed: new Set()
+}];
 var virtualGamepads = []
-var startTime, then, now, dt, fps=0, fpsMinForEffects=30, fpsTime
+var startTime, then, now, dt, fps = 0, fpsMinForEffects = 30, fpsTime
 var isRestartButtonPressed, restartStage = false, gameOver, ceremonyOver, lastRoundEndThen, lastWinnerPlayerIds, lastFinalWinnerPlayerIds, finalWinnerTeam
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
@@ -49,7 +52,7 @@ const stages = {
 
 let stage
 
-const mostFigures = ['girl', 'robot', 'teddy', 'fat', 'boy',  'father', 'grandpa', 'mother']
+const mostFigures = ['girl', 'robot', 'teddy', 'fat', 'boy', 'father', 'grandpa', 'mother']
 
 const games = {
     battleRoyale: {
@@ -99,7 +102,7 @@ const teams = {
         games: new Set([games.vip]),
         label: 'Guards',
         walkRectLength: 300,
-        maxSpeed: 0.75*defaultMaxSpeed,
+        maxSpeed: 0.75 * defaultMaxSpeed,
         playerTeam: true,
         sprites: ['boy'],
         size: 0
@@ -124,7 +127,7 @@ const teams = {
         games: new Set([games.vip]),
         label: 'VIPs',
         walkRectLength: 150,
-        maxSpeed: 0.5*defaultMaxSpeed,
+        maxSpeed: 0.5 * defaultMaxSpeed,
         playerTeam: false,
         sprites: ['mother', 'father', 'grandpa'],
         size: 0
@@ -134,47 +137,47 @@ const teams = {
 let tileArea = []
 const tileWidth = 120;
 const audio = {
-    fart: {title: './sfx/sound2.mp3', currentTime: 0.15},
-    beanFart: {title: './sfx/sound1.mp3', currentTime: 0.15},
-    shootHit: {title: './sfx/slingshotHit.mp3', currentTime: 1.5},
-    shootMiss: {title: './sfx/slingshotMiss.mp3', currentTime: 1.5},
-    death: {title: './sfx/gag-reflex-41207.mp3', currentTime: 0.0},
-    join: {title: './sfx/sounddrum.mp3'},
-    firstBlood: {title: './sfx/first-blood.mp3', volume: 0.2},
-    win: {title: './sfx/audience-clapping-03-99963.mp3'},
+    fart: { title: './sfx/sound2.mp3', currentTime: 0.15 },
+    beanFart: { title: './sfx/sound1.mp3', currentTime: 0.15 },
+    shootHit: { title: './sfx/slingshotHit.mp3', currentTime: 1.5 },
+    shootMiss: { title: './sfx/slingshotMiss.mp3', currentTime: 1.5 },
+    death: { title: './sfx/gag-reflex-41207.mp3', currentTime: 0.0 },
+    join: { title: './sfx/sounddrum.mp3' },
+    firstBlood: { title: './sfx/first-blood.mp3', volume: 0.2 },
+    win: { title: './sfx/audience-clapping-03-99963.mp3' },
     musicGame: [
-        {title: './sfx/music1.mp3', currentTime: 20, volume: 0.5},
-        {title: './sfx/music2.mp3', volume: 0.5},
-        {title: './sfx/music3.mp3', volume: 0.5}
+        { title: './sfx/music1.mp3', currentTime: 20, volume: 0.5 },
+        { title: './sfx/music2.mp3', volume: 0.5 },
+        { title: './sfx/music3.mp3', volume: 0.5 }
     ],
     musicLobby: [
-        {title: './sfx/lobby.mp3', volume: 0.2}
+        { title: './sfx/lobby.mp3', volume: 0.2 }
     ],
     multiKill: [
-        {title: './sfx/double-kill.mp3', volume: 0.3},
-        {title: './sfx/triple-kill.mp3', volume: 0.4},
-        {title: './sfx/multi-kill.mp3', volume: 0.5},
-        {title: './sfx/mega-kill.ogg'},
-        {title: './sfx/ultra-kill.mp3', volume: 0.5},
-        {title: './sfx/monster-kill.mp3', volume: 0.5},
-        {title: './sfx/ludicrous-kill.mp3', volume: 0.5},
-        {title: './sfx/holy-shit.ogg'}
+        { title: './sfx/double-kill.mp3', volume: 0.3 },
+        { title: './sfx/triple-kill.mp3', volume: 0.4 },
+        { title: './sfx/multi-kill.mp3', volume: 0.5 },
+        { title: './sfx/mega-kill.ogg' },
+        { title: './sfx/ultra-kill.mp3', volume: 0.5 },
+        { title: './sfx/monster-kill.mp3', volume: 0.5 },
+        { title: './sfx/ludicrous-kill.mp3', volume: 0.5 },
+        { title: './sfx/holy-shit.ogg' }
     ],
     totalKill: [
-        {title: './sfx/killing-spree.mp3', volume: 0.5},
-        {title: './sfx/rampage.mp3', volume: 0.5},
-        {title: './sfx/dominating.mp3', volume: 0.5},
-        {title: './sfx/unstoppable.ogg'},
-        {title: './sfx/god-like.mp3', volume: 0.5},
-        {title: './sfx/wicked-sick.ogg'}
+        { title: './sfx/killing-spree.mp3', volume: 0.5 },
+        { title: './sfx/rampage.mp3', volume: 0.5 },
+        { title: './sfx/dominating.mp3', volume: 0.5 },
+        { title: './sfx/unstoppable.ogg' },
+        { title: './sfx/god-like.mp3', volume: 0.5 },
+        { title: './sfx/wicked-sick.ogg' }
     ],
 
     eat: [
-        {title: './sfx/eatingsfxwav-14588.mp3'},
-        {title: './sfx/carrotnom-92106.mp3'},
-        {title: './sfx/eat-a-cracker-95783.mp3', volume: 0.5},
-        {title: './sfx/game-eat-sound-83240.mp3'},
-        {title: './sfx/game-eat-sound-83240.mp3'}
+        { title: './sfx/eatingsfxwav-14588.mp3' },
+        { title: './sfx/carrotnom-92106.mp3' },
+        { title: './sfx/eat-a-cracker-95783.mp3', volume: 0.5 },
+        { title: './sfx/game-eat-sound-83240.mp3' },
+        { title: './sfx/game-eat-sound-83240.mp3' }
     ]
 }
 
@@ -196,120 +199,34 @@ var soundWin = getAudio(audio.win);
 var actualMusicPlaylist;
 
 const gameVoteButtonDefinition = () => ({
-    x: level.width*0.5,
-    y: level.height*0.5,
-    innerRadius: level.width*0.0,
-    outerRadius: level.width*0.15,
-    defaultLoadingSpeed: 1/3000,
-    getExecute: button => () => button.playersNear.forEach(figure => { 
+    x: level.width * 0.5,
+    y: level.height * 0.5,
+    innerRadius: level.width * 0.0,
+    outerRadius: level.width * 0.15,
+    defaultLoadingSpeed: 1 / 3000,
+    getExecute: button => () => button.playersNear.forEach(figure => {
         if (figure.player.vote != button.gameId) {
             figure.player.vote = button.gameId
-            initSpinningWheel()
+            const playerVotedCount = players.filter(player => player.vote).length
+            if (playerVotedCount === button.playersPossible.length) {
+                initSpinningWheel()
+            }
         }
     })
 })
 
-const spinningWheel = {
-    acceleration: -0.5,
-    constantSpeedThreshold: 1,
-    startSpeed: 5,
-    maxTurnsToStop: 5
-}
-
-const initSpinningWheel = () => {
-    if (!spinningWheel.position) {
-        spinningWheel.position = 0
-    }
-    spinningWheel.startTime = dtProcessed
-    spinningWheel.speed = spinningWheel.startSpeed
-    spinningWheel.turn = 0
-
-    const gamesEntries = Object.entries(games)
-    gamesEntries.forEach(([_, game]) => game.votes = 0)
-    Object.values(players).forEach(player => player.vote && games[player.vote].votes++)
-
-    spinningWheel.parts = gamesEntries.map(([key, game], index) => ({
-        game: key,
-        position: index,
-        votes: game.votes
-    }))
-    activeParts = spinningWheel.parts.filter(part => part.votes > 0)
-
-    if (activeParts.length === 1) {
-        spinningWheel.mode = 'single'
-        spinningWheel.turnsToStop = 1
-    } else {
-        spinningWheel.mode = 'multi'
-        spinningWheel.turnsToStop = getRandomInt(spinningWheel.maxTurnsToStop)+1
-    }
-    spinningWheel.winner = activeParts[getRandomIndex(activeParts.map(part => part.votes))]
-    spinningWheel.activeParts = spinningWheel.parts.filter(part => part.votes > 0)
-    console.log('initSpinningWheel', spinningWheel.winner, activeParts, spinningWheel.parts)
-}
-
-const stepSpinningWheel = dt => {
-    if (!spinningWheel.mode) {
-        return
-    }
-
-    if (spinningWheel.turn === spinningWheel.turnsToStop && spinningWheel.part !== spinningWheel.winner) {
-        spinningWheel.mode = null
-        game = games[spinningWheel.winner.game]
-        initStage(stages.gameLobby)
-        console.log('spinning wheel stop')
-        return
-    }
-
-    if (spinningWheel.speed > spinningWheel.constantSpeedThreshold) {
-        spinningWheel.speed += 0.001*spinningWheel.acceleration * dt
-    } else {
-        spinningWheel.speed = spinningWheel.constantSpeedThreshold
-    }
-
-    let distance = 1
-    let part = spinningWheel.part
-    if (part !== undefined) {
-        distance = part.votes
-    }
-    if (0.001*spinningWheel.speed * (dtProcessed - spinningWheel.startTime) > distance) {
-        if (spinningWheel.mode === 'single' && part !== undefined) {
-            part = undefined
-        } else {
-            part = part || spinningWheel.winner
-            for (let index = 0; index < spinningWheel.parts.length; index++) {
-                if (part === spinningWheel.winner && spinningWheel.speed === spinningWheel.constantSpeedThreshold) {
-                    spinningWheel.turn++
-                }
-                part = spinningWheel.parts[(part.position+1) % spinningWheel.parts.length]
-                if (part.votes > 0) {
-                    break
-                }
-            }
-        }
-        spinningWheel.part = part
-        spinningWheel.startTime = dtProcessed
-    }
-
-    console.log('stepSpinningWheel2', spinningWheel.mode, spinningWheel.speed, spinningWheel.winner, spinningWheel.turnsToStop, spinningWheel.part, spinningWheel.turn)
-}
-
 const lobbyStartButtonDefinition = () => ({
-    x: level.width*0.5,
-    y: level.height*0.5,
-    innerRadius: level.width*0.15,
-    outerRadius: level.width*0.15,
-    defaultLoadingSpeed: 0.5/3000,
-    execute: () => {
-        //game = voteGame()
-        //initStage(stages.gameLobby)
-    }
+    x: level.width * 0.5,
+    y: level.height * 0.5,
+    innerRadius: level.width * 0.15,
+    outerRadius: level.width * 0.15
 })
 
 const gameStartButtonDefinition = () => ({
-    x: level.width*0.5,
-    y: level.height*0.5,
-    innerRadius: level.width*0.1,
-    defaultLoadingSpeed: 1/3000,
+    x: level.width * 0.5,
+    y: level.height * 0.5,
+    innerRadius: level.width * 0.1,
+    defaultLoadingSpeed: 1 / 3000,
     execute: () => {
         initStage(stages.game)
     }
@@ -317,58 +234,58 @@ const gameStartButtonDefinition = () => ({
 
 const rectangleButtonsDefinition = () => ({
     mute: {
-        x: level.width*(1.0 - 0.05 -0.15),
-        y: level.height*0.12,
-        width: level.width*0.15,
-        height: level.height*0.1,
-        defaultLoadingSpeed: 1/2500,
+        x: level.width * (1.0 - 0.05 - 0.15),
+        y: level.height * 0.12,
+        width: level.width * 0.15,
+        height: level.height * 0.1,
+        defaultLoadingSpeed: 1 / 2500,
         execute: toggleMusic
     },
     bots: {
-        x: level.width*(1.0 - 0.05 -0.15),
-        y: level.height*0.12 + level.height*0.1 + 20,
-        width: level.width*0.15,
-        height: level.height*0.1,
-        defaultLoadingSpeed: 1/2000,
+        x: level.width * (1.0 - 0.05 - 0.15),
+        y: level.height * 0.12 + level.height * 0.1 + 20,
+        width: level.width * 0.15,
+        height: level.height * 0.1,
+        defaultLoadingSpeed: 1 / 2000,
         execute: toggleBots
     }
 })
 
 const shootingRangeDefinition = () => ({
-    x: level.width*0.5,
-    y: level.height*0.9,
+    x: level.width * 0.5,
+    y: level.height * 0.9,
     width: 512,
     height: 128,
     team: 'sniper'
 })
 
 const raceLineDefinition = () => ({
-    xStart: level.width*0.1,
-    xFinish: level.width*0.9,
-    y: level.height*0.1,
-    height: level.height*0.8
+    xStart: level.width * 0.1,
+    xFinish: level.width * 0.9,
+    y: level.height * 0.1,
+    height: level.height * 0.8
 })
 
 
 const teamSwitchersDefinition = () => ({
     assassin: {
-        x: level.width*0.4,
-        y: level.height*0.75,
+        x: level.width * 0.4,
+        y: level.height * 0.75,
         team: 'assassin'
     },
     guard: {
-        x: level.width*0.6,
-        y: level.height*0.75,
+        x: level.width * 0.6,
+        y: level.height * 0.75,
         team: 'guard'
     },
     killer: {
-        x: level.width*0.4,
-        y: level.height*0.75,
+        x: level.width * 0.4,
+        y: level.height * 0.75,
         team: 'killer'
     },
     sniper: {
-        x: level.width*0.6,
-        y: level.height*0.75,
+        x: level.width * 0.6,
+        y: level.height * 0.75,
         team: 'sniper'
     }
 })
@@ -381,164 +298,163 @@ const buttons = {
 }
 
 const circleOfDeathDefinition = () => ({
-    x: level.width/2,
-    y: level.height/2,
-    radius: Math.hypot(level.width/2, level.height/2),
-    startRadius: Math.hypot(level.width/2, level.height/2)
+    x: level.width / 2,
+    y: level.height / 2,
+    radius: Math.hypot(level.width / 2, level.height / 2),
+    startRadius: Math.hypot(level.width / 2, level.height / 2)
 })
 
 var circleOfDeath
 
 const foodDefinition = () => ({
     oreo: {
-        x: stage === stages.gameLobby ? level.width*1.4/5 : level.width*4/5,
-        y: stage === stages.gameLobby ? level.height*3/5 : level.height*4/5,
+        x: stage === stages.gameLobby ? level.width * 1.4 / 5 : level.width * 4 / 5,
+        y: stage === stages.gameLobby ? level.height * 3 / 5 : level.height * 4 / 5,
     },
     broccoli: {
-        x: stage === stages.gameLobby ? level.width*0.6/5 : level.width/5,
-        y: stage === stages.gameLobby ? level.height*2/5 : level.height/5,
+        x: stage === stages.gameLobby ? level.width * 0.6 / 5 : level.width / 5,
+        y: stage === stages.gameLobby ? level.height * 2 / 5 : level.height / 5,
     },
     onion: {
-        x: stage === stages.gameLobby ? level.width*0.6/5 : level.width/5,
-        y: stage === stages.gameLobby ? level.height*3/5 : level.height*4/5,
+        x: stage === stages.gameLobby ? level.width * 0.6 / 5 : level.width / 5,
+        y: stage === stages.gameLobby ? level.height * 3 / 5 : level.height * 4 / 5,
     },
     salad: {
-        x: stage === stages.gameLobby ? level.width*1.4/5 : level.width*4/5,
-        y: stage === stages.gameLobby ? level.height*2/5 : level.height/5,
+        x: stage === stages.gameLobby ? level.width * 1.4 / 5 : level.width * 4 / 5,
+        y: stage === stages.gameLobby ? level.height * 2 / 5 : level.height / 5,
     },
     taco: {
-        x: stage === stages.gameLobby ? level.width*1/5 : level.width/2,
-        y: stage === stages.gameLobby ? level.height*2.5/5 : level.height/2,
+        x: stage === stages.gameLobby ? level.width * 1 / 5 : level.width / 2,
+        y: stage === stages.gameLobby ? level.height * 2.5 / 5 : level.height / 2,
     }
 })
 
 const app = new PIXI.Application();
 window.__PIXI_DEVTOOLS__ = {
     app
-  };
+};
 var levelContainer;
 const figureShadowLayer = new PIXI.RenderLayer();
-const figureLayer = new PIXI.RenderLayer({sortableChildren: true});
+const figureLayer = new PIXI.RenderLayer({ sortableChildren: true });
 const cloudLayer = new PIXI.RenderLayer();
 const fogLayer = new PIXI.RenderLayer();
 const crosshairLayer = new PIXI.RenderLayer();
-const scoreLayer = new PIXI.RenderLayer({sortableChildren: true});
+const scoreLayer = new PIXI.RenderLayer({ sortableChildren: true });
 const overlayLayer = new PIXI.RenderLayer();
-const debugLayer = new PIXI.RenderLayer({sortableChildren: true});
+const debugLayer = new PIXI.RenderLayer({ sortableChildren: true });
 
 app.textStyleDefault = {
     fontFamily: 'Knall',
     fontSize: 32
 };
 
-app.textStyleController= {
+app.textStyleController = {
     fontFamily: 'Knall',
     fontSize: 32,
     fill: '#000'
 };
 
-const touchControl = new FWTouchControl(app, {isBitmapFont: true, textStyle: app.textStyleController, textStyleSmall: app.textStyleController, textStyleTitle: app.textStyleController, isPassive: true, layout: 'simple', showButtonLabels: false, showHintLabels: true });
-const touchControlSniper = new FWTouchControl(app, {color: new PIXI.Color(0x3355ff), isBitmapFont: true, textStyle: app.textStyleController, textStyleSmall: app.textStyleController, textStyleTitle: app.textStyleController, isPassive: true, layout: 'simple', showButtonLabels: false, showHintLabels: true });
+const touchControl = new FWTouchControl(app, { isBitmapFont: true, textStyle: app.textStyleController, textStyleSmall: app.textStyleController, textStyleTitle: app.textStyleController, isPassive: true, layout: 'simple', showButtonLabels: false, showHintLabels: true });
+const touchControlSniper = new FWTouchControl(app, { color: new PIXI.Color(0x3355ff), isBitmapFont: true, textStyle: app.textStyleController, textStyleSmall: app.textStyleController, textStyleTitle: app.textStyleController, isPassive: true, layout: 'simple', showButtonLabels: false, showHintLabels: true });
 
 
-(async () =>
-    {
-        console.log('no need to hide');
-    
-        // Initialize the application.
-        await app.init({antialias: true, backgroundAlpha: 0, resizeTo: window,resolution: window.devicePixelRatio || 1, autoDensity: true,});
-    
-        // Then adding the application's canvas to the DOM body.
-        document.body.appendChild(app.canvas);
+(async () => {
+    console.log('no need to hide');
 
-        const loadingText = createLoadingText(app);
+    // Initialize the application.
+    await app.init({ antialias: true, backgroundAlpha: 0, resizeTo: window, resolution: window.devicePixelRatio || 1, autoDensity: true, });
 
-        await Promise.all(loadPromises);
-        const fontFamilyName = 'Rockboxcond12'
-        PIXI.Assets.addBundle('main', {
-            background_grass: './gfx/background_grass.jpg',
-            crosshair: './gfx/crosshair.svg',
-            fenceAtlas: './gfx/fence.json',
-            figureAtlas: './gfx/figure.json',
-            fontTTF: './gfx/'+fontFamilyName+'.ttf',
-        });
-        await PIXI.Assets.loadBundle('main')
+    // Then adding the application's canvas to the DOM body.
+    document.body.appendChild(app.canvas);
 
-        document.fonts.add(PIXI.Assets.get('fontTTF'))
+    const loadingText = createLoadingText(app);
 
-        PIXI.BitmapFontManager.install({
-            name: 'Knall', 
-            style: {
-                chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
-                fontFamily: fontFamilyName,
-                fontSize: 32,
-                fill: colors.white
+    await Promise.all(loadPromises);
+    const fontFamilyName = 'Rockboxcond12'
+    PIXI.Assets.addBundle('main', {
+        background_grass: './gfx/background_grass.jpg',
+        crosshair: './gfx/crosshair.svg',
+        fenceAtlas: './gfx/fence.json',
+        figureAtlas: './gfx/figure.json',
+        fontTTF: './gfx/' + fontFamilyName + '.ttf',
+    });
+    await PIXI.Assets.loadBundle('main')
+
+    document.fonts.add(PIXI.Assets.get('fontTTF'))
+
+    PIXI.BitmapFontManager.install({
+        name: 'Knall',
+        style: {
+            chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
+            fontFamily: fontFamilyName,
+            fontSize: 32,
+            fill: colors.white
+        }
+    })
+
+    PIXI.BitmapFontManager.install({
+        name: 'KnallStroke',
+        style: {
+            chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
+            fontFamily: fontFamilyName,
+            fontSize: 48,
+            fill: colors.white,
+            stroke: {
+                width: 1,
             }
-        })
+        }
+    })
 
-        PIXI.BitmapFontManager.install({
-            name: 'KnallStroke', 
-            style: {
-                chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
-                fontFamily: fontFamilyName,
-                fontSize: 48,
-                fill: colors.white,
-                stroke: {
-                    width: 1,
-                }
+    PIXI.BitmapFontManager.install({
+        name: 'KnallTitle',
+        style: {
+            chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
+            fontFamily: fontFamilyName,
+            fontSize: 128,
+            fill: colors.white,
+            align: 'center',
+            stroke: {
+                color: colors.black,
+                width: 12,
             }
-        })
+        }
+    })
 
-        PIXI.BitmapFontManager.install({
-            name: 'KnallTitle', 
-            style: {
-                chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
-                fontFamily: fontFamilyName,
-                fontSize: 128,
-                fill: colors.white,
-                align: 'center',
-                stroke: {
-                    color: colors.black,
-                    width: 12,
-                }
+    PIXI.BitmapFontManager.install({
+        name: 'KnallWinning',
+        style: {
+            chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
+            fontFamily: fontFamilyName,
+            fontSize: level.width * 0.1,
+            fill: {
+                alpha: 0.8,
+                color: colors.lightBrown,
+            },
+            stroke: {
+                color: colors.white,
+                width: 6,
             }
-        })
+        }
+    })
 
-        PIXI.BitmapFontManager.install({
-            name: 'KnallWinning', 
-            style: {
-                chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
-                fontFamily: fontFamilyName,
-                fontSize: level.width*0.1,
-                fill: {
-                    alpha: 0.8,
-                    color: colors.lightBrown,
-                },
-                stroke: {
-                    color: colors.white,
-                    width: 6,
-                }
-            }
-        })
+    initNetwork()
+    destroyContainer(app, loadingText)
+    levelContainer = createLevelContainer(app, level);
+    app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, fogLayer, crosshairLayer, scoreLayer, overlayLayer, debugLayer)
+    addGrass()
+    addHeadline()
+    addLobbyItems(app)
+    addFoods(app)
+    addLevelBoundary(app)
+    addFiguresInitialPool(app)
+    addFog(app)
+    addWinningCeremony(app)
+    addOverlay(app)
+    addDebug(app)
 
-        initNetwork()
-        destroyContainer(app, loadingText)
-        levelContainer = createLevelContainer(app, level);
-        app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, fogLayer, crosshairLayer, scoreLayer, overlayLayer, debugLayer)
-        addGrass()
-        addHeadline()
-        addLobbyItems(app)
-        addFoods(app)
-        addLevelBoundary(app)
-        addFiguresInitialPool(app)
-        addFog(app)
-        addWinningCeremony(app)
-        addOverlay(app)
-        addDebug(app)
-
-        initStage(stages.startLobby)
-        window.requestAnimationFrame(gameLoop);
-    }
+    initStage(stages.startLobby)
+    window.requestAnimationFrame(gameLoop);
+}
 )();
 
 function initStage(nextStage) {
@@ -557,6 +473,7 @@ function initStage(nextStage) {
     multikillCounter = 0;
     lastTotalkillAudio = 0;
     totalkillCounter = 0;
+    spinningWheel.finishTime = undefined
     touchControl.visible = stage === stages.startLobby || (stage === stages.gameLobby && game === games.rampage)
     touchControlSniper.visible = (stage === stages.gameLobby && game === games.rampage)
 
@@ -597,7 +514,7 @@ function initStage(nextStage) {
     }
 
     figures.filter(figure => figure.type === 'cloud').forEach(cloud => destroyContainer(app, cloud))
-    
+
     if (!isMusicMuted()) {
         if (stage === stages.startLobby) {
             stopMusicPlaylist();
@@ -618,7 +535,7 @@ function initStage(nextStage) {
         } else if (game === games.rampage) {
             const killerFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'killer')
             const sniperFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'sniper')
-            const ammo = Math.ceil(baseAmmoFactor * killerFigures.length/sniperFigures.length + bonusAmmoFactor*Math.sqrt(maxPlayerFigures/killerFigures.length))
+            const ammo = Math.ceil(baseAmmoFactor * killerFigures.length / sniperFigures.length + bonusAmmoFactor * Math.sqrt(maxPlayerFigures / killerFigures.length))
             addSniperFigures(app, sniperFigures, ammo)
         }
     }
@@ -681,7 +598,7 @@ function initStage(nextStage) {
 
     if (game === games.food) {
         figures.filter(figure => figure.type === 'bean').forEach(figure => {
-            const {x, y} = foodDefinition()[figure.id]
+            const { x, y } = foodDefinition()[figure.id]
             Object.assign(figure, {
                 x,
                 y,
@@ -698,7 +615,7 @@ function gameLoop() {
     if (windowHasFocus) {
         if (fpsTime < now - 1000) {
             fpsTime = now
-            fps = Math.floor(1000/dt)
+            fps = Math.floor(1000 / dt)
         }
 
         players = collectInputs()
@@ -726,14 +643,14 @@ function gameLoop() {
 
         dtToProcess += dt
         let counter = 0;
-        while(dtToProcess > dtFix) {
+        while (dtToProcess > dtFix) {
             if (!restartStage) {
-                handleInput(players, figures, dtProcessed) 
+                handleInput(players, figures, dtProcessed)
                 handleNPCs(figures, dtProcessed, oldNumberJoinedKeyboardPlayers, dtFix)
                 updateGame(figures, dtFix, dtProcessed)
             }
-            dtToProcess-=dtFix
-            dtProcessed+=dtFix
+            dtToProcess -= dtFix
+            dtProcessed += dtFix
             counter++
         }
 
@@ -779,10 +696,10 @@ const handleWinning = () => {
             }
 
             //countdown
-            if (!restartStage && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
+            if (!restartStage && game.countdown && dtProcessed >= startTime + game.countdown * 1000) {
                 winRoundFigures([])
             }
-        
+
             // max points hit
             const maxPoints = Math.max(...players.map(p => p.score?.points || 0))
             if (maxPoints >= pointsToWin) {
@@ -812,10 +729,10 @@ const handleWinning = () => {
             }
 
             //countdown
-            if (!restartStage && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
+            if (!restartStage && game.countdown && dtProcessed >= startTime + game.countdown * 1000) {
                 winRoundTeam('guard')
             }
-        
+
             // max points hit
             const maxPoints = Math.max(...Object.values(teams).map(team => team.points))
             if (maxPoints >= pointsToWin) {
@@ -845,7 +762,7 @@ const handleWinning = () => {
             if (!restartStage && figuresInFinish.length > 0) {
                 winRoundFigures(figuresInFinish.filter(f => f.playerId))
             }
-        
+
             // max points hit
             const maxPoints = Math.max(...players.map(p => p.score?.points || 0))
             if (maxPoints >= pointsToWin) {
@@ -882,7 +799,7 @@ const handleWinning = () => {
             }
 
             //countdown
-            if (!restartStage && game.countdown && dtProcessed >= startTime+game.countdown*1000) {
+            if (!restartStage && game.countdown && dtProcessed >= startTime + game.countdown * 1000) {
                 finishRound()
             }
 
@@ -892,7 +809,7 @@ const handleWinning = () => {
             }
         }
     }
-    
+
     if (gameOver) {
         playAudio(soundWin)
     }
@@ -904,7 +821,7 @@ function updateGame(figures, dt, dtProcessed) {
     let figuresRevived = []
 
     if (stage === stages.startLobby) {
-        stepSpinningWheel(dt)
+        processSpinningWheel(dtProcessed)
     }
 
     if (stage === stages.startLobby || stage === stages.gameLobby) {
@@ -922,14 +839,16 @@ function updateGame(figures, dt, dtProcessed) {
         }
     }
 
-    figuresRevived.forEach(f => {if (dtProcessed-f.killTime > deadDuration) {
-        f.isDead = false
-        f.isDeathDetected = false
-        f.killTime = 0
-    }})
+    figuresRevived.forEach(f => {
+        if (dtProcessed - f.killTime > deadDuration) {
+            f.isDead = false
+            f.isDeathDetected = false
+            f.killTime = 0
+        }
+    })
 
     if (stage === stages.startLobby || stage === stages.gameLobby) {
-        const minimumPlayers = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
+        const playersMinimum = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
         const playersPossible = figures.filter(f => f.playerId && f.playerId[0] !== 'b' && f.type === 'fighter')
         const allPlayers = figures.filter(f => f.playerId && f.type === 'fighter')
         allPlayersSameTeam = Object.values(teams).filter(team => team.playerTeam && team.games.has(game)).some(team => team.size == allPlayers.length)
@@ -937,20 +856,30 @@ function updateGame(figures, dt, dtProcessed) {
         Object.values(buttons).forEach(btn => {
             if (!btn.visible) return
             btn.loadingSpeed = btn.defaultLoadingSpeed
+            btn.playersMinimum = playersMinimum
             btn.playersPossible = playersPossible
             btn.playersPreviouslyNear = btn.playersNear
             btn.playersNear = playersPossible.filter(f => !f.isDead && btn.isInArea(f))
-            
+            if (btn === buttons.selectGame) {
+                const allPlayersOnButton = btn.playersNear.length === btn.playersPossible.length
+                if (!allPlayersOnButton) {
+                    btn.playersPossible.forEach(figure => !btn.playersNear.includes(figure) && (figure.player.vote = null))
+                    if (spinningWheel.mode) {
+                        stopSpinningWheel()
+                    }
+                }
+            }
+
             let aimLoadingPercentage
-            if (btn === buttons.startGame || btn === buttons.selectGame) {
+            if (btn === buttons.startGame) {
                 if (allPlayersSameTeam) {
                     btn.loadingSpeed = 0
                 }
-                aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, minimumPlayers);
+                aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, playersMinimum);
             } else {
                 aimLoadingPercentage = btn.playersNear.length > 0 ? 1 : 0;
             }
-            
+
             if (btn.execute) {
                 loadButton(btn, aimLoadingPercentage)
             }
@@ -958,35 +887,35 @@ function updateGame(figures, dt, dtProcessed) {
     }
 
     figures.filter(f => f.speed > 0 || f.recoilForce).forEach(f => {
-        let xyNew = {x: f.x, y: f.y}
+        let xyNew = { x: f.x, y: f.y }
 
         // player movement
         if (f.speed > 0) {
-            xyNew = move(xyNew.x, xyNew.y, f.direction,f.speed, dt)
+            xyNew = move(xyNew.x, xyNew.y, f.direction, f.speed, dt)
         }
-        
+
         // recoil movement
-        if (f.recoilForce && dtProcessed-f.lastAttackTime <= f.recoilDuration) {
+        if (f.recoilForce && dtProcessed - f.lastAttackTime <= f.recoilDuration) {
             if (!f.recoilAngle) {
-                f.recoilAngle = Math.random()*2*Math.PI
+                f.recoilAngle = Math.random() * 2 * Math.PI
             }
-            xyNew = move(xyNew.x, xyNew.y, f.recoilAngle, f.recoilForce/(f.recoilOffset+dtProcessed-f.lastAttackTime), dt)
-        } else if (f.recoilForce && dtProcessed-f.lastAttackTime > f.recoilDuration) {
+            xyNew = move(xyNew.x, xyNew.y, f.recoilAngle, f.recoilForce / (f.recoilOffset + dtProcessed - f.lastAttackTime), dt)
+        } else if (f.recoilForce && dtProcessed - f.lastAttackTime > f.recoilDuration) {
             f.recoilAngle = undefined
         }
-        
+
         if (xyNew) {
             [f.x, f.y] = cropXY(xyNew.x, xyNew.y, level)
         }
     })
-    
+
     // eat beans
     if (stage !== stages.startLobby && game === games.food) {
         let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter');
         figures.filter(b => b.type === 'bean').forEach(b => {
             playerFigures.forEach(fig => {
-                if (squaredDistance(b.x,b.y,fig.x,fig.y) < b.attackDistance*b.attackDistance) {
-                    if (!fig.beans.has(b.id)) {                    
+                if (squaredDistance(b.x, b.y, fig.x, fig.y) < b.attackDistance * b.attackDistance) {
+                    if (!fig.beans.has(b.id)) {
                         playAudioPool(soundEatPool[fig.beans.size]);
                         fig.beans.add(b.id);
                         b.lastAttackTime = dtProcessed
@@ -998,10 +927,10 @@ function updateGame(figures, dt, dtProcessed) {
 
     // circle of death
     if (stage === stages.game && game === games.battleRoyale) {
-        const scale =  1 - (dtProcessed - startTime)/(game.countdown*1000)
-        circleOfDeath.radius = scale*circleOfDeath.startRadius
-        figuresAlive.filter(f => f.type === 'fighter' ).forEach(f => {
-            if (squaredDistance(f.x, f.y, level.width/2, level.height/2) > circleOfDeath.radius*circleOfDeath.radius) {
+        const scale = 1 - (dtProcessed - startTime) / (game.countdown * 1000)
+        circleOfDeath.radius = scale * circleOfDeath.startRadius
+        figuresAlive.filter(f => f.type === 'fighter').forEach(f => {
+            if (squaredDistance(f.x, f.y, level.width / 2, level.height / 2) > circleOfDeath.radius * circleOfDeath.radius) {
                 killFigure(f)
             }
         })
@@ -1010,9 +939,9 @@ function updateGame(figures, dt, dtProcessed) {
     // shooting range crosshair detaching
     if (stage === stages.gameLobby && (game === games.rampage)) {
         let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
-        figuresAlive.filter(f => f.type === 'crosshair' ).forEach(f => {
+        figuresAlive.filter(f => f.type === 'crosshair').forEach(f => {
             const playerFigure = playerFigures.find(figure => figure.playerId === f.playerId)
-            const inAttachRadius = squaredDistance(f.x, f.y, playerFigure.x, playerFigure.y) <= f.attachRadius*f.attachRadius
+            const inAttachRadius = squaredDistance(f.x, f.y, playerFigure.x, playerFigure.y) <= f.attachRadius * f.attachRadius
             if (f.detached && inAttachRadius) {
                 playerFigure.isAiming = false
                 f.isDead = true
@@ -1093,7 +1022,7 @@ function updateGame(figures, dt, dtProcessed) {
             })
         })
     }
-    
+
     figures.filter(f => f.type === 'fighter').forEach(f => {
         if (f.attacked) {
             if (f.beansFarted.size === 0) {
@@ -1152,8 +1081,8 @@ function handleInput(players, figures, dtProcessed) {
 
                 addPlayerScore(figure)
                 if (stage === stages.startLobby) {
-                    figure.x = level.width*0.04+ Math.random() * level.width*0.3
-                    figure.y = level.height*0.05+Math.random() * level.height*0.42
+                    figure.x = level.width * 0.04 + Math.random() * level.width * 0.3
+                    figure.y = level.height * 0.05 + Math.random() * level.height * 0.42
                 }
                 playAudio(soundJoin);
 
@@ -1161,7 +1090,7 @@ function handleInput(players, figures, dtProcessed) {
                     if (!isMusicMuted()) {
                         playMusicPlaylist(musicLobby);
                     }
-                }  
+                }
             }
         })
     }
@@ -1174,7 +1103,7 @@ function handleInput(players, figures, dtProcessed) {
             // moving
             if (f.isInRace) {
                 if (f.player.isSpeedButtonPressed) {
-                    f.speed = 2.2*f.maxSpeed
+                    f.speed = 2.2 * f.maxSpeed
                 } else if (p.isWalkButtonPressed) {
                     f.speed = f.maxSpeed
                 }
@@ -1190,13 +1119,13 @@ function handleInput(players, figures, dtProcessed) {
             }
             // attacking
             if (p.isAttackButtonPressed && !f.isAttacking && !f.isInRace) {
-                if (!f.lastAttackTime || dtProcessed-f.lastAttackTime > f.attackBreakDuration) {
+                if (!f.lastAttackTime || dtProcessed - f.lastAttackTime > f.attackBreakDuration) {
                     if (f.type === 'crosshair') {
                         f.ammo--
                     }
                     if (f.beans?.size > 0) {
-                        let xyNew = move(f.x, f.y, f.direction+deg2rad(180),f.attackDistance*0.5, 1)
-                        addFartCloud({x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size})
+                        let xyNew = move(f.x, f.y, f.direction + deg2rad(180), f.attackDistance * 0.5, 1)
+                        addFartCloud({ x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size })
                         f.beans.forEach(b => f.beansFarted.add(b))
                         f.beans.clear()
                     }
@@ -1204,12 +1133,12 @@ function handleInput(players, figures, dtProcessed) {
                     f.lastAttackTime = dtProcessed
                 }
             }
-            f.isAttacking = f.lastAttackTime && (dtProcessed-f.lastAttackTime <= f.attackDuration) ? true : false;
+            f.isAttacking = f.lastAttackTime && (dtProcessed - f.lastAttackTime <= f.attackDuration) ? true : false;
         } else if (f.isAiming) {
             const crosshairFigure = figures.find(fig => fig.playerId === f.playerId && fig.type === 'crosshair' && fig.ammo > 0)
             if (crosshairFigure) {
-                f.direction = angle(f.x,f.y,crosshairFigure.x,crosshairFigure.y)
-            } 
+                f.direction = angle(f.x, f.y, crosshairFigure.x, crosshairFigure.y)
+            }
         }
     })
 }
@@ -1239,8 +1168,8 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
     if (startKeyboardMovement) {
         shuffledIndexes = shuffle([...Array(movingNPCFigures.length).keys()]);
     }
-    movingNPCFigures.forEach((f,i,array) => {
-        if (((startKeyboardMovement && shuffledIndexes[i] < array.length/2) || squaredDistance(f.x,f.y,f.xTarget,f.yTarget) < 25) && f.speed > 0) {
+    movingNPCFigures.forEach((f, i, array) => {
+        if (((startKeyboardMovement && shuffledIndexes[i] < array.length / 2) || squaredDistance(f.x, f.y, f.xTarget, f.yTarget) < 25) && f.speed > 0) {
             const breakDuration = startKeyboardMovement ? 0 : Math.random() * f.maxBreakDuration;
             f.startWalkTime = Math.random() * breakDuration + time
             f.speed = 0
@@ -1253,57 +1182,57 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
 
                 if (numberJoinedKeyboardPlayers > 0) {
                     discreteAngle = getNextDiscreteAngle(angle(f.x, f.y, f.xTarget, f.yTarget), 8);
-                    const direction = {x: Math.cos(discreteAngle), y: Math.sin(discreteAngle)};
+                    const direction = { x: Math.cos(discreteAngle), y: Math.sin(discreteAngle) };
                     if (direction.x !== 0) {
-                        const xBorder = direction.x > 0 ? level.width-level.padding[2] : level.padding[0];
-                        let t = (xBorder - f.x)/direction.x;
-                        let y = t*direction.y + f.y;
-                        if (y >= level.padding[1] && y < level.height-level.padding[3]) {
-                            t = (f.xTarget - f.x)/direction.x;
-                            f.yTarget = t*direction.y + f.y;
+                        const xBorder = direction.x > 0 ? level.width - level.padding[2] : level.padding[0];
+                        let t = (xBorder - f.x) / direction.x;
+                        let y = t * direction.y + f.y;
+                        if (y >= level.padding[1] && y < level.height - level.padding[3]) {
+                            t = (f.xTarget - f.x) / direction.x;
+                            f.yTarget = t * direction.y + f.y;
                         }
                     }
                     if (direction.y !== 0) {
-                        const yBorder = direction.y > 0 ? level.height-level.padding[3] : level.padding[1];
-                        let t = (yBorder - f.y)/direction.y;
-                        let x = t*direction.x + f.x;
-                        if (x >= level.padding[0] && x < level.width-level.padding[2]) {
-                            t = (f.yTarget - f.y)/direction.y;
-                            f.xTarget = t*direction.x + f.x;
+                        const yBorder = direction.y > 0 ? level.height - level.padding[3] : level.padding[1];
+                        let t = (yBorder - f.y) / direction.y;
+                        let x = t * direction.x + f.x;
+                        if (x >= level.padding[0] && x < level.width - level.padding[2]) {
+                            t = (f.yTarget - f.y) / direction.y;
+                            f.xTarget = t * direction.x + f.x;
                         }
                     }
                 }
             }
-            f.direction = angle(f.x,f.y,f.xTarget,f.yTarget)
+            f.direction = angle(f.x, f.y, f.xTarget, f.yTarget)
             f.speed = f.maxSpeed
         }
     })
 
     figures.filter(f => f.type === 'cloud').forEach(f => {
-        f.lifetime+=dt
+        f.lifetime += dt
         if (f.lifetime > fartGrowDuration) {
             if (!f.isAttacking) {
                 f.isAttacking = true
                 if (f.size === 5) {
-                    f.attackDistanceMultiplier = 3*f.size
+                    f.attackDistanceMultiplier = 3 * f.size
                 } else if (f.size === 1) {
-                    f.attackDistanceMultiplier = 2*f.size
+                    f.attackDistanceMultiplier = 2 * f.size
                 } else {
-                    f.attackDistanceMultiplier = 1.5*f.size
-                }   
+                    f.attackDistanceMultiplier = 1.5 * f.size
+                }
             }
-            f.attackDistanceMultiplier*=Math.pow(0.999,dt)
+            f.attackDistanceMultiplier *= Math.pow(0.999, dt)
             if (f.attackDistanceMultiplier < 0.1) {
                 f.attackDistanceMultiplier = 0
                 f.isDead = true
             }
         } else {
             if (f.size === 5) {
-                f.attackDistanceMultiplier= f.lifetime/fartGrowDuration * 3*f.size
+                f.attackDistanceMultiplier = f.lifetime / fartGrowDuration * 3 * f.size
             } else if (f.size === 1) {
-                f.attackDistanceMultiplier= f.lifetime/fartGrowDuration * 2*f.size
+                f.attackDistanceMultiplier = f.lifetime / fartGrowDuration * 2 * f.size
             } else {
-                f.attackDistanceMultiplier= f.lifetime/fartGrowDuration * 1.5*f.size
+                f.attackDistanceMultiplier = f.lifetime / fartGrowDuration * 1.5 * f.size
             }
         }
     })
