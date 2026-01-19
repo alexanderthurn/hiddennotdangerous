@@ -210,7 +210,7 @@ const gameVoteButtonDefinition = () => ({
         if (figure.player.vote != button.gameId) {
             figure.player.vote = button.gameId
             const playerVotedCount = players.filter(player => player.vote).length
-            if (playerVotedCount === button.playersPossible.length) {
+            if (playerVotedCount === button.playersPossible.length && playerVotedCount >= button.playersMinimum) {
                 initSpinningWheel()
             }
         }
@@ -859,6 +859,7 @@ function updateGame(figures, dt, dtProcessed) {
 
         Object.values(buttons).forEach(btn => {
             if (!btn.visible) return
+            btn.allPlayers = allPlayers
             btn.loadingSpeed = btn.defaultLoadingSpeed
             btn.playersMinimum = playersMinimum
             btn.playersPossible = playersPossible

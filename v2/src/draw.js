@@ -88,12 +88,12 @@ const animateLobbyStartButton = button => {
     button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime >= 0).length > 0
 
     let text = 'Walk here to\nVOTE\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
-    if (button.playersPossible?.length === 1) {
+    if (button.playersPossible?.length === 1 && button.allPlayers?.length === 1) {
         text = 'Walk here to\nVOTE\n\nmin 2 players\nor 1 player +1 bot'
-    } else if (button.playersPossible?.length > 1 && button.playersNear?.length === button.playersPossible?.length) {
+    } else if (spinningWheel.mode) {
+        text = 'Spinning votes'
+    } else if (spinningWheel.finishTime) {
         text = 'Entering LOBBY'
-    } else if (button.playersNear?.length > 0) {
-        text = 'Walk here to\nVOTE\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
     }
     button.getChildAt(2).text = text
 }
