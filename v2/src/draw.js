@@ -150,9 +150,9 @@ const animateRingSegmentButton = button => {
 
     // Pulse effect for winner segment
     if (isWinner) {
-        const pulseSpeed = 0.005
+        const pulseSpeed = 2 * Math.PI
         const pulseAmount = 0.15
-        const pulse = 1.15 + Math.sin(dtProcessed * pulseSpeed) * pulseAmount
+        const pulse = 1.15 + Math.sin(-Math.PI / 2 + (dtProcessed - spinningWheel.finishTime) * 0.001 * pulseSpeed) * pulseAmount
         button.scale.set(pulse)
         button.getChildAt(0).tint = colors.darkBrown
         button.getChildAt(0).alpha = 1

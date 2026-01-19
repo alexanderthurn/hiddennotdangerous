@@ -626,7 +626,8 @@ const spinningWheel = {
     acceleration: -0.25,
     constantSpeedThreshold: 0.5,
     startSpeed: 2.5,
-    maxTurnsToStop: 5
+    maxTurnsToStop: 5,
+    finishDuration: 3000
 }
 
 const initSpinningWheel = () => {
@@ -637,7 +638,7 @@ const initSpinningWheel = () => {
         spinningWheel.position = 0
     }
     spinningWheel.startTime = dtProcessed
-    const playerFigureCount = figures.filter(figure => figure.playerId).length
+    const playerFigureCount = figures.filter(figure => figure.playerId && !figureIsBot(figure)).length
     spinningWheel.segmentLength = 1 / playerFigureCount
     spinningWheel.speed = spinningWheel.startSpeed
     spinningWheel.turn = 0
@@ -684,7 +685,7 @@ const processSpinningWheel = dtProcessed => {
     if (!spinningWheel.finishTime && spinningWheel.turn === spinningWheel.turnsToStop && spinningWheel.segment === spinningWheel.winner) {
         spinningWheel.finishTime = dtProcessed
     }
-    if (dtProcessed - spinningWheel.finishTime > 3000) {
+    if (dtProcessed - spinningWheel.finishTime > spinningWheel.finishDuration) {
         stopSpinningWheel()
         game = games[spinningWheel.winner.game]
         initStage(stages.gameLobby)
