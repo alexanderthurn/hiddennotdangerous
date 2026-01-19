@@ -709,6 +709,7 @@ const stepSpinningWheel = dtProcessed => {
         distance *= segment.votes
     }
     if (0.001 * spinningWheel.speed * (dtProcessed - spinningWheel.startTime) > distance) {
+        playAudio(soundSpinningWheel)
         if (spinningWheel.mode === 'single' && segment !== undefined) {
             segment = undefined
         } else {

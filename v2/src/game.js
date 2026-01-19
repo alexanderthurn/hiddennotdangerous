@@ -143,6 +143,7 @@ const audio = {
     shootMiss: { title: './sfx/slingshotMiss.mp3', currentTime: 1.5 },
     death: { title: './sfx/gag-reflex-41207.mp3', currentTime: 0.0 },
     join: { title: './sfx/sounddrum.mp3' },
+    spinningWheel: { title: './sfx/spinningWheelClick.mp3' },
     firstBlood: { title: './sfx/first-blood.mp3', volume: 0.2 },
     win: { title: './sfx/audience-clapping-03-99963.mp3' },
     musicGame: [
@@ -191,6 +192,7 @@ var soundEatPool = audio.eat.map(audio => loadAudioPool(audio, 4));
 var musicGame = audio.musicGame.map(audio => getAudio(audio));
 var musicLobby = audio.musicLobby.map(audio => getAudio(audio));
 var soundJoin = getAudio(audio.join);
+var soundSpinningWheel = getAudio(audio.spinningWheel);
 var soundFirstBlood = getAudio(audio.firstBlood);
 var soundMultiKill = audio.multiKill.map(audio => getAudio(audio));
 var soundTotalKill = audio.totalKill.map(audio => getAudio(audio));
@@ -1058,7 +1060,7 @@ function handleInput(players, figures, dtProcessed) {
         f.hasHit = false
     })
 
-    if (stage !== stages.game) {
+    if (stage !== stages.game && !spinningWheel.finishTime) {
         var joinedFighters = figures.filter(f => f.playerId && f.type === 'fighter')
         // join by doing anything
         players.filter(p => p.isAnyButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {

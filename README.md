@@ -51,6 +51,7 @@ To generate characters:
 - music3: https://pixabay.com/de/music/schlaflieder-brahms-lullaby-wiegenlied-op49-no4-music-box-version-2-229418/
 - slingshotHit: https://pixabay.com/sound-effects/slingshot-2-40485/
 - slingshotMiss: https://pixabay.com/sound-effects/slingshot-1-40486/
+- spinningWheelClick: https://pixabay.com/sound-effects/film-special-effects-wheel-spin-click-slow-down-101152/
 - sound1: https://pixabay.com/de/sound-effects/fart-9-228245/
 - sound2: https://pixabay.com/de/sound-effects/fart-83471/
 - sounddrum: https://pixabay.com/de/sound-effects/awesome-kick-drum-41824/
