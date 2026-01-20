@@ -172,6 +172,8 @@ const stopAudio = (audio) => {
     file.load();
 }
 
+const isAudioPlaying = audio => audio.file.currentTime > 0 && !audio.file.ended
+
 const playAudioPool = (audioPool, volume) => {
     const freeAudioEntry = audioPool.find(entry => entry.audio.file.ended || !entry.played);
     if (freeAudioEntry) {
@@ -631,7 +633,6 @@ const spinningWheel = {
     acceleration: -0.25,
     constantSpeedThreshold: 0.5,
     startSpeed: 2.5,
-    maxTurnsToStop: 5,
     finishDuration: 6000,
     pulseDuration: 2500,
     boomerangDuration: 2000,
@@ -649,7 +650,6 @@ const initSpinningWheel = () => {
     const playerFigureCount = figures.filter(figure => figure.playerId && !figureIsBot(figure)).length
     spinningWheel.segmentLength = 1 / playerFigureCount
     spinningWheel.speed = spinningWheel.startSpeed
-    spinningWheel.turn = 0
 
     const gamesEntries = Object.entries(games)
     gamesEntries.forEach(([_, game]) => game.votes = 0)
@@ -665,11 +665,9 @@ const initSpinningWheel = () => {
     if (activeSegments.length === 1) {
         spinningWheel.mode = 'single'
         spinningWheel.segment = activeSegments[0]
-        spinningWheel.turnsToStop = 1
     } else {
         spinningWheel.mode = 'multi'
         spinningWheel.segment = spinningWheel.segment || activeSegments[0]
-        spinningWheel.turnsToStop = getRandomInt(spinningWheel.maxTurnsToStop) + 1
     }
     spinningWheel.winner = activeSegments[getRandomIndex(activeSegments.map(segment => segment.votes))]
     spinningWheel.activeSegments = spinningWheel.segments.filter(segment => segment.votes > 0)
@@ -682,7 +680,6 @@ const stopSpinningWheel = () => {
     spinningWheel.mode = null
     spinningWheel.speed = 0
     spinningWheel.segment = undefined
-    spinningWheel.turn = 0
 }
 
 const processSpinningWheel = dtProcessed => {
@@ -690,13 +687,10 @@ const processSpinningWheel = dtProcessed => {
         return
     }
 
-    if (!spinningWheel.finishTime && spinningWheel.turn === spinningWheel.turnsToStop && spinningWheel.segment === spinningWheel.winner) {
-        spinningWheel.finishTime = dtProcessed
-    }
-    if (!soundBoomerang.file.currentTime && spinningWheel.finishTime && dtProcessed > spinningWheel.pulseDuration + spinningWheel.finishTime && dtProcessed <= spinningWheel.finishDuration - spinningWheel.readDuration + spinningWheel.finishTime) {
+    if (!isAudioPlaying(soundBoomerang) && spinningWheel.finishTime && dtProcessed > spinningWheel.pulseDuration + spinningWheel.finishTime && dtProcessed <= spinningWheel.finishDuration - spinningWheel.readDuration + spinningWheel.finishTime) {
         playAudio(soundBoomerang)
     }
-    if (soundBoomerang.file.currentTime && dtProcessed > spinningWheel.finishDuration - spinningWheel.readDuration + spinningWheel.finishTime) {
+    if (isAudioPlaying(soundBoomerang) && dtProcessed > spinningWheel.finishDuration - spinningWheel.readDuration + spinningWheel.finishTime) {
         stopAudio(soundBoomerang)
     }
     if (dtProcessed - spinningWheel.finishTime > spinningWheel.finishDuration) {
@@ -731,7 +725,7 @@ const stepSpinningWheel = dtProcessed => {
             segment = segment || spinningWheel.winner
             for (let index = 0; index < spinningWheel.segments.length; index++) {
                 if (segment === spinningWheel.winner && spinningWheel.speed === spinningWheel.constantSpeedThreshold) {
-                    spinningWheel.turn++
+                    spinningWheel.finishTime = dtProcessed
                 }
                 segment = spinningWheel.segments[(segment.position + 1) % spinningWheel.segments.length]
                 if (segment.votes > 0) {
