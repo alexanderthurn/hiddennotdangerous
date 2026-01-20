@@ -144,6 +144,7 @@ const audio = {
     death: { title: './sfx/gag-reflex-41207.mp3', currentTime: 0.0 },
     join: { title: './sfx/sounddrum.mp3' },
     spinningWheel: { title: './sfx/spinningWheelClick.mp3' },
+    boomerang: { title: './sfx/boomerang.mp3', currentTime: 0.1 },
     firstBlood: { title: './sfx/first-blood.mp3', volume: 0.2 },
     win: { title: './sfx/audience-clapping-03-99963.mp3' },
     musicGame: [
@@ -193,6 +194,7 @@ var musicGame = audio.musicGame.map(audio => getAudio(audio));
 var musicLobby = audio.musicLobby.map(audio => getAudio(audio));
 var soundJoin = getAudio(audio.join);
 var soundSpinningWheel = getAudio(audio.spinningWheel);
+var soundBoomerang = getAudio(audio.boomerang);
 var soundFirstBlood = getAudio(audio.firstBlood);
 var soundMultiKill = audio.multiKill.map(audio => getAudio(audio));
 var soundTotalKill = audio.totalKill.map(audio => getAudio(audio));

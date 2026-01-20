@@ -90,10 +90,10 @@ const animateLobbyStartButton = button => {
     let text = 'Walk here to\nVOTE\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
     if (button.playersPossible?.length === 1 && button.allPlayers?.length === 1) {
         text = 'Walk here to\nVOTE\n\nmin 2 players\nor 1 player +1 bot'
-    } else if (spinningWheel.mode) {
-        text = 'Spinning votes'
     } else if (spinningWheel.finishTime) {
         text = 'Entering LOBBY'
+    } else if (spinningWheel.mode) {
+        text = 'Spinning votes'
     }
     button.getChildAt(2).text = text
 }
@@ -148,16 +148,138 @@ const animateRingSegmentButton = button => {
     const isCurrentSegment = spinningWheel.segment?.game === button.gameId
     const isWinner = spinningWheel.finishTime && spinningWheel.segment?.game === button.gameId
 
-    // Pulse effect for winner segment
+    // Animation phases for winner
+    const flyDuration = spinningWheel.finishDuration - spinningWheel.pulseDuration
+
     if (isWinner) {
-        const pulseSpeed = 2 * Math.PI
-        const pulseAmount = 0.15
-        const pulse = 1.15 + Math.sin(-Math.PI / 2 + (dtProcessed - spinningWheel.finishTime) * 0.001 * pulseSpeed) * pulseAmount
-        button.scale.set(pulse)
-        button.getChildAt(0).tint = colors.darkBrown
-        button.getChildAt(0).alpha = 1
+        const elapsedTime = dtProcessed - spinningWheel.finishTime
+        const area = button.getChildAt(0)
+
+        if (elapsedTime < spinningWheel.pulseDuration) {
+            // Phase 1: Pulse effect
+            const pulse = 1.15 + Math.sin(-Math.PI / 2 + elapsedTime * 0.001 * 2 * Math.PI) * 0.15
+            button.scale.set(pulse)
+
+            area.tint = colors.darkBrown
+            area.alpha = 1
+        } else {
+            // Phase 2: Fly around in boomerang curves, then settle, then hold for reading
+            const settleDuration = flyDuration - spinningWheel.boomerangDuration - spinningWheel.readDuration
+            const flyElapsed = elapsedTime - spinningWheel.pulseDuration
+
+            overlayLayer.attach(button)
+            area.alpha = 1
+
+            if (flyElapsed < spinningWheel.boomerangDuration) {
+                // Sub-phase 2a: Figure-8 like looping flight across the whole field
+                const boomerangProgress = flyElapsed / spinningWheel.boomerangDuration
+
+                // Generate random waypoints once per spin (stored on button)
+                if (!button.boomerangPath) {
+                    // Use full map dimensions for sweeping coverage
+                    const rangeX = level.width * 0.45
+                    const rangeY = level.height * 0.45
+
+                    // Create a figure-8 like path with 6 waypoints for multiple loops
+                    button.boomerangPath = [
+                        // Start at center
+                        { x: 0, y: 0, cx: (Math.random() - 0.5) * rangeX * 1.5, cy: (Math.random() - 0.5) * rangeY * 1.5 },
+                        // Loop 1: sweep to top-right area - control point curves outward
+                        {
+                            x: rangeX * (0.5 + Math.random() * 0.5), y: -rangeY * (0.5 + Math.random() * 0.5),
+                            cx: rangeX * (1.2 + Math.random() * 0.5), cy: rangeY * (0.3 + Math.random() * 0.4)
+                        },
+                        // Cross to bottom-left area - big sweeping curve through bottom
+                        {
+                            x: -rangeX * (0.5 + Math.random() * 0.5), y: rangeY * (0.5 + Math.random() * 0.5),
+                            cx: rangeX * (0.2 + Math.random() * 0.3), cy: rangeY * (1.0 + Math.random() * 0.5)
+                        },
+                        // Loop 2: sweep to top-left area - curve through left side
+                        {
+                            x: -rangeX * (0.5 + Math.random() * 0.5), y: -rangeY * (0.3 + Math.random() * 0.5),
+                            cx: -rangeX * (1.2 + Math.random() * 0.4), cy: rangeY * (0.2 + Math.random() * 0.3)
+                        },
+                        // Cross to bottom-right area - big curve through right side
+                        {
+                            x: rangeX * (0.5 + Math.random() * 0.5), y: rangeY * (0.3 + Math.random() * 0.5),
+                            cx: -rangeX * (0.3 + Math.random() * 0.3), cy: -rangeY * (0.8 + Math.random() * 0.4)
+                        },
+                        // Return toward center for settle phase
+                        {
+                            x: (Math.random() - 0.5) * rangeX * 0.3, y: (Math.random() - 0.5) * rangeY * 0.3,
+                            cx: rangeX * (0.8 + Math.random() * 0.4), cy: rangeY * (0.5 + Math.random() * 0.3)
+                        }
+                    ]
+                }
+
+                const path = button.boomerangPath
+                const numSegments = path.length - 1
+
+                // Determine which segment we're on and local progress
+                const segmentIndex = Math.min(Math.floor(boomerangProgress * numSegments), numSegments - 1)
+                const segmentProgress = (boomerangProgress * numSegments) - segmentIndex
+
+                // Spin around segment's center during flight
+                const spinRotations = 4  // Number of full rotations during boomerang phase
+                const rotation = boomerangProgress * spinRotations * Math.PI * 2
+
+                // Counter-rotate the pivot so the path isn't affected by rotation
+                // This keeps the visual position on the curved path while spinning
+                const cos = Math.cos(-rotation)
+                const sin = Math.sin(-rotation)
+
+                const p0 = path[segmentIndex]
+                const p1 = path[segmentIndex + 1]
+                const curve = quadraticBezier(segmentProgress, p0, { x: p1.cx, y: p1.cy }, p1)
+                button.pivot.x = curve.x * cos - curve.y * sin
+                button.pivot.y = curve.x * sin + curve.y * cos
+                button.scale.set(1.3 + Math.sin(boomerangProgress * Math.PI * 4) * 0.15)
+                button.rotation = rotation
+            } else {
+                // Sub-phase 2b: Settle into final position
+                const easedProgress = easeInOutCubic(Math.min((flyElapsed - spinningWheel.boomerangDuration) / settleDuration, 1))
+
+                // Get the end position from boomerang path (last waypoint in array)
+                const path = button.boomerangPath || [{ x: 0, y: 0 }]
+                const lastPoint = path[path.length - 1]
+                const boomerangEndX = lastPoint.x
+                const boomerangEndY = lastPoint.y
+                const boomerangEndScale = 1.3
+
+                // End position for settle phase
+                const centerAngle = button.startAngle + distanceAnglesRad(button.startAngle, button.endAngle) / 2
+                const midRadius = (button.innerRadius + button.outerRadius) / 2
+                const endOffsetX = Math.cos(centerAngle) * midRadius
+                const endOffsetY = Math.sin(centerAngle) * midRadius
+
+                // Interpolate from boomerang end position to final position
+                button.pivot.x = boomerangEndX + (endOffsetX - boomerangEndX) * easedProgress
+                button.pivot.y = boomerangEndY + (endOffsetY - boomerangEndY) * easedProgress
+
+                // Scale from boomerang end scale to final scale
+                const endScale = 0.95 * level.height / button.outerRadius
+                button.scale.set(boomerangEndScale + (endScale - boomerangEndScale) * easedProgress)
+
+                // Determine text orientation - text is flipped when angle is in bottom half
+                let targetRotation = -Math.PI / 2 - centerAngle
+                const textAngleDeg = (rad2limiteddeg(centerAngle) + 90)
+                if (textAngleDeg > 90 && textAngleDeg < 270) {
+                    targetRotation += Math.PI
+                }
+
+                // Rotation: add spins before settling
+                const spinRotations = 2
+                const totalRotation = targetRotation + spinRotations * Math.PI * 2
+                button.rotation = totalRotation * easedProgress
+            }
+        }
     } else {
+        // Reset any flying state for non-winner segments
         button.scale.set(1)
+        button.rotation = 0
+        button.pivot.set(0, 0)
+        overlayLayer.detach(button)
+
         if (isCurrentSegment) {
             button.getChildAt(0).tint = colors.darkBrown
             button.getChildAt(0).alpha = 1
@@ -472,7 +594,7 @@ const animateLobbyItems = lobbyContainer => {
 }
 
 const addLobbyItems = (app) => {
-    const lobbyContainer = new PIXI.Container()
+    const lobbyContainer = new PIXI.Container({ sortableChildren: true })
     addGameSelection(app, lobbyContainer)
     addGameStartButton(app, lobbyContainer)
     addButtons(app, lobbyContainer)

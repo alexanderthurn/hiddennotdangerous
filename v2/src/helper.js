@@ -167,6 +167,11 @@ const playAudio = (audio) => {
     file.play().catch((err) => { console.log(err) });
 }
 
+const stopAudio = (audio) => {
+    const { file } = audio;
+    file.load();
+}
+
 const playAudioPool = (audioPool, volume) => {
     const freeAudioEntry = audioPool.find(entry => entry.audio.file.ended || !entry.played);
     if (freeAudioEntry) {
@@ -627,7 +632,10 @@ const spinningWheel = {
     constantSpeedThreshold: 0.5,
     startSpeed: 2.5,
     maxTurnsToStop: 5,
-    finishDuration: 3000
+    finishDuration: 6000,
+    pulseDuration: 2500,
+    boomerangDuration: 2000,
+    readDuration: 1000
 }
 
 const initSpinningWheel = () => {
@@ -685,6 +693,12 @@ const processSpinningWheel = dtProcessed => {
     if (!spinningWheel.finishTime && spinningWheel.turn === spinningWheel.turnsToStop && spinningWheel.segment === spinningWheel.winner) {
         spinningWheel.finishTime = dtProcessed
     }
+    if (!soundBoomerang.file.currentTime && spinningWheel.finishTime && dtProcessed > spinningWheel.pulseDuration + spinningWheel.finishTime && dtProcessed <= spinningWheel.finishDuration - spinningWheel.readDuration + spinningWheel.finishTime) {
+        playAudio(soundBoomerang)
+    }
+    if (soundBoomerang.file.currentTime && dtProcessed > spinningWheel.finishDuration - spinningWheel.readDuration + spinningWheel.finishTime) {
+        stopAudio(soundBoomerang)
+    }
     if (dtProcessed - spinningWheel.finishTime > spinningWheel.finishDuration) {
         stopSpinningWheel()
         game = games[spinningWheel.winner.game]
@@ -729,3 +743,11 @@ const stepSpinningWheel = dtProcessed => {
         spinningWheel.startTime = dtProcessed
     }
 }
+
+// Easing function for smooth acceleration/deceleration
+const easeInOutCubic = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+
+const quadraticBezier = (t, p0, p1, p2) => ({
+    x: (1 - t) * (1 - t) * p0.x + 2 * (1 - t) * t * p1.x + t * t * p2.x,
+    y: (1 - t) * (1 - t) * p0.y + 2 * (1 - t) * t * p1.y + t * t * p2.y
+})
