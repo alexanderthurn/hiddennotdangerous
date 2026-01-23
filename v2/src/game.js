@@ -450,6 +450,7 @@ const touchControlSniper = new FWTouchControl(app, { color: new PIXI.Color(0x335
     addGrass()
     addHeadline()
     addLobbyItems(app)
+    addRaceTrack(app)
     addFoods(app)
     addLevelBoundary(app)
     addFiguresInitialPool(app)

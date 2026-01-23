@@ -513,6 +513,21 @@ const animateShootingRange = button => {
     button.visible = game === games.rampage
 }
 
+const addRaceTrack = (app) => {
+    const { xFinish, y, height } = raceLineDefinition()
+    const finishLine = new PIXI.NineSliceSprite(PIXI.Assets.get('fenceAtlas').textures['finishline'])
+    const width = 50
+    finishLine.x = xFinish - width / 2
+    finishLine.y = y
+    finishLine.width = width
+    finishLine.height = height
+    levelContainer.addChild(finishLine)
+
+    app.ticker.add(() => {
+        finishLine.visible = stage === stages.game && game === games.race
+    })
+}
+
 const addShootingRange = (app, props, lobbyContainer) => {
     const { x, y, width, height, team } = props
     const newX = x - width / 2
