@@ -149,8 +149,6 @@ const animateRingSegmentButton = button => {
     const isWinner = spinningWheel.finishTime && spinningWheel.segment?.game === button.gameId
 
     // Animation phases for winner
-    const flyDuration = spinningWheel.finishDuration - spinningWheel.pulseDuration
-
     if (isWinner) {
         const elapsedTime = dtProcessed - spinningWheel.finishTime
         const area = button.getChildAt(0)
@@ -164,7 +162,7 @@ const animateRingSegmentButton = button => {
             area.alpha = 1
         } else {
             // Phase 2: Fly around in boomerang curves, then settle, then hold for reading
-            const settleDuration = flyDuration - spinningWheel.boomerangDuration - spinningWheel.readDuration
+            const settleDuration = spinningWheel.finishDuration - spinningWheel.pulseDuration - spinningWheel.boomerangDuration - spinningWheel.readDuration
             const flyElapsed = elapsedTime - spinningWheel.pulseDuration
 
             overlayLayer.attach(button)

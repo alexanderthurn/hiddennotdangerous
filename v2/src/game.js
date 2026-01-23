@@ -879,10 +879,7 @@ function updateGame(figures, dt, dtProcessed) {
 
             let aimLoadingPercentage
             if (btn === buttons.startGame) {
-                if (allPlayersSameTeam) {
-                    btn.loadingSpeed = 0
-                }
-                aimLoadingPercentage = btn.playersNear.length / Math.max(playersPossible.length, playersMinimum);
+                aimLoadingPercentage = !allPlayersSameTeam ? btn.playersNear.length / Math.max(playersPossible.length, playersMinimum) : 0;
             } else {
                 aimLoadingPercentage = btn.playersNear.length > 0 ? 1 : 0;
             }
