@@ -515,12 +515,13 @@ const animateShootingRange = button => {
 
 const addRaceTrack = (app) => {
     const { xFinish, y, height } = raceLineDefinition()
-    const finishLine = new PIXI.NineSliceSprite(PIXI.Assets.get('fenceAtlas').textures['finishline'])
-    const width = 50
+    const finishLine = new PIXI.TilingSprite(PIXI.Assets.get('fenceAtlas').textures['finishline'])
+    const width = 52
     finishLine.x = xFinish - width / 2
     finishLine.y = y
     finishLine.width = width
     finishLine.height = height
+    finishLine.tileScale.set(0.5, 0.5)
     levelContainer.addChild(finishLine)
 
     app.ticker.add(() => {
