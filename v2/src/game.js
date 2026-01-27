@@ -272,6 +272,13 @@ const raceLineDefinition = () => ({
     height: level.height * 0.8
 })
 
+const practiceTrackDefinition = () => ({
+    x: level.width * 0.5,
+    y: level.height * 0.85,
+    width: 400,
+    height: 100
+})
+
 
 const teamSwitchersDefinition = () => ({
     assassin: {

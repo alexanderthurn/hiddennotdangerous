@@ -571,6 +571,60 @@ const addShootingRange = (app, props, lobbyContainer) => {
     })
 }
 
+const addPracticeTrack = (app, props, lobbyContainer) => {
+    const { x, y, width, height } = props
+    const trackX = x - width / 2
+    const trackY = y - height / 2
+
+    // Track background
+    const trackBg = new PIXI.Graphics()
+        .rect(trackX, trackY, width, height)
+        .fill({ color: colors.darkBrown, alpha: 0.3 })
+
+    // Start zone (left side)
+    const startZoneWidth = 60
+    const startZone = new PIXI.Graphics()
+        .rect(trackX, trackY, startZoneWidth, height)
+        .fill({ color: colors.green, alpha: 0.5 })
+
+    // Start zone label
+    const startLabel = new PIXI.BitmapText({
+        text: 'START',
+        style: { ...app.textStyleDefault, align: 'center' },
+    })
+    startLabel.anchor.set(0.5, 0.5)
+    startLabel.x = trackX + startZoneWidth / 2
+    startLabel.y = y
+    startLabel.scale.set(0.8)
+
+    // Mini finish line (right side)
+    const finishLineWidth = 26
+    const finishLine = new PIXI.TilingSprite(PIXI.Assets.get('fenceAtlas').textures['finishline'])
+    finishLine.x = trackX + width - finishLineWidth
+    finishLine.y = trackY
+    finishLine.width = finishLineWidth
+    finishLine.height = height
+    finishLine.tileScale.set(0.25, 0.25)
+
+    // Track label
+    const trackLabel = new PIXI.BitmapText({
+        text: 'PRACTICE TRACK',
+        style: { ...app.textStyleDefault, align: 'center' },
+    })
+    trackLabel.anchor.set(0.5, 1)
+    trackLabel.x = x
+    trackLabel.y = trackY - 5
+    trackLabel.scale.set(0.8)
+
+    const practiceTrackContainer = new PIXI.Container()
+    practiceTrackContainer.addChild(trackBg, startZone, startLabel, finishLine, trackLabel)
+    lobbyContainer.addChild(practiceTrackContainer)
+
+    app.ticker.add(() => {
+        practiceTrackContainer.visible = stage === stages.gameLobby && game === games.race
+    })
+}
+
 const createTeamSwitcher = (app, props, lobbyContainer) => {
     const { x, y, team } = props
     const width = 128
@@ -613,6 +667,7 @@ const addLobbyItems = (app) => {
     addGameStartButton(app, lobbyContainer)
     addButtons(app, lobbyContainer)
     addShootingRange(app, shootingRangeDefinition(), lobbyContainer)
+    addPracticeTrack(app, practiceTrackDefinition(), lobbyContainer)
     addTeamSwitchers(app, lobbyContainer)
     addNetworkQrCode(app, lobbyContainer)
     addGameDescription(app, lobbyContainer)
