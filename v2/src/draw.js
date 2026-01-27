@@ -616,8 +616,33 @@ const addPracticeTrack = (app, props, lobbyContainer) => {
     trackLabel.y = trackY - 5
     trackLabel.scale.set(0.8)
 
+    // Start zone button - enters race mode
+    const startButton = new PIXI.Container()
+    startButton.execute = () => startButton.playersNear.forEach(f => {
+        if (!f.isInRace) {
+            f.isInRace = true
+        }
+    })
+    startButton.isInArea = f => stage === stages.gameLobby && game === games.race &&
+        new PIXI.Rectangle(trackX, trackY, startZoneWidth, height).contains(f.x, f.y)
+    startButton.addChild(startZone, startLabel)
+
+    // Finish line button - exits race mode
+    const finishButton = new PIXI.Container()
+    finishButton.execute = () => finishButton.playersNear.forEach(f => {
+        if (f.isInRace) {
+            f.isInRace = false
+        }
+    })
+    finishButton.isInArea = f => stage === stages.gameLobby && game === games.race &&
+        new PIXI.Rectangle(trackX + width - finishLineWidth / 2, trackY, finishLineWidth / 2, height).contains(f.x, f.y)
+    finishButton.addChild(finishLine)
+
+    buttons.practiceTrackStart = startButton
+    buttons.practiceTrackFinish = finishButton
+
     const practiceTrackContainer = new PIXI.Container()
-    practiceTrackContainer.addChild(trackBg, startZone, startLabel, finishLine, trackLabel)
+    practiceTrackContainer.addChild(trackBg, startButton, finishButton, trackLabel)
     lobbyContainer.addChild(practiceTrackContainer)
 
     app.ticker.add(() => {
