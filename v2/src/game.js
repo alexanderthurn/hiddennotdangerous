@@ -265,7 +265,7 @@ const shootingRangeDefinition = () => ({
     team: 'sniper'
 })
 
-const raceLineDefinition = () => ({
+const raceTrackDefinition = () => ({
     xStart: level.width * 0.1,
     xFinish: level.width * 0.9,
     y: level.height * 0.1,
@@ -772,7 +772,7 @@ const handleWinning = () => {
             }
 
             // first at finish
-            const figuresInFinish = figures.filter(f => f.x > raceLineDefinition().xFinish && f.type === 'fighter')
+            const figuresInFinish = figures.filter(f => f.x > raceTrackDefinition().xFinish && f.type === 'fighter')
             if (!restartStage && figuresInFinish.length > 0) {
                 winRoundFigures(figuresInFinish.filter(f => f.playerId))
             }

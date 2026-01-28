@@ -86,7 +86,7 @@ const initRandomOutsidePositionFigure = figure => {
 }
 
 const initStartPositionFigure = (figure, i, walkRectLength) => {
-    let { xStart: x, y, height } = raceLineDefinition()
+    let { xStart: x, y, height } = raceTrackDefinition()
     y = y + i / maxPlayerFigures * height
 
     initFigure(figure, x, y, 0)

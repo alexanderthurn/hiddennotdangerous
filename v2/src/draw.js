@@ -514,7 +514,7 @@ const animateShootingRange = button => {
 }
 
 const addRaceTrack = (app) => {
-    const { xFinish, y, height } = raceLineDefinition()
+    const { xFinish, y, height } = raceTrackDefinition()
     const finishLine = new PIXI.TilingSprite(PIXI.Assets.get('fenceAtlas').textures['finishline'])
     const width = 52
     finishLine.x = xFinish - width / 2
@@ -616,22 +616,28 @@ const addPracticeTrack = (app, props, lobbyContainer) => {
     trackLabel.y = trackY - 5
     trackLabel.scale.set(0.8)
 
-    // Start zone button - enters race mode
+    // Start zone button - enters race mode and spawns crosshair
     const startButton = new PIXI.Container()
     startButton.execute = () => startButton.playersNear.forEach(f => {
         if (!f.isInRace) {
             f.isInRace = true
+            const crosshair = createCrosshair({ ...f, x: f.x, y: f.y })
+            figures.push(crosshair)
         }
     })
     startButton.isInArea = f => stage === stages.gameLobby && game === games.race &&
         new PIXI.Rectangle(trackX, trackY, startZoneWidth, height).contains(f.x, f.y)
     startButton.addChild(startZone, startLabel)
 
-    // Finish line button - exits race mode
+    // Finish line button - exits race mode and removes crosshair
     const finishButton = new PIXI.Container()
     finishButton.execute = () => finishButton.playersNear.forEach(f => {
         if (f.isInRace) {
             f.isInRace = false
+            const crosshair = figures.find(fig => fig.type === 'crosshair' && fig.playerId === f.playerId)
+            if (crosshair) {
+                crosshair.isDead = true
+            }
         }
     })
     finishButton.isInArea = f => stage === stages.gameLobby && game === games.race &&
