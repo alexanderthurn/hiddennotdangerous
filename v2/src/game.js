@@ -545,7 +545,7 @@ function initStage(nextStage) {
 
     if (roundCounter === 1 && stage === stages.game) {
         if (game === games.race) {
-            addCrosshairs(figuresPoolArray.filter(figure => figure.playerId), 1)
+            addCrosshairs(figuresPoolArray.filter(figure => figure.playerId && !figureIsBot(figure)), 1)
         } else if (game === games.rampage) {
             const killerFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'killer')
             const sniperFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'sniper')
