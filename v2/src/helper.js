@@ -13,6 +13,7 @@ const colors = {
     lightBrown: 0x8B4513,
     lime: 0x00FF00,
     magenta: 0xFF00FF,
+    neonBlue: 0x3355FF,
     purple: 0x800080,
     red: 0xFF0000,
     white: 0xFFFFFF,

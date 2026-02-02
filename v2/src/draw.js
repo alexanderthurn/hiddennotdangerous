@@ -687,8 +687,10 @@ const addTeamSwitchers = (app, lobbyContainer) => {
     Object.entries(teamSwitchersDefinition()).forEach(([id, button]) => { buttons[id] = createTeamSwitcher(app, button, lobbyContainer) })
 }
 
-const animateLobbyItems = lobbyContainer => {
-
+const animateLobbyItems = (lobbyContainer, touchControlDefault, touchControlSniper, touchControlRace) => {
+    touchControlDefault.visible = stage === stages.startLobby || (stage === stages.gameLobby && game === games.rampage)
+    touchControlSniper.visible = stage === stages.gameLobby && game === games.rampage
+    touchControlRace.visible = stage === stages.gameLobby && game === games.race
     lobbyContainer.visible = stage === stages.startLobby || stage === stages.gameLobby
 }
 
@@ -703,63 +705,35 @@ const addLobbyItems = (app) => {
     addNetworkQrCode(app, lobbyContainer)
     addGameDescription(app, lobbyContainer)
 
-    const fontHeight = 32
-    const howToPlay = new PIXI.BitmapText({
-        text: 'HOW TO PLAY\n\nJoin by pressing any key on your Gamepad'
-            + '\nor WASDT(Key1) or ' + String.fromCharCode(8592) + String.fromCharCode(8593) + String.fromCharCode(8594) + String.fromCharCode(8595) + '0(RSHIFT)\nor touch'
-            + '\n\n1.) Find your player 2.) Fart to knock out others\n3.) Stay hidden 4.) Eat to power up your farts'
-            + '\n\nBe the last baby standing!',
-        style: {
-            align: 'center',
-            fontSize: fontHeight,
-            fill: colors.white
-        }
-    });
+    const touchControlDefault = createTouchControlHint(app, lobbyContainer, { position: 'left', text: 'Controls', buttonHints: new Map([[0, { text: 'FART', scale: 4 }], [3, { text: 'SHOW', scale: 4 }]]), axisHints: new Map([[0, { text: 'WALK', scale: 2 }]]) })
+    const touchControlSniper = createTouchControlHint(app, lobbyContainer, { position: 'right', color: new PIXI.Color(colors.neonBlue), text: 'Sniper', buttonHints: new Map([[0, { text: 'SHOOT', scale: 3 }]]), axisHints: new Map([[0, { text: 'AIM', scale: 2 }]]) })
+    const touchControlRace = createTouchControlHint(app, lobbyContainer, { position: 'right', color: new PIXI.Color(colors.electricIndigo), text: 'Race', buttonHints: new Map([[0, { text: 'SHOOT', scale: 3 }], [1, { text: 'RUN', scale: 4 }], [2, { text: 'WALK', scale: 4 }], [3, { text: 'SHOW', scale: 4 }]]), axisHints: new Map([[0, { text: 'AIM', scale: 2 }]]) })
 
-    howToPlay.anchor.set(0.5, 0)
-    howToPlay.x = level.width * 0.22 + fontHeight
-    howToPlay.y = level.height * 0.1
-    howToPlay.visible = false
+    levelContainer.addChild(lobbyContainer)
 
+    app.ticker.add(() => animateLobbyItems(lobbyContainer, touchControlDefault, touchControlSniper, touchControlRace))
+}
 
-    touchControl.setHintForButton(0, { text: 'FART', scale: 4 });
-    touchControl.setHintForButton(3, { text: 'SHOW', scale: 4 });
-    touchControl.setHintForAxis(0, { text: 'WALK', scale: 2 });
+const createTouchControlHint = (app, container, props) => {
+    const { position, text, buttonHints, axisHints, color } = props
+    const touchControl = new FWTouchControl(app, { color, isBitmapFont: true, textStyle: app.textStyleController, textStyleSmall: app.textStyleController, textStyleTitle: app.textStyleController, isPassive: true, layout: 'simple', showButtonLabels: false, showHintLabels: true });
+
     const qrWidth = Math.min(level.width, level.height) * 0.3;
-    touchControl.update(app, { x: level.width * 0.05, y: level.height * 0.1, wantedWidth: qrWidth * 1.2, wantedHeight: qrWidth * 0.8 })
-    lobbyContainer.addChild(touchControl)
+    const qrLeft = { x: level.width * 0.05, y: level.height * 0.1, wantedWidth: qrWidth * 1.2, wantedHeight: qrWidth * 0.8 };
+    const qrRight = { x: level.width * 0.95 - qrWidth * 1.2, y: level.height * 0.1, wantedWidth: qrWidth * 1.2, wantedHeight: qrWidth * 0.8 };
+    buttonHints.forEach((hint, index) => touchControl.setHintForButton(index, hint))
+    axisHints.forEach((hint, index) => touchControl.setHintForAxis(index, hint))
+    touchControl.update(app, position == 'right' ? qrRight : qrLeft)
     touchControl.label = new PIXI.BitmapText({
-        text: 'Controls',
+        text,
         style: { ...app.textStyleDefault, align: 'center' },
     })
     touchControl.label.anchor.set(0.5, 0)
     touchControl.label.x = touchControl.wantedWidth * 0.5
     touchControl.label.y = touchControl.wantedHeight
-    touchControlSniper.setHintForButton(0, { text: 'SHOOT', scale: 3 });
-    touchControlSniper.setHintForAxis(0, { text: 'AIM', scale: 2 });
-    touchControlSniper.visible = true;
-    touchControlSniper.update(app, { x: level.width * 0.95 - qrWidth * 1.2, y: level.height * 0.1, wantedWidth: qrWidth * 1.2, wantedHeight: qrWidth * 0.8 })
-    touchControlSniper.label = new PIXI.BitmapText({
-        text: 'Sniper',
-        style: { ...app.textStyleDefault, align: 'center' },
-    })
-    touchControlSniper.label.anchor.set(0.5, 0)
-    touchControlSniper.label.x = touchControlSniper.wantedWidth * 0.5
-    touchControlSniper.label.y = touchControlSniper.wantedHeight
-    touchControlSniper.addChild(touchControlSniper.label)
-
-
-
     touchControl.addChild(touchControl.label)
-    lobbyContainer.addChild(touchControlSniper)
-
-
-
-
-    lobbyContainer.addChild(howToPlay)
-    levelContainer.addChild(lobbyContainer)
-
-    app.ticker.add(() => animateLobbyItems(lobbyContainer))
+    container.addChild(touchControl)
+    return touchControl
 }
 
 const getScoreDefaultX = player => {

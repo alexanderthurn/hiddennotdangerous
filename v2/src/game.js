@@ -367,10 +367,6 @@ app.textStyleController = {
     fill: '#000'
 };
 
-const touchControl = new FWTouchControl(app, { isBitmapFont: true, textStyle: app.textStyleController, textStyleSmall: app.textStyleController, textStyleTitle: app.textStyleController, isPassive: true, layout: 'simple', showButtonLabels: false, showHintLabels: true });
-const touchControlSniper = new FWTouchControl(app, { color: new PIXI.Color(0x3355ff), isBitmapFont: true, textStyle: app.textStyleController, textStyleSmall: app.textStyleController, textStyleTitle: app.textStyleController, isPassive: true, layout: 'simple', showButtonLabels: false, showHintLabels: true });
-
-
 (async () => {
     console.log('no need to hide');
 
@@ -488,8 +484,6 @@ function initStage(nextStage) {
     lastTotalkillAudio = 0;
     totalkillCounter = 0;
     spinningWheel.finishTime = undefined
-    touchControl.visible = stage === stages.startLobby || (stage === stages.gameLobby && game === games.rampage)
-    touchControlSniper.visible = (stage === stages.gameLobby && game === games.rampage)
 
     if (stage === stages.startLobby) {
         game = undefined
