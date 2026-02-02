@@ -1060,7 +1060,8 @@ const animateFigure = (figure, spritesheet) => {
     }
     animation = figure.currentSprite + '_' + animation
 
-    if (figure.isDead && (!(stage === stages.game && (game === games.rampage)) || figure.isDeathDetected)) {
+    const isDeathDetected = figure.isDead && (!(stage === stages.game && (game === games.rampage)) || figure.isDeathDetected)
+    if (isDeathDetected) {
         body.angle = 90
         figureLayer.detach(body)
         shadow.visible = false
@@ -1101,7 +1102,7 @@ const animateFigure = (figure, spritesheet) => {
     let frameAnchor = body.textures[body.currentFrame].defaultAnchor || { x: 0.5, y: 0.5 }
     body.anchor = shadow.anchor = rotationAnchor
 
-    body.y = shadow.y = figure.isDead ? 0 : -body.height * (frameAnchor.y - rotationAnchor.y)
+    body.y = shadow.y = isDeathDetected ? 0 : -body.height * (frameAnchor.y - rotationAnchor.y)
     shadow.x = body.x + body.width * 0.5 * body.scale.x
 
 
