@@ -268,8 +268,8 @@ const shootingRangeDefinition = () => ({
 const raceTrackDefinition = () => ({
     xStart: level.width * 0.1,
     xFinish: level.width * 0.9,
-    y: level.height * 0.1,
-    height: level.height * 0.8
+    y: level.height * 0.05,
+    height: level.height * 0.9
 })
 
 const practiceTrackDefinition = () => ({
