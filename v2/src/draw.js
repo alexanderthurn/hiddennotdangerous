@@ -1247,6 +1247,7 @@ const addFiguresInitialPool = (app) => {
             attackAngle: 90,
             type: 'fighter',
         })
+        figure.visible = false
         figuresInitialPool.add(figure)
     }
     for (var i = 0; i < numberVIPs; i++) {

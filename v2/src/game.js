@@ -502,6 +502,9 @@ function initStage(nextStage) {
 
         figuresPool = new Set(figuresInitialPool)
 
+        figures.filter(figure => figure.type === 'fighter' && figure.team !== 'vip').forEach(figure => {
+            figure.visible = false
+        })
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => destroyContainer(app, figure))
         figures.filter(figure => figure.type === 'fighter').forEach(figure => {
             if (figure.team !== 'vip') {
@@ -553,7 +556,9 @@ function initStage(nextStage) {
     figures = []
 
     // Figuren aus Pool laden
-    if (game === games.vip) {
+    if (stage === stages.startLobby) {
+        figures.push(figuresPoolArray.find(figure => figure.type === 'fighter' && figure.team !== 'vip'))
+    } else if (game === games.vip) {
         figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'fighter'))
     } else {
         figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team !== 'vip'))
@@ -567,8 +572,15 @@ function initStage(nextStage) {
 
     // Figuren initialisieren
 
+    if (stage === stages.startLobby || stage === stages.gameLobby) {
+        figures.filter(figure => figure.type === 'fighter' && figure.team !== 'vip').forEach(figure => {
+            figure.visible = true
+        })
+    }
+
     if (stage === stages.gameLobby) {
-        resetFiguresToBabys(figures.filter(figure => figure.playerId && figure.type === 'fighter'))
+        figures.filter(figure => !figure.playerId).forEach(figure => initRandomPositionFigure(figure))
+        //resetFiguresToBabys(figures.filter(figure => figure.playerId && figure.type === 'fighter'))
         if (game.initialTeam) {
             figures.filter(figure => figure.playerId).forEach(figure => {
                 switchTeam(figure, game.initialTeam)
@@ -682,6 +694,7 @@ function gameLoop() {
         })
     }
     then = now
+    console.log('game loop', figures.length, figuresPool.size)
     window.requestAnimationFrame(gameLoop);
 }
 
@@ -1064,6 +1077,7 @@ function handleInput(players, figures, dtProcessed) {
 
     if (stage !== stages.game && !spinningWheel.finishTime) {
         var joinedFighters = figures.filter(f => f.playerId && f.type === 'fighter')
+
         // join by doing anything
         players.filter(p => p.isAnyButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
             var figure = joinedFighters.find(f => f.playerId === p.playerId)
@@ -1077,6 +1091,13 @@ function handleInput(players, figures, dtProcessed) {
                     p.crosshairColor = getCrosshairColor()
                 }
                 var figure = figures.find(f => !f.playerId && f.type === 'fighter')
+                if (!figure) {
+                    // load from pool
+                    figure = Array.from(figuresPool).find(f => !f.playerId && f.type === 'fighter')
+                    figures.push(figure)
+                    initRandomPositionFigure(figure)
+                    figure.visible = true
+                }
                 p.joinedTime = dtProcessed
                 figure.isDead = false
                 figure.isDeathDetected = false
