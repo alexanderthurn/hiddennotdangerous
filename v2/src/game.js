@@ -1106,10 +1106,6 @@ function handleInput(players, figures, dtProcessed) {
                 switchTeam(figure, game?.initialTeam)
 
                 addPlayerScore(figure)
-                if (stage === stages.startLobby) {
-                    figure.x = level.width * 0.04 + Math.random() * level.width * 0.3
-                    figure.y = level.height * 0.05 + Math.random() * level.height * 0.42
-                }
                 playAudio(soundJoin);
 
                 if (joinedFighters.length === 0) {
