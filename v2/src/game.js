@@ -1083,7 +1083,6 @@ function handleInput(players, figures, dtProcessed) {
                 figure.playerId = p.playerId
                 figure.player = p
                 switchTeam(figure, game?.initialTeam)
-                figure.currentSprite = mostFigures[joinedFighters.length % mostFigures.length]
 
                 addPlayerScore(figure)
                 if (stage === stages.startLobby) {
