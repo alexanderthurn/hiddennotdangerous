@@ -720,10 +720,9 @@ const handleWinning = () => {
                 winRoundFigures([])
             }
 
-            // max points hit
-            const maxPoints = Math.max(...players.map(p => p.score?.points || 0))
-            if (maxPoints >= pointsToWin) {
-                const playersWithMaxPoints = players.filter(p => p.score?.points === maxPoints)
+            // round limit hit
+            const playersWithMaxPoints = getPlayersWithMaxScore()
+            if (restartStage && roundCounter >= getRoundCount() && playersWithMaxPoints.length === 1) {
                 lastFinalWinnerPlayerIds = new Set(playersWithMaxPoints.map(p => p.playerId))
                 gameOver = true
             }
@@ -753,10 +752,9 @@ const handleWinning = () => {
                 winRoundTeam('guard')
             }
 
-            // max points hit
-            const maxPoints = Math.max(...Object.values(teams).map(team => team.points))
-            if (maxPoints >= pointsToWin) {
-                const teamsWithMaxPoints = Object.keys(teams).filter(team => teams[team].points === maxPoints)
+            // round limit hit
+            const teamsWithMaxPoints = getTeamsWithMaxScore()
+            if (restartStage && roundCounter >= getRoundCount() && teamsWithMaxPoints.length === 1) {
                 finalWinnerTeam = teamsWithMaxPoints[0]
                 lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.team === finalWinnerTeam).map(f => f.playerId))
                 gameOver = true
@@ -783,10 +781,9 @@ const handleWinning = () => {
                 winRoundFigures(figuresInFinish.filter(f => f.playerId))
             }
 
-            // max points hit
-            const maxPoints = Math.max(...players.map(p => p.score?.points || 0))
-            if (maxPoints >= pointsToWin) {
-                const playersWithMaxPoints = players.filter(p => p.score?.points === maxPoints)
+            // round limit hit
+            const playersWithMaxPoints = getPlayersWithMaxScore()
+            if (restartStage && roundCounter >= getRoundCount() && playersWithMaxPoints.length === 1) {
                 lastFinalWinnerPlayerIds = new Set(playersWithMaxPoints.map(p => p.playerId))
                 gameOver = true
             }
@@ -823,8 +820,8 @@ const handleWinning = () => {
                 finishRound()
             }
 
-            // max rounds hit
-            if (restartStage && roundCounter >= roundsToWin) {
+            // round limit hit
+            if (restartStage && roundCounter >= getRoundCount()) {
                 gameOver = true
             }
         }

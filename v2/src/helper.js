@@ -606,6 +606,16 @@ const winRoundFigures = winnerFigures => {
     finishRound()
 }
 
+const getPlayersWithMaxScore = () => {
+    const maxPoints = Math.max(...players.map(p => p.score?.points || 0))
+    return players.filter(p => p.score?.points === maxPoints)
+}
+
+const getTeamsWithMaxScore = () => {
+    const maxPoints = Math.max(...Object.values(teams).map(team => team.points))
+    return Object.keys(teams).filter(team => teams[team].points === maxPoints)
+}
+
 const switchTeam = (figure, team) => {
     if (figure.team) {
         teams[figure.team].size--
