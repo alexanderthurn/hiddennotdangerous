@@ -89,7 +89,7 @@ const animateLobbyStartButton = button => {
 
     let text = 'Walk here to\nVOTE\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
     if (button.playersPossible?.length === 1 && button.allPlayers?.length === 1) {
-        text = 'Walk here to\nVOTE\n\nmin 2 players\nor 1 player +1 bot'
+        text = 'Walk here to\nVOTE\n\nmin 2 players' + (numberBots > 0 ? '\nor 1 player +1 bot' : '')
     } else if (spinningWheel.finishTime) {
         text = 'Entering LOBBY'
     } else if (spinningWheel.mode) {
@@ -107,7 +107,7 @@ const animateGameStartButton = button => {
     } else if (allPlayersSameTeam) {
         text = 'SWITCH TEAM\nAll players in same team'
     } else if (button.playersPossible?.length === 1) {
-        text = 'Walk here to\nSTART\n\nmin 2 players\nor 1 player +1 bot'
+        text = 'Walk here to\nSTART\n\nmin 2 players' + (numberBots > 0 ? '\nor 1 player +1 bot' : '')
     } else if (button.playersPossible?.length > 1 && button.playersNear?.length === button.playersPossible?.length) {
         text = 'Starting GAME'
     } else if (button.playersNear?.length > 0) {
@@ -498,15 +498,15 @@ const animateMuteButton = button => {
     button.getChildAt(2).text = isMusicMuted() ? 'Music: OFF' : 'Music: ON'
 }
 
-const animateBotsButton = button => {
-    button.getChildAt(2).text = 'Bots: ' + getBotCount()
+const animateRoundsButton = button => {
+    button.getChildAt(2).text = 'Rounds: ' + getRoundCount()
 }
 
 const addButtons = (app, lobbyContainer) => {
     Object.entries(rectangleButtonsDefinition()).forEach(([id, button]) => { buttons[id] = createRectangleButton(button, lobbyContainer) })
 
     app.ticker.add(() => animateMuteButton(buttons.mute))
-    app.ticker.add(() => animateBotsButton(buttons.bots))
+    app.ticker.add(() => animateRoundsButton(buttons.rounds))
 }
 
 const animateShootingRange = button => {

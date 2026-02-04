@@ -38,7 +38,7 @@ var isRestartButtonPressed, restartStage = false, gameOver, ceremonyOver, lastRo
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
 var dtFix = 10, dtToProcess = 0, dtProcessed = 0
 var figuresInitialPool = new Set(), figuresPool = new Set()
-var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, defaultMaxSpeed = 0.12, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, roundsToWin = 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000, baseAmmoFactor = 2, bonusAmmoFactor = 0.5, detectRadius = 200
+var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, numberBots = getQueryParam('bots') && Number.parseInt(getQueryParam('bots')) || 0, defaultMaxSpeed = 0.12, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, roundsToWin = 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000, baseAmmoFactor = 2, bonusAmmoFactor = 0.5, detectRadius = 200
 
 var allPlayersSameTeam, isDebugMode = false
 var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
@@ -247,13 +247,13 @@ const rectangleButtonsDefinition = () => ({
         defaultLoadingSpeed: 1 / 2500,
         execute: toggleMusic
     },
-    bots: {
+    rounds: {
         x: level.width * (1.0 - 0.05 - 0.15),
         y: level.height * 0.12 + level.height * 0.1 + 20,
         width: level.width * 0.15,
         height: level.height * 0.1,
         defaultLoadingSpeed: 1 / 2000,
-        execute: toggleBots
+        execute: toggleRounds
     }
 })
 
@@ -306,8 +306,7 @@ const teamSwitchersDefinition = () => ({
 const buttons = {
     selectGame: {},
     startGame: {},
-    mute: {},
-    bots: {}
+    mute: {}
 }
 
 const circleOfDeathDefinition = () => ({

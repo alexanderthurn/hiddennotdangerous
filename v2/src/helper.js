@@ -273,22 +273,22 @@ const playKillingSounds = (numberKilledFigures, killTime) => {
     }
 }
 
-const getBotCount = () => {
-    var bots = parseInt(window.localStorage.getItem('bots'))
-    return isNaN(bots) ? 0 : bots
+const getRoundCount = () => {
+    var rounds = parseInt(window.localStorage.getItem('rounds'))
+    return isNaN(rounds) ? 3 : rounds
 }
 
-const setBotCount = (bots) => {
-    window.localStorage.setItem('bots', bots)
+const setRoundCount = (rounds) => {
+    window.localStorage.setItem('rounds', rounds)
 }
 
-const toggleBots = () => {
-    var count = getBotCount()
+const toggleRounds = () => {
+    var count = getRoundCount()
     count++
-    if (count > 3) {
-        count = 0
+    if (count > 10) {
+        count = 1
     }
-    setBotCount(count)
+    setRoundCount(count)
     return count
 }
 

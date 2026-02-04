@@ -9,7 +9,7 @@ window.addEventListener('keydown', event => {
     });
 
     if (event.code === 'Escape') {
-        isDebugMode =!isDebugMode
+        isDebugMode = !isDebugMode
     }
 
     if (event.code === 'ArrowDown' || event.code === 'ArrowUp') { /* prevent scrolling of website */
@@ -22,7 +22,7 @@ window.addEventListener('blur', () => {
 }, { passive: false })
 
 window.addEventListener('focus', () => {
-    setTimeout(() => {windowHasFocus = true}, 100)
+    setTimeout(() => { windowHasFocus = true }, 100)
 }, { passive: false })
 
 
@@ -48,8 +48,7 @@ window.addEventListener('pointerup', event => {
 
 
 function collectInputs() {
-    const botCount = getBotCount()
-    botPlayers = botPlayers.slice(0, botCount)
+    botPlayers = botPlayers.slice(0, numberBots)
 
     const defaultBotPlayer = {
         type: 'bot',
@@ -64,20 +63,20 @@ function collectInputs() {
     };
 
     botPlayers = botPlayers.map(bp => Object.assign(bp, defaultBotPlayer));
-    for (var b = 0; b < getBotCount(); b++) {
+    for (var b = 0; b < numberBots; b++) {
         const playerId = 'b' + b
         let bot = botPlayers.find(bp => bp.playerId === playerId);
         let isNew = false
         if (!bot) {
             isNew = true
-            bot = {...defaultBotPlayer, playerId};
+            bot = { ...defaultBotPlayer, playerId };
         }
 
         var f = figures.find(f => f.playerId === bot.playerId && f.type === 'fighter')
         if (f && !f.isDead) {
             var xTarget = -1000
             var yTarget = -1000
-    
+
             if (stage === stages.startLobby) {
                 xTarget = buttons.selectGame.x
                 yTarget = buttons.selectGame.y
@@ -90,9 +89,9 @@ function collectInputs() {
                     const otherPlayerFigures = figures.filter(fig => fig.playerId && fig.playerId !== f.playerId && !fig.isDead && fig.type === 'fighter');
 
                     //go to center of other players
-                    xTarget = otherPlayerFigures.reduce((prevValue, fig) => prevValue+fig.x, 0)/otherPlayerFigures.length;
-                    yTarget = otherPlayerFigures.reduce((prevValue, fig) => prevValue+fig.y, 0)/otherPlayerFigures.length;
-                    if (squaredDistance(f.x,f.y,xTarget, yTarget) < 250) {
+                    xTarget = otherPlayerFigures.reduce((prevValue, fig) => prevValue + fig.x, 0) / otherPlayerFigures.length;
+                    yTarget = otherPlayerFigures.reduce((prevValue, fig) => prevValue + fig.y, 0) / otherPlayerFigures.length;
+                    if (squaredDistance(f.x, f.y, xTarget, yTarget) < 250) {
                         //turn around and fart
                         xTarget *= -1
                         yTarget *= -1
@@ -100,11 +99,11 @@ function collectInputs() {
                     }
                 } else {
                     beans.forEach((b, i, beans) => {
-                        if (!f.beans.has(b.id) && (i < beans.length-1 || f.beans.size !== 1)) {
-                            const beanTarget = {x: b.x, y: b.y}
-                            let d1 = distance(f.x,f.y,beanTarget.x,beanTarget.y);
-                            let d2 = distance(f.x,f.y,xTarget,yTarget);
-                            if (f.beans.size === 0 && i === beans.length-1) {
+                        if (!f.beans.has(b.id) && (i < beans.length - 1 || f.beans.size !== 1)) {
+                            const beanTarget = { x: b.x, y: b.y }
+                            let d1 = distance(f.x, f.y, beanTarget.x, beanTarget.y);
+                            let d2 = distance(f.x, f.y, xTarget, yTarget);
+                            if (f.beans.size === 0 && i === beans.length - 1) {
                                 d1 += level.shortestPathBean5;
                                 d2 += level.shortestPathNotBean5;
                             }
@@ -137,7 +136,7 @@ function collectInputs() {
                 gamepadPlayers.push(x)
             }
         } else {
-            Object.assign(gamepadPlayers[gamepadPlayerIndex],x)
+            Object.assign(gamepadPlayers[gamepadPlayerIndex], x)
         }
     })
 
@@ -147,7 +146,7 @@ function collectInputs() {
         g.isMarkerButtonPressed = false
         g.isSpeedButtonPressed = false
         g.isWalkButtonPressed = false
-         if (g.buttons[4].pressed && g.buttons[5].pressed && g.buttons[6].pressed && g.buttons[7].pressed && g.buttons[10].pressed && g.buttons[11].pressed) {
+        if (g.buttons[4].pressed && g.buttons[5].pressed && g.buttons[6].pressed && g.buttons[7].pressed && g.buttons[10].pressed && g.buttons[11].pressed) {
             console.log('Gamepad restart button pressed', g.isRestartButtonPressed)
             if (!g.isRestartButtonPressed) {
                 console.log('Gamepad restart button pressed2')
@@ -175,7 +174,7 @@ function collectInputs() {
             if (g.buttons[3].pressed) {
                 g.isMarkerButtonPressed = true
             }
-           
+
         }
         let x = g.axes[0];
         let y = g.axes[1];
@@ -213,14 +212,14 @@ function collectInputs() {
                 let p
                 let isNewPlayer = false
                 if (key.playerId) {
-                    p = keyboardPlayers.find(kp => key.playerId ===  kp.playerId);
+                    p = keyboardPlayers.find(kp => key.playerId === kp.playerId);
                     if (!p) {
                         isNewPlayer = true
-                        p = {...defaultkeyboardPlayer, playerId: 'k' + keyboardPlayers.length};
+                        p = { ...defaultkeyboardPlayer, playerId: 'k' + keyboardPlayers.length };
                     }
                     p.isAnyButtonPressed = true
                 }
-                
+
                 switch (action) {
                     case 'left':
                         p.xAxis--;
@@ -268,7 +267,7 @@ function collectInputs() {
             }
         })
     });
-    
+
 
     return [...gamepadPlayers, ...keyboardPlayers, ...botPlayers];
 }
