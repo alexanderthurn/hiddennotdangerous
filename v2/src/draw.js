@@ -954,7 +954,13 @@ const addFoods = (app) => {
 const addGrass = () => {
     const shitBackground = PIXI.Sprite.from('background_shit')
     const grassBackground = PIXI.Sprite.from('background_grass')
+    const defaultGrassScale = level.width + level.height
+
     const grassMask = new PIXI.Graphics()
+        .circle(0, 0, defaultGrassScale)
+        .fill({ color: 0xffffff })
+    grassMask.position.set(level.width / 2, level.height / 2)
+    grassBackground.mask = grassMask
     levelContainer.addChild(shitBackground, grassBackground, grassMask)
 
     app.ticker.add(() => {
@@ -968,12 +974,10 @@ const addGrass = () => {
         shitBackground.visible = isBattleRoyale
 
         if (isBattleRoyale) {
-            grassBackground.mask = grassMask
-            grassMask.clear()
-                .circle(level.width / 2, level.height / 2, circleOfDeath.radius)
-                .fill({ color: 0xffffff })
+            const scale = circleOfDeath.radius / defaultGrassScale
+            grassMask.scale.set(scale, scale)
         } else {
-            grassBackground.mask = null
+            grassMask.scale.set(1, 1)
         }
     })
 }
