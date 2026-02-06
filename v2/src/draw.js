@@ -952,16 +952,34 @@ const addFoods = (app) => {
 }
 
 const addGrass = () => {
-    const shitBackground = PIXI.Sprite.from('background_shit')
-    const grassBackground = PIXI.Sprite.from('background_grass')
     const defaultGrassScale = level.width + level.height
 
+    const shitBackground = PIXI.Sprite.from('background_shit')
+    const grassBackground = PIXI.Sprite.from('background_grass')
     const grassMask = new PIXI.Graphics()
         .circle(0, 0, defaultGrassScale)
         .fill({ color: 0xffffff })
     grassMask.position.set(level.width / 2, level.height / 2)
     grassBackground.mask = grassMask
     levelContainer.addChild(shitBackground, grassBackground, grassMask)
+
+    const blurContainer = new PIXI.Container()
+    const blurShit = PIXI.Sprite.from('background_shit')
+    const blurGrass = PIXI.Sprite.from('background_grass')
+
+    const blurGrassMask = new PIXI.Graphics()
+        .circle(0, 0, defaultGrassScale)
+        .fill({ color: 0xffffff })
+    blurGrassMask.position.set(level.width / 2, level.height / 2)
+    blurGrass.mask = blurGrassMask
+    blurContainer.addChild(blurShit, blurGrass, blurGrassMask)
+    blurContainer.filters = new PIXI.BlurFilter({ strength: 2, quality: 3 })
+
+    const blurMask = new PIXI.Graphics()
+    blurMask.position.set(level.width / 2, level.height / 2)
+    blurContainer.mask = blurMask
+
+    levelContainer.addChild(blurContainer, blurMask)
 
     app.ticker.add(() => {
         if (game === games.battleRoyale) {
@@ -972,10 +990,19 @@ const addGrass = () => {
 
         const isBattleRoyale = stage === stages.game && game === games.battleRoyale
         shitBackground.visible = isBattleRoyale
+        blurContainer.visible = isBattleRoyale
 
         if (isBattleRoyale) {
             const scale = circleOfDeath.radius / defaultGrassScale
             grassMask.scale.set(scale, scale)
+            blurGrassMask.scale.set(scale, scale)
+
+            const ringWidth = 5
+            blurMask.clear()
+                .circle(0, 0, circleOfDeath.radius + ringWidth)
+                .fill({ color: 0xffffff })
+                .circle(0, 0, circleOfDeath.radius - ringWidth)
+                .cut()
         } else {
             grassMask.scale.set(1, 1)
         }
