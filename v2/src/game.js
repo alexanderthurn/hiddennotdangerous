@@ -278,8 +278,8 @@ const raceTrackDefinition = () => ({
 const practiceTrackDefinition = () => ({
     x: level.width * 0.5,
     y: level.height * 0.85,
-    width: 400,
-    height: 100
+    width: 512,
+    height: 128
 })
 
 
