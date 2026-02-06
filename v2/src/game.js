@@ -215,6 +215,7 @@ const gameVoteButtonDefinition = () => ({
             figure.player.vote = button.gameId
             const playerVotedCount = players.filter(player => player.vote).length
             if (playerVotedCount === button.playersPossible.length && playerVotedCount >= button.playersMinimum) {
+                console.log('initSpinningWheel', playerVotedCount, button.playersPossible.length, button.playersMinimum)
                 initSpinningWheel()
             }
         }
@@ -842,9 +843,7 @@ function updateGame(figures, dt, dtProcessed) {
     let figuresDead = figures.filter(f => f.isDead);
     let figuresRevived = []
 
-    if (stage === stages.startLobby) {
-        processSpinningWheel(dtProcessed)
-    }
+    processSpinningWheel(dtProcessed)
 
     if (stage === stages.startLobby || stage === stages.gameLobby) {
         figuresRevived = figuresDead

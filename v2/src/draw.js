@@ -295,7 +295,7 @@ const createRingSegmentButton = (props, lobbyContainer) => {
 
     let button = new PIXI.Container()
     button = Object.assign(button, { x, y, startAngle, endAngle, innerRadius, outerRadius, gameId, execute: getExecute(button) })
-    button.isInArea = f => new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y) && (distanceAnglesRad(angle(x, y, f.x, f.y), centerAngle) < width / 2)
+    button.isInArea = f => stage === stages.startLobby && new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y) && (distanceAnglesRad(angle(x, y, f.x, f.y), centerAngle) < width / 2)
 
     const area = new PIXI.Graphics()
         .arc(0, 0, innerRadius, startAngle, endAngle)
