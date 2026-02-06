@@ -381,6 +381,7 @@ app.textStyleController = {
     const fontFamilyName = 'Rockboxcond12'
     PIXI.Assets.addBundle('main', {
         background_grass: './gfx/background_grass.jpg',
+        background_shit: './gfx/background_shit.jpg',
         crosshair: './gfx/crosshair.svg',
         fenceAtlas: './gfx/fence.json',
         figureAtlas: './gfx/figure.json',

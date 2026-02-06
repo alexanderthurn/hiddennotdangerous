@@ -426,7 +426,7 @@ const addGameDescription = (app, lobbyContainer) => {
         switch (game) {
             case games.battleRoyale:
                 gameDescriptionRight.text = 'Kill other players'
-                    + '\nStay in centre'
+                    + '\nStay on grass'
                     + '\nSurvivor wins'
                 break
             case games.food:
@@ -952,11 +952,34 @@ const addFoods = (app) => {
 }
 
 const addGrass = () => {
-    levelContainer.addChild(PIXI.Sprite.from('background_grass'))
+    const shitBackground = PIXI.Sprite.from('background_shit')
+    const grassBackground = PIXI.Sprite.from('background_grass')
+    const grassMask = new PIXI.Graphics()
+    grassMask.circle(level.width / 2, level.height / 2, level.width)
+    levelContainer.addChild(shitBackground, grassBackground, grassMask)
+
+    app.ticker.add(() => {
+        if (game === games.battleRoyale) {
+            document.body.style.backgroundImage = "url('./gfx/background_shit.jpg')"
+        } else {
+            document.body.style.backgroundImage = "url('./gfx/background_grass.jpg')"
+        }
+
+        const isBattleRoyale = stage === stages.game && game === games.battleRoyale
+        shitBackground.visible = isBattleRoyale
+        if (isBattleRoyale) {
+            grassBackground.mask = grassMask
+            grassMask.clear()
+                .circle(level.width / 2, level.height / 2, circleOfDeath.radius)
+                .fill({ color: 0xffffff })
+        } else {
+            grassBackground.mask = null
+        }
+    })
 }
 
 
-const addLevelBoundary = (app) => {
+const addLevelBoundary = () => {
     const spritesheet = PIXI.Assets.get('fenceAtlas')
 
     const fenceLower = createSpriteWithShadowContainer({ texture: spritesheet.textures['fence_horizontal'], scaleFactor: { x: 1, y: 1.3 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.0, y: level.height * 1 }, anchor: { x: 0.0, y: 0.9 }, options: { tilingSprite: { tileScale: { x: 0.28, y: 0.28 }, tilePosition: { x: 0, y: 0 } } } });
@@ -981,7 +1004,7 @@ const addLevelBoundary = (app) => {
     levelContainer.addChild(fenceLower, fenceUpper, fenceLeft, fenceRight)
 }
 
-const addLevelDecoration = (app) => {
+const addLevelDecoration = () => {
     const spritesheet = PIXI.Assets.get('fenceAtlas')
 
     const tree1 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree1'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.3, y: level.height * 0.1 }, options: {} });
@@ -1332,12 +1355,9 @@ const addOverlay = app => {
 }
 
 const animateCircleOfDeath = circle => {
-    circle.visible = stage === stages.game && game === games.battleRoyale
-
-    if (circle.visible) {
-        circle.clear().circle(0, 0, circle.radius)
-            .stroke({ alpha: 0.8, color: colors.darkBrown, width: 30 })
-    }
+    // Circle stroke is no longer drawn - the background masking shows the boundary
+    // Grass visible inside, shit background visible outside
+    circle.visible = false
 }
 
 const createCircleOfDeath = app => {
