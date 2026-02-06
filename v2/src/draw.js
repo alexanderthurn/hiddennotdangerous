@@ -955,7 +955,6 @@ const addGrass = () => {
     const shitBackground = PIXI.Sprite.from('background_shit')
     const grassBackground = PIXI.Sprite.from('background_grass')
     const grassMask = new PIXI.Graphics()
-    grassMask.circle(level.width / 2, level.height / 2, level.width)
     levelContainer.addChild(shitBackground, grassBackground, grassMask)
 
     app.ticker.add(() => {
@@ -967,6 +966,7 @@ const addGrass = () => {
 
         const isBattleRoyale = stage === stages.game && game === games.battleRoyale
         shitBackground.visible = isBattleRoyale
+
         if (isBattleRoyale) {
             grassBackground.mask = grassMask
             grassMask.clear()
