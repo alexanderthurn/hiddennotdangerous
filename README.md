@@ -56,6 +56,7 @@ To generate characters:
 - sound2: https://pixabay.com/de/sound-effects/fart-83471/
 - sounddrum: https://pixabay.com/de/sound-effects/awesome-kick-drum-41824/
 - shooter memes: https://tuna.voicemod.net/user/shiftingratechorus77356, https://dotawiki.de/index.php?title=Killing_Sounds
+- surprise: https://pixabay.com/sound-effects/people-ohhhh-39316/
 - cloud: https://opengameart.org/content/vaporizng-cloud-particle
 - food: https://opengameart.org/content/cc0-food-icons
 - eat sound: https://cdn.pixabay.com/download/audio/2022/01/18/audio_9f09ebc2fa.mp3?filename=eatingsfxwav-14588.mp3 

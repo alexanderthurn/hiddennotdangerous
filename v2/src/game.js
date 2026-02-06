@@ -146,6 +146,7 @@ const audio = {
     spinningWheel: { title: './sfx/spinningWheelClick.mp3' },
     boomerang: { title: './sfx/boomerang.mp3', currentTime: 0.1 },
     firstBlood: { title: './sfx/first-blood.mp3', volume: 0.2 },
+    roundEnd: { title: './sfx/surprise.mp3' },
     win: { title: './sfx/audience-clapping-03-99963.mp3' },
     musicGame: [
         { title: './sfx/music1.mp3', currentTime: 20, volume: 0.5 },
@@ -198,6 +199,7 @@ var soundBoomerang = getAudio(audio.boomerang);
 var soundFirstBlood = getAudio(audio.firstBlood);
 var soundMultiKill = audio.multiKill.map(audio => getAudio(audio));
 var soundTotalKill = audio.totalKill.map(audio => getAudio(audio));
+var soundRoundEnd = getAudio(audio.roundEnd);
 var soundWin = getAudio(audio.win);
 
 var actualMusicPlaylist;
@@ -830,6 +832,8 @@ const handleWinning = () => {
 
     if (gameOver) {
         playAudio(soundWin)
+    } else if (restartStage) {
+        playAudio(soundRoundEnd)
     }
 }
 
