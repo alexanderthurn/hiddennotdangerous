@@ -452,9 +452,7 @@ app.textStyleController = {
     destroyContainer(app, loadingText)
     gameContainer = createGameContainer(app, level, levelContainer)
     levelContainer = gameContainer.getChildByName('level')
-    //levelContainer = createLevelContainer(app, level);
     app.stage.addChild(gameContainer, figureShadowLayer, figureLayer, cloudLayer, fogLayer, crosshairLayer, scoreLayer, overlayLayer, debugLayer)
-    //addGrass()
     addHeadline()
     addLobbyItems(app)
     addRaceTrack(app)
@@ -698,7 +696,6 @@ function gameLoop() {
         })
     }
     then = now
-    console.log('game loop', figures.length, figuresPool.size)
     window.requestAnimationFrame(gameLoop);
 }
 
