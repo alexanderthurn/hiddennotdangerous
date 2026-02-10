@@ -951,7 +951,7 @@ const addFoods = (app) => {
     })
 }
 
-const addGrass = () => {
+const addGrass = (container) => {
     const defaultGrassScale = level.width + level.height
 
     const shitBackground = PIXI.Sprite.from('background_shit')
@@ -961,7 +961,7 @@ const addGrass = () => {
         .fill({ color: 0xffffff })
     grassMask.position.set(level.width / 2, level.height / 2)
     grassBackground.mask = grassMask
-    levelContainer.addChild(shitBackground, grassBackground, grassMask)
+    container.addChild(shitBackground, grassBackground, grassMask)
 
     const blurContainer = new PIXI.Container()
     const blurShit = PIXI.Sprite.from('background_shit')
@@ -979,13 +979,13 @@ const addGrass = () => {
     blurMask.position.set(level.width / 2, level.height / 2)
     blurContainer.mask = blurMask
 
-    levelContainer.addChild(blurContainer, blurMask)
+    container.addChild(blurContainer, blurMask)
 
     app.ticker.add(() => {
         if (game === games.battleRoyale) {
-            document.body.style.backgroundImage = "url('./gfx/background_shit.jpg')"
+            //document.body.style.backgroundImage = "url('./gfx/background_shit.jpg')"
         } else {
-            document.body.style.backgroundImage = "url('./gfx/background_grass.jpg')"
+            //document.body.style.backgroundImage = "url('./gfx/background_grass.jpg')"
         }
 
         const isBattleRoyale = stage === stages.game && game === games.battleRoyale

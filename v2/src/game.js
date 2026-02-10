@@ -134,8 +134,6 @@ const teams = {
     }
 }
 
-let tileArea = []
-const tileWidth = 120;
 const audio = {
     fart: { title: './sfx/sound2.mp3', currentTime: 0.15 },
     beanFart: { title: './sfx/sound1.mp3', currentTime: 0.15 },
@@ -146,7 +144,7 @@ const audio = {
     spinningWheel: { title: './sfx/spinningWheelClick.mp3' },
     boomerang: { title: './sfx/boomerang.mp3', currentTime: 0.1 },
     firstBlood: { title: './sfx/first-blood.mp3', volume: 0.2 },
-    roundEnd: { title: './sfx/surprise.mp3' },
+    roundEnd: { title: './sfx/surprise+4.5db.mp3' },
     win: { title: './sfx/audience-clapping-03-99963.mp3' },
     musicGame: [
         { title: './sfx/music1.mp3', currentTime: 20, volume: 0.5 },
@@ -348,6 +346,7 @@ const app = new PIXI.Application();
 window.__PIXI_DEVTOOLS__ = {
     app
 };
+var gameContainer;
 var levelContainer;
 const figureShadowLayer = new PIXI.RenderLayer();
 const figureLayer = new PIXI.RenderLayer({ sortableChildren: true });
@@ -451,9 +450,11 @@ app.textStyleController = {
 
     initNetwork()
     destroyContainer(app, loadingText)
-    levelContainer = createLevelContainer(app, level);
-    app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, fogLayer, crosshairLayer, scoreLayer, overlayLayer, debugLayer)
-    addGrass()
+    gameContainer = createGameContainer(app, level, levelContainer)
+    levelContainer = gameContainer.getChildByName('level')
+    //levelContainer = createLevelContainer(app, level);
+    app.stage.addChild(gameContainer, figureShadowLayer, figureLayer, cloudLayer, fogLayer, crosshairLayer, scoreLayer, overlayLayer, debugLayer)
+    //addGrass()
     addHeadline()
     addLobbyItems(app)
     addRaceTrack(app)
