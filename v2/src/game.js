@@ -947,7 +947,7 @@ function updateGame(figures, dt, dtProcessed) {
         const scale = 1 - (dtProcessed - startTime) / (game.countdown * 1000)
         circleOfDeath.radius = scale * circleOfDeath.startRadius
         figuresAlive.filter(f => f.type === 'fighter').forEach(f => {
-            if (squaredDistance(f.x, f.y, level.width / 2, level.height / 2) > circleOfDeath.radius * circleOfDeath.radius) {
+            if (level.scale * level.scale * squaredDistance(f.x, f.y, level.width / 2, level.height / 2) > circleOfDeath.radius * circleOfDeath.radius) {
                 killFigure(f)
             }
         })

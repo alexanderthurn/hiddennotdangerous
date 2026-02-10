@@ -367,24 +367,17 @@ const createGameContainer = (app, level, levelContainer) => {
 const createLevelContainer = level => {
     const levelContainer = new PIXI.Container()
 
-    const scale = 0.9
-    levelContainer.width = level.width
-    levelContainer.height = level.height
-    levelContainer.scale.x = scale
-    levelContainer.scale.y = scale
-    levelContainer.x = (0.5 * (1 - scale) * level.width)
-    levelContainer.y = (0.5 * (1 - scale) * level.height)
+    levelContainer.scale.x = level.scale
+    levelContainer.scale.y = level.scale
+    levelContainer.x = (0.5 * (1 - level.scale) * level.width)
+    levelContainer.y = (0.5 * (1 - level.scale) * level.height)
     levelContainer.label = 'level'
-
-    app.ticker.add(() => {
-        console.log('vla', levelContainer.width, levelContainer.height)
-    })
 
     return levelContainer
 }
 
 function createLevel() {
-    const level = { width: 1920, height: 1080, padding: [15, 40, 15, 10] }
+    const level = { width: 1920, height: 1080, padding: [15, 40, 15, 10], scale: 0.9 }
     level.rectangle = new PIXI.Rectangle(level.padding[0], level.padding[1], level.width - level.padding[0] - level.padding[2], level.height - level.padding[1] - level.padding[3])
     level.shortestPathNotBean5 = 2 * 0.6 * level.height + 2 * 0.3 * Math.hypot(level.height, level.width);
     level.shortestPathBean5 = 2 * 0.6 * level.height + 0.6 * level.width + 0.3 * Math.hypot(level.height, level.width);

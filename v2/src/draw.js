@@ -952,6 +952,8 @@ const addFoods = (app) => {
 }
 
 const addGrass = (container) => {
+    circleOfDeath = circleOfDeathDefinition()
+
     const defaultGrassScale = level.width + level.height
 
     const shitBackground = PIXI.Sprite.from('background_shit')
@@ -959,7 +961,7 @@ const addGrass = (container) => {
     const grassMask = new PIXI.Graphics()
         .circle(0, 0, defaultGrassScale)
         .fill({ color: 0xffffff })
-    grassMask.position.set(level.width / 2, level.height / 2)
+    grassMask.position.set(circleOfDeath.x, circleOfDeath.y)
     grassBackground.mask = grassMask
     container.addChild(shitBackground, grassBackground, grassMask)
 
@@ -970,24 +972,18 @@ const addGrass = (container) => {
     const blurGrassMask = new PIXI.Graphics()
         .circle(0, 0, defaultGrassScale)
         .fill({ color: 0xffffff })
-    blurGrassMask.position.set(level.width / 2, level.height / 2)
+    blurGrassMask.position.set(circleOfDeath.x, circleOfDeath.y)
     blurGrass.mask = blurGrassMask
     blurContainer.addChild(blurShit, blurGrass, blurGrassMask)
     blurContainer.filters = new PIXI.BlurFilter({ strength: 2, quality: 3 })
 
     const blurMask = new PIXI.Graphics()
-    blurMask.position.set(level.width / 2, level.height / 2)
+    blurMask.position.set(circleOfDeath.x, circleOfDeath.y)
     blurContainer.mask = blurMask
 
     container.addChild(blurContainer, blurMask)
 
     app.ticker.add(() => {
-        if (game === games.battleRoyale) {
-            //document.body.style.backgroundImage = "url('./gfx/background_shit.jpg')"
-        } else {
-            //document.body.style.backgroundImage = "url('./gfx/background_grass.jpg')"
-        }
-
         const isBattleRoyale = stage === stages.game && game === games.battleRoyale
         shitBackground.visible = isBattleRoyale
         blurContainer.visible = isBattleRoyale
@@ -1374,29 +1370,13 @@ const createCrosshair = props => {
 }
 
 const addOverlay = app => {
-    const circleOfDeathGraphic = createCircleOfDeath(app)
     const countdown = createCountdown(app)
     const fpsText = createFpsText(app)
     const pauseOverlay = createPauseOverlay(app)
 
-    circleOfDeath = circleOfDeathGraphic
-    levelContainer.addChild(circleOfDeathGraphic, countdown)
+    levelContainer.addChild(countdown)
     app.stage.addChild(fpsText, pauseOverlay)
-    overlayLayer.attach(circleOfDeathGraphic, countdown, fpsText, pauseOverlay)
-}
-
-const animateCircleOfDeath = circle => {
-    // Circle stroke is no longer drawn - the background masking shows the boundary
-    // Grass visible inside, shit background visible outside
-    circle.visible = false
-}
-
-const createCircleOfDeath = app => {
-    let circle = new PIXI.Graphics()
-    Object.assign(circle, circleOfDeathDefinition())
-
-    app.ticker.add(() => animateCircleOfDeath(circle))
-    return circle
+    overlayLayer.attach(countdown, fpsText, pauseOverlay)
 }
 
 const animateCountdown = countdown => {
