@@ -414,7 +414,7 @@ const addGameDescription = (app, lobbyContainer) => {
                 break
             case games.vip:
                 gameDescriptionLeft.text = 'GIRLS:'
-                    + '\nKill the piggies in time'
+                    + '\nKill parents and grandpa'
                     + '\nStun the boys'
                     + '\nTimer is ticking'
                 break
@@ -434,6 +434,11 @@ const addGameDescription = (app, lobbyContainer) => {
                     + '\nEat food, fart strong'
                     + '\nSurvivor wins'
                 break
+            case games.race:
+                gameDescriptionRight.text = 'Win the race'
+                    + '\nShoot rivals'
+                    + '\nFirst wins'
+                break
             case games.rampage:
                 gameDescriptionRight.text = 'SNIPERS:'
                     + '\nTake out the killers'
@@ -442,7 +447,7 @@ const addGameDescription = (app, lobbyContainer) => {
                 break
             case games.vip:
                 gameDescriptionRight.text = 'BOYS:'
-                    + '\nSave the piggies'
+                    + '\nSave parents and grandpa'
                     + '\nNeutralize the girls'
                     + '\nGirls can stun you'
                 break
@@ -589,7 +594,7 @@ const addPracticeTrack = (app, props, lobbyContainer) => {
 
     // Start zone label
     const startLabel = new PIXI.BitmapText({
-        text: 'START',
+        text: 'TRY\nHERE',
         style: { ...app.textStyleDefault, align: 'center' },
     })
     startLabel.anchor.set(0.5, 0.5)
@@ -605,16 +610,6 @@ const addPracticeTrack = (app, props, lobbyContainer) => {
     finishLine.width = finishLineWidth
     finishLine.height = height
     finishLine.tileScale.set(0.25, 0.25)
-
-    // Track label
-    const trackLabel = new PIXI.BitmapText({
-        text: 'PRACTICE TRACK',
-        style: { ...app.textStyleDefault, align: 'center' },
-    })
-    trackLabel.anchor.set(0.5, 1)
-    trackLabel.x = x
-    trackLabel.y = trackY - 5
-    trackLabel.scale.set(0.8)
 
     // Start zone button - enters race mode and spawns crosshair
     const startButton = new PIXI.Container()
@@ -648,7 +643,7 @@ const addPracticeTrack = (app, props, lobbyContainer) => {
     buttons.practiceTrackFinish = finishButton
 
     const practiceTrackContainer = new PIXI.Container()
-    practiceTrackContainer.addChild(trackBg, startButton, finishButton, trackLabel)
+    practiceTrackContainer.addChild(trackBg, startButton, finishButton)
     lobbyContainer.addChild(practiceTrackContainer)
 
     app.ticker.add(() => {
