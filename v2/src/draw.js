@@ -951,6 +951,10 @@ const addFoods = (app) => {
     })
 }
 
+const animateGrass = () => {
+
+}
+
 const addGrass = (container) => {
     circleOfDeath = circleOfDeathDefinition()
 
@@ -1371,12 +1375,11 @@ const createCrosshair = props => {
 
 const addOverlay = app => {
     const countdown = createCountdown(app)
-    const fpsText = createFpsText(app)
     const pauseOverlay = createPauseOverlay(app)
 
     levelContainer.addChild(countdown)
-    gameContainer.addChild(fpsText, pauseOverlay)
-    overlayLayer.attach(countdown, fpsText, pauseOverlay)
+    gameContainer.addChild(pauseOverlay)
+    overlayLayer.attach(countdown, pauseOverlay)
 }
 
 const animateCountdown = countdown => {
@@ -1497,8 +1500,9 @@ const addDebug = app => {
 
     const playersText = createPlayersText(app)
     const figuresText = createFiguresText(app)
+    const fpsText = createFpsText(app)
 
-    debugContainer.addChild(playersText, figuresText)
+    debugContainer.addChild(playersText, figuresText, fpsText)
     app.stage.addChild(debugContainer)
     debugLayer.attach(debugContainer)
 
