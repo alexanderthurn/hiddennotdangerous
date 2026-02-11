@@ -951,20 +951,38 @@ const addFoods = (app) => {
     })
 }
 
-const animateGrass = () => {
+const animateGrass = (shitBackground, blurContainer, grassMask, blurGrassMask, blurMask) => {
+    const isBattleRoyale = stage === stages.game && game === games.battleRoyale
+    shitBackground.visible = isBattleRoyale
+    blurContainer.visible = isBattleRoyale
 
+    if (isBattleRoyale) {
+        const scale = circleOfDeath.radius / grassMask.defaultRadius
+        grassMask.scale.set(scale, scale)
+        blurGrassMask.scale.set(scale, scale)
+
+        const ringWidth = 5
+        blurMask.clear()
+            .circle(0, 0, circleOfDeath.radius + ringWidth)
+            .fill({ color: 0xffffff })
+            .circle(0, 0, circleOfDeath.radius - ringWidth)
+            .cut()
+    } else {
+        grassMask.scale.set(1, 1)
+    }
 }
 
 const addGrass = (container) => {
     circleOfDeath = circleOfDeathDefinition()
 
-    const defaultGrassScale = level.width + level.height
+    const defaultGrassRadius = level.width + level.height
 
     const shitBackground = PIXI.Sprite.from('background_shit')
     const grassBackground = PIXI.Sprite.from('background_grass')
     const grassMask = new PIXI.Graphics()
-        .circle(0, 0, defaultGrassScale)
+        .circle(0, 0, defaultGrassRadius)
         .fill({ color: 0xffffff })
+    grassMask.defaultRadius = defaultGrassRadius
     grassMask.position.set(circleOfDeath.x, circleOfDeath.y)
     grassBackground.mask = grassMask
     container.addChild(shitBackground, grassBackground, grassMask)
@@ -974,7 +992,7 @@ const addGrass = (container) => {
     const blurGrass = PIXI.Sprite.from('background_grass')
 
     const blurGrassMask = new PIXI.Graphics()
-        .circle(0, 0, defaultGrassScale)
+        .circle(0, 0, defaultGrassRadius)
         .fill({ color: 0xffffff })
     blurGrassMask.position.set(circleOfDeath.x, circleOfDeath.y)
     blurGrass.mask = blurGrassMask
@@ -987,26 +1005,7 @@ const addGrass = (container) => {
 
     container.addChild(blurContainer, blurMask)
 
-    app.ticker.add(() => {
-        const isBattleRoyale = stage === stages.game && game === games.battleRoyale
-        shitBackground.visible = isBattleRoyale
-        blurContainer.visible = isBattleRoyale
-
-        if (isBattleRoyale) {
-            const scale = circleOfDeath.radius / defaultGrassScale
-            grassMask.scale.set(scale, scale)
-            blurGrassMask.scale.set(scale, scale)
-
-            const ringWidth = 5
-            blurMask.clear()
-                .circle(0, 0, circleOfDeath.radius + ringWidth)
-                .fill({ color: 0xffffff })
-                .circle(0, 0, circleOfDeath.radius - ringWidth)
-                .cut()
-        } else {
-            grassMask.scale.set(1, 1)
-        }
-    })
+    app.ticker.add(() => animateGrass(shitBackground, blurContainer, grassMask, blurGrassMask, blurMask))
 }
 
 
