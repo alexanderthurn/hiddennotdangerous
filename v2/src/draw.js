@@ -1375,7 +1375,7 @@ const addOverlay = app => {
     const pauseOverlay = createPauseOverlay(app)
 
     levelContainer.addChild(countdown)
-    app.stage.addChild(fpsText, pauseOverlay)
+    gameContainer.addChild(fpsText, pauseOverlay)
     overlayLayer.attach(countdown, fpsText, pauseOverlay)
 }
 
@@ -1403,25 +1403,20 @@ const createCountdown = app => {
     return countdown
 }
 
-const animatePauseOverlay = (app, overlay, time) => {
-    const background = overlay.getChildByLabel('background')
+const animatePauseOverlay = (overlay, time) => {
     const text = overlay.getChildByLabel('text')
-    background.height = app.screen.height
-    background.width = app.screen.width
-    background.y = 0
     const numberJoinedPlayer = players.filter(p => p.joinedTime >= 0).length
     text.text = (numberJoinedPlayer > 0) ? 'Pause' : '   Welcome to\nKnirps und Knall\n \n Press any key'
-    text.x = Math.sin(time.lastTime / 1000) * 10 + app.screen.width / 2
-    text.y = Math.cos(time.lastTime / 1000) * 10 + app.screen.height / 2
+    text.x = Math.sin(time.lastTime / 1000) * 10 + level.width / 2
+    text.y = Math.cos(time.lastTime / 1000) * 10 + level.height / 2
     overlay.visible = !windowHasFocus || numberJoinedPlayer === 0
 }
 
 const createPauseOverlay = app => {
     const overlay = new PIXI.Container()
 
-    const background = new PIXI.Graphics().rect(0, 0, app.screen.width, app.screen.height)
+    const background = new PIXI.Graphics().rect(0, 0, level.width, level.height)
         .fill({ alpha: 0.3, color: colors.darkBrown })
-    background.label = 'background'
 
     const text = new PIXI.BitmapText({
         style: {
@@ -1430,13 +1425,11 @@ const createPauseOverlay = app => {
         anchor: { x: 0.5, y: 0.5 },
         label: 'text',
         scale: { x: 2, y: 2 },
-        position: { x: app.screen.width / 2, y: app.screen.height / 2 },
-
     })
 
     overlay.addChild(background, text)
 
-    app.ticker.add((time) => animatePauseOverlay(app, overlay, time))
+    app.ticker.add((time) => animatePauseOverlay(overlay, time))
     return overlay
 }
 
