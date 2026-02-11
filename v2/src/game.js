@@ -778,7 +778,8 @@ const handleWinning = () => {
             }
 
             // first at finish
-            const figuresInFinish = figures.filter(f => f.x > raceTrackDefinition().xFinish && f.type === 'fighter')
+            const finishLineX = raceTrackDefinition().xFinish
+            const figuresInFinish = figures.filter(f => f.x > finishLineX && f.type === 'fighter')
             if (!restartStage && figuresInFinish.length > 0) {
                 winRoundFigures(figuresInFinish.filter(f => f.playerId))
             }
@@ -1233,13 +1234,7 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
         if (f.lifetime > fartGrowDuration) {
             if (!f.isAttacking) {
                 f.isAttacking = true
-                if (f.size === 5) {
-                    f.attackDistanceMultiplier = 3 * f.size
-                } else if (f.size === 1) {
-                    f.attackDistanceMultiplier = 2 * f.size
-                } else {
-                    f.attackDistanceMultiplier = 1.5 * f.size
-                }
+                f.attackDistanceMultiplier = getCloudMultiplier(f.size)
             }
             f.attackDistanceMultiplier *= Math.pow(0.999, dt)
             if (f.attackDistanceMultiplier < 0.1) {
@@ -1247,13 +1242,7 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
                 f.isDead = true
             }
         } else {
-            if (f.size === 5) {
-                f.attackDistanceMultiplier = f.lifetime / fartGrowDuration * 3 * f.size
-            } else if (f.size === 1) {
-                f.attackDistanceMultiplier = f.lifetime / fartGrowDuration * 2 * f.size
-            } else {
-                f.attackDistanceMultiplier = f.lifetime / fartGrowDuration * 1.5 * f.size
-            }
+            f.attackDistanceMultiplier = f.lifetime / fartGrowDuration * getCloudMultiplier(f.size)
         }
     })
 }

@@ -453,6 +453,17 @@ function cropXY(x, y, level) {
     return [x, y]
 }
 
+const getCloudMultiplier = size => {
+    switch (size) {
+        case 5:
+            return 3 * size
+        case 1:
+            return 2 * size
+        default:
+            return 1.5 * size
+    }
+}
+
 const figureIsBot = figure => figure.playerId?.includes('b')
 
 const initSniperPositions = figures => {
@@ -592,7 +603,7 @@ const killFigure = (figure) => {
         figure.died = true
         figure.killTime = dtProcessed
         if (game === games.rampage && figure.team !== 'killer') {
-            figures.filter(f => f.team === 'killer' & f.type === 'fighter').forEach(f => {
+            figures.filter(f => f.team === 'killer' && f.type === 'fighter').forEach(f => {
                 f.player.score.points++
                 f.player.score.shownPoints = f.player.score.points
             })
