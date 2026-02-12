@@ -1540,15 +1540,7 @@ const addFartCloud = (props) => {
 }
 
 const addFog = app => {
-    let uViewPointDefinition = ''
-    let uViewPointExecution = ''
-    let uViewPointUniforms = {}
-
-    for (let i = 0; i < maxPlayerFigures; i++) {
-        uViewPointDefinition += `uniform vec2 uViewPoint${i};`
-        uViewPointExecution += `if(${i} < uNumViewPoints) {updateVisibility(pixelPos, uViewPoint${i});}`
-        uViewPointUniforms[`uViewPoint${i}`] = { type: 'vec2<f32>' }
-    }
+    const viewPointsData = new Float32Array(maxPlayerFigures * 2)
 
     const fogFilter = new PIXI.Filter({
         glProgram: new PIXI.GlProgram({
@@ -1558,24 +1550,23 @@ const addFog = app => {
 
             uniform sampler2D uTexture;
             uniform vec2 uResolution;
-            ${uViewPointDefinition}
+            uniform vec2 uViewPoints[${maxPlayerFigures}];
             uniform int uNumViewPoints;
             uniform float uRadius;
 
             const float baseFog = 0.5;
-            float visibility = 0.0;
-
-            void updateVisibility(vec2 pixelPos, vec2 center) {
-                float dist = distance(pixelPos, center);
-                float softness = uRadius * 0.3;
-                float localVis = 1.0-smoothstep(uRadius-softness, uRadius, dist);
-                visibility = max(visibility, localVis);
-            }
 
             void main() {
-                vec2 pixelPos = vec2(vTextureCoord.x, vTextureCoord.y)*uResolution;
+                vec2 pixelPos = vTextureCoord * uResolution;
+                float softness = uRadius * 0.3;
+                float visibility = 0.0;
 
-                ${uViewPointExecution}
+                for (int i = 0; i < ${maxPlayerFigures}; i++) {
+                    if (i >= uNumViewPoints) break;
+                    float dist = distance(pixelPos, uViewPoints[i]);
+                    float localVis = 1.0 - smoothstep(uRadius - softness, uRadius, dist);
+                    visibility = max(visibility, localVis);
+                }
 
                 vec4 fg = texture2D(uTexture, vTextureCoord);
                 fg.a = mix(baseFog, 0.0, visibility);
@@ -1589,7 +1580,7 @@ const addFog = app => {
                 uResolution: { value: [level.width, level.height], type: 'vec2<f32>' },
                 uRadius: { value: detectRadius, type: 'f32' },
                 uNumViewPoints: { type: 'i32' },
-                ...uViewPointUniforms
+                uViewPoints: { value: viewPointsData, type: 'vec2<f32>', size: maxPlayerFigures }
             },
         },
     });
@@ -1608,7 +1599,8 @@ const addFog = app => {
         const crosshairs = figures.filter(f => f.playerId && f.type === 'crosshair' && f.ammo > 0)
         fogFilter.resources.myUniforms.uniforms.uNumViewPoints = crosshairs.length
         crosshairs.forEach((f, i) => {
-            fogFilter.resources.myUniforms.uniforms[`uViewPoint${i}`] = [f.x, f.y]
+            viewPointsData[i * 2] = f.x
+            viewPointsData[i * 2 + 1] = f.y
         })
     })
 }
