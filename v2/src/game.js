@@ -319,7 +319,7 @@ const circleOfDeathDefinition = () => ({
 
 var circleOfDeath
 
-const foodDefinition = () => ({
+const getFoodDefinition = () => ({
     oreo: {
         x: stage === stages.gameLobby ? level.width * 1.4 / 5 : level.width * 4 / 5,
         y: stage === stages.gameLobby ? level.height * 3 / 5 : level.height * 4 / 5,
@@ -619,8 +619,9 @@ function initStage(nextStage) {
     }
 
     if (game === games.food) {
+        const foodDefinition = getFoodDefinition();
         figures.filter(figure => figure.type === 'bean').forEach(figure => {
-            const { x, y } = foodDefinition()[figure.id]
+            const { x, y } = foodDefinition[figure.id]
             Object.assign(figure, {
                 x,
                 y,

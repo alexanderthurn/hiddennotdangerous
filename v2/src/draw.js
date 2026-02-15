@@ -935,7 +935,7 @@ const addFood = (app, texture, props) => {
 }
 
 const addFoods = (app) => {
-    Object.keys(foodDefinition()).forEach(key => {
+    Object.keys(getFoodDefinition()).forEach(key => {
         addFood(app, PIXI.Assets.get(key), {
             id: key,
             type: 'bean',
