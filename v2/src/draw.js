@@ -295,7 +295,9 @@ const createRingSegmentButton = (props, lobbyContainer) => {
 
     let button = new PIXI.Container()
     button = Object.assign(button, { x, y, startAngle, endAngle, innerRadius, outerRadius, gameId, execute: getExecute(button) })
-    button.isInArea = f => stage === stages.startLobby && new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y) && (distanceAnglesRad(angle(x, y, f.x, f.y), centerAngle) < width / 2)
+    const outerCircle = new PIXI.Circle(x, y, outerRadius)
+    const innerCircle = new PIXI.Circle(x, y, innerRadius)
+    button.isInArea = f => stage === stages.startLobby && outerCircle.contains(f.x, f.y) && !innerCircle.contains(f.x, f.y) && (distanceAnglesRad(angle(x, y, f.x, f.y), centerAngle) < width / 2)
 
     const area = new PIXI.Graphics()
         .arc(0, 0, innerRadius, startAngle, endAngle)
@@ -337,7 +339,8 @@ const addGameRing = (lobbyContainer) => {
 const addGameSelection = (app, lobbyContainer) => {
     addGameRing(lobbyContainer)
     const circleButton = createCircleButton(lobbyStartButtonDefinition(), lobbyContainer)
-    circleButton.isInArea = f => stage === stages.startLobby && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius).contains(f.x, f.y)
+    const selectGameCircle = new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius)
+    circleButton.isInArea = f => stage === stages.startLobby && selectGameCircle.contains(f.x, f.y)
     buttons.selectGame = circleButton
 
     app.ticker.add(() => animateLobbyStartButton(circleButton))
@@ -345,7 +348,8 @@ const addGameSelection = (app, lobbyContainer) => {
 
 const addGameStartButton = (app, lobbyContainer) => {
     const circleButton = createCircleButton(gameStartButtonDefinition(), lobbyContainer)
-    circleButton.isInArea = f => stage === stages.gameLobby && dtProcessed - startTime > 5000 && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius).contains(f.x, f.y)
+    const startGameCircle = new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius)
+    circleButton.isInArea = f => stage === stages.gameLobby && dtProcessed - startTime > 5000 && startGameCircle.contains(f.x, f.y)
 
     buttons.startGame = circleButton
 
@@ -469,7 +473,8 @@ const createRectangleButton = (props, lobbyContainer) => {
 
     let button = new PIXI.Container()
     button = Object.assign(button, { x, y, loadingPercentage, defaultLoadingSpeed, execute })
-    button.isInArea = f => new PIXI.Rectangle(x, y, width, height).contains(f.x, f.y)
+    const buttonRect = new PIXI.Rectangle(x, y, width, height)
+    button.isInArea = f => buttonRect.contains(f.x, f.y)
 
     const loadingBar = new PIXI.Graphics()
         .rect(0, 0, 0.1, height)
@@ -553,7 +558,8 @@ const addShootingRange = (app, props, lobbyContainer) => {
 
     const buttonOutside = new PIXI.Container()
     buttonOutside.execute = () => buttonOutside.playersNear.forEach(f => f.justShot = false)
-    buttonOutside.isInArea = f => stage === stages.gameLobby && (game === games.rampage) && !(new PIXI.Rectangle(newX, newY, width, height)).contains(f.x, f.y)
+    const outsideRect = new PIXI.Rectangle(newX, newY, width, height)
+    buttonOutside.isInArea = f => stage === stages.gameLobby && (game === games.rampage) && !outsideRect.contains(f.x, f.y)
     buttonOutside.addChild(area)
 
     const buttonInside = new PIXI.Container()
@@ -565,7 +571,8 @@ const addShootingRange = (app, props, lobbyContainer) => {
             figures.push(crosshair)
         }
     })
-    buttonInside.isInArea = f => stage === stages.gameLobby && (game === games.rampage) && new PIXI.Rectangle(newXInside, newYInside, widthInside, heightInside).contains(f.x, f.y)
+    const insideRect = new PIXI.Rectangle(newXInside, newYInside, widthInside, heightInside)
+    buttonInside.isInArea = f => stage === stages.gameLobby && (game === games.rampage) && insideRect.contains(f.x, f.y)
 
     buttons.shootingRangeInside = buttonInside
     buttons.shootingRangeOutside = buttonOutside
@@ -620,8 +627,9 @@ const addPracticeTrack = (app, props, lobbyContainer) => {
             figures.push(crosshair)
         }
     })
+    const startRect = new PIXI.Rectangle(trackX, trackY, startZoneWidth, height)
     startButton.isInArea = f => stage === stages.gameLobby && game === games.race &&
-        new PIXI.Rectangle(trackX, trackY, startZoneWidth, height).contains(f.x, f.y)
+        startRect.contains(f.x, f.y)
     startButton.addChild(startZone, startLabel)
 
     // Finish line button - exits race mode and removes crosshair
@@ -635,8 +643,9 @@ const addPracticeTrack = (app, props, lobbyContainer) => {
             }
         }
     })
+    const finishRect = new PIXI.Rectangle(trackX + width - finishLineWidth / 2, trackY, finishLineWidth / 2, height)
     finishButton.isInArea = f => stage === stages.gameLobby && game === games.race &&
-        new PIXI.Rectangle(trackX + width - finishLineWidth / 2, trackY, finishLineWidth / 2, height).contains(f.x, f.y)
+        finishRect.contains(f.x, f.y)
     finishButton.addChild(finishLine)
 
     buttons.practiceTrackStart = startButton
@@ -667,7 +676,8 @@ const createTeamSwitcher = (app, props, lobbyContainer) => {
 
     const button = new PIXI.Container()
     button.execute = () => button.playersNear.forEach(f => switchTeam(f, team))
-    button.isInArea = f => stage === stages.gameLobby && games.has(game) && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y)
+    const teamRect = new PIXI.Rectangle(newX, newY, width, height)
+    button.isInArea = f => stage === stages.gameLobby && games.has(game) && teamRect.contains(f.x, f.y)
     button.addChild(area)
     lobbyContainer.addChild(button)
 
