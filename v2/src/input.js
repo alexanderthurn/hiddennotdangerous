@@ -33,7 +33,7 @@ window.addEventListener('keyup', event => {
 });
 window.addEventListener("contextmenu", e => e.preventDefault());
 
-var windowHasFocus = false
+let windowHasFocus = false
 
 
 window.addEventListener('pointerup', event => {
@@ -72,10 +72,10 @@ function collectInputs() {
             bot = { ...defaultBotPlayer, playerId };
         }
 
-        var f = figures.find(f => f.playerId === bot.playerId && f.type === 'fighter')
+        const f = figures.find(f => f.playerId === bot.playerId && f.type === 'fighter')
         if (f && !f.isDead) {
-            var xTarget = -1000
-            var yTarget = -1000
+            let xTarget = -1000
+            let yTarget = -1000
 
             if (stage === stages.startLobby) {
                 xTarget = buttons.selectGame.x
@@ -84,7 +84,7 @@ function collectInputs() {
                 xTarget = buttons.startGame.x
                 yTarget = buttons.startGame.y
             } else {
-                var beans = figures.filter(b => b.type === 'bean')
+                const beans = figures.filter(b => b.type === 'bean')
                 if (f.beans.size === beans.length) {
                     const otherPlayerFigures = figures.filter(fig => fig.playerId && fig.playerId !== f.playerId && !fig.isDead && fig.type === 'fighter');
 
@@ -130,7 +130,7 @@ function collectInputs() {
     }
 
     FWNetwork.getInstance().getAllGamepads().filter(x => x && x.connected).map(x => {
-        var gamepadPlayerIndex = gamepadPlayers.findIndex(g => g.id === x.id && g.index === x.index)
+        let gamepadPlayerIndex = gamepadPlayers.findIndex(g => g.id === x.id && g.index === x.index)
         if (gamepadPlayerIndex < 0) {
             if (x.buttons.some(b => b.pressed)) {
                 gamepadPlayers.push(x)

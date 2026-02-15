@@ -748,7 +748,7 @@ const animatePlayerScore = figure => {
     }
 
     if (!restartStage) {
-        var lp = Math.min((dtProcessed - player.joinedTime) / moveNewPlayerDuration, 1)
+        const lp = Math.min((dtProcessed - player.joinedTime) / moveNewPlayerDuration, 1)
 
         player.score = Object.assign(player.score, getLinePoint(lp, { x: level.width * 0.5, y: level.height * 0.5 }, { x: getScoreDefaultX(player), y: player.score.yDefault }))
         player.score.scale = getIntervalPoint(lp, 12, 1)

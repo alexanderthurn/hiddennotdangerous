@@ -1,10 +1,10 @@
-var loadPromises = []
-var gamepadPlayers = []
-var keyboardPlayers = [];
-var botPlayers = []
-var players = []
-var playersSortedByJoinTime = []
-var keyboards = [{
+let loadPromises = []
+let gamepadPlayers = []
+let keyboardPlayers = [];
+let botPlayers = []
+let players = []
+let playersSortedByJoinTime = []
+const keyboards = [{
     keys: {
         'KeyA': { playerId: 'k0', action: 'left' },
         'KeyD': { playerId: 'k0', action: 'right' },
@@ -32,17 +32,18 @@ var keyboards = [{
         'AltRight': { playerId: 'k1', action: 'marker' }
     }, pressed: new Set()
 }];
-var virtualGamepads = []
-var startTime, then, now, dt, fps = 0, fpsMinForEffects = 30, fpsTime
-var isRestartButtonPressed, restartStage = false, gameOver, ceremonyOver, lastRoundEndThen, lastWinnerPlayerIds, lastFinalWinnerPlayerIds, finalWinnerTeam
+const virtualGamepads = []
+let startTime, then, now, dt, fps = 0, fpsMinForEffects = 30, fpsTime
+let isRestartButtonPressed, restartStage = false, gameOver, ceremonyOver, lastRoundEndThen, lastWinnerPlayerIds, lastFinalWinnerPlayerIds, finalWinnerTeam
 const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
-var dtFix = 10, dtToProcess = 0, dtProcessed = 0
-var figuresInitialPool = new Set(), figuresPool = new Set()
-var figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, numberBots = getQueryParam('bots') && Number.parseInt(getQueryParam('bots')) || 0, defaultMaxSpeed = 0.12, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, roundsToWin = 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000, baseAmmoFactor = 2, bonusAmmoFactor = 0.5, detectRadius = 200
+const dtFix = 10
+let dtToProcess = 0, dtProcessed = 0
+let figuresInitialPool = new Set(), figuresPool = new Set()
+let figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, numberBots = getQueryParam('bots') && Number.parseInt(getQueryParam('bots')) || 0, defaultMaxSpeed = 0.12, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, roundsToWin = 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000, baseAmmoFactor = 2, bonusAmmoFactor = 0.5, detectRadius = 200
 
-var allPlayersSameTeam, isDebugMode = false
-var lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
-var level = createLevel()
+let allPlayersSameTeam, isDebugMode = false
+let lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
+let level = createLevel()
 
 const stages = {
     game: 'game',
@@ -182,25 +183,25 @@ const audio = {
     ]
 }
 
-var soundFartPool = loadAudioPool(audio.fart, 10);
-var soundBeanFartPool = loadAudioPool(audio.beanFart, 10);
-var soundShootHitPool = loadAudioPool(audio.shootHit, 10);
-var soundShootMissPool = loadAudioPool(audio.shootMiss, 10);
-var soundDeathPool = loadAudioPool(audio.death, 10);
-var soundEatPool = audio.eat.map(audio => loadAudioPool(audio, 4));
+const soundFartPool = loadAudioPool(audio.fart, 10);
+const soundBeanFartPool = loadAudioPool(audio.beanFart, 10);
+const soundShootHitPool = loadAudioPool(audio.shootHit, 10);
+const soundShootMissPool = loadAudioPool(audio.shootMiss, 10);
+const soundDeathPool = loadAudioPool(audio.death, 10);
+const soundEatPool = audio.eat.map(audio => loadAudioPool(audio, 4));
 
-var musicGame = audio.musicGame.map(audio => getAudio(audio));
-var musicLobby = audio.musicLobby.map(audio => getAudio(audio));
-var soundJoin = getAudio(audio.join);
-var soundSpinningWheel = getAudio(audio.spinningWheel);
-var soundBoomerang = getAudio(audio.boomerang);
-var soundFirstBlood = getAudio(audio.firstBlood);
-var soundMultiKill = audio.multiKill.map(audio => getAudio(audio));
-var soundTotalKill = audio.totalKill.map(audio => getAudio(audio));
-var soundRoundEnd = getAudio(audio.roundEnd);
-var soundWin = getAudio(audio.win);
+const musicGame = audio.musicGame.map(audio => getAudio(audio));
+const musicLobby = audio.musicLobby.map(audio => getAudio(audio));
+const soundJoin = getAudio(audio.join);
+const soundSpinningWheel = getAudio(audio.spinningWheel);
+const soundBoomerang = getAudio(audio.boomerang);
+const soundFirstBlood = getAudio(audio.firstBlood);
+const soundMultiKill = audio.multiKill.map(audio => getAudio(audio));
+const soundTotalKill = audio.totalKill.map(audio => getAudio(audio));
+const soundRoundEnd = getAudio(audio.roundEnd);
+const soundWin = getAudio(audio.win);
 
-var actualMusicPlaylist;
+let actualMusicPlaylist;
 
 const gameVoteButtonDefinition = () => ({
     x: level.width * 0.5,
@@ -317,7 +318,7 @@ const circleOfDeathDefinition = () => ({
     startRadius: Math.hypot(level.width / 2, level.height / 2)
 })
 
-var circleOfDeath
+let circleOfDeath
 
 const getFoodDefinition = () => ({
     oreo: {
@@ -346,8 +347,8 @@ const app = new PIXI.Application();
 window.__PIXI_DEVTOOLS__ = {
     app
 };
-var gameContainer;
-var levelContainer;
+let gameContainer;
+let levelContainer;
 const figureShadowLayer = new PIXI.RenderLayer();
 const figureLayer = new PIXI.RenderLayer({ sortableChildren: true });
 const cloudLayer = new PIXI.RenderLayer();
@@ -1065,11 +1066,11 @@ function handleInput(players, figures, dtProcessed) {
     })
 
     if (stage !== stages.game && !spinningWheel.finishTime) {
-        var joinedFighters = figures.filter(f => f.playerId && f.type === 'fighter')
+        const joinedFighters = figures.filter(f => f.playerId && f.type === 'fighter')
 
         // join by doing anything
         players.filter(p => p.isAnyButtonPressed || (p.isMoving && p.type !== 'gamepad')).forEach(p => {
-            var figure = joinedFighters.find(f => f.playerId === p.playerId)
+            let figure = joinedFighters.find(f => f.playerId === p.playerId)
             if (!figure) {
                 // player join first
                 if (p.type === 'bot') {
@@ -1079,7 +1080,7 @@ function handleInput(players, figures, dtProcessed) {
                 } else {
                     p.crosshairColor = getCrosshairColor()
                 }
-                var figure = figures.find(f => !f.playerId && f.type === 'fighter')
+                figure = figures.find(f => !f.playerId && f.type === 'fighter')
                 if (!figure) {
                     // load from pool
                     figure = Array.from(figuresPool).find(f => !f.playerId && f.type === 'fighter')
@@ -1107,7 +1108,7 @@ function handleInput(players, figures, dtProcessed) {
     }
 
     figures.filter(f => f.playerId && (f.type === 'crosshair' || f.type === 'fighter')).forEach(f => {
-        var p = f.player
+        const p = f.player
 
         f.speed = 0.0
         if (!f.isDead && !f.isAiming && !(f.ammo <= 0)) {

@@ -187,7 +187,7 @@ const playAudioPool = (audioPool, volume) => {
 }
 
 const loadAudioPool = (audio, length) => {
-    var audioPool = [];
+    const audioPool = [];
     for (let i = 0; i < length; i++) {
         audioPool.push({ audio: getAudio(audio) });
     }
@@ -275,7 +275,7 @@ const playKillingSounds = (numberKilledFigures, killTime) => {
 }
 
 const getRoundCount = () => {
-    var rounds = parseInt(window.localStorage.getItem('rounds'))
+    const rounds = parseInt(window.localStorage.getItem('rounds'))
     return isNaN(rounds) ? 3 : rounds
 }
 
@@ -284,7 +284,7 @@ const setRoundCount = (rounds) => {
 }
 
 const toggleRounds = () => {
-    var count = getRoundCount()
+    let count = getRoundCount()
     count++
     if (count > 10) {
         count = 1
