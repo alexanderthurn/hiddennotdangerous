@@ -700,36 +700,45 @@ function gameLoop() {
     window.requestAnimationFrame(gameLoop);
 }
 
+const handleSoloModeWinning = (figuresPlayer, extraChecks) => {
+    // players left, quit game
+    if (figuresPlayer.length < 2) {
+        lastFinalWinnerPlayerIds = new Set(figuresPlayer.map(f => f.playerId))
+        gameOver = true
+        winRoundFigures(figuresPlayer)
+    }
+
+    if (!gameOver) {
+        // last survivor
+        const survivors = figuresPlayer.filter(f => !f.isDead)
+        if (survivors.length < 2) {
+            winRoundFigures(survivors)
+        }
+
+        // mode-specific checks
+        if (extraChecks) {
+            extraChecks()
+        }
+
+        // countdown
+        if (!restartStage && game.countdown && dtProcessed >= startTime + game.countdown * 1000) {
+            winRoundFigures([])
+        }
+
+        // round limit hit
+        const playersWithMaxPoints = getPlayersWithMaxScore()
+        if (restartStage && roundCounter >= getRoundCount() && playersWithMaxPoints.length === 1) {
+            lastFinalWinnerPlayerIds = new Set(playersWithMaxPoints.map(p => p.playerId))
+            gameOver = true
+        }
+    }
+}
+
 const handleWinning = () => {
     const figuresPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
 
     if (game === games.battleRoyale || game === games.food) {
-        // players left, quit game
-        if (figuresPlayer.length < 2) {
-            lastFinalWinnerPlayerIds = new Set(figuresPlayer.map(f => f.playerId))
-            gameOver = true
-            winRoundFigures(figuresPlayer)
-        }
-
-        if (!gameOver) {
-            // last survivor
-            const survivors = figuresPlayer.filter(f => !f.isDead)
-            if (survivors.length < 2) {
-                winRoundFigures(survivors)
-            }
-
-            //countdown
-            if (!restartStage && game.countdown && dtProcessed >= startTime + game.countdown * 1000) {
-                winRoundFigures([])
-            }
-
-            // round limit hit
-            const playersWithMaxPoints = getPlayersWithMaxScore()
-            if (restartStage && roundCounter >= getRoundCount() && playersWithMaxPoints.length === 1) {
-                lastFinalWinnerPlayerIds = new Set(playersWithMaxPoints.map(p => p.playerId))
-                gameOver = true
-            }
-        }
+        handleSoloModeWinning(figuresPlayer)
     } else if (game === games.vip) {
         // players left, quit game
         const assassins = figuresPlayer.filter(f => f.team === 'assassin')
@@ -764,34 +773,14 @@ const handleWinning = () => {
             }
         }
     } else if (game === games.race) {
-        // players left, quit game
-        if (figuresPlayer.length < 2) {
-            lastFinalWinnerPlayerIds = new Set(figuresPlayer.map(f => f.playerId))
-            gameOver = true
-            winRoundFigures(figuresPlayer)
-        }
-
-        if (!gameOver) {
-            // last survivor
-            const survivors = figuresPlayer.filter(f => !f.isDead)
-            if (survivors.length < 2) {
-                winRoundFigures(survivors)
-            }
-
+        handleSoloModeWinning(figuresPlayer, () => {
             // first at finish
             const finishLineX = raceTrackDefinition().xFinish
             const figuresInFinish = figures.filter(f => f.x > finishLineX && f.type === 'fighter')
             if (!restartStage && figuresInFinish.length > 0) {
                 winRoundFigures(figuresInFinish.filter(f => f.playerId))
             }
-
-            // round limit hit
-            const playersWithMaxPoints = getPlayersWithMaxScore()
-            if (restartStage && roundCounter >= getRoundCount() && playersWithMaxPoints.length === 1) {
-                lastFinalWinnerPlayerIds = new Set(playersWithMaxPoints.map(p => p.playerId))
-                gameOver = true
-            }
-        }
+        })
     } else if (game === games.rampage) {
         // players left, quit game
         const killers = figuresPlayer.filter(f => f.team === 'killer')
