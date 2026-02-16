@@ -106,7 +106,7 @@ const initFigure = (figure, x, y, direction) => {
         x,
         y,
         direction,
-        startWalkTime: Math.random() * 5000 + dtProcessed,
+        startWalkTime: Math.random() * npcInitialWalkDelay + dtProcessed,
         speed: 0,
         isDead: false,
         isDeathDetected: false,

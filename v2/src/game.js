@@ -41,7 +41,7 @@ const dtFix = 10
 let dtToProcess = 0, dtProcessed = 0
 
 // --- Round / Win State ---
-let isRestartButtonPressed, restartStage = false
+let isRestartButtonPressed, restartStage = false, roundCounter = 0
 let gameOver, ceremonyOver
 let lastRoundEndThen, lastWinnerPlayerIds, lastFinalWinnerPlayerIds, finalWinnerTeam
 const moveNewPlayerDuration = 1000
@@ -64,6 +64,15 @@ const fartGrowDuration = 2000
 const baseAmmoFactor = 2
 const bonusAmmoFactor = 0.5
 const detectRadius = 200
+const raceSpeedMultiplier = 2.2
+const guardSpeedFactor = 0.75
+const vipSpeedFactor = 0.5
+const cloudDecayRate = 0.999
+const cloudMinSize = 0.1
+const cloudOffset = 0.5
+const npcArrivalThreshold = 25
+const npcInitialWalkDelay = 5000
+const lobbyStartDelay = 5000
 
 // --- Kill Tracking ---
 let lastKillTime, multikillCounter, lastTotalkillAudio, totalkillCounter
@@ -114,7 +123,7 @@ const games = {
     }
 }
 
-let game, roundCounter = 0
+let game
 
 const teams = {
     assassin: {
@@ -132,7 +141,7 @@ const teams = {
         games: new Set([games.vip]),
         label: 'Guards',
         walkRectLength: 300,
-        maxSpeed: 0.75 * defaultMaxSpeed,
+        maxSpeed: guardSpeedFactor * defaultMaxSpeed,
         playerTeam: true,
         sprites: ['boy'],
         size: 0
@@ -157,7 +166,7 @@ const teams = {
         games: new Set([games.vip]),
         label: 'VIPs',
         walkRectLength: 150,
-        maxSpeed: 0.5 * defaultMaxSpeed,
+        maxSpeed: vipSpeedFactor * defaultMaxSpeed,
         playerTeam: false,
         sprites: ['mother', 'father', 'grandpa'],
         size: 0
@@ -1143,7 +1152,7 @@ function handleInput(players, figures, dtProcessed) {
             // moving
             if (f.isInRace) {
                 if (f.player.isSpeedButtonPressed) {
-                    f.speed = 2.2 * f.maxSpeed
+                    f.speed = raceSpeedMultiplier * f.maxSpeed
                 } else if (p.isWalkButtonPressed) {
                     f.speed = f.maxSpeed
                 }
@@ -1154,7 +1163,7 @@ function handleInput(players, figures, dtProcessed) {
                 if (f.type === 'crosshair') {
                     f.speed *= Math.min(p.speed, 1)
                 } else if (f.player.isSpeedButtonPressed && isDebugMode) {
-                    f.speed *= 2.2
+                    f.speed *= raceSpeedMultiplier
                 }
             }
             // attacking
@@ -1164,7 +1173,7 @@ function handleInput(players, figures, dtProcessed) {
                         f.ammo--
                     }
                     if (f.beans?.size > 0) {
-                        let xyNew = move(f.x, f.y, f.direction + deg2rad(180), f.attackDistance * 0.5, 1)
+                        let xyNew = move(f.x, f.y, f.direction + deg2rad(180), f.attackDistance * cloudOffset, 1)
                         addFartCloud({ x: xyNew.x, y: xyNew.y, playerId: f.playerId, size: f.beans.size })
                         f.beans.forEach(b => f.beansFarted.add(b))
                         f.beans.clear()
@@ -1209,7 +1218,7 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
         shuffledIndexes = shuffle([...Array(movingNPCFigures.length).keys()]);
     }
     movingNPCFigures.forEach((f, i, array) => {
-        if (((startKeyboardMovement && shuffledIndexes[i] < array.length / 2) || squaredDistance(f.x, f.y, f.xTarget, f.yTarget) < 25) && f.speed > 0) {
+        if (((startKeyboardMovement && shuffledIndexes[i] < array.length / 2) || squaredDistance(f.x, f.y, f.xTarget, f.yTarget) < npcArrivalThreshold) && f.speed > 0) {
             const breakDuration = startKeyboardMovement ? 0 : Math.random() * f.maxBreakDuration;
             f.startWalkTime = Math.random() * breakDuration + time
             f.speed = 0
@@ -1255,8 +1264,8 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
                 f.isAttacking = true
                 f.attackDistanceMultiplier = getCloudMultiplier(f.size)
             }
-            f.attackDistanceMultiplier *= Math.pow(0.999, dt)
-            if (f.attackDistanceMultiplier < 0.1) {
+            f.attackDistanceMultiplier *= Math.pow(cloudDecayRate, dt)
+            if (f.attackDistanceMultiplier < cloudMinSize) {
                 f.attackDistanceMultiplier = 0
                 f.isDead = true
             }

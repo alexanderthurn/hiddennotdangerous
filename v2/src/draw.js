@@ -102,7 +102,7 @@ const animateGameStartButton = button => {
     button.visible = stage === stages.gameLobby
 
     let text = 'Walk here to\nSTART\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
-    if (dtProcessed - startTime <= 5000) {
+    if (dtProcessed - startTime <= lobbyStartDelay) {
         text = 'PREPARE\nfor the game'
     } else if (allPlayersSameTeam) {
         text = 'SWITCH TEAM\nAll players in same team'
@@ -349,7 +349,7 @@ const addGameSelection = (app, lobbyContainer) => {
 const addGameStartButton = (app, lobbyContainer) => {
     const circleButton = createCircleButton(gameStartButtonDefinition(), lobbyContainer)
     const startGameCircle = new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius)
-    circleButton.isInArea = f => stage === stages.gameLobby && dtProcessed - startTime > 5000 && startGameCircle.contains(f.x, f.y)
+    circleButton.isInArea = f => stage === stages.gameLobby && dtProcessed - startTime > lobbyStartDelay && startGameCircle.contains(f.x, f.y)
 
     buttons.startGame = circleButton
 
