@@ -86,13 +86,12 @@ const initRandomOutsidePositionFigure = figure => {
     figure.isAiming = true
 }
 
-const initStartPositionFigure = (figure, i, walkRectLength) => {
+const initStartPositionFigure = (figure, i) => {
     let { xStart: x, y, height } = raceTrackDefinition()
     y += (i + 1) / (maxPlayerFigures + 1) * height
 
     initFigure(figure, x, y, 0)
     figure.isInRace = true
-    figure.walkRectLength = walkRectLength
 }
 
 const initCrosshair = figure => {
@@ -397,12 +396,15 @@ function getRandomXYInRectangle(x, y, w, h) {
 
 function getCloseRandomXY(figure) {
     if (figure.isInRace) {
-        return [figure.x + Math.random() * figure.walkRectLength, figure.y]
-    } else if (figure.walkRectLength) {
-        return getRandomXYInRectangle(figure.x - figure.walkRectLength, figure.y - figure.walkRectLength, 2 * figure.walkRectLength, 2 * figure.walkRectLength)
+        return [figure.x + Math.random() * getWalkRectLength(game, figure), figure.y]
+    } else if (game?.walkRectLength) {
+        const walkRectLength = getWalkRectLength(game, figure)
+        return getRandomXYInRectangle(figure.x - walkRectLength, figure.y - walkRectLength, 2 * walkRectLength, 2 * walkRectLength)
     }
     return getRandomXY()
 }
+
+const getWalkRectLength = (game, figure) => game?.walkRectLength ? game.walkRectLength * figure.maxSpeed / defaultMaxSpeed : level.rectangle.width
 
 const getIntervalPoint = (t, start, end) => start + t * (end - start)
 
@@ -648,7 +650,6 @@ const switchTeam = (figure, team) => {
     figure.team = team
     figure.currentSprite = teams[team]?.sprites?.[teams[team]?.size % teams[team]?.sprites.length] || figure.defaultSprite
     figure.maxSpeed = teams[team]?.maxSpeed || defaultMaxSpeed
-    figure.walkRectLength = teams[team]?.walkRectLength
     if (figure.team) {
         teams[figure.team].size++
     }

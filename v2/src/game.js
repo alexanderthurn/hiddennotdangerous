@@ -119,7 +119,8 @@ const games = {
     vip: {
         color: colors.blue,
         text: 'VIP',
-        countdown: 180
+        countdown: 180,
+        walkRectLength: 300
     }
 }
 
@@ -130,7 +131,6 @@ const teams = {
         color: colors.red,
         games: new Set([games.vip]),
         label: 'Assassins',
-        walkRectLength: 300,
         maxSpeed: defaultMaxSpeed,
         playerTeam: true,
         sprites: ['girl'],
@@ -140,7 +140,6 @@ const teams = {
         color: colors.blue,
         games: new Set([games.vip]),
         label: 'Guards',
-        walkRectLength: 300,
         maxSpeed: guardSpeedFactor * defaultMaxSpeed,
         playerTeam: true,
         sprites: ['boy'],
@@ -165,7 +164,6 @@ const teams = {
         color: colors.green,
         games: new Set([games.vip]),
         label: 'VIPs',
-        walkRectLength: 150,
         maxSpeed: vipSpeedFactor * defaultMaxSpeed,
         playerTeam: false,
         sprites: ['mother', 'father', 'grandpa'],
@@ -640,7 +638,7 @@ function initStage(nextStage) {
 
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => initCrosshair(figure))
         if (stage !== stages.gameLobby) {
-            shuffle(figures.filter(figure => figure.type !== 'crosshair')).forEach((figure, i) => initStartPositionFigure(figure, i, games.race.walkRectLength))
+            shuffle(figures.filter(figure => figure.type !== 'crosshair')).forEach((figure, i) => initStartPositionFigure(figure, i))
         }
     } else if (game === games.rampage) {
         initRandomSpriteFigures(figures.filter(figure => figure.team !== 'sniper'))
