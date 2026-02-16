@@ -1520,7 +1520,7 @@ const addFartCloud = (props) => {
         attackAngle: 360,
         direction: 0,
         isAttacking: false,
-        attackDuration: 10000000,
+        attackDuration: Infinity,
         attackDistance: 64,
         lifetime: 0,
         ...props
