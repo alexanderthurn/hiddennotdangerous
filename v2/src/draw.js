@@ -1193,7 +1193,7 @@ const animateFigureMarker = (attackArc, figure) => {
     attackArc.visible = isDebugMode && figure.isAttacking
 }
 
-createFigureMarker = figure => {
+const createFigureMarker = figure => {
     const markerContainer = new PIXI.Container()
     const marker = new PIXI.Graphics(figureMarker)
 
@@ -1271,22 +1271,24 @@ const addCrosshairs = (sniperFigures, ammo) => {
     })
 }
 
+const defaultFigureProps = () => ({
+    maxBreakDuration: 5000,
+    maxSpeed: defaultMaxSpeed,
+    attackDuration: 500,
+    attackBreakDuration: 2000,
+    points: 0,
+    attackDistance: 80,
+    attackAngle: 90,
+    type: 'fighter',
+})
+
 const addSniperFigures = (app, sniperFigures, ammo) => {
     let spritesheet = PIXI.Assets.get('figureAtlas')
     sniperFigures.forEach(f => {
         const crosshair = createCrosshair({ ...f, x: f.x, y: f.y, ammo })
 
         // NPC replacement in level
-        const figure = createFigure(app, spritesheet, {
-            maxBreakDuration: 5000,
-            maxSpeed: defaultMaxSpeed,
-            attackDuration: 500,
-            attackBreakDuration: 2000,
-            points: 0,
-            attackDistance: 80,
-            attackAngle: 90,
-            type: 'fighter',
-        })
+        const figure = createFigure(app, spritesheet, defaultFigureProps())
         figuresPool.add(crosshair)
         figuresPool.add(figure)
     })
@@ -1294,30 +1296,13 @@ const addSniperFigures = (app, sniperFigures, ammo) => {
 
 const addFiguresInitialPool = (app) => {
     let spritesheet = PIXI.Assets.get('figureAtlas')
-    for (var i = 0; i < maxPlayerFigures; i++) {
-        const figure = createFigure(app, spritesheet, {
-            maxBreakDuration: 5000,
-            maxSpeed: defaultMaxSpeed,
-            attackDuration: 500,
-            attackBreakDuration: 2000,
-            points: 0,
-            attackDistance: 80,
-            attackAngle: 90,
-            type: 'fighter',
-        })
+    for (let i = 0; i < maxPlayerFigures; i++) {
+        const figure = createFigure(app, spritesheet, defaultFigureProps())
         figure.visible = false
         figuresInitialPool.add(figure)
     }
-    for (var i = 0; i < numberVIPs; i++) {
-        const figure = createFigure(app, spritesheet, {
-            maxBreakDuration: 5000,
-            attackDuration: 500,
-            attackBreakDuration: 2000,
-            points: 0,
-            attackDistance: 80,
-            attackAngle: 90,
-            type: 'fighter',
-        })
+    for (let i = 0; i < numberVIPs; i++) {
+        const figure = createFigure(app, spritesheet, defaultFigureProps())
         switchTeam(figure, 'vip')
 
         app.ticker.add(() => {

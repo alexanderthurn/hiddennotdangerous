@@ -63,7 +63,7 @@ function collectInputs() {
     };
 
     botPlayers = botPlayers.map(bp => Object.assign(bp, defaultBotPlayer));
-    for (var b = 0; b < numberBots; b++) {
+    for (let b = 0; b < numberBots; b++) {
         const playerId = 'b' + b
         let bot = botPlayers.find(bp => bp.playerId === playerId);
         let isNew = false
