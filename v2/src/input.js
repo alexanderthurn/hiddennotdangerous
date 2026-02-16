@@ -147,9 +147,7 @@ function collectInputs() {
         g.isSpeedButtonPressed = false
         g.isWalkButtonPressed = false
         if (g.buttons[4].pressed && g.buttons[5].pressed && g.buttons[6].pressed && g.buttons[7].pressed && g.buttons[10].pressed && g.buttons[11].pressed) {
-            console.log('Gamepad restart button pressed', g.isRestartButtonPressed)
             if (!g.isRestartButtonPressed) {
-                console.log('Gamepad restart button pressed2')
                 isRestartButtonPressed = true
             }
             g.isRestartButtonPressed = true

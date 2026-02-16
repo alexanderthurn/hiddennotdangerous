@@ -32,17 +32,46 @@ const keyboards = [{
         'AltRight': { playerId: 'k1', action: 'marker' }
     }, pressed: new Set()
 }];
-const virtualGamepads = []
-let startTime, then, now, dt, fps = 0, fpsMinForEffects = 30, fpsTime
-let isRestartButtonPressed, restartStage = false, gameOver, ceremonyOver, lastRoundEndThen, lastWinnerPlayerIds, lastFinalWinnerPlayerIds, finalWinnerTeam
-const moveNewPlayerDuration = 1000, moveScoreToPlayerDuration = 1000, showFinalWinnerDuration = 5000;
+
+// --- Game Loop Timing ---
+let startTime, then, now, dt
+let fps = 0, fpsTime
+const fpsMinForEffects = 30
 const dtFix = 10
 let dtToProcess = 0, dtProcessed = 0
-let figuresInitialPool = new Set(), figuresPool = new Set()
-let figures = [], maxPlayerFigures = 32, numberGuards = 17, numberVIPs = 3, numberBots = getQueryParam('bots') && Number.parseInt(getQueryParam('bots')) || 0, defaultMaxSpeed = 0.12, pointsToWin = getQueryParam('wins') && Number.parseInt(getQueryParam('wins')) || 3, roundsToWin = 3, deadDuration = 3000, beanAttackDuration = 800, fartGrowDuration = 2000, baseAmmoFactor = 2, bonusAmmoFactor = 0.5, detectRadius = 200
 
-let allPlayersSameTeam, isDebugMode = false
-let lastKillTime, multikillCounter, multikillTimeWindow = 4000, lastTotalkillAudio, totalkillCounter;
+// --- Round / Win State ---
+let isRestartButtonPressed, restartStage = false
+let gameOver, ceremonyOver
+let lastRoundEndThen, lastWinnerPlayerIds, lastFinalWinnerPlayerIds, finalWinnerTeam
+const moveNewPlayerDuration = 1000
+const moveScoreToPlayerDuration = 1000
+const showFinalWinnerDuration = 5000
+
+// --- Figure Pools ---
+let figuresInitialPool = new Set(), figuresPool = new Set()
+let figures = []
+
+// --- Game Constants ---
+const maxPlayerFigures = 32
+const numberGuards = 17
+const numberVIPs = 3
+const numberBots = getQueryParam('bots') && Number.parseInt(getQueryParam('bots')) || 0
+const defaultMaxSpeed = 0.12
+const deadDuration = 3000
+const beanAttackDuration = 800
+const fartGrowDuration = 2000
+const baseAmmoFactor = 2
+const bonusAmmoFactor = 0.5
+const detectRadius = 200
+
+// --- Kill Tracking ---
+let lastKillTime, multikillCounter, lastTotalkillAudio, totalkillCounter
+const multikillTimeWindow = 4000
+
+// --- Misc State ---
+let allPlayersSameTeam
+let isDebugMode = false
 let level = createLevel()
 
 const stages = {
@@ -214,7 +243,6 @@ const gameVoteButtonDefinition = () => ({
             figure.player.vote = button.gameId
             const playerVotedCount = players.filter(player => player.vote).length
             if (playerVotedCount === button.playersPossible.length && playerVotedCount >= button.playersMinimum) {
-                console.log('initSpinningWheel', playerVotedCount, button.playersPossible.length, button.playersMinimum)
                 initSpinningWheel()
             }
         }
