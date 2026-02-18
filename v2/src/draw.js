@@ -1182,8 +1182,8 @@ const animateFigure = (figure, spritesheet) => {
         shadow.animationSpeed = animationSpeedFactor * figure.speed
     }
 
-    body.zIndex = figure.y + (1 - body.anchor.y) * body.height
-    marker.zIndex = figure.yd
+    body.zIndex = figure.y
+    marker.zIndex = figure.y
 }
 
 const figureMarker = new PIXI.GraphicsContext().circle(0, 0, 5).fill()
