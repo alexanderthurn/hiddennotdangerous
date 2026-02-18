@@ -377,7 +377,7 @@ const createLevelContainer = level => {
 }
 
 function createLevel() {
-    const level = { width: 1920, height: 1080, padding: [15, 40, 15, 10], scale: 0.9 }
+    const level = { width: 1920, height: 1080, padding: [30, 40, 30, 10], scale: 0.9 }
     level.rectangle = new PIXI.Rectangle(level.padding[0], level.padding[1], level.width - level.padding[0] - level.padding[2], level.height - level.padding[1] - level.padding[3])
     level.shortestPathNotBean5 = 2 * 0.6 * level.height + 2 * 0.3 * Math.hypot(level.height, level.width);
     level.shortestPathBean5 = 2 * 0.6 * level.height + 0.6 * level.width + 0.3 * Math.hypot(level.height, level.width);
