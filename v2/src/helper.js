@@ -169,6 +169,8 @@ const playAudio = (audio) => {
             file[key] = value;
         }
     });
+    const globalVolume = getGlobalVolume();
+    file.volume = (file.volume !== undefined ? file.volume : 1.0) * globalVolume;
     file.play().catch((err) => { console.log(err) });
 }
 
@@ -205,14 +207,17 @@ const loadAudioPool = (audio, length) => {
     return audioPool;
 }
 
-const muteAudio = () => {
-    window.localStorage.setItem('mute', 'true')
+const getGlobalVolume = () => {
+    const volume = window.localStorage.getItem('volume');
+    return volume === null ? 1.0 : parseFloat(volume);
 }
-const unmuteAudio = () => {
-    window.localStorage.removeItem('mute')
+
+const setGlobalVolume = (volume) => {
+    window.localStorage.setItem('volume', volume);
 }
+
 const isMusicMuted = () => {
-    return window.localStorage.getItem('mute') === 'true'
+    return getGlobalVolume() === 0;
 }
 
 const getPlayAudio = (audio) => () => playAudio(audio)
@@ -297,13 +302,23 @@ const toggleRounds = () => {
     return count
 }
 
-const toggleMusic = () => {
-    if (isMusicMuted()) {
-        unmuteAudio()
-        playMusicPlaylist(musicLobby)
-    } else {
-        muteAudio()
-        stopMusicPlaylist()
+const cycleVolume = () => {
+    let volume = getGlobalVolume();
+    if (volume >= 1.0) volume = 0.5;
+    else if (volume >= 0.5) volume = 0.0;
+    else volume = 1.0;
+
+    setGlobalVolume(volume);
+
+    if (volume > 0 && !actualMusicPlaylist && stage === stages.startLobby) {
+        playMusicPlaylist(musicLobby);
+    } else if (volume === 0 && actualMusicPlaylist) {
+        stopMusicPlaylist();
+    } else if (actualMusicPlaylist) {
+        actualMusicPlaylist.forEach(track => {
+            const baseVolume = track.volume || 1.0;
+            track.file.volume = baseVolume * volume;
+        })
     }
 }
 

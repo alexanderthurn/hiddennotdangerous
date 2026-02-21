@@ -505,7 +505,12 @@ const createRectangleButton = (props, lobbyContainer) => {
 }
 
 const animateMuteButton = button => {
-    button.getChildAt(2).text = isMusicMuted() ? 'Music: OFF' : 'Music: ON'
+    const volume = getGlobalVolume()
+    if (volume === 0) {
+        button.getChildAt(2).text = 'Music: OFF'
+    } else {
+        button.getChildAt(2).text = 'Music: ' + (volume * 100) + '%'
+    }
 }
 
 const animateRoundsButton = button => {
