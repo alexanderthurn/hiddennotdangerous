@@ -95,29 +95,29 @@ const mostFigures = ['girl', 'robot', 'teddy', 'fat', 'boy', 'father', 'grandpa'
 
 const games = {
     battleRoyale: {
-        color: colors.red,
+        color: colors.cardinal,
         text: 'BATTLE ROYALE',
         countdown: 90
     },
     food: {
-        color: colors.green,
+        color: colors.elfGreen,
         text: 'FOOD'
     },
     race: {
-        color: colors.black,
+        color: colors.blueGem,
         text: 'RACE',
         sprites: mostFigures,
         walkRectLength: 100
     },
     rampage: {
-        color: colors.yellow,
+        color: colors.chocolate,
         text: 'RAMPAGE',
         countdown: 180,
         initialTeam: 'killer',
         sprites: mostFigures
     },
     vip: {
-        color: colors.blue,
+        color: colors.lochmara,
         text: 'VIP',
         countdown: 180,
         walkRectLength: 300
