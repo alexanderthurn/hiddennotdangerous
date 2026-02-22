@@ -1180,13 +1180,13 @@ function handleInput(players, figures, dtProcessed) {
                     f.lastAttackTime = dtProcessed
                 }
             }
-            f.isAttacking = f.lastAttackTime && (dtProcessed - f.lastAttackTime <= f.attackDuration) ? true : false;
         } else if (f.isAiming) {
             const crosshairFigure = figures.find(fig => fig.playerId === f.playerId && fig.type === 'crosshair' && fig.ammo > 0)
             if (crosshairFigure) {
                 f.direction = angle(f.x, f.y, crosshairFigure.x, crosshairFigure.y)
             }
         }
+        f.isAttacking = f.lastAttackTime && (dtProcessed - f.lastAttackTime <= f.attackDuration) ? true : false;
     })
 }
 
