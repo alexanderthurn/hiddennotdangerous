@@ -1160,7 +1160,7 @@ const animateFigure = (figure, spritesheet) => {
     let frameAnchor = body.textures[body.currentFrame].defaultAnchor || { x: 0.5, y: 0.5 }
     body.anchor = shadow.anchor = rotationAnchor
 
-    body.y = shadow.y = isDeathDetected ? 0 : -body.height * (frameAnchor.y - rotationAnchor.y)
+    body.y = shadow.y = -body.height * (frameAnchor.y - rotationAnchor.y) * (isDeathDetected ? 0.5 : 1)
     shadow.x = body.x + body.width * 0.5 * body.scale.x
 
 
@@ -1235,12 +1235,10 @@ const createFigure = (app, spritesheet, props) => {
     figure = Object.assign(figure, props)
 
     const body = new PIXI.AnimatedSprite(spritesheet.animations.baby_down)
-    //body.anchor.set(0.5)
     body.scale = 0.5
     body.label = 'body'
 
     const shadow = new PIXI.AnimatedSprite(spritesheet.animations.baby_down)
-    //shadow.anchor.set(0.1, 0.5)
     shadow.alpha = shadowDefinition.alpha
     shadow.scale.set(shadowDefinition.scale.x * body.scale.x, shadowDefinition.scale.y * body.scale.y)
     shadow.skew.set(shadowDefinition.skew.x, shadowDefinition.skew.y)
