@@ -766,13 +766,13 @@ const stepSpinningWheel = dtProcessed => {
         } else {
             segment = segment || spinningWheel.winner
             for (let index = 0; index < spinningWheel.segments.length; index++) {
-                if (segment === spinningWheel.winner && spinningWheel.speed === spinningWheel.constantSpeedThreshold) {
-                    spinningWheel.finishTime = dtProcessed
-                }
                 segment = spinningWheel.segments[(segment.position + 1) % spinningWheel.segments.length]
                 if (segment.votes > 0) {
                     break
                 }
+            }
+            if (segment === spinningWheel.winner && spinningWheel.speed === spinningWheel.constantSpeedThreshold) {
+                spinningWheel.finishTime = dtProcessed
             }
         }
         spinningWheel.segment = segment
