@@ -130,7 +130,7 @@ const teams = {
     assassin: {
         color: colors.red,
         games: new Set([games.vip]),
-        label: 'Assassins',
+        label: 'Girls',
         maxSpeed: defaultMaxSpeed,
         playerTeam: true,
         sprites: ['girl'],
@@ -139,7 +139,7 @@ const teams = {
     guard: {
         color: colors.blue,
         games: new Set([games.vip]),
-        label: 'Guards',
+        label: 'Boys',
         maxSpeed: guardSpeedFactor * defaultMaxSpeed,
         playerTeam: true,
         sprites: ['boy'],
