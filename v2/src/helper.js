@@ -399,12 +399,23 @@ function getRandomXYInRectangle(x, y, w, h) {
     return [rectangle.x + Math.random() * rectangle.width, rectangle.y + Math.random() * rectangle.height]
 }
 
+function getRandomXYInCircle(cx, cy, radius) {
+    const a = Math.random() * 2 * Math.PI
+    const maxR = Math.min(radius, distanceToBorder(cx, cy, Math.cos(a), Math.sin(a)))
+    const r = maxR * Math.sqrt(Math.random())
+    return [cx + r * Math.cos(a), cy + r * Math.sin(a)]
+}
+
 function getCloseRandomXY(figure) {
     if (figure.isInRace) {
         return [figure.x + Math.random() * getWalkRectLength(game, figure), figure.y]
     } else if (game?.walkRectLength) {
         const walkRectLength = getWalkRectLength(game, figure)
         return getRandomXYInRectangle(figure.x - walkRectLength, figure.y - walkRectLength, 2 * walkRectLength, 2 * walkRectLength)
+    }
+    if (game === games.battleRoyale && circleOfDeath) {
+        // shrink by 0.8 so that figures don't run so much into the edges of the circle
+        return getRandomXYInCircle(circleOfDeath.x, circleOfDeath.y, circleOfDeath.radius / (level.scale * level.scale) * 0.8)
     }
     return getRandomXY()
 }
