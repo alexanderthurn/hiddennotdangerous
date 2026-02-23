@@ -101,7 +101,7 @@ const animateLobbyStartButton = button => {
 const animateGameStartButton = button => {
     button.visible = stage === stages.gameLobby
 
-    let text = 'Walk here to\nSTART\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
+    let text
     if (dtProcessed - startTime <= lobbyStartDelay) {
         text = 'PREPARE\nfor the game'
     } else if (allPlayersSameTeam) {
@@ -110,8 +110,8 @@ const animateGameStartButton = button => {
         text = 'Walk here to\nSTART\n\nmin 2 players' + (numberBots > 0 ? '\nor 1 player +1 bot' : '')
     } else if (button.playersPossible?.length > 1 && button.playersNear?.length === button.playersPossible?.length) {
         text = 'Starting GAME'
-    } else if (button.playersNear?.length > 0) {
-        text = 'Walk here to\nSTART\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
+    } else {
+        text = 'Walk here to\nSTART\n\n' + (button.playersNear?.length || 0) + '/' + (button.playersPossible?.length || 0) + ' players'
     }
     button.getChildAt(2).text = text
 }
@@ -349,7 +349,7 @@ const addGameSelection = (app, lobbyContainer) => {
 const addGameStartButton = (app, lobbyContainer) => {
     const circleButton = createCircleButton(gameStartButtonDefinition(), lobbyContainer)
     const startGameCircle = new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius)
-    circleButton.isInArea = f => stage === stages.gameLobby && dtProcessed - startTime > lobbyStartDelay && startGameCircle.contains(f.x, f.y)
+    circleButton.isInArea = f => stage === stages.gameLobby && startGameCircle.contains(f.x, f.y)
 
     buttons.startGame = circleButton
 

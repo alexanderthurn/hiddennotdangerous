@@ -919,7 +919,7 @@ function updateGame(figures, dt, dtProcessed) {
 
             let aimLoadingPercentage
             if (btn === buttons.startGame) {
-                aimLoadingPercentage = !allPlayersSameTeam ? btn.playersNear.length / Math.max(playersPossible.length, playersMinimum) : 0;
+                aimLoadingPercentage = !allPlayersSameTeam && dtProcessed - startTime > lobbyStartDelay ? btn.playersNear.length / Math.max(playersPossible.length, playersMinimum) : 0;
             } else {
                 aimLoadingPercentage = btn.playersNear.length > 0 ? 1 : 0;
             }
