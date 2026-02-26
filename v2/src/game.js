@@ -382,7 +382,7 @@ const app = new PIXI.Application();
 window.__PIXI_DEVTOOLS__ = {
     app
 };
-let gameContainer;
+
 let levelContainer;
 const figureShadowLayer = new PIXI.RenderLayer();
 const figureLayer = new PIXI.RenderLayer({ sortableChildren: true });
@@ -486,9 +486,9 @@ app.textStyleController = {
 
     initNetwork()
     destroyContainer(app, loadingText)
-    gameContainer = createGameContainer(app, level, levelContainer)
-    levelContainer = gameContainer.getChildByName('level')
-    app.stage.addChild(gameContainer, figureShadowLayer, figureLayer, cloudLayer, fogLayer, crosshairLayer, scoreLayer, overlayLayer, debugLayer)
+    levelContainer = createLevelContainer(app, level)
+    app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, fogLayer, crosshairLayer, scoreLayer, overlayLayer, debugLayer)
+    addGrass(app)
     addHeadline()
     addLobbyItems(app)
     addRaceTrack(app)
@@ -974,7 +974,7 @@ function updateGame(figures, dt, dtProcessed) {
         const scale = 1 - (dtProcessed - startTime) / (game.countdown * 1000)
         circleOfDeath.radius = scale * circleOfDeath.startRadius
         figuresAlive.filter(f => f.type === 'fighter').forEach(f => {
-            if (level.scale * level.scale * squaredDistance(f.x, f.y, level.width / 2, level.height / 2) > circleOfDeath.radius * circleOfDeath.radius) {
+            if (/*level.scale * level.scale **/ squaredDistance(f.x, f.y, level.width / 2, level.height / 2) > circleOfDeath.radius * circleOfDeath.radius) {
                 killFigure(f)
             }
         })

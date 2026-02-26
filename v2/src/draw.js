@@ -977,24 +977,33 @@ const animateGrass = (shitBackground, blurContainer, grassMask, blurGrassMask, b
     }
 }
 
-const addGrass = (container) => {
+const createBackgroundSprite = texture => {
+    const backgroundSprite = PIXI.TilingSprite.from(texture)
+    backgroundSprite.height = 3 * level.height
+    backgroundSprite.width = 3 * level.width
+    backgroundSprite.position.set(-level.width, -level.height)
+
+    return backgroundSprite
+}
+
+const addGrass = app => {
     circleOfDeath = circleOfDeathDefinition()
 
     const defaultGrassRadius = level.width + level.height
 
-    const shitBackground = PIXI.Sprite.from('background_shit')
-    const grassBackground = PIXI.Sprite.from('background_grass')
+    const shitBackground = createBackgroundSprite('background_shit')
+    const grassBackground = createBackgroundSprite('background_grass')
     const grassMask = new PIXI.Graphics()
         .circle(0, 0, defaultGrassRadius)
         .fill({ color: 0xffffff })
     grassMask.defaultRadius = defaultGrassRadius
     grassMask.position.set(circleOfDeath.x, circleOfDeath.y)
     grassBackground.mask = grassMask
-    container.addChild(shitBackground, grassBackground, grassMask)
+    levelContainer.addChild(shitBackground, grassBackground, grassMask)
 
     const blurContainer = new PIXI.Container()
-    const blurShit = PIXI.Sprite.from('background_shit')
-    const blurGrass = PIXI.Sprite.from('background_grass')
+    const blurShit = createBackgroundSprite('background_shit')
+    const blurGrass = createBackgroundSprite('background_grass')
 
     const blurGrassMask = new PIXI.Graphics()
         .circle(0, 0, defaultGrassRadius)
@@ -1008,7 +1017,7 @@ const addGrass = (container) => {
     blurMask.position.set(circleOfDeath.x, circleOfDeath.y)
     blurContainer.mask = blurMask
 
-    container.addChild(blurContainer, blurMask)
+    levelContainer.addChild(blurContainer, blurMask)
 
     app.ticker.add(() => animateGrass(shitBackground, blurContainer, grassMask, blurGrassMask, blurMask))
 }
@@ -1365,7 +1374,7 @@ const addOverlay = app => {
     const pauseOverlay = createPauseOverlay(app)
 
     levelContainer.addChild(countdown)
-    gameContainer.addChild(pauseOverlay)
+    app.stage.addChild(pauseOverlay)
     overlayLayer.attach(countdown, pauseOverlay)
 }
 
@@ -1393,20 +1402,25 @@ const createCountdown = app => {
     return countdown
 }
 
-const animatePauseOverlay = (overlay, time) => {
+const animatePauseOverlay = (app, overlay, time) => {
+    const background = overlay.getChildByLabel('background')
     const text = overlay.getChildByLabel('text')
+    background.height = app.screen.height
+    background.width = app.screen.width
+    background.y = 0
     const numberJoinedPlayer = players.filter(p => p.joinedTime >= 0).length
     text.text = (numberJoinedPlayer > 0) ? 'Pause' : '   Welcome to\nKnirps und Knall\n \n Press any key'
-    text.x = Math.sin(time.lastTime / 1000) * 10 + level.width / 2
-    text.y = Math.cos(time.lastTime / 1000) * 10 + level.height / 2
+    text.x = Math.sin(time.lastTime / 1000) * 10 + app.screen.width / 2
+    text.y = Math.cos(time.lastTime / 1000) * 10 + app.screen.height / 2
     overlay.visible = !windowHasFocus || numberJoinedPlayer === 0
 }
 
 const createPauseOverlay = app => {
     const overlay = new PIXI.Container()
 
-    const background = new PIXI.Graphics().rect(0, 0, level.width, level.height)
+    const background = new PIXI.Graphics().rect(0, 0, app.screen.width, app.screen.height)
         .fill({ alpha: 0.3, color: colors.darkBrown })
+    background.label = 'background'
 
     const text = new PIXI.BitmapText({
         style: {
@@ -1414,12 +1428,12 @@ const createPauseOverlay = app => {
         },
         anchor: { x: 0.5, y: 0.5 },
         label: 'text',
-        scale: { x: 2, y: 2 },
+        scale: { x: 2, y: 2 }
     })
 
     overlay.addChild(background, text)
 
-    app.ticker.add((time) => animatePauseOverlay(overlay, time))
+    app.ticker.add((time) => animatePauseOverlay(app, overlay, time))
     return overlay
 }
 

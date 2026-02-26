@@ -351,32 +351,15 @@ const destroyContainer = (app, container) => {
     }
 }
 
-const createGameContainer = (app, level, levelContainer) => {
-    const gameContainer = new PIXI.Container()
-    addGrass(gameContainer)
-
-    levelContainer = createLevelContainer(level)
-    gameContainer.addChild(levelContainer)
-
-    app.ticker.add(() => {
-        const scale = Math.min(app.screen.width / level.width, app.screen.height / level.height)
-        gameContainer.scale.x = scale
-        gameContainer.scale.y = scale
-        gameContainer.x = (app.screen.width - scale * level.width) / 2
-        gameContainer.y = (app.screen.height - scale * level.height) / 2
-    })
-
-    return gameContainer
-}
-
-const createLevelContainer = level => {
+const createLevelContainer = (app, level) => {
     const levelContainer = new PIXI.Container()
 
-    levelContainer.scale.x = level.scale
-    levelContainer.scale.y = level.scale
-    levelContainer.x = (0.5 * (1 - level.scale) * level.width)
-    levelContainer.y = (0.5 * (1 - level.scale) * level.height)
-    levelContainer.label = 'level'
+    app.ticker.add(() => {
+        const scale = Math.min(app.screen.width / level.width, app.screen.height / level.height) * level.scale
+        levelContainer.scale.x = levelContainer.scale.y = scale
+        levelContainer.x = (app.screen.width - scale * level.width) / 2
+        levelContainer.y = (app.screen.height - scale * level.height) / 2
+    })
 
     return levelContainer
 }
