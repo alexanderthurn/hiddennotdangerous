@@ -398,7 +398,7 @@ function getCloseRandomXY(figure) {
     }
     if (game === games.battleRoyale && circleOfDeath) {
         // shrink by 0.8 so that figures don't run so much into the edges of the circle
-        return getRandomXYInCircle(circleOfDeath.x, circleOfDeath.y, circleOfDeath.radius / (level.scale * level.scale) * 0.8)
+        return getRandomXYInCircle(circleOfDeath.x, circleOfDeath.y, circleOfDeath.radius * 0.8)
     }
     return getRandomXY()
 }
@@ -412,7 +412,7 @@ const getLinePoint = (t, start, end) => ({ x: getIntervalPoint(t, start.x, end.x
 const getRandomOutsideLevelXY = () => {
     let t = Math.random() * (level.width + level.height)
     let x, y
-    const inverseLevelScaleFactor = 1 / 0.9
+    const inverseLevelScaleFactor = 1 / level.scale
     const margin = (inverseLevelScaleFactor - 1) / 4
     const start = -margin, end = 1 + margin
     if (t < level.width) {

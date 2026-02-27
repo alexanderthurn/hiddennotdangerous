@@ -349,8 +349,8 @@ const buttons = {
 const circleOfDeathDefinition = () => ({
     x: level.width / 2,
     y: level.height / 2,
-    radius: Math.hypot(level.width / 2, level.height / 2),
-    startRadius: Math.hypot(level.width / 2, level.height / 2)
+    radius: 1.25 / level.scale * Math.hypot(level.width / 2, level.height / 2),
+    startRadius: 1.25 / level.scale * Math.hypot(level.width / 2, level.height / 2)
 })
 
 let circleOfDeath
