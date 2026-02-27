@@ -349,8 +349,9 @@ const buttons = {
 const circleOfDeathDefinition = () => ({
     x: level.width / 2,
     y: level.height / 2,
-    radius: 1.25 / level.scale * Math.hypot(level.width / 2, level.height / 2),
-    startRadius: 1.25 / level.scale * Math.hypot(level.width / 2, level.height / 2)
+    radius: 1.09 / level.scale * Math.hypot(level.width / 2, level.height / 2),
+    //start radius just big enough for 4:3 screen
+    startRadius: 1.09 / level.scale * Math.hypot(level.width / 2, level.height / 2)
 })
 
 let circleOfDeath
@@ -419,7 +420,7 @@ app.textStyleController = {
     const fontFamilyName = 'Rockboxcond12'
     PIXI.Assets.addBundle('main', {
         background_grass: './gfx/background_grass.jpg',
-        background_shit: './gfx/background_shit.jpg',
+        background_shit: './gfx/background_shit1x1.jpg',
         crosshair: './gfx/crosshair.svg',
         fenceAtlas: './gfx/fence.json',
         figureAtlas: './gfx/figure.json',
