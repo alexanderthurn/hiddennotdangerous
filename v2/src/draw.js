@@ -1371,11 +1371,10 @@ const createCrosshair = props => {
 
 const addOverlay = app => {
     const countdown = createCountdown(app)
-    const pauseOverlay = createPauseOverlay(app)
+    addPauseOverlay(app)
 
     levelContainer.addChild(countdown)
-    app.stage.addChild(pauseOverlay)
-    overlayLayer.attach(countdown, pauseOverlay)
+    overlayLayer.attach(countdown)
 }
 
 const animateCountdown = countdown => {
@@ -1402,39 +1401,39 @@ const createCountdown = app => {
     return countdown
 }
 
-const animatePauseOverlay = (app, overlay, time) => {
-    const background = overlay.getChildByLabel('background')
-    const text = overlay.getChildByLabel('text')
-    background.height = app.screen.height
-    background.width = app.screen.width
-    background.y = 0
+const animatePauseOverlay = (app, background, text, time) => {
     const numberJoinedPlayer = players.filter(p => p.joinedTime >= 0).length
-    text.text = (numberJoinedPlayer > 0) ? 'Pause' : '   Welcome to\nKnirps und Knall\n \n Press any key'
-    text.x = Math.sin(time.lastTime / 1000) * 10 + app.screen.width / 2
-    text.y = Math.cos(time.lastTime / 1000) * 10 + app.screen.height / 2
-    overlay.visible = !windowHasFocus || numberJoinedPlayer === 0
+    const visible = !windowHasFocus || numberJoinedPlayer === 0
+    background.visible = visible
+    text.visible = visible
+
+    if (visible) {
+        background.height = app.screen.height
+        background.width = app.screen.width
+        background.y = 0
+        text.text = (numberJoinedPlayer > 0) ? 'Pause' : '   Welcome to\nKnirps und Knall\n \n Press any key'
+        text.x = Math.sin(time.lastTime / 1000) * 10 + level.width / 2
+        text.y = Math.cos(time.lastTime / 1000) * 10 + level.height / 2
+    }
 }
 
-const createPauseOverlay = app => {
-    const overlay = new PIXI.Container()
-
+const addPauseOverlay = app => {
     const background = new PIXI.Graphics().rect(0, 0, app.screen.width, app.screen.height)
         .fill({ alpha: 0.3, color: colors.darkBrown })
-    background.label = 'background'
 
     const text = new PIXI.BitmapText({
         style: {
             fontFamily: 'KnallTitle'
         },
         anchor: { x: 0.5, y: 0.5 },
-        label: 'text',
         scale: { x: 2, y: 2 }
     })
 
-    overlay.addChild(background, text)
+    levelContainer.addChild(text)
+    app.stage.addChild(background)
+    overlayLayer.attach(background, text)
 
-    app.ticker.add((time) => animatePauseOverlay(app, overlay, time))
-    return overlay
+    app.ticker.add((time) => animatePauseOverlay(app, background, text, time))
 }
 
 const animateFpsText = (app, fpsText) => {
