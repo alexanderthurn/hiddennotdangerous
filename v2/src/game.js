@@ -349,7 +349,6 @@ const buttons = {
 const circleOfDeathDefinition = () => ({
     x: level.width / 2,
     y: level.height / 2,
-    radius: 1.09 / level.scale * Math.hypot(level.width / 2, level.height / 2),
     //start radius just big enough for 4:3 screen
     startRadius: 1.09 / level.scale * Math.hypot(level.width / 2, level.height / 2)
 })

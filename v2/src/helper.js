@@ -396,7 +396,7 @@ function getCloseRandomXY(figure) {
         const walkRectLength = getWalkRectLength(game, figure)
         return getRandomXYInRectangle(figure.x - walkRectLength, figure.y - walkRectLength, 2 * walkRectLength, 2 * walkRectLength)
     }
-    if (game === games.battleRoyale && circleOfDeath) {
+    if (stage === stages.game && game === games.battleRoyale && circleOfDeath) {
         // shrink by 0.8 so that figures don't run so much into the edges of the circle
         return getRandomXYInCircle(circleOfDeath.x, circleOfDeath.y, circleOfDeath.radius * 0.8)
     }
