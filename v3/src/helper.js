@@ -184,7 +184,7 @@ const stopAudio = (audio) => {
 }
 
 const isAudioPlaying = (audio) => {
-    return sound.isPlaying(audio.alias)
+    return sound.find(audio.alias)?.isPlaying ?? false
 }
 
 // pixi/sound handles concurrent playback natively — no manual pool needed
