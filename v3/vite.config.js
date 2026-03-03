@@ -18,5 +18,9 @@ export default defineConfig({
         // Verhindert Unschärfe bei manchen Assets durch Inlining-Limit
         assetsInlineLimit: 0,
         chunkSizeWarningLimit: 1000,
+    },
+
+    server: {
+        port: 3333,
     }
 })
