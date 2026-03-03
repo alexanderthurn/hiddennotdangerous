@@ -55,7 +55,6 @@ export default [
                 crosshairColors: 'readonly',
                 crosshairColorsInUse: 'writable',
                 getCrosshairColor: 'readonly',
-                musicPlaylistEndHandlers: 'writable',
                 setDeadzone: 'readonly',
                 pad: 'readonly',
                 getCountdownText: 'readonly',
@@ -91,7 +90,6 @@ export default [
                 muteAudio: 'readonly',
                 unmuteAudio: 'readonly',
                 isMusicMuted: 'readonly',
-                getPlayAudio: 'readonly',
                 playPlaylist: 'readonly',
                 stopPlaylist: 'readonly',
                 stopMusicPlaylist: 'readonly',
@@ -296,7 +294,7 @@ export default [
             }
         },
         rules: {
-            'no-unused-vars': 'warn',
+            'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
             'no-undef': 'error',
         }
     }

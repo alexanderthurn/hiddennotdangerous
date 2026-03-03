@@ -226,8 +226,8 @@ const soundShootMissPool = loadAudioPool(audio.shootMiss, 10);
 const soundDeathPool = loadAudioPool(audio.death, 10);
 const soundEatPool = audio.eat.map(audio => loadAudioPool(audio, 4));
 
-const musicGame = audio.musicGame.map(audio => getAudio(audio));
-const musicLobby = audio.musicLobby.map(audio => getAudio(audio));
+const musicGame = audio.musicGame.map(audio => getAudio(audio, { preload: false }));
+const musicLobby = audio.musicLobby.map(audio => getAudio(audio, { preload: false }));
 const soundJoin = getAudio(audio.join);
 const soundSpinningWheel = getAudio(audio.spinningWheel);
 const soundBoomerang = getAudio(audio.boomerang);

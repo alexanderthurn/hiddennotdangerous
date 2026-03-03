@@ -1,3 +1,5 @@
+import { sound } from '@pixi/sound'
+
 const colors = {
     black: 0x000000,
     blue: 0x0000FF,
@@ -35,7 +37,8 @@ const getCrosshairColor = () => {
     return color
 }
 
-let musicPlaylistEndHandlers = [];
+let _soundCounter = 0
+let _activePlaylistId = null
 
 function setDeadzone(m, deadzone = 0.2) {
     if (m < deadzone)
@@ -155,54 +158,51 @@ const distanceAnglesDeg = distanceAngles(360);
 
 const getNextDiscreteAngle = (angle, numberDiscreteAngles) => deg2rad(Math.round(rad2deg(angle) * numberDiscreteAngles / 360) * 360 / numberDiscreteAngles);
 
-const getAudio = (audio) => {
-    const { title, ...props } = audio;
-    const file = new Audio(title);
-    return { file, ...props };
-};
+const getAudio = (config, { preload = true } = {}) => {
+    const alias = 'snd_' + (_soundCounter++)
+    if (preload) {
+        loadPromises.push(new Promise((resolve) => {
+            sound.add(alias, {
+                url: config.title,
+                preload: true,
+                singleInstance: true,
+                loaded: () => resolve(),
+            })
+        }))
+    } else {
+        sound.add(alias, { url: config.title, singleInstance: true })
+    }
+    return { alias, volume: config.volume ?? 1, start: config.currentTime ?? 0 }
+}
 
 const playAudio = (audio) => {
-    const { file, ...props } = audio;
-    file.load()
-    Object.entries(props).forEach(([key, value]) => {
-        if (value) {
-            file[key] = value;
-        }
-    });
-    file.play().catch((err) => { console.log(err) });
+    sound.play(audio.alias, { volume: audio.volume, start: audio.start })
 }
 
 const stopAudio = (audio) => {
-    const { file } = audio;
-    file.load();
+    sound.stop(audio.alias)
 }
 
-const isAudioPlaying = audio => audio.file.currentTime > 0 && !audio.file.ended
+const isAudioPlaying = (audio) => {
+    return sound.isPlaying(audio.alias)
+}
+
+// pixi/sound handles concurrent playback natively — no manual pool needed
+const loadAudioPool = (config, _length) => {
+    const alias = 'snd_' + (_soundCounter++)
+    loadPromises.push(new Promise((resolve) => {
+        sound.add(alias, {
+            url: config.title,
+            preload: true,
+            singleInstance: false,
+            loaded: () => resolve(),
+        })
+    }))
+    return { alias, volume: config.volume ?? 1, start: config.currentTime ?? 0 }
+}
 
 const playAudioPool = (audioPool, volume) => {
-    const freeAudioEntry = audioPool.find(entry => entry.audio.file.ended || !entry.played);
-    if (freeAudioEntry) {
-        freeAudioEntry.played = true;
-        if (volume) {
-            freeAudioEntry.audio.file.volume = volume;
-        }
-        playAudio(freeAudioEntry.audio);
-    }
-}
-
-const loadAudioPool = (audio, length) => {
-    const audioPool = [];
-    for (let i = 0; i < length; i++) {
-        audioPool.push({ audio: getAudio(audio) });
-    }
-    audioPool.forEach(poolEntry => loadPromises.push(new Promise((resolve) => {
-        const handler = () => {
-            poolEntry.audio.file.removeEventListener('canplaythrough', handler);
-            resolve();
-        };
-        poolEntry.audio.file.addEventListener('canplaythrough', handler);
-    })));
-    return audioPool;
+    sound.play(audioPool.alias, { volume: volume ?? audioPool.volume, start: audioPool.start })
 }
 
 const muteAudio = () => {
@@ -215,32 +215,27 @@ const isMusicMuted = () => {
     return window.localStorage.getItem('mute') === 'true'
 }
 
-const getPlayAudio = (audio) => () => playAudio(audio)
-
 const playPlaylist = (playlist, isShuffled) => {
-    if (playlist) {
-        if (isShuffled) {
-            playlist = shuffle(playlist)
-        }
-        playlist.forEach((track, index, list) => {
-            const handler = getPlayAudio(playlist[(index + 1) % list.length]);
-            track.file.addEventListener("ended", handler);
-            musicPlaylistEndHandlers.push({ track, handler });
-        });
-        playAudio(playlist[0]);
+    if (!playlist || playlist.length === 0) return
+    const playlistId = Symbol()
+    _activePlaylistId = playlistId
+    const ordered = isShuffled ? shuffle([...playlist]) : playlist
+    const playNext = (index) => {
+        if (_activePlaylistId !== playlistId) return
+        const track = ordered[index]
+        sound.play(track.alias, {
+            volume: track.volume,
+            start: track.start,
+            complete: () => playNext((index + 1) % ordered.length),
+        })
     }
+    playNext(0)
 }
 
 const stopPlaylist = (playlist) => {
-    if (playlist) {
-        // Entferne alle Event-Listener
-        musicPlaylistEndHandlers.forEach(({ track, handler }) => {
-            track.file.removeEventListener("ended", handler);
-        });
-        musicPlaylistEndHandlers = [];
-
-        playlist.forEach(track => track.file.load());
-    }
+    _activePlaylistId = null
+    if (!playlist) return
+    playlist.forEach(track => sound.stop(track.alias))
 }
 
 const stopMusicPlaylist = () => {
@@ -248,10 +243,11 @@ const stopMusicPlaylist = () => {
     actualMusicPlaylist = undefined
 }
 
-const playMusicPlaylist = (musicPlaylist, shuffle) => {
-    if (actualMusicPlaylist != musicPlaylist) {
+const playMusicPlaylist = (musicPlaylist, isShuffled) => {
+    if (isMusicMuted()) return
+    if (actualMusicPlaylist !== musicPlaylist) {
         stopMusicPlaylist()
-        playPlaylist(musicPlaylist, shuffle)
+        playPlaylist(musicPlaylist, isShuffled)
         actualMusicPlaylist = musicPlaylist
     }
 }
@@ -784,7 +780,6 @@ const quadraticBezier = (t, p0, p1, p2) => ({
 
 Object.assign(window, {
     colors, crosshairColors, crosshairColorsInUse, getCrosshairColor,
-    musicPlaylistEndHandlers,
     setDeadzone, pad, getCountdownText, getQueryParam,
     mod, getRandomInt, getRandomIndex,
     initRandomPositionFigure, initRandomOutsidePositionFigure, initStartPositionFigure,
@@ -793,7 +788,7 @@ Object.assign(window, {
     deg2rad, deg2limitedrad, rad2deg, rad2limiteddeg,
     distanceAngles, distanceAnglesRad, distanceAnglesDeg, getNextDiscreteAngle,
     getAudio, playAudio, stopAudio, isAudioPlaying, playAudioPool, loadAudioPool,
-    muteAudio, unmuteAudio, isMusicMuted, getPlayAudio,
+    muteAudio, unmuteAudio, isMusicMuted,
     playPlaylist, stopPlaylist, stopMusicPlaylist, playMusicPlaylist,
     playKillingSounds, getRoundCount, setRoundCount, toggleRounds, toggleMusic,
     voteGame, loadButton, addAnimation, destroyContainer, createLevelContainer,
