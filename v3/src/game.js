@@ -172,19 +172,19 @@ const teams = {
 }
 
 const audio = {
-    fart: { title: './sfx/sound2.ogg', currentTime: 0.15 },
-    beanFart: { title: './sfx/sound1.ogg', currentTime: 0.15 },
-    shootHit: { title: './sfx/slingshotHit.ogg', currentTime: 1.5 },
-    shootMiss: { title: './sfx/slingshotMiss.ogg', currentTime: 1.5 },
-    death: { title: './sfx/gag-reflex-41207.ogg', currentTime: 0.0 },
+    fart: { title: './sfx/sound2.ogg', start: 0.15 },
+    beanFart: { title: './sfx/sound1.ogg', start: 0.15 },
+    shootHit: { title: './sfx/slingshotHit.ogg', start: 1.5 },
+    shootMiss: { title: './sfx/slingshotMiss.ogg', start: 1.5 },
+    death: { title: './sfx/gag-reflex-41207.ogg', start: 0.0 },
     join: { title: './sfx/sounddrum.ogg' },
     spinningWheel: { title: './sfx/spinningWheelClick.ogg' },
-    boomerang: { title: './sfx/boomerang.ogg', currentTime: 0.1 },
+    boomerang: { title: './sfx/boomerang.ogg', start: 0.1, end: 2.6 },
     firstBlood: { title: './sfx/first-blood.ogg', volume: 0.2 },
     roundEnd: { title: './sfx/surprise+4.5db.ogg' },
     win: { title: './sfx/audience-clapping-03-99963.ogg' },
     musicGame: [
-        { title: './sfx/music1.ogg', currentTime: 20, volume: 0.5 },
+        { title: './sfx/music1.ogg', start: 20, volume: 0.5 },
         { title: './sfx/music2.ogg', volume: 0.5 },
         { title: './sfx/music3.ogg', volume: 0.5 }
     ],
@@ -425,106 +425,106 @@ Object.assign(window, {
     initStage, gameLoop, updateGame, handleInput, handleNPCs
 })
 
-;(async () => {
-    console.log('no need to hide');
+    ; (async () => {
+        console.log('no need to hide');
 
-    // Initialize the application.
-    await app.init({ antialias: true, backgroundAlpha: 0, resizeTo: window, resolution: window.devicePixelRatio || 1, autoDensity: true, });
+        // Initialize the application.
+        await app.init({ antialias: true, backgroundAlpha: 0, resizeTo: window, resolution: window.devicePixelRatio || 1, autoDensity: true, });
 
-    // Then adding the application's canvas to the DOM body.
-    document.body.appendChild(app.canvas);
+        // Then adding the application's canvas to the DOM body.
+        document.body.appendChild(app.canvas);
 
-    const loadingText = createLoadingText(app);
+        const loadingText = createLoadingText(app);
 
-    await Promise.all(loadPromises);
-    const fontFamilyName = 'Rockboxcond12'
-    PIXI.Assets.addBundle('main', {
-        background_grass: './gfx/background_grass.jpg',
-        background_shit: './gfx/background_shit1x1.jpg',
-        crosshair: './gfx/crosshair.svg',
-        fenceAtlas: './gfx/fence.json',
-        figureAtlas: './gfx/figure.json',
-        fontTTF: './gfx/' + fontFamilyName + '.ttf',
-    });
-    await PIXI.Assets.loadBundle('main')
+        await Promise.all(loadPromises);
+        const fontFamilyName = 'Rockboxcond12'
+        PIXI.Assets.addBundle('main', {
+            background_grass: './gfx/background_grass.jpg',
+            background_shit: './gfx/background_shit1x1.jpg',
+            crosshair: './gfx/crosshair.svg',
+            fenceAtlas: './gfx/fence.json',
+            figureAtlas: './gfx/figure.json',
+            fontTTF: './gfx/' + fontFamilyName + '.ttf',
+        });
+        await PIXI.Assets.loadBundle('main')
 
-    document.fonts.add(PIXI.Assets.get('fontTTF'))
+        document.fonts.add(PIXI.Assets.get('fontTTF'))
 
-    PIXI.BitmapFontManager.install({
-        name: 'Knall',
-        style: {
-            chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
-            fontFamily: fontFamilyName,
-            fontSize: 32,
-            fill: colors.white
-        }
-    })
-
-    PIXI.BitmapFontManager.install({
-        name: 'KnallStroke',
-        style: {
-            chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
-            fontFamily: fontFamilyName,
-            fontSize: 48,
-            fill: colors.white,
-            stroke: {
-                width: 1,
+        PIXI.BitmapFontManager.install({
+            name: 'Knall',
+            style: {
+                chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
+                fontFamily: fontFamilyName,
+                fontSize: 32,
+                fill: colors.white
             }
-        }
-    })
+        })
 
-    PIXI.BitmapFontManager.install({
-        name: 'KnallTitle',
-        style: {
-            chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
-            fontFamily: fontFamilyName,
-            fontSize: 128,
-            fill: colors.white,
-            align: 'center',
-            stroke: {
-                color: colors.black,
-                width: 12,
+        PIXI.BitmapFontManager.install({
+            name: 'KnallStroke',
+            style: {
+                chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
+                fontFamily: fontFamilyName,
+                fontSize: 48,
+                fill: colors.white,
+                stroke: {
+                    width: 1,
+                }
             }
-        }
-    })
+        })
 
-    PIXI.BitmapFontManager.install({
-        name: 'KnallWinning',
-        style: {
-            chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
-            fontFamily: fontFamilyName,
-            fontSize: level.width * 0.1,
-            fill: {
-                alpha: 0.8,
-                color: colors.lightBrown,
-            },
-            stroke: {
-                color: colors.white,
-                width: 6,
+        PIXI.BitmapFontManager.install({
+            name: 'KnallTitle',
+            style: {
+                chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
+                fontFamily: fontFamilyName,
+                fontSize: 128,
+                fill: colors.white,
+                align: 'center',
+                stroke: {
+                    color: colors.black,
+                    width: 12,
+                }
             }
-        }
-    })
+        })
 
-    initNetwork()
-    destroyContainer(app, loadingText)
-    levelContainer = createLevelContainer(app, level)
-    app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, fogLayer, crosshairLayer, scoreLayer, overlayLayer, debugLayer)
-    addGrass(app)
-    addHeadline()
-    addLobbyItems(app)
-    addRaceTrack(app)
-    addFoods(app)
-    addLevelBoundary(app)
-    addFiguresInitialPool(app)
-    addFog(app)
-    addWinningCeremony(app)
-    addOverlay(app)
-    addDebug(app)
+        PIXI.BitmapFontManager.install({
+            name: 'KnallWinning',
+            style: {
+                chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
+                fontFamily: fontFamilyName,
+                fontSize: level.width * 0.1,
+                fill: {
+                    alpha: 0.8,
+                    color: colors.lightBrown,
+                },
+                stroke: {
+                    color: colors.white,
+                    width: 6,
+                }
+            }
+        })
 
-    initStage(stages.startLobby)
-    window.requestAnimationFrame(gameLoop);
-}
-)();
+        initNetwork()
+        destroyContainer(app, loadingText)
+        levelContainer = createLevelContainer(app, level)
+        app.stage.addChild(levelContainer, figureShadowLayer, figureLayer, cloudLayer, fogLayer, crosshairLayer, scoreLayer, overlayLayer, debugLayer)
+        addGrass(app)
+        addHeadline()
+        addLobbyItems(app)
+        addRaceTrack(app)
+        addFoods(app)
+        addLevelBoundary(app)
+        addFiguresInitialPool(app)
+        addFog(app)
+        addWinningCeremony(app)
+        addOverlay(app)
+        addDebug(app)
+
+        initStage(stages.startLobby)
+        window.requestAnimationFrame(gameLoop);
+    }
+    )();
 
 function initStage(nextStage) {
     then = Date.now();
