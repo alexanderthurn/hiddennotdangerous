@@ -1,12 +1,13 @@
 {
   "name": "stealthy-stinkers",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "eslint": "eslint ./src"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.3",
