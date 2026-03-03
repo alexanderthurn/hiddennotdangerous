@@ -172,11 +172,11 @@ const getAudio = (config, { preload = true } = {}) => {
     } else {
         sound.add(alias, { url: config.title, singleInstance: true })
     }
-    return { alias, volume: config.volume ?? 1, start: config.currentTime ?? 0 }
+    return { alias, end: config.end, start: config.start ?? 0, volume: config.volume ?? 1 }
 }
 
 const playAudio = (audio) => {
-    sound.play(audio.alias, { volume: audio.volume, start: audio.start })
+    sound.play(audio.alias, { end: audio.end, start: audio.start, volume: audio.volume })
 }
 
 const stopAudio = (audio) => {
@@ -198,11 +198,11 @@ const loadAudioPool = (config, _length) => {
             loaded: () => resolve(),
         })
     }))
-    return { alias, volume: config.volume ?? 1, start: config.currentTime ?? 0 }
+    return { alias, end: config.end, start: config.start ?? 0, volume: config.volume ?? 1 }
 }
 
 const playAudioPool = (audioPool, volume) => {
-    sound.play(audioPool.alias, { volume: volume ?? audioPool.volume, start: audioPool.start })
+    sound.play(audioPool.alias, { end: audioPool.end, start: audioPool.start, volume: volume ?? audioPool.volume })
 }
 
 const muteAudio = () => {
@@ -705,13 +705,14 @@ const initSpinningWheel = () => {
     spinningWheel.activeSegments = spinningWheel.segments.filter(segment => segment.votes > 0)
 }
 
-const stopSpinningWheel = () => {
-    if (spinningWheel.finishTime) {
+const stopSpinningWheel = (force = false) => {
+    if (spinningWheel.finishTime && !force) {
         return
     }
     spinningWheel.mode = null
-    spinningWheel.speed = 0
     spinningWheel.segment = undefined
+    spinningWheel.speed = 0
+    spinningWheel.stage = undefined
 }
 
 const processSpinningWheel = dtProcessed => {
@@ -719,11 +720,9 @@ const processSpinningWheel = dtProcessed => {
         return
     }
 
-    if (!isAudioPlaying(soundBoomerang) && spinningWheel.finishTime && dtProcessed > spinningWheel.pulseDuration + spinningWheel.finishTime && dtProcessed <= spinningWheel.finishDuration - spinningWheel.readDuration + spinningWheel.finishTime) {
+    if (spinningWheel.stage !== 'boomerang' && spinningWheel.finishTime && dtProcessed > spinningWheel.pulseDuration + spinningWheel.finishTime) {
+        spinningWheel.stage = 'boomerang'
         playAudio(soundBoomerang)
-    }
-    if (isAudioPlaying(soundBoomerang) && dtProcessed > spinningWheel.finishDuration - spinningWheel.readDuration + spinningWheel.finishTime) {
-        stopAudio(soundBoomerang)
     }
     if (dtProcessed - spinningWheel.finishTime > spinningWheel.finishDuration) {
         stopSpinningWheel()
