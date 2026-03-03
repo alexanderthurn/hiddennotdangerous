@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@pixi/sound": "^6.0.1",
-    "pixi.js": "^8.16.0"
+    "peerjs": "^1.5.5",
+    "pixi.js": "^8.16.0",
+    "qrious": "^4.0.2"
   }
 }
