@@ -172,50 +172,50 @@ const teams = {
 }
 
 const audio = {
-    fart: { title: './sfx/sound2.mp3', currentTime: 0.15 },
-    beanFart: { title: './sfx/sound1.mp3', currentTime: 0.15 },
-    shootHit: { title: './sfx/slingshotHit.mp3', currentTime: 1.5 },
-    shootMiss: { title: './sfx/slingshotMiss.mp3', currentTime: 1.5 },
-    death: { title: './sfx/gag-reflex-41207.mp3', currentTime: 0.0 },
-    join: { title: './sfx/sounddrum.mp3' },
-    spinningWheel: { title: './sfx/spinningWheelClick.mp3' },
-    boomerang: { title: './sfx/boomerang.mp3', currentTime: 0.1 },
-    firstBlood: { title: './sfx/first-blood.mp3', volume: 0.2 },
-    roundEnd: { title: './sfx/surprise+4.5db.mp3' },
-    win: { title: './sfx/audience-clapping-03-99963.mp3' },
+    fart: { title: './sfx/sound2.ogg', currentTime: 0.15 },
+    beanFart: { title: './sfx/sound1.ogg', currentTime: 0.15 },
+    shootHit: { title: './sfx/slingshotHit.ogg', currentTime: 1.5 },
+    shootMiss: { title: './sfx/slingshotMiss.ogg', currentTime: 1.5 },
+    death: { title: './sfx/gag-reflex-41207.ogg', currentTime: 0.0 },
+    join: { title: './sfx/sounddrum.ogg' },
+    spinningWheel: { title: './sfx/spinningWheelClick.ogg' },
+    boomerang: { title: './sfx/boomerang.ogg', currentTime: 0.1 },
+    firstBlood: { title: './sfx/first-blood.ogg', volume: 0.2 },
+    roundEnd: { title: './sfx/surprise+4.5db.ogg' },
+    win: { title: './sfx/audience-clapping-03-99963.ogg' },
     musicGame: [
-        { title: './sfx/music1.mp3', currentTime: 20, volume: 0.5 },
-        { title: './sfx/music2.mp3', volume: 0.5 },
-        { title: './sfx/music3.mp3', volume: 0.5 }
+        { title: './sfx/music1.ogg', currentTime: 20, volume: 0.5 },
+        { title: './sfx/music2.ogg', volume: 0.5 },
+        { title: './sfx/music3.ogg', volume: 0.5 }
     ],
     musicLobby: [
-        { title: './sfx/lobby.mp3', volume: 0.2 }
+        { title: './sfx/lobby.ogg', volume: 0.2 }
     ],
     multiKill: [
-        { title: './sfx/double-kill.mp3', volume: 0.3 },
-        { title: './sfx/triple-kill.mp3', volume: 0.4 },
-        { title: './sfx/multi-kill.mp3', volume: 0.5 },
+        { title: './sfx/double-kill.ogg', volume: 0.3 },
+        { title: './sfx/triple-kill.ogg', volume: 0.4 },
+        { title: './sfx/multi-kill.ogg', volume: 0.5 },
         { title: './sfx/mega-kill.ogg' },
-        { title: './sfx/ultra-kill.mp3', volume: 0.5 },
-        { title: './sfx/monster-kill.mp3', volume: 0.5 },
-        { title: './sfx/ludicrous-kill.mp3', volume: 0.5 },
+        { title: './sfx/ultra-kill.ogg', volume: 0.5 },
+        { title: './sfx/monster-kill.ogg', volume: 0.5 },
+        { title: './sfx/ludicrous-kill.ogg', volume: 0.5 },
         { title: './sfx/holy-shit.ogg' }
     ],
     totalKill: [
-        { title: './sfx/killing-spree.mp3', volume: 0.5 },
-        { title: './sfx/rampage.mp3', volume: 0.5 },
-        { title: './sfx/dominating.mp3', volume: 0.5 },
+        { title: './sfx/killing-spree.ogg', volume: 0.5 },
+        { title: './sfx/rampage.ogg', volume: 0.5 },
+        { title: './sfx/dominating.ogg', volume: 0.5 },
         { title: './sfx/unstoppable.ogg' },
-        { title: './sfx/god-like.mp3', volume: 0.5 },
+        { title: './sfx/god-like.ogg', volume: 0.5 },
         { title: './sfx/wicked-sick.ogg' }
     ],
 
     eat: [
-        { title: './sfx/eatingsfxwav-14588.mp3' },
-        { title: './sfx/carrotnom-92106.mp3' },
-        { title: './sfx/eat-a-cracker-95783.mp3', volume: 0.5 },
-        { title: './sfx/game-eat-sound-83240.mp3' },
-        { title: './sfx/game-eat-sound-83240.mp3' }
+        { title: './sfx/eatingsfxwav-14588.ogg' },
+        { title: './sfx/carrotnom-92106.ogg' },
+        { title: './sfx/eat-a-cracker-95783.ogg', volume: 0.5 },
+        { title: './sfx/game-eat-sound-83240.ogg' },
+        { title: './sfx/game-eat-sound-83240.ogg' }
     ]
 }
 
