@@ -1,9 +1,9 @@
-let loadPromises = []
-let gamepadPlayers = []
-let keyboardPlayers = [];
-let botPlayers = []
-let players = []
-let playersSortedByJoinTime = []
+window.loadPromises = []
+window.gamepadPlayers = []
+window.keyboardPlayers = []
+window.botPlayers = []
+window.players = []
+window.playersSortedByJoinTime = []
 const keyboards = [{
     keys: {
         'KeyA': { playerId: 'k0', action: 'left' },
@@ -34,23 +34,23 @@ const keyboards = [{
 }];
 
 // --- Game Loop Timing ---
-let startTime, then, now, dt
-let fps = 0, fpsTime
+window.startTime = undefined; window.then = undefined; window.now = undefined; window.dt = undefined
+window.fps = 0; window.fpsTime = undefined
 const fpsMinForEffects = 30
 const dtFix = 10
-let dtToProcess = 0, dtProcessed = 0
+window.dtToProcess = 0; window.dtProcessed = 0
 
 // --- Round / Win State ---
-let isRestartButtonPressed, restartStage = false, roundCounter = 0
-let gameOver, ceremonyOver
-let lastRoundEndThen, lastWinnerPlayerIds, lastFinalWinnerPlayerIds, finalWinnerTeam
+window.isRestartButtonPressed = undefined; window.restartStage = false; window.roundCounter = 0
+window.gameOver = undefined; window.ceremonyOver = undefined
+window.lastRoundEndThen = undefined; window.lastWinnerPlayerIds = undefined; window.lastFinalWinnerPlayerIds = undefined; window.finalWinnerTeam = undefined
 const moveNewPlayerDuration = 1000
 const moveScoreToPlayerDuration = 1000
 const showFinalWinnerDuration = 5000
 
 // --- Figure Pools ---
-let figuresInitialPool = new Set(), figuresPool = new Set()
-let figures = []
+window.figuresInitialPool = new Set(); window.figuresPool = new Set()
+window.figures = []
 
 // --- Game Constants ---
 const maxPlayerFigures = 32
@@ -75,13 +75,13 @@ const npcInitialWalkDelay = 5000
 const lobbyStartDelay = 5000
 
 // --- Kill Tracking ---
-let lastKillTime, multikillCounter, lastTotalkillAudio, totalkillCounter
+window.lastKillTime = undefined; window.multikillCounter = undefined; window.lastTotalkillAudio = undefined; window.totalkillCounter = undefined
 const multikillTimeWindow = 4000
 
 // --- Misc State ---
-let allPlayersSameTeam
-let isDebugMode = false
-let level = createLevel()
+window.allPlayersSameTeam = undefined
+window.isDebugMode = false
+window.level = createLevel()
 
 const stages = {
     game: 'game',
@@ -89,7 +89,7 @@ const stages = {
     startLobby: 'startLobby',
 }
 
-let stage
+window.stage = undefined
 
 const mostFigures = ['girl', 'robot', 'teddy', 'fat', 'boy', 'father', 'grandpa', 'mother']
 
@@ -124,7 +124,7 @@ const games = {
     }
 }
 
-let game
+window.game = undefined
 
 const teams = {
     assassin: {
@@ -237,7 +237,7 @@ const soundTotalKill = audio.totalKill.map(audio => getAudio(audio));
 const soundRoundEnd = getAudio(audio.roundEnd);
 const soundWin = getAudio(audio.win);
 
-let actualMusicPlaylist;
+window.actualMusicPlaylist = undefined
 
 const gameVoteButtonDefinition = () => ({
     x: level.width * 0.5,
@@ -353,7 +353,7 @@ const circleOfDeathDefinition = () => ({
     startRadius: 1.09 / level.scale * Math.hypot(level.width / 2, level.height / 2)
 })
 
-let circleOfDeath
+window.circleOfDeath = undefined
 
 const getFoodDefinition = () => ({
     oreo: {
@@ -383,7 +383,7 @@ window.__PIXI_DEVTOOLS__ = {
     app
 };
 
-let levelContainer;
+window.levelContainer = undefined
 const figureShadowLayer = new PIXI.RenderLayer();
 const figureLayer = new PIXI.RenderLayer({ sortableChildren: true });
 const cloudLayer = new PIXI.RenderLayer();
@@ -404,7 +404,28 @@ app.textStyleController = {
     fill: '#000'
 };
 
-(async () => {
+Object.assign(window, {
+    keyboards, fpsMinForEffects, dtFix, moveNewPlayerDuration, moveScoreToPlayerDuration,
+    showFinalWinnerDuration, maxPlayerFigures, numberGuards, numberVIPs, numberBots,
+    defaultMaxSpeed, deadDuration, beanAttackDuration, fartGrowDuration,
+    baseAmmoFactor, bonusAmmoFactor, detectRadius, raceSpeedMultiplier,
+    guardSpeedFactor, vipSpeedFactor, cloudDecayRate, cloudMinSize, cloudOffset,
+    npcArrivalThreshold, npcInitialWalkDelay, lobbyStartDelay, multikillTimeWindow,
+    stages, mostFigures, games, teams, audio,
+    soundFartPool, soundBeanFartPool, soundShootHitPool, soundShootMissPool,
+    soundDeathPool, soundEatPool, musicGame, musicLobby,
+    soundJoin, soundSpinningWheel, soundBoomerang, soundFirstBlood,
+    soundMultiKill, soundTotalKill, soundRoundEnd, soundWin,
+    gameVoteButtonDefinition, lobbyStartButtonDefinition, gameStartButtonDefinition,
+    rectangleButtonsDefinition, shootingRangeDefinition, raceTrackDefinition,
+    practiceTrackDefinition, teamSwitchersDefinition, buttons, circleOfDeathDefinition,
+    getFoodDefinition, app,
+    figureShadowLayer, figureLayer, cloudLayer, fogLayer, crosshairLayer,
+    scoreLayer, overlayLayer, debugLayer,
+    initStage, gameLoop, updateGame, handleInput, handleNPCs
+})
+
+;(async () => {
     console.log('no need to hide');
 
     // Initialize the application.
@@ -1228,7 +1249,7 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
                 }
 
                 if (numberJoinedKeyboardPlayers > 0) {
-                    discreteAngle = getNextDiscreteAngle(angle(f.x, f.y, f.xTarget, f.yTarget), 8);
+                    const discreteAngle = getNextDiscreteAngle(angle(f.x, f.y, f.xTarget, f.yTarget), 8);
                     const direction = { x: Math.cos(discreteAngle), y: Math.sin(discreteAngle) };
                     if (direction.x !== 0) {
                         const xBorder = direction.x > 0 ? level.width - level.padding[2] : level.padding[0];

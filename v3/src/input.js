@@ -33,7 +33,7 @@ window.addEventListener('keyup', event => {
 });
 window.addEventListener("contextmenu", e => e.preventDefault());
 
-let windowHasFocus = false
+window.windowHasFocus = false
 
 
 window.addEventListener('pointerup', event => {
@@ -269,3 +269,5 @@ function collectInputs() {
 
     return [...gamepadPlayers, ...keyboardPlayers, ...botPlayers];
 }
+
+window.collectInputs = collectInputs

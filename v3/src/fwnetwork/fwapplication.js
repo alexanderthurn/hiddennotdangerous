@@ -77,3 +77,5 @@ class FWApplication extends PIXI.Application {
     }
 
 }
+
+window.FWApplication = FWApplication

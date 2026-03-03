@@ -696,7 +696,7 @@ const initSpinningWheel = () => {
         position: index,
         votes: game.votes
     }))
-    activeSegments = spinningWheel.segments.filter(segment => segment.votes > 0)
+    let activeSegments = spinningWheel.segments.filter(segment => segment.votes > 0)
 
     if (activeSegments.length === 1) {
         spinningWheel.mode = 'single'
@@ -780,4 +780,32 @@ const easeInOutCubic = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3
 const quadraticBezier = (t, p0, p1, p2) => ({
     x: (1 - t) * (1 - t) * p0.x + 2 * (1 - t) * t * p1.x + t * t * p2.x,
     y: (1 - t) * (1 - t) * p0.y + 2 * (1 - t) * t * p1.y + t * t * p2.y
+})
+
+Object.assign(window, {
+    colors, crosshairColors, crosshairColorsInUse, getCrosshairColor,
+    musicPlaylistEndHandlers,
+    setDeadzone, pad, getCountdownText, getQueryParam,
+    mod, getRandomInt, getRandomIndex,
+    initRandomPositionFigure, initRandomOutsidePositionFigure, initStartPositionFigure,
+    initCrosshair, initFigure, initPlayerScore,
+    shuffle, distance, squaredDistance, angle, move,
+    deg2rad, deg2limitedrad, rad2deg, rad2limiteddeg,
+    distanceAngles, distanceAnglesRad, distanceAnglesDeg, getNextDiscreteAngle,
+    getAudio, playAudio, stopAudio, isAudioPlaying, playAudioPool, loadAudioPool,
+    muteAudio, unmuteAudio, isMusicMuted, getPlayAudio,
+    playPlaylist, stopPlaylist, stopMusicPlaylist, playMusicPlaylist,
+    playKillingSounds, getRoundCount, setRoundCount, toggleRounds, toggleMusic,
+    voteGame, loadButton, addAnimation, destroyContainer, createLevelContainer,
+    createLevel, getRandomXY, getRandomXYInRectangle, getRandomXYInCircle,
+    getCloseRandomXY, cropXY, reduceBounds,
+    getWalkRectLength, getIntervalPoint, getLinePoint,
+    getRandomOutsideLevelXY, distanceToBorder, getCloudMultiplier,
+    figureIsBot, initSniperPositions, resetFiguresToBabys,
+    initRandomSpriteFigures, initVIPGamePositions,
+    detectFigure, attackFigure, killFigure, finishRound,
+    winRoundTeam, winRoundFigures, getPlayersWithMaxScore, getTeamsWithMaxScore,
+    switchTeam, initNetwork,
+    spinningWheel, initSpinningWheel, stopSpinningWheel, processSpinningWheel, stepSpinningWheel,
+    easeInOutCubic, quadraticBezier
 })

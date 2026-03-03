@@ -592,6 +592,10 @@ class FWTouchControl extends PIXI.Container {
     }
 }
 
+window.getPixelPerCentimeter = getPixelPerCentimeter
+window.centimeterToPixel = centimeterToPixel
+window.FWTouchControl = FWTouchControl
+
 
 
    /*

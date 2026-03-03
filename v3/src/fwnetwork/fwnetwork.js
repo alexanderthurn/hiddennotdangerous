@@ -572,7 +572,7 @@ class FWNetwork {
             case 'webrtc':
                 msg = 'Native WebRTC errors.'
                 break;
-            default: 
+            default:
                 msg = 'unknown error'
                 break;
         }
@@ -580,3 +580,10 @@ class FWNetwork {
         return msg
     }
 }
+
+window.FMOTE_CONNECTION_STATUS_OFF = FMOTE_CONNECTION_STATUS_OFF
+window.FMOTE_CONNECTION_STATUS_INITIALIZNG = FMOTE_CONNECTION_STATUS_INITIALIZNG
+window.FMOTE_CONNECTION_STATUS_WORKING = FMOTE_CONNECTION_STATUS_WORKING
+window.FMOTE_CONNECTION_STATUS_ERROR = FMOTE_CONNECTION_STATUS_ERROR
+window.FMOTE_VERSION = FMOTE_VERSION
+window.FWNetwork = FWNetwork

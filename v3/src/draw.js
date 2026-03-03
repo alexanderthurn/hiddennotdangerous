@@ -1611,3 +1611,28 @@ const addFog = app => {
     })
 }
 
+Object.assign(window, {
+    defaultFilterVert, shadowDefinition,
+    createLoadingText, addHeadline,
+    animateCircleButton, animateLobbyStartButton, animateGameStartButton,
+    createCircleButton, animateRingSegmentButton, createRingSegmentButton,
+    addGameRing, addGameSelection, addGameStartButton, addNetworkQrCode, addGameDescription,
+    animateRectangleButton, createRectangleButton, animateMuteButton, animateRoundsButton,
+    addButtons, animateShootingRange, addRaceTrack, addShootingRange, addPracticeTrack,
+    createTeamSwitcher, addTeamSwitchers, animateLobbyItems, addLobbyItems,
+    createTouchControlHint, getScoreDefaultX, animatePlayerScore,
+    botCircleContext, playerCircleContext, addPlayerScore,
+    animateWinningCeremony, addWinningCeremony,
+    animateFood, addFood, addFoods,
+    animateGrass, createBackgroundSprite, addGrass, addLevelBoundary, addLevelDecoration,
+    createSpriteWithShadowContainer, createShadow,
+    animateFigure, figureMarker, animateFigureMarker, createFigureMarker,
+    animateAttackArc, createAttackArc, createFigure,
+    addCrosshairs, defaultFigureProps, addSniperFigures, addFiguresInitialPool,
+    createCrosshair, addOverlay, animateCountdown, createCountdown,
+    animatePauseOverlay, addPauseOverlay,
+    animateFpsText, createFpsText, animatePlayersText, createPlayersText,
+    animateFiguresText, createFiguresText, addDebug,
+    animateFartCloud, addFartCloud, addFog
+})
+
