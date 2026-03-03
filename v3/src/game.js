@@ -722,7 +722,6 @@ function gameLoop() {
         figures = figures.filter(f => !((f.type === 'cloud' || f.type === 'crosshair') && f.isDead))
 
         dtToProcess += dt
-        let counter = 0;
         while (dtToProcess > dtFix) {
             if (!restartStage) {
                 handleInput(players, figures, dtProcessed)
@@ -731,7 +730,6 @@ function gameLoop() {
             }
             dtToProcess -= dtFix
             dtProcessed += dtFix
-            counter++
         }
 
         if (!restartStage && stage === stages.game) {
@@ -749,7 +747,7 @@ function gameLoop() {
             initStage(stages.startLobby)
         }
     } else {
-        FWNetwork.getInstance().getAllGamepads().filter(x => x && x.connected).map(x => {
+        FWNetwork.getInstance().getAllGamepads().filter(x => x && x.connected).forEach(() => {
             windowHasFocus = true
         })
     }

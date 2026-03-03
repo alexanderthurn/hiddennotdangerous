@@ -688,7 +688,7 @@ const initSpinningWheel = () => {
     spinningWheel.speed = spinningWheel.startSpeed
 
     const gamesEntries = Object.entries(games)
-    gamesEntries.forEach(([_, game]) => game.votes = 0)
+    gamesEntries.forEach(([, game]) => game.votes = 0)
     Object.values(players).forEach(player => player.vote && games[player.vote].votes++)
 
     spinningWheel.segments = gamesEntries.map(([key, game], index) => ({

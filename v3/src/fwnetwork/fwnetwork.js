@@ -177,7 +177,7 @@ class FWNetwork {
                 this.status = `hosting`;
             });
     
-            this.peer.on('open', (id) => {
+            this.peer.on('open', () => {
                 this.status = 'open';
             });
         }

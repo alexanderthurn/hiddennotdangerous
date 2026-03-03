@@ -139,40 +139,40 @@ class FWTouchControl extends PIXI.Container {
 
             if (i === 17) {
                 buttonContainer.addEventListener('pointerdown', {
-                    handleEvent: function(event) {
+                    handleEvent: function() {
                         if (self.isPassive) return;
                         app.settingsDialog.show();
                     }
-                }); 
+                });
             }
 
             buttonContainer.addEventListener('pointerup', {
-                handleEvent: function(event) {
+                handleEvent: function() {
                     if (self.isPassive) return;
                     buttonContainer.pressed = false;
                     buttonContainer.pointerdown = null;
                 }
-            }); 
+            });
 
             buttonContainer.addEventListener('pointerleave', {
-                handleEvent: function(event) {
+                handleEvent: function() {
                     if (self.isPassive) return;
                     buttonContainer.pressed = false;
                 }
-            }); 
+            });
 
             if ((i === 12 || i === 13 || i === 14 || i === 15)) {
                 buttonContainer.addEventListener('pointerenter', {
-                    handleEvent: function(event) {
+                    handleEvent: function() {
                         if (self.isPassive) return;
-                        if (self.buttonContainers[12].pointerdown || 
+                        if (self.buttonContainers[12].pointerdown ||
                             self.buttonContainers[13].pointerdown ||
                             self.buttonContainers[14].pointerdown ||
                             self.buttonContainers[15].pointerdown) {
                             buttonContainer.pressed = true;
                         }
                     }
-                }); 
+                });
             }
             this.buttonContainers.push(buttonContainer);
             this.addChild(buttonContainer);
@@ -260,7 +260,7 @@ class FWTouchControl extends PIXI.Container {
             });
 
             axisContainer.addEventListener('pointerup', {
-                handleEvent: function(event) {
+                handleEvent: function() {
                     if (self.isPassive) return;
                     axisContainer.xAxis = 0;
                     axisContainer.yAxis = 0;
@@ -269,10 +269,10 @@ class FWTouchControl extends PIXI.Container {
                     self.buttonContainers[axisContainer.clickIndex].pressed = false;
                     axisContainer.pointerdown = null;
                 }
-            }); 
+            });
 
             axisContainer.addEventListener('pointerleave', {
-                handleEvent: function(event) {
+                handleEvent: function() {
                     if (self.isPassive) return;
                    /* axisContainer.xAxis = 0;
                     axisContainer.yAxis = 0;
@@ -483,7 +483,7 @@ class FWTouchControl extends PIXI.Container {
         }
 
 
-        this.axesContainers.forEach((container, index) => {
+        this.axesContainers.forEach((container) => {
             container.radius = container.rPos[2] * minHeightWidth;
             container.scale = container.radius / container.startRadius;
             container.x = (distanceToBorderX + container.radius) + container.rPos[0] * (this.wantedWidth - distanceToBorderX * 2 - container.radius * 2) + (container.rPos.length > 3 ? container.rPos[3] * container.radius * 2 : 0);
@@ -501,7 +501,7 @@ class FWTouchControl extends PIXI.Container {
         });
 
 
-        this.buttonContainers.forEach((container, index) => {
+        this.buttonContainers.forEach((container) => {
             container.radius = container.rPos[2] * minHeightWidth;
             container.scale = container.radius / container.startRadius;
             container.alpha = (container.pressed ? 0.5 : 1.0);
@@ -548,7 +548,7 @@ class FWTouchControl extends PIXI.Container {
             this.connectionContainers[i].status = localGamepads[j] && localGamepads[j].connected && this.connectionContainers[2].status || FMOTE_CONNECTION_STATUS_OFF
         })
         
-        this.connectionContainers.forEach((container, index) => {
+        this.connectionContainers.forEach((container) => {
             container.radius = container.rPos[2] * minHeightWidth;
             container.scale = container.radius / container.startRadius;
 
