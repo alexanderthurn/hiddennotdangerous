@@ -28,8 +28,8 @@ void main(void)
 const shadowDefinition = {
     alpha: 0.25,
     angle: 0,
-    scale: {x: 1, y: 1.28},
-    skew: {x: -0.68, y: 0},
+    scale: { x: 1, y: 1.28 },
+    skew: { x: -0.68, y: 0 },
     color: 0x000000
 }
 
@@ -49,10 +49,10 @@ const addHeadline = () => {
     const title = new PIXI.BitmapText({
         text: 'KNIRPS UND KNALL',
         style: app.textStyleDefault,
-        anchor: {x: 0.5, y: 1},
-        position: {x: level.width/2, y: -level.width*0.005},
+        anchor: { x: 0.5, y: 1 },
+        position: { x: level.width / 2, y: -level.width * 0.005 },
         tint: colors.white,
-        scale: {x: 1.5, y: 1.5}
+        scale: { x: 1.5, y: 1.5 }
     });
 
     const authors = new PIXI.BitmapText({
@@ -62,13 +62,13 @@ const addHeadline = () => {
 
     authors.anchor.set(1, 1);
     authors.x = level.width;
-    authors.y = -level.width*0.005;
+    authors.y = -level.width * 0.005;
 
     const code = new PIXI.BitmapText({
         text: '',
         style: app.textStyleDefault,
-        anchor: {x: 0, y: 1},
-        position: {x: 0, y: -level.width*0.005}
+        anchor: { x: 0, y: 1 },
+        position: { x: 0, y: -level.width * 0.005 }
     });
 
     levelContainer.addChild(title, authors, code);
@@ -87,13 +87,13 @@ const animateCircleButton = button => {
 const animateLobbyStartButton = button => {
     button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime >= 0).length > 0
 
-    let text = 'Walk here to\nVOTE\n\n'+button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
-    if (button.playersPossible?.length === 1) {
-        text = 'Walk here to\nVOTE\n\nmin 2 players\nor 1 player +1 bot'
-    } else if (button.playersPossible?.length > 1 && button.playersNear?.length === button.playersPossible?.length ) {
-        text ='Entering LOBBY'
-    } else if (button.playersNear?.length > 0) {
-        text = 'Walk here to\nVOTE\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
+    let text = 'Walk here to\nVOTE\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
+    if (button.playersPossible?.length === 1 && button.allPlayers?.length === 1) {
+        text = 'Walk here to\nVOTE\n\nmin 2 players' + (numberBots > 0 ? '\nor 1 player +1 bot' : '')
+    } else if (spinningWheel.finishTime) {
+        text = 'Entering LOBBY'
+    } else if (spinningWheel.mode) {
+        text = 'Spinning votes'
     }
     button.getChildAt(2).text = text
 }
@@ -101,38 +101,38 @@ const animateLobbyStartButton = button => {
 const animateGameStartButton = button => {
     button.visible = stage === stages.gameLobby
 
-    let text = 'Walk here to\nSTART\n\n'+button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
-    if (dtProcessed - startTime <= 5000) {
+    let text
+    if (dtProcessed - startTime <= lobbyStartDelay) {
         text = 'PREPARE\nfor the game'
     } else if (allPlayersSameTeam) {
         text = 'SWITCH TEAM\nAll players in same team'
     } else if (button.playersPossible?.length === 1) {
-        text = 'Walk here to\nSTART\n\nmin 2 players\nor 1 player +1 bot'
-    } else if (button.playersPossible?.length > 1 && button.playersNear?.length === button.playersPossible?.length ) {
-        text ='Starting GAME'
-    } else if (button.playersNear?.length > 0) {
-        text = 'Walk here to\nSTART\n\n' + button.playersNear?.length + '/' + button.playersPossible?.length + ' players'
+        text = 'Walk here to\nSTART\n\nmin 2 players' + (numberBots > 0 ? '\nor 1 player +1 bot' : '')
+    } else if (button.playersPossible?.length > 1 && button.playersNear?.length === button.playersPossible?.length) {
+        text = 'Starting GAME'
+    } else {
+        text = 'Walk here to\nSTART\n\n' + (button.playersNear?.length || 0) + '/' + (button.playersPossible?.length || 0) + ' players'
     }
     button.getChildAt(2).text = text
 }
 
 const createCircleButton = (props, lobbyContainer) => {
-    const {innerRadius} = props
+    const { alphaArea, innerRadius } = props
 
     let button = new PIXI.Container()
     button = Object.assign(button, props)
 
     const area = new PIXI.Graphics()
-    .circle(0, 0, innerRadius)
-    .fill({alpha: 1, color: colors.darkBrown})
+        .circle(0, 0, innerRadius)
+        .fill({ alpha: alphaArea, color: colors.darkBrown })
 
     const loadingCircle = new PIXI.Graphics()
-    .circle(0, 0, innerRadius)
-    .fill({alpha: 1, color: colors.grey})
+        .circle(0, 0, innerRadius)
+        .fill({ alpha: alphaArea, color: colors.grey })
 
     const buttonText = new PIXI.BitmapText({
-        style: {...app.textStyleDefault, align: 'center'},
-        anchor: {x: 0.5, y: 0.5}
+        style: { ...app.textStyleDefault, align: 'center' },
+        anchor: { x: 0.5, y: 0.5 }
     });
 
     button.addChild(area, loadingCircle, buttonText)
@@ -142,63 +142,177 @@ const createCircleButton = (props, lobbyContainer) => {
     return button
 }
 
-const animateRingPartButton = button => {
+const animateRingSegmentButton = button => {
     button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime >= 0).length > 0
 
-    let votes = 0, oldVotes
-    Object.values(players).forEach(player => player.vote === button.gameId && votes++)
+    const isCurrentSegment = spinningWheel.segment?.game === button.gameId
+    const isWinner = spinningWheel.finishTime && spinningWheel.segment?.game === button.gameId
 
-    if (button.playersPossible && (oldVotes !== votes || button.numberOldPlayersPossible !== button.playersPossible.length)) {
-        oldVotes = votes
-        button.numberOldPlayersPossible = button.playersPossible.length
+    // Animation phases for winner
+    if (isWinner) {
+        const elapsedTime = dtProcessed - spinningWheel.finishTime
+        const area = button.getChildAt(0)
 
-        const loadingArea = button.getChildAt(1)
-        loadingArea.clear()
+        if (elapsedTime < spinningWheel.pulseDuration) {
+            // Phase 1: Pulse effect
+            const pulse = 1.15 + Math.sin(-Math.PI / 2 + elapsedTime * 0.001 * 2 * Math.PI) * 0.15
+            button.scale.set(pulse)
 
-        if (votes > 0) {
-            const height = button.outerRadius - button.innerRadius
-            const rel = 8
-            const partHeight = rel * height / (button.playersPossible.length*rel+button.playersPossible.length-1)
-            const margin = 0*partHeight / rel
+            area.tint = colors.darkBrown
+            area.alpha = 1
+        } else {
+            // Phase 2: Fly around in boomerang curves, then settle, then hold for reading
+            const settleDuration = spinningWheel.finishDuration - spinningWheel.pulseDuration - spinningWheel.boomerangDuration - spinningWheel.readDuration
+            const flyElapsed = elapsedTime - spinningWheel.pulseDuration
 
-            let startRadius = button.innerRadius
-            for (let index = 0; index < votes; index++) {
-                const innerRadius = startRadius
-                const outerRadius = innerRadius + partHeight
-                startRadius = outerRadius + margin
+            overlayLayer.attach(button)
+            area.alpha = 1
 
-                loadingArea.arc(0, 0, innerRadius, button.startAngle, button.endAngle)
-                .lineTo(Math.cos(button.endAngle)*outerRadius, Math.sin(button.endAngle)*outerRadius)
-                .arc(0, 0, outerRadius, button.endAngle, button.startAngle, true)
-                .fill({alpha: 0.5, color: games[button.gameId].color})
+            if (flyElapsed < spinningWheel.boomerangDuration) {
+                // Sub-phase 2a: Figure-8 like looping flight across the whole field
+                const boomerangProgress = flyElapsed / spinningWheel.boomerangDuration
+
+                // Generate random waypoints once per spin (stored on button)
+                if (!button.boomerangPath) {
+                    // Use full map dimensions for sweeping coverage
+                    const rangeX = level.width * 0.45
+                    const rangeY = level.height * 0.45
+
+                    // Create a figure-8 like path with 6 waypoints for multiple loops
+                    button.boomerangPath = [
+                        // Start at center
+                        { x: 0, y: 0, cx: (Math.random() - 0.5) * rangeX * 1.5, cy: (Math.random() - 0.5) * rangeY * 1.5 },
+                        // Loop 1: sweep to top-right area - control point curves outward
+                        {
+                            x: rangeX * (0.5 + Math.random() * 0.5), y: -rangeY * (0.5 + Math.random() * 0.5),
+                            cx: rangeX * (1.2 + Math.random() * 0.5), cy: rangeY * (0.3 + Math.random() * 0.4)
+                        },
+                        // Cross to bottom-left area - big sweeping curve through bottom
+                        {
+                            x: -rangeX * (0.5 + Math.random() * 0.5), y: rangeY * (0.5 + Math.random() * 0.5),
+                            cx: rangeX * (0.2 + Math.random() * 0.3), cy: rangeY * (1.0 + Math.random() * 0.5)
+                        },
+                        // Loop 2: sweep to top-left area - curve through left side
+                        {
+                            x: -rangeX * (0.5 + Math.random() * 0.5), y: -rangeY * (0.3 + Math.random() * 0.5),
+                            cx: -rangeX * (1.2 + Math.random() * 0.4), cy: rangeY * (0.2 + Math.random() * 0.3)
+                        },
+                        // Cross to bottom-right area - big curve through right side
+                        {
+                            x: rangeX * (0.5 + Math.random() * 0.5), y: rangeY * (0.3 + Math.random() * 0.5),
+                            cx: -rangeX * (0.3 + Math.random() * 0.3), cy: -rangeY * (0.8 + Math.random() * 0.4)
+                        },
+                        // Return toward center for settle phase
+                        {
+                            x: (Math.random() - 0.5) * rangeX * 0.3, y: (Math.random() - 0.5) * rangeY * 0.3,
+                            cx: rangeX * (0.8 + Math.random() * 0.4), cy: rangeY * (0.5 + Math.random() * 0.3)
+                        }
+                    ]
+                }
+
+                const path = button.boomerangPath
+                const numSegments = path.length - 1
+
+                // Determine which segment we're on and local progress
+                const segmentIndex = Math.min(Math.floor(boomerangProgress * numSegments), numSegments - 1)
+                const segmentProgress = (boomerangProgress * numSegments) - segmentIndex
+
+                // Spin around segment's center during flight
+                const spinRotations = 4  // Number of full rotations during boomerang phase
+                const rotation = boomerangProgress * spinRotations * Math.PI * 2
+
+                // Counter-rotate the pivot so the path isn't affected by rotation
+                // This keeps the visual position on the curved path while spinning
+                const cos = Math.cos(-rotation)
+                const sin = Math.sin(-rotation)
+
+                const p0 = path[segmentIndex]
+                const p1 = path[segmentIndex + 1]
+                const curve = quadraticBezier(segmentProgress, p0, { x: p1.cx, y: p1.cy }, p1)
+                button.pivot.x = curve.x * cos - curve.y * sin
+                button.pivot.y = curve.x * sin + curve.y * cos
+                button.scale.set(1.3 + Math.sin(boomerangProgress * Math.PI * 4) * 0.15)
+                button.rotation = rotation
+            } else {
+                // Sub-phase 2b: Settle into final position
+                const easedProgress = easeInOutCubic(Math.min((flyElapsed - spinningWheel.boomerangDuration) / settleDuration, 1))
+
+                // Get the end position from boomerang path (last waypoint in array)
+                const path = button.boomerangPath || [{ x: 0, y: 0 }]
+                const lastPoint = path[path.length - 1]
+                const boomerangEndX = lastPoint.x
+                const boomerangEndY = lastPoint.y
+                const boomerangEndScale = 1.3
+
+                // End position for settle phase
+                const centerAngle = button.startAngle + distanceAnglesRad(button.startAngle, button.endAngle) / 2
+                const midRadius = (button.innerRadius + button.outerRadius) / 2
+                const endOffsetX = Math.cos(centerAngle) * midRadius
+                const endOffsetY = Math.sin(centerAngle) * midRadius
+
+                // Interpolate from boomerang end position to final position
+                button.pivot.x = boomerangEndX + (endOffsetX - boomerangEndX) * easedProgress
+                button.pivot.y = boomerangEndY + (endOffsetY - boomerangEndY) * easedProgress
+
+                // Scale from boomerang end scale to final scale
+                const endScale = 0.95 * level.height / button.outerRadius
+                button.scale.set(boomerangEndScale + (endScale - boomerangEndScale) * easedProgress)
+
+                // Determine text orientation - text is flipped when angle is in bottom half
+                let targetRotation = -Math.PI / 2 - centerAngle
+                const textAngleDeg = (rad2limiteddeg(centerAngle) + 90)
+                if (textAngleDeg > 90 && textAngleDeg < 270) {
+                    targetRotation += Math.PI
+                }
+
+                // Rotation: add spins before settling
+                const spinRotations = 2
+                const totalRotation = targetRotation + spinRotations * Math.PI * 2
+                button.rotation = totalRotation * easedProgress
             }
+        }
+    } else {
+        // Reset any flying state for non-winner segments
+        button.scale.set(1)
+        button.rotation = 0
+        button.pivot.set(0, 0)
+        overlayLayer.detach(button)
+
+        if (isCurrentSegment) {
+            button.getChildAt(0).tint = colors.darkBrown
+            button.getChildAt(0).alpha = 1
+        } else {
+            button.getChildAt(0).tint = games[button.gameId].color
+            button.getChildAt(0).alpha = 0.75
         }
     }
 }
 
-const createRingPartButton = (props, lobbyContainer) => {
-    const {x, y, startAngle, endAngle, innerRadius, outerRadius, gameId, getExecute} = props
+const createRingSegmentButton = (props, lobbyContainer) => {
+    const { x, y, startAngle, endAngle, innerRadius, outerRadius, gameId, getExecute } = props
     const width = distanceAnglesRad(startAngle, endAngle)
-    const centerAngle = startAngle + width/2
+    const centerAngle = startAngle + width / 2
 
     let button = new PIXI.Container()
-    button = Object.assign(button, {x, y, startAngle, endAngle, innerRadius, outerRadius, gameId, execute: getExecute(button)})
-    button.isInArea = f => new PIXI.Circle(x, y, outerRadius).contains(f.x, f.y) && !(new PIXI.Circle(x, y, innerRadius)).contains(f.x, f.y) && (distanceAnglesRad(angle(x, y, f.x, f.y), centerAngle) < width/2)
+    button = Object.assign(button, { x, y, startAngle, endAngle, innerRadius, outerRadius, gameId, execute: getExecute(button) })
+    const outerCircle = new PIXI.Circle(x, y, outerRadius)
+    const innerCircle = new PIXI.Circle(x, y, innerRadius)
+    button.isInArea = f => stage === stages.startLobby && outerCircle.contains(f.x, f.y) && !innerCircle.contains(f.x, f.y) && (distanceAnglesRad(angle(x, y, f.x, f.y), centerAngle) < width / 2)
 
     const area = new PIXI.Graphics()
-    .arc(0, 0, innerRadius, startAngle, endAngle)
-    .lineTo(Math.cos(endAngle)*outerRadius, Math.sin(endAngle)*outerRadius)
-    .arc(0, 0, outerRadius, endAngle, startAngle, true)
-    .fill({alpha: 0.5, color: games[gameId].color})
+        .arc(0, 0, innerRadius, startAngle, endAngle)
+        .lineTo(Math.cos(endAngle) * outerRadius, Math.sin(endAngle) * outerRadius)
+        .arc(0, 0, outerRadius, endAngle, startAngle, true)
+        .fill({ color: colors.white })
 
     const loadingArea = new PIXI.Graphics()
 
     const buttonText = new PIXI.BitmapText({
         text: games[gameId].text,
-        style: {...app.textStyleDefault, align: 'center'}
+        style: { ...app.textStyleDefault, align: 'center' }
     });
-    buttonText.x = Math.cos(centerAngle)*((innerRadius+outerRadius)*0.75)
-    buttonText.y = Math.sin(centerAngle)*((innerRadius+outerRadius)*0.75)
+    buttonText.x = Math.cos(centerAngle) * ((innerRadius + outerRadius) * 0.75)
+    buttonText.y = Math.sin(centerAngle) * ((innerRadius + outerRadius) * 0.75)
     buttonText.anchor.set(0.5)
     buttonText.angle = (rad2limiteddeg(centerAngle) + 90)
     if (buttonText.angle > 90 && buttonText.angle < 270) {
@@ -207,26 +321,26 @@ const createRingPartButton = (props, lobbyContainer) => {
     button.addChild(area, loadingArea, buttonText)
     lobbyContainer.addChild(button)
 
-    addAnimation(button, () => animateRingPartButton(button))
+    addAnimation(button, () => animateRingSegmentButton(button))
     return button
 }
 
 const addGameRing = (lobbyContainer) => {
     const gameIds = Object.keys(games)
     const startAngle = 270
-    const diffAngle = 360/gameIds.length
+    const diffAngle = 360 / gameIds.length
 
     gameIds.forEach((gameId, index) => {
-        const button = createRingPartButton({...gameVoteButtonDefinition(), startAngle: deg2limitedrad(startAngle+index*diffAngle), endAngle:deg2limitedrad(startAngle+(index+1)*diffAngle), gameId}, lobbyContainer);
+        const button = createRingSegmentButton({ ...gameVoteButtonDefinition(), startAngle: deg2limitedrad(startAngle + index * diffAngle), endAngle: deg2limitedrad(startAngle + (index + 1) * diffAngle), gameId }, lobbyContainer);
         buttons['vote_' + gameId] = button
     })
 }
 
 const addGameSelection = (app, lobbyContainer) => {
-    const circleButton = createCircleButton(lobbyStartButtonDefinition(), lobbyContainer)
-    circleButton.isInArea = f => stage === stages.startLobby && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius).contains(f.x, f.y)
     addGameRing(lobbyContainer)
-
+    const circleButton = createCircleButton(lobbyStartButtonDefinition(), lobbyContainer)
+    const selectGameCircle = new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius)
+    circleButton.isInArea = f => stage === stages.startLobby && selectGameCircle.contains(f.x, f.y)
     buttons.selectGame = circleButton
 
     app.ticker.add(() => animateLobbyStartButton(circleButton))
@@ -234,61 +348,62 @@ const addGameSelection = (app, lobbyContainer) => {
 
 const addGameStartButton = (app, lobbyContainer) => {
     const circleButton = createCircleButton(gameStartButtonDefinition(), lobbyContainer)
-    circleButton.isInArea = f => stage === stages.gameLobby && dtProcessed - startTime > 5000 && new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius).contains(f.x, f.y)
+    const startGameCircle = new PIXI.Circle(circleButton.x, circleButton.y, circleButton.innerRadius)
+    circleButton.isInArea = f => stage === stages.gameLobby && startGameCircle.contains(f.x, f.y)
 
     buttons.startGame = circleButton
 
     app.ticker.add(() => animateGameStartButton(circleButton))
 }
 
-const addNetworkQrCode = (app, lobbyContainer) => { 
+const addNetworkQrCode = (app, lobbyContainer) => {
     const nw = FWNetwork.getInstance()
 
     const qrCodeContainer = new PIXI.Container()
     qrCodeContainer.sprite = new PIXI.Sprite()
     qrCodeContainer.sprite.anchor.set(0., 0)
-    qrCodeContainer.label = new PIXI.BitmapText( {
-        text: '', 
-        style: {...app.textStyleDefault, align: 'center'},
+    qrCodeContainer.label = new PIXI.BitmapText({
+        text: '',
+        style: { ...app.textStyleDefault, align: 'center' },
     })
     qrCodeContainer.label.anchor.set(0.5, 0)
     qrCodeContainer.addChild(qrCodeContainer.sprite, qrCodeContainer.label)
     lobbyContainer.addChild(qrCodeContainer)
 
     app.ticker.add(() => {
-        const qrWidth = Math.min(level.width,level.height) * 0.25;
-        qrCodeContainer.position.set(level.width*0.05, level.height*0.6)
+        const qrWidth = Math.min(level.width, level.height) * 0.25;
+        qrCodeContainer.position.set(level.width * 0.05, level.height * 0.6)
         qrCodeContainer.sprite.texture = nw.qrCodeTexture
         qrCodeContainer.sprite.width = qrCodeContainer.sprite.height = qrWidth
 
         qrCodeContainer.label.text = nw.qrCodeBaseUrl + "\n" + nw.roomNumber
-        qrCodeContainer.label.position.set(qrCodeContainer.sprite.width*0.5, qrCodeContainer.sprite.height*1)
-        qrCodeContainer.label.width =  qrCodeContainer.sprite.width*0.8
+        qrCodeContainer.label.position.set(qrCodeContainer.sprite.width * 0.5, qrCodeContainer.sprite.height * 1)
+        qrCodeContainer.label.width = qrCodeContainer.sprite.width * 0.8
         qrCodeContainer.label.scale.y = qrCodeContainer.label.scale.x
 
         qrCodeContainer.visible = stage === stages.startLobby && nw.qrCodeTexture && nw.qrCodeBaseUrl && nw.roomNumber
     })
 }
 
-const addGameDescription = (app, lobbyContainer) => { 
+const addGameDescription = (app, lobbyContainer) => {
     const gameDescriptionLeft = new PIXI.BitmapText({
         text: '',
-        style: {...app.textStyleDefault},
-        scale: {x: 2, y: 2}
+        style: { ...app.textStyleDefault },
+        scale: { x: 2, y: 2 }
     })
     const gameDescriptionRight = new PIXI.BitmapText({
         text: '',
-        style: {...app.textStyleDefault},
-        scale: {x: 2, y: 2}
+        style: { ...app.textStyleDefault },
+        scale: { x: 2, y: 2 }
     })
 
     gameDescriptionLeft.anchor.set(0, 0.5)
-    gameDescriptionLeft.x = level.width*0.05
-    gameDescriptionLeft.y = level.height*0.5
+    gameDescriptionLeft.x = level.width * 0.05
+    gameDescriptionLeft.y = level.height * 0.5
 
     gameDescriptionRight.anchor.set(0, 0.5)
-    gameDescriptionRight.x = level.width*0.65
-    gameDescriptionRight.y = level.height*0.5
+    gameDescriptionRight.x = level.width * 0.65
+    gameDescriptionRight.y = level.height * 0.5
 
     lobbyContainer.addChild(gameDescriptionLeft, gameDescriptionRight)
 
@@ -303,7 +418,7 @@ const addGameDescription = (app, lobbyContainer) => {
                 break
             case games.vip:
                 gameDescriptionLeft.text = 'GIRLS:'
-                    + '\nKill the piggies in time'
+                    + '\nKill parents and grandpa'
                     + '\nStun the boys'
                     + '\nTimer is ticking'
                 break
@@ -315,7 +430,7 @@ const addGameDescription = (app, lobbyContainer) => {
         switch (game) {
             case games.battleRoyale:
                 gameDescriptionRight.text = 'Kill other players'
-                    + '\nStay in centre'
+                    + '\nStay on grass'
                     + '\nSurvivor wins'
                 break
             case games.food:
@@ -323,15 +438,20 @@ const addGameDescription = (app, lobbyContainer) => {
                     + '\nEat food, fart strong'
                     + '\nSurvivor wins'
                 break
+            case games.race:
+                gameDescriptionRight.text = 'Win the race'
+                    + '\nShoot rivals'
+                    + '\nFirst wins'
+                break
             case games.rampage:
                 gameDescriptionRight.text = 'SNIPERS:'
                     + '\nTake out the killers'
                     + '\nAvoid shooting innocents'
-                    + '\nAmmo is finite' 
+                    + '\nAmmo is finite'
                 break
             case games.vip:
                 gameDescriptionRight.text = 'BOYS:'
-                    + '\nSave the piggies'
+                    + '\nSave parents and grandpa'
                     + '\nNeutralize the girls'
                     + '\nGirls can stun you'
                 break
@@ -345,24 +465,25 @@ const animateRectangleButton = button => {
     button.visible = stage === stages.startLobby && players.filter(p => p.joinedTime >= 0).length > 0
 
     const loadingBar = button.getChildAt(1)
-    loadingBar.width = button.width*button.loadingPercentage
+    loadingBar.width = button.width * button.loadingPercentage
 }
 
 const createRectangleButton = (props, lobbyContainer) => {
-    const {x, y, width, height, loadingPercentage, defaultLoadingSpeed, execute} = props
+    const { x, y, width, height, loadingPercentage, defaultLoadingSpeed, execute } = props
 
     let button = new PIXI.Container()
-    button = Object.assign(button, {x, y, loadingPercentage, defaultLoadingSpeed, execute})
-    button.isInArea = f => new PIXI.Rectangle(x, y, width, height).contains(f.x, f.y)
+    button = Object.assign(button, { x, y, loadingPercentage, defaultLoadingSpeed, execute })
+    const buttonRect = new PIXI.Rectangle(x, y, width, height)
+    button.isInArea = f => buttonRect.contains(f.x, f.y)
 
     const loadingBar = new PIXI.Graphics()
-    .rect(0, 0, 0.1, height)
-    .fill({alpha: 0.5, color: colors.darkBrown})
+        .rect(0, 0, 0.1, height)
+        .fill({ alpha: 0.5, color: colors.darkBrown })
 
     const buttonText = new PIXI.BitmapText({
         style: app.textStyleDefault,
-        anchor: {x: 0.5, y: 0.5},
-        position: {x: width/2, y: height/2},
+        anchor: { x: 0.5, y: 0.5 },
+        position: { x: width / 2, y: height / 2 },
     });
 
 
@@ -387,41 +508,58 @@ const animateMuteButton = button => {
     button.getChildAt(2).text = isMusicMuted() ? 'Music: OFF' : 'Music: ON'
 }
 
-const animateBotsButton = button => {
-    button.getChildAt(2).text = 'Bots: ' + getBotCount()
+const animateRoundsButton = button => {
+    button.getChildAt(2).text = 'Rounds: ' + getRoundCount()
 }
 
 const addButtons = (app, lobbyContainer) => {
-    Object.entries(rectangleButtonsDefinition()).forEach(([id, button]) => {buttons[id] = createRectangleButton(button, lobbyContainer)})
-    
+    Object.entries(rectangleButtonsDefinition()).forEach(([id, button]) => { buttons[id] = createRectangleButton(button, lobbyContainer) })
+
     app.ticker.add(() => animateMuteButton(buttons.mute))
-    app.ticker.add(() => animateBotsButton(buttons.bots))
+    app.ticker.add(() => animateRoundsButton(buttons.rounds))
 }
 
 const animateShootingRange = button => {
     button.visible = game === games.rampage
 }
 
-const addShootingRange = (app, props, lobbyContainer) => {
-    const {x, y, width, height, team} = props
-    const newX = x - width/2
-    const newY = y - height/2
+const addRaceTrack = (app) => {
+    const { xFinish, y, height } = raceTrackDefinition()
+    const finishLine = new PIXI.TilingSprite(PIXI.Assets.get('fenceAtlas').textures['finishline'])
+    const width = 52
+    finishLine.x = xFinish - width / 2
+    finishLine.y = y
+    finishLine.width = width
+    finishLine.height = height
+    finishLine.tileScale.set(0.5, 0.5)
+    levelContainer.addChild(finishLine)
 
-    const padding = Math.min(width, height)/4
-    const widthInside = width-2*padding
-    const heightInside = height-2*padding
-    const newXInside = x - widthInside/2
-    const newYInside = y - heightInside/2
+    app.ticker.add(() => {
+        finishLine.visible = stage === stages.game && game === games.race
+    })
+}
+
+const addShootingRange = (app, props, lobbyContainer) => {
+    const { x, y, width, height, team } = props
+    const newX = x - width / 2
+    const newY = y - height / 2
+
+    const padding = Math.min(width, height) / 4
+    const widthInside = width - 2 * padding
+    const heightInside = height - 2 * padding
+    const newXInside = x - widthInside / 2
+    const newYInside = y - heightInside / 2
 
     const area = new PIXI.NineSliceSprite(PIXI.Assets.get('house_shootingrange'))
-    area.x = newX 
+    area.x = newX
     area.y = newY
-    area.width = width 
-    area.height = height 
+    area.width = width
+    area.height = height
 
     const buttonOutside = new PIXI.Container()
-    buttonOutside.execute = () => buttonOutside.playersNear.forEach(f => f.justShot = false) 
-    buttonOutside.isInArea = f => stage === stages.gameLobby && (game === games.rampage) && !(new PIXI.Rectangle(newX, newY, width, height)).contains(f.x, f.y)
+    buttonOutside.execute = () => buttonOutside.playersNear.forEach(f => f.justShot = false)
+    const outsideRect = new PIXI.Rectangle(newX, newY, width, height)
+    buttonOutside.isInArea = f => stage === stages.gameLobby && (game === games.rampage) && !outsideRect.contains(f.x, f.y)
     buttonOutside.addChild(area)
 
     const buttonInside = new PIXI.Container()
@@ -429,11 +567,12 @@ const addShootingRange = (app, props, lobbyContainer) => {
         if (f.team === team && !f.isAiming && !f.justShot) {
             f.isAiming = true
             f.justShot = true
-            const crosshair = createCrosshair({...f, x: f.x, y: f.y})
+            const crosshair = createCrosshair({ ...f, x: f.x, y: f.y })
             figures.push(crosshair)
         }
-    }) 
-    buttonInside.isInArea = f => stage === stages.gameLobby && (game === games.rampage) && new PIXI.Rectangle(newXInside, newYInside, widthInside, heightInside).contains(f.x, f.y)
+    })
+    const insideRect = new PIXI.Rectangle(newXInside, newYInside, widthInside, heightInside)
+    buttonInside.isInArea = f => stage === stages.gameLobby && (game === games.rampage) && insideRect.contains(f.x, f.y)
 
     buttons.shootingRangeInside = buttonInside
     buttons.shootingRangeOutside = buttonOutside
@@ -444,23 +583,101 @@ const addShootingRange = (app, props, lobbyContainer) => {
     })
 }
 
+const addPracticeTrack = (app, props, lobbyContainer) => {
+    const { x, y, width, height } = props
+    const trackX = x - width / 2
+    const trackY = y - height / 2
+
+    // Track background
+    const trackBg = new PIXI.Graphics()
+        .rect(trackX, trackY, width, height)
+        .fill({ color: colors.darkBrown, alpha: 0.3 })
+
+    // Start zone (left side)
+    const startZoneWidth = 60
+    const startZone = new PIXI.Graphics()
+        .rect(trackX, trackY, startZoneWidth, height)
+        .fill({ color: colors.green, alpha: 0.5 })
+
+    // Start zone label
+    const startLabel = new PIXI.BitmapText({
+        text: 'TRY\nHERE',
+        style: { ...app.textStyleDefault, align: 'center' },
+    })
+    startLabel.anchor.set(0.5, 0.5)
+    startLabel.x = trackX + startZoneWidth / 2
+    startLabel.y = y
+    startLabel.scale.set(0.8)
+
+    // Mini finish line (right side)
+    const finishLineWidth = 26
+    const finishLine = new PIXI.TilingSprite(PIXI.Assets.get('fenceAtlas').textures['finishline'])
+    finishLine.x = trackX + width - finishLineWidth
+    finishLine.y = trackY
+    finishLine.width = finishLineWidth
+    finishLine.height = height
+    finishLine.tileScale.set(0.25, 0.25)
+
+    // Start zone button - enters race mode and spawns crosshair
+    const startButton = new PIXI.Container()
+    startButton.execute = () => startButton.playersNear.forEach(f => {
+        if (!f.isInRace) {
+            f.isInRace = true
+            const crosshair = createCrosshair({ ...f, x: f.x, y: f.y })
+            figures.push(crosshair)
+        }
+    })
+    const startRect = new PIXI.Rectangle(trackX, trackY, startZoneWidth, height)
+    startButton.isInArea = f => stage === stages.gameLobby && game === games.race &&
+        startRect.contains(f.x, f.y)
+    startButton.addChild(startZone, startLabel)
+
+    // Finish line button - exits race mode and removes crosshair
+    const finishButton = new PIXI.Container()
+    finishButton.execute = () => finishButton.playersNear.forEach(f => {
+        if (f.isInRace) {
+            f.isInRace = false
+            const crosshair = figures.find(fig => fig.type === 'crosshair' && fig.playerId === f.playerId)
+            if (crosshair) {
+                crosshair.isDead = true
+            }
+        }
+    })
+    const finishRect = new PIXI.Rectangle(trackX + width - finishLineWidth / 2, trackY, finishLineWidth / 2, height)
+    finishButton.isInArea = f => stage === stages.gameLobby && game === games.race &&
+        finishRect.contains(f.x, f.y)
+    finishButton.addChild(finishLine)
+
+    buttons.practiceTrackStart = startButton
+    buttons.practiceTrackFinish = finishButton
+
+    const practiceTrackContainer = new PIXI.Container()
+    practiceTrackContainer.addChild(trackBg, startButton, finishButton)
+    lobbyContainer.addChild(practiceTrackContainer)
+
+    app.ticker.add(() => {
+        practiceTrackContainer.visible = stage === stages.gameLobby && game === games.race
+    })
+}
+
 const createTeamSwitcher = (app, props, lobbyContainer) => {
-    const {x, y, team} = props
+    const { x, y, team } = props
     const width = 128
     const height = 128
-    const newX = x - width/2
-    const newY = y - height/2
+    const newX = x - width / 2
+    const newY = y - height / 2
     const games = teams[team].games
 
     const area = new PIXI.NineSliceSprite(PIXI.Assets.get('house_' + team))
-    area.x = newX 
+    area.x = newX
     area.y = newY
-    area.width = width 
-    area.height = height 
+    area.width = width
+    area.height = height
 
     const button = new PIXI.Container()
-    button.execute = () => button.playersNear.forEach(f => switchTeam(f, team)) 
-    button.isInArea = f => stage === stages.gameLobby && games.has(game) && new PIXI.Rectangle(newX, newY, width, height).contains(f.x, f.y)
+    button.execute = () => button.playersNear.forEach(f => switchTeam(f, team))
+    const teamRect = new PIXI.Rectangle(newX, newY, width, height)
+    button.isInArea = f => stage === stages.gameLobby && games.has(game) && teamRect.contains(f.x, f.y)
     button.addChild(area)
     lobbyContainer.addChild(button)
 
@@ -472,91 +689,66 @@ const createTeamSwitcher = (app, props, lobbyContainer) => {
 }
 
 const addTeamSwitchers = (app, lobbyContainer) => {
-    Object.entries(teamSwitchersDefinition()).forEach(([id, button]) => {buttons[id] = createTeamSwitcher(app, button, lobbyContainer)})
+    Object.entries(teamSwitchersDefinition()).forEach(([id, button]) => { buttons[id] = createTeamSwitcher(app, button, lobbyContainer) })
 }
 
-const animateLobbyItems = lobbyContainer => {
-
+const animateLobbyItems = (lobbyContainer, touchControlDefault, touchControlSniper, touchControlRace) => {
+    touchControlDefault.visible = stage === stages.startLobby || (stage === stages.gameLobby && game === games.rampage)
+    touchControlSniper.visible = stage === stages.gameLobby && game === games.rampage
+    touchControlRace.visible = stage === stages.gameLobby && game === games.race
     lobbyContainer.visible = stage === stages.startLobby || stage === stages.gameLobby
 }
 
 const addLobbyItems = (app) => {
-    const lobbyContainer = new PIXI.Container()
+    const lobbyContainer = new PIXI.Container({ sortableChildren: true })
     addGameSelection(app, lobbyContainer)
     addGameStartButton(app, lobbyContainer)
     addButtons(app, lobbyContainer)
     addShootingRange(app, shootingRangeDefinition(), lobbyContainer)
+    addPracticeTrack(app, practiceTrackDefinition(), lobbyContainer)
     addTeamSwitchers(app, lobbyContainer)
     addNetworkQrCode(app, lobbyContainer)
     addGameDescription(app, lobbyContainer)
 
-    const fontHeight = 32
-    const howToPlay = new PIXI.BitmapText({
-        text: 'HOW TO PLAY\n\nJoin by pressing any key on your Gamepad' 
-            + '\nor WASDT(Key1) or ' + String.fromCharCode(8592) + String.fromCharCode(8593)+ String.fromCharCode(8594)+ String.fromCharCode(8595) + '0(RSHIFT)\nor touch' 
-            + '\n\n1.) Find your player 2.) Fart to knock out others\n3.) Stay hidden 4.) Eat to power up your farts' 
-            + '\n\nBe the last baby standing!',
-        style: {
-            align: 'center',
-            fontSize: fontHeight,
-            fill: colors.white
-        }
-    });
+    const touchControlDefault = createTouchControlHint(app, lobbyContainer, { position: 'left', text: 'Controls', buttonHints: new Map([[0, { text: 'FART', scale: 4 }], [3, { text: 'SHOW', scale: 4 }]]), axisHints: new Map([[0, { text: 'WALK', scale: 2 }]]) })
+    const touchControlSniper = createTouchControlHint(app, lobbyContainer, { position: 'right', color: new PIXI.Color(colors.neonBlue), text: 'Sniper', buttonHints: new Map([[0, { text: 'SHOOT', scale: 3 }]]), axisHints: new Map([[0, { text: 'AIM', scale: 2 }]]) })
+    const touchControlRace = createTouchControlHint(app, lobbyContainer, { position: 'right', color: new PIXI.Color(colors.electricIndigo), text: 'Race', buttonHints: new Map([[0, { text: 'SHOOT', scale: 3 }], [1, { text: 'RUN', scale: 4 }], [2, { text: 'WALK', scale: 4 }], [3, { text: 'SHOW', scale: 4 }]]), axisHints: new Map([[0, { text: 'AIM', scale: 2 }]]) })
 
-    howToPlay.anchor.set(0.5, 0)
-    howToPlay.x = level.width*0.22+fontHeight
-    howToPlay.y = level.height*0.1
-    howToPlay.visible = false
-
-
-    touchControl.setHintForButton(0, {text: 'FART', scale: 4});
-    touchControl.setHintForButton(3, {text: 'SHOW', scale: 4});
-    touchControl.setHintForAxis(0, {text: 'WALK', scale: 2});
-    const qrWidth = Math.min(level.width,level.height) * 0.3;
-    touchControl.update(app, {x: level.width*0.05, y: level.height*0.1, wantedWidth: qrWidth*1.2, wantedHeight: qrWidth*0.8})
-    lobbyContainer.addChild(touchControl)
-    touchControl.label = new PIXI.BitmapText( {
-        text: 'Controls', 
-        style: {...app.textStyleDefault, align: 'center'},
-    })
-    touchControl.label.anchor.set(0.5, 0)
-    touchControl.label.x = touchControl.wantedWidth*0.5
-    touchControl.label.y = touchControl.wantedHeight
-    touchControlSniper.setHintForButton(0, {text: 'SHOOT', scale: 3});
-    touchControlSniper.setHintForAxis(0, {text: 'AIM', scale: 2});
-    touchControlSniper.visible = true;
-    touchControlSniper.update(app, {x: level.width*0.95 - qrWidth*1.2, y: level.height*0.1, wantedWidth: qrWidth*1.2, wantedHeight: qrWidth*0.8})
-    touchControlSniper.label = new PIXI.BitmapText( {
-        text: 'Sniper', 
-        style: {...app.textStyleDefault, align: 'center'},
-    })
-    touchControlSniper.label.anchor.set(0.5, 0)
-    touchControlSniper.label.x = touchControlSniper.wantedWidth*0.5
-    touchControlSniper.label.y = touchControlSniper.wantedHeight
-    touchControlSniper.addChild(touchControlSniper.label)
-
-
-
-    touchControl.addChild(touchControl.label)
-    lobbyContainer.addChild(touchControlSniper)
-
-
-
-
-    lobbyContainer.addChild(howToPlay)
     levelContainer.addChild(lobbyContainer)
 
-    app.ticker.add(() => animateLobbyItems(lobbyContainer))
+    app.ticker.add(() => animateLobbyItems(lobbyContainer, touchControlDefault, touchControlSniper, touchControlRace))
+}
+
+const createTouchControlHint = (app, container, props) => {
+    const { position, text, buttonHints, axisHints, color } = props
+    const touchControl = new FWTouchControl(app, { color, isBitmapFont: true, textStyle: app.textStyleController, textStyleSmall: app.textStyleController, textStyleTitle: app.textStyleController, isPassive: true, layout: 'simple', showButtonLabels: false, showHintLabels: true });
+
+    const qrWidth = Math.min(level.width, level.height) * 0.3;
+    const qrLeft = { x: level.width * 0.05, y: level.height * 0.1, wantedWidth: qrWidth * 1.2, wantedHeight: qrWidth * 0.8 };
+    const qrRight = { x: level.width * 0.95 - qrWidth * 1.2, y: level.height * 0.1, wantedWidth: qrWidth * 1.2, wantedHeight: qrWidth * 0.8 };
+    buttonHints.forEach((hint, index) => touchControl.setHintForButton(index, hint))
+    axisHints.forEach((hint, index) => touchControl.setHintForAxis(index, hint))
+    touchControl.update(app, position == 'right' ? qrRight : qrLeft)
+    touchControl.label = new PIXI.BitmapText({
+        text,
+        style: { ...app.textStyleDefault, align: 'center' },
+    })
+    touchControl.label.anchor.set(0.5, 0)
+    touchControl.label.x = touchControl.wantedWidth * 0.5
+    touchControl.label.y = touchControl.wantedHeight
+    touchControl.addChild(touchControl.label)
+    container.addChild(touchControl)
+    return touchControl
 }
 
 const getScoreDefaultX = player => {
-    const offx = 48*1.2
+    const offx = 48 * 1.2
     const playerIndex = playersSortedByJoinTime.indexOf(player)
-    return 32+playerIndex*offx
+    return 32 + playerIndex * offx
 }
 
 const animatePlayerScore = figure => {
-    const {player} = figure
+    const { player } = figure
     if (!player) {
         return
     }
@@ -566,9 +758,9 @@ const animatePlayerScore = figure => {
     }
 
     if (!restartStage) {
-        var lp = Math.min((dtProcessed - player.joinedTime) / moveNewPlayerDuration, 1)
+        const lp = Math.min((dtProcessed - player.joinedTime) / moveNewPlayerDuration, 1)
 
-        player.score = Object.assign(player.score, getLinePoint(lp, {x: level.width*0.5, y: level.height*0.5}, {x: getScoreDefaultX(player), y: player.score.yDefault}))
+        player.score = Object.assign(player.score, getLinePoint(lp, { x: level.width * 0.5, y: level.height * 0.5 }, { x: getScoreDefaultX(player), y: player.score.yDefault }))
         player.score.scale = getIntervalPoint(lp, 12, 1)
     }
 
@@ -576,17 +768,17 @@ const animatePlayerScore = figure => {
 
     if (player.isMarkerButtonPressed) {
         const shakeMargin = 10
-        player.score.x += (Math.random()-0.5)*shakeMargin*player.score.scale.x
-        player.score.y += (Math.random()-0.5)*shakeMargin*player.score.scale.y
+        player.score.x += (Math.random() - 0.5) * shakeMargin * player.score.scale.x
+        player.score.y += (Math.random() - 0.5) * shakeMargin * player.score.scale.y
     }
 }
 
-const botCircleContext = new PIXI.GraphicsContext().rect(-24,-24, 48,48).fill({alpha: 0.5, color: colors.white}).stroke({alpha: 0.5, color: colors.black, width: 1})
-const playerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({alpha: 0.5, color: colors.white}).stroke({alpha: 0.5, color: colors.black, width: 1})
+const botCircleContext = new PIXI.GraphicsContext().rect(-24, -24, 48, 48).fill({ alpha: 0.5, color: colors.white }).stroke({ alpha: 0.5, color: colors.black, width: 1 })
+const playerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({ alpha: 0.5, color: colors.white }).stroke({ alpha: 0.5, color: colors.black, width: 1 })
 
 const addPlayerScore = figure => {
     let playerScore = new PIXI.Container()
-    playerScore.yDefault = level.height+32
+    playerScore.yDefault = level.height + 32
     initPlayerScore(playerScore)
 
     let circle
@@ -596,12 +788,12 @@ const addPlayerScore = figure => {
         circle = new PIXI.Graphics(playerCircleContext)
     }
     circle.tint = colors.black
-    
+
     const text = new PIXI.BitmapText({
         text: 0,
         style: app.textStyleDefault,
-        anchor: {x: 0.5, y: 0.5},
-        scale: {x: 1.1, y: 1.1},
+        anchor: { x: 0.5, y: 0.5 },
+        scale: { x: 1.1, y: 1.1 },
     });
 
     figure.player.score = playerScore
@@ -623,22 +815,22 @@ const animateWinningCeremony = winnerText => {
         playerFigures = playerFigures.filter(f => f.team === 'killer')
     }
 
-    const playerFiguresSortedByNewPoints = playerFigures.toSorted((f1,f2) => (f1.player.score.points-f1.player.score.oldPoints) - (f2.player.score.points-f2.player.score.oldPoints))
+    const playerFiguresSortedByNewPoints = playerFigures.toSorted((f1, f2) => (f1.player.score.points - f1.player.score.oldPoints) - (f2.player.score.points - f2.player.score.oldPoints))
 
-    const dt3 = dtProcessed - (lastRoundEndThen + playerFigures.length*moveScoreToPlayerDuration);
-    const dt4 = dtProcessed - (lastRoundEndThen + playerFigures.length*moveScoreToPlayerDuration + showFinalWinnerDuration);
+    const dt3 = dtProcessed - (lastRoundEndThen + playerFigures.length * moveScoreToPlayerDuration);
+    const dt4 = dtProcessed - (lastRoundEndThen + playerFigures.length * moveScoreToPlayerDuration + showFinalWinnerDuration);
 
     playerFiguresSortedByNewPoints.forEach((f, i) => {
         f.player.score.zIndex = i
-        const dt2 = dtProcessed - (lastRoundEndThen + i*moveScoreToPlayerDuration);
-        
+        const dt2 = dtProcessed - (lastRoundEndThen + i * moveScoreToPlayerDuration);
+
         if (dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
             const lp = dt2 / moveScoreToPlayerDuration
 
-            f.player.score = Object.assign(f.player.score, getLinePoint(lp, {x: getScoreDefaultX(f.player), y: f.player.score.yDefault}, f))
+            f.player.score = Object.assign(f.player.score, getLinePoint(lp, { x: getScoreDefaultX(f.player), y: f.player.score.yDefault }, f))
 
             if (lastFinalWinnerPlayerIds?.has(f.playerId)) {
-                f.player.score.scale = getIntervalPoint(lp, 1, 2)*getIntervalPoint(lp, 1, 2)
+                f.player.score.scale = getIntervalPoint(lp, 1, 2) * getIntervalPoint(lp, 1, 2)
             } else {
                 f.player.score.scale = getIntervalPoint(lp, 1, 2)
             }
@@ -658,7 +850,7 @@ const animateWinningCeremony = winnerText => {
         } else if (dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
             const lp = dt4 / moveScoreToPlayerDuration
 
-            f.player.score = Object.assign(f.player.score, getLinePoint(lp, f, {x: getScoreDefaultX(f.player), y: f.player.score.yDefault}))
+            f.player.score = Object.assign(f.player.score, getLinePoint(lp, f, { x: getScoreDefaultX(f.player), y: f.player.score.yDefault }))
 
             f.player.score.scale = f.player.score.scale = getIntervalPoint(lp, 2, 1)
             if (lastFinalWinnerPlayerIds) {
@@ -668,7 +860,7 @@ const animateWinningCeremony = winnerText => {
             f.player.score.getChildAt(0).tint = teams[f.team] ? teams[f.team].color : colors.black
         }
     })
-    
+
     if (gameOver && dt3 >= 0 && dt3 < showFinalWinnerDuration) {
         winnerText.visible = true
         if (game === games.rampage) {
@@ -680,7 +872,7 @@ const animateWinningCeremony = winnerText => {
         } else {
             const lastFinalWinnerFigure = playerFigures.find(f => lastFinalWinnerPlayerIds?.has(f.playerId))
             const lastFinalWinnerIndex = playersSortedByJoinTime.indexOf(lastFinalWinnerFigure?.player)
-            const lastFinalWinnerNumber = lastFinalWinnerIndex+1
+            const lastFinalWinnerNumber = lastFinalWinnerIndex + 1
             if (figureIsBot(lastFinalWinnerFigure)) {
                 winnerText.text = `Player ${lastFinalWinnerNumber} (Bot) wins`
             } else {
@@ -702,8 +894,8 @@ const addWinningCeremony = app => {
             fontFamily: 'KnallWinning',
             fontSize: 256
         },
-        anchor: {x: 0.5, y: 0.5},
-        position: {x: level.width/2, y: level.height/2},
+        anchor: { x: 0.5, y: 0.5 },
+        position: { x: level.width / 2, y: level.height / 2 },
     })
 
     levelContainer.addChild(winnerText)
@@ -715,11 +907,10 @@ const addWinningCeremony = app => {
 const animateFood = figure => {
     figure.visible = stage !== stages.startLobby && game === games.food
 
-    const plate = figure.getChildByLabel('plate')
-    let durationLastAttack = dtProcessed-figure.lastAttackTime
+    let durationLastAttack = dtProcessed - figure.lastAttackTime
     if (figure.lastAttackTime && durationLastAttack < figure.attackDuration) {
-        const perc = durationLastAttack/figure.attackDuration
-        figure.scale = 1 - 0.2 * Math.sin(perc*Math.PI)
+        const perc = durationLastAttack / figure.attackDuration
+        figure.scale = 1 - 0.2 * Math.sin(perc * Math.PI)
     }
 
     const marker = figure.getChildByLabel('marker')
@@ -730,13 +921,14 @@ const addFood = (app, texture, props) => {
     let food = new PIXI.Container()
     food = Object.assign(food, props)
 
-    const plate = new PIXI.Sprite({texture: PIXI.Assets.get('plate'), 
-        width: food.attackDistance*2,
-        height: food.attackDistance*2,
+    const plate = new PIXI.Sprite({
+        texture: PIXI.Assets.get('plate'),
+        width: food.attackDistance * 2,
+        height: food.attackDistance * 2,
         label: 'plate',
-        anchor: {x: 0.5, y: 0.5},
+        anchor: { x: 0.5, y: 0.5 },
     })
-    
+
     const meal = new PIXI.Sprite(texture)
     meal.scale = 1.2
 
@@ -753,7 +945,7 @@ const addFood = (app, texture, props) => {
 }
 
 const addFoods = (app) => {
-    Object.keys(foodDefinition()).forEach(key => {
+    Object.keys(getFoodDefinition()).forEach(key => {
         addFood(app, PIXI.Assets.get(key), {
             id: key,
             type: 'bean',
@@ -764,75 +956,137 @@ const addFoods = (app) => {
     })
 }
 
-const addGrass = () => {
-    levelContainer.addChild(PIXI.Sprite.from('background_grass'))
+const animateGrass = (shitBackground, blurContainer, grassMask, blurGrassMask, blurMask) => {
+    const isBattleRoyale = stage === stages.game && game === games.battleRoyale
+    shitBackground.visible = isBattleRoyale
+    blurContainer.visible = isBattleRoyale
+
+    if (isBattleRoyale) {
+        const scale = circleOfDeath.radius / grassMask.defaultRadius
+        grassMask.scale.set(scale, scale)
+        blurGrassMask.scale.set(scale, scale)
+
+        const ringWidth = 5
+        blurMask.clear()
+            .circle(0, 0, circleOfDeath.radius + ringWidth)
+            .fill({ color: 0xffffff })
+            .circle(0, 0, circleOfDeath.radius - ringWidth)
+            .cut()
+    } else {
+        grassMask.scale.set(1, 1)
+    }
+}
+
+const createBackgroundSprite = texture => {
+    const backgroundSprite = PIXI.TilingSprite.from(texture)
+    backgroundSprite.height = 3 * level.height
+    backgroundSprite.width = 3 * level.width
+    backgroundSprite.position.set(-level.width, -level.height)
+
+    return backgroundSprite
+}
+
+const addGrass = app => {
+    circleOfDeath = circleOfDeathDefinition()
+
+    const defaultGrassRadius = level.width + level.height
+
+    const shitBackground = createBackgroundSprite('background_shit')
+    const grassBackground = createBackgroundSprite('background_grass')
+    const grassMask = new PIXI.Graphics()
+        .circle(0, 0, defaultGrassRadius)
+        .fill({ color: 0xffffff })
+    grassMask.defaultRadius = defaultGrassRadius
+    grassMask.position.set(circleOfDeath.x, circleOfDeath.y)
+    grassBackground.mask = grassMask
+    levelContainer.addChild(shitBackground, grassBackground, grassMask)
+
+    const blurContainer = new PIXI.Container()
+    const blurShit = createBackgroundSprite('background_shit')
+    const blurGrass = createBackgroundSprite('background_grass')
+
+    const blurGrassMask = new PIXI.Graphics()
+        .circle(0, 0, defaultGrassRadius)
+        .fill({ color: 0xffffff })
+    blurGrassMask.position.set(circleOfDeath.x, circleOfDeath.y)
+    blurGrass.mask = blurGrassMask
+    blurContainer.addChild(blurShit, blurGrass, blurGrassMask)
+    blurContainer.filters = new PIXI.BlurFilter({ strength: 2, quality: 3 })
+
+    const blurMask = new PIXI.Graphics()
+    blurMask.position.set(circleOfDeath.x, circleOfDeath.y)
+    blurContainer.mask = blurMask
+
+    levelContainer.addChild(blurContainer, blurMask)
+
+    app.ticker.add(() => animateGrass(shitBackground, blurContainer, grassMask, blurGrassMask, blurMask))
 }
 
 
-const addLevelBoundary = (app) => {
+const addLevelBoundary = () => {
     const spritesheet = PIXI.Assets.get('fenceAtlas')
-    
+
     const fenceLower = createSpriteWithShadowContainer({ texture: spritesheet.textures['fence_horizontal'], scaleFactor: { x: 1, y: 1.3 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.0, y: level.height * 1 }, anchor: { x: 0.0, y: 0.9 }, options: { tilingSprite: { tileScale: { x: 0.28, y: 0.28 }, tilePosition: { x: 0, y: 0 } } } });
-    fenceLower.shadow.width = fenceLower.sprite.width=level.width
-    fenceLower.shadow.height = fenceLower.sprite.height=level.height*0.04
+    fenceLower.shadow.width = fenceLower.sprite.width = level.width
+    fenceLower.shadow.height = fenceLower.sprite.height = level.height * 0.04
 
     const fenceUpper = createSpriteWithShadowContainer({ texture: spritesheet.textures['fence_horizontal'], scaleFactor: { x: 1, y: 1.3 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.0, y: level.height * 0.03 }, anchor: { x: 0.0, y: 0.9 }, options: { tilingSprite: { tileScale: { x: 0.28, y: 0.28 }, tilePosition: { x: 0, y: 0 } } } });
-    fenceUpper.shadow.width = fenceUpper.sprite.width=level.width
-    fenceUpper.shadow.height = fenceUpper.sprite.height=level.height*0.04
+    fenceUpper.shadow.width = fenceUpper.sprite.width = level.width
+    fenceUpper.shadow.height = fenceUpper.sprite.height = level.height * 0.04
     fenceUpper.sprite.zIndex = -level.height
-    
+
     const fenceLeft = createSpriteWithShadowContainer({ texture: spritesheet.textures['fence_horizontal'], scaleFactor: { x: 1.5 / shadowDefinition.scale.x, y: 1 / shadowDefinition.scale.y }, skewFactor: { x: 0, y: 0 }, position: { x: -level.width * 0.001, y: level.height * 0.00 }, anchor: { x: 0.0, y: 0.0 }, options: { tilingSprite: { tileScale: { x: 0.4, y: 0.4 }, tilePosition: { x: 0, y: 0 } } } });
-    fenceLeft.shadow.width = fenceLeft.sprite.width=level.width*0.006
-    fenceLeft.shadow.height = fenceLeft.sprite.height=level.height
+    fenceLeft.shadow.width = fenceLeft.sprite.width = level.width * 0.006
+    fenceLeft.shadow.height = fenceLeft.sprite.height = level.height
     fenceLeft.sprite.zIndex = level.height
-    
+
     const fenceRight = createSpriteWithShadowContainer({ texture: spritesheet.textures['fence_horizontal'], scaleFactor: { x: 1.5 / shadowDefinition.scale.x, y: 1 / shadowDefinition.scale.y }, skewFactor: { x: 0, y: 0 }, position: { x: level.width * 1, y: level.height * 0.00 }, anchor: { x: 1, y: 0.0 }, options: { tilingSprite: { tileScale: { x: 0.4, y: 0.4 }, tilePosition: { x: 0, y: 0 } } } });
-    fenceRight.shadow.width = fenceRight.sprite.width=level.width*0.006
-    fenceRight.shadow.height = fenceRight.sprite.height=level.height
+    fenceRight.shadow.width = fenceRight.sprite.width = level.width * 0.006
+    fenceRight.shadow.height = fenceRight.sprite.height = level.height
     fenceRight.sprite.zIndex = level.height
 
     levelContainer.addChild(fenceLower, fenceUpper, fenceLeft, fenceRight)
 }
 
-const addLevelDecoration = (app) => {
+const addLevelDecoration = () => {
     const spritesheet = PIXI.Assets.get('fenceAtlas')
 
     const tree1 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree1'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.3, y: level.height * 0.1 }, options: {} });
     const tree2 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree2'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.8, y: level.height * 0.6 }, options: {} });
     const tree3 = createSpriteWithShadowContainer({ texture: spritesheet.textures['tree3'], scaleFactor: { x: 1, y: 1 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.9, y: level.height * 0.9 }, options: {} });
-    
+
     const randomStuffTextureNames = ['bush1', 'bush2', 'bush3', 'chair', 'bush4', 'bush5', 'bush6', 'flower1', 'flower2', 'mushroom', 'lamp']
     const randomStuffTextureNamesFlat = ['butterfly', 'cap', 'kite']
-    
+
     const randomStuff = new PIXI.Container()
 
     for (let i = 0; i < randomStuffTextureNamesFlat.length; i++) {
-        const randomX =  level.width*0.05 + Math.random() * level.width*0.3
-        const randomY = level.height*0.05 + Math.random() * level.height*0.4
-        const elem =  new PIXI.Sprite({ texture: PIXI.Assets.get(randomStuffTextureNamesFlat[i]), position: { x:randomX, y: randomY } });
+        const randomX = level.width * 0.05 + Math.random() * level.width * 0.3
+        const randomY = level.height * 0.05 + Math.random() * level.height * 0.4
+        const elem = new PIXI.Sprite({ texture: PIXI.Assets.get(randomStuffTextureNamesFlat[i]), position: { x: randomX, y: randomY } });
         randomStuff.addChild(elem)
     }
 
     for (let i = 0; i < randomStuffTextureNames.length; i++) {
-        const randomX =  level.width*0.05 + Math.random() * level.width*0.3
-        const randomY = level.height*0.05 + Math.random() * level.height*0.4
-        const elem =  createSpriteWithShadowContainer({ texture: PIXI.Assets.get(randomStuffTextureNames[i]), position: { x:randomX, y: randomY }, options: {} });
+        const randomX = level.width * 0.05 + Math.random() * level.width * 0.3
+        const randomY = level.height * 0.05 + Math.random() * level.height * 0.4
+        const elem = createSpriteWithShadowContainer({ texture: PIXI.Assets.get(randomStuffTextureNames[i]), position: { x: randomX, y: randomY }, options: {} });
         randomStuff.addChild(elem)
     }
 
     levelContainer.addChild(randomStuff, tree1, tree2, tree3)
 }
 
-const createSpriteWithShadowContainer = ({texture, scaleFactor, skewFactor, position, anchor, options}) => { 
+const createSpriteWithShadowContainer = ({ texture, scaleFactor, skewFactor, position, anchor, options }) => {
     const container = new PIXI.Container()
     container.position.set(position.x, position.y)
     if (options?.tilingSprite) {
-        container.sprite = new PIXI.TilingSprite({texture: texture, tileScale: options.tilingSprite.tileScale, tilePosition: options.tilingSprite.tilePosition}) 
+        container.sprite = new PIXI.TilingSprite({ texture: texture, tileScale: options.tilingSprite.tileScale, tilePosition: options.tilingSprite.tilePosition })
     } else {
         container.sprite = new PIXI.Sprite(texture)
     }
     anchor && container.sprite.anchor.set(anchor.x, anchor.y)
-    container.sprite.zIndex = container.y + (1-container.sprite.anchor.y)*container.sprite.height
+    container.sprite.zIndex = container.y + (1 - container.sprite.anchor.y) * container.sprite.height
     figureLayer.attach(container.sprite)
     container.shadow = createShadow(container.sprite, scaleFactor, skewFactor, container.y)
     container.addChild(container.sprite, container.shadow)
@@ -842,11 +1096,11 @@ const createSpriteWithShadowContainer = ({texture, scaleFactor, skewFactor, posi
 const createShadow = (spriteOriginal, scaleFactor, skewFactor, zIndex) => {
     let shadow = new PIXI.Sprite(spriteOriginal.texture)
     if (spriteOriginal instanceof PIXI.TilingSprite) {
-        shadow = new PIXI.TilingSprite({texture: spriteOriginal.texture, tileScale: spriteOriginal.tileScale, tilePosition: spriteOriginal.tilePosition}) 
-  
+        shadow = new PIXI.TilingSprite({ texture: spriteOriginal.texture, tileScale: spriteOriginal.tileScale, tilePosition: spriteOriginal.tilePosition })
+
     }
-    shadow.scale.set((scaleFactor?.x ?? 1)* shadowDefinition.scale.x, (scaleFactor?.y ?? 1)* shadowDefinition.scale.y)
-    shadow.skew.set((skewFactor?.x ?? 1)* shadowDefinition.skew.x, (skewFactor?.y ?? 1)*shadowDefinition.skew.y)
+    shadow.scale.set((scaleFactor?.x ?? 1) * shadowDefinition.scale.x, (scaleFactor?.y ?? 1) * shadowDefinition.scale.y)
+    shadow.skew.set((skewFactor?.x ?? 1) * shadowDefinition.skew.x, (skewFactor?.y ?? 1) * shadowDefinition.skew.y)
     shadow.alpha = shadowDefinition.alpha
     shadow.tint = shadowDefinition.color
     shadow.anchor.set(spriteOriginal.anchor.x, spriteOriginal.anchor.y)
@@ -873,12 +1127,13 @@ const animateFigure = (figure, spritesheet) => {
     }
     animation = figure.currentSprite + '_' + animation
 
-    if (figure.isDead && (!(stage === stages.game && (game === games.rampage)) || figure.isDeathDetected)) {
+    const isDeathDetected = figure.isDead && (!(stage === stages.game && (game === games.rampage)) || figure.isDeathDetected)
+    if (isDeathDetected) {
         body.angle = 90
         figureLayer.detach(body)
         shadow.visible = false
     } else {
-        if (figure.isAttacking && (!(stage === stages.game && (game === games.rampage )) || figure.isDetected)) {
+        if (figure.isAttacking && (!(stage === stages.game && (game === games.rampage)) || figure.isDetected)) {
             if (distanceAnglesDeg(deg, 0) < 45) {
                 body.angle = 20
             } else if (distanceAnglesDeg(deg, 90) <= 45) {
@@ -891,7 +1146,7 @@ const animateFigure = (figure, spritesheet) => {
         } else {
             body.angle = 0
         }
-       
+
         figureLayer.attach(body)
         shadow.visible = true
     }
@@ -910,13 +1165,13 @@ const animateFigure = (figure, spritesheet) => {
         shadow.textures = spritesheet.animations[animation]
     }
 
-    let rotationAnchor = {x: 0.5, y: 0.5}
-    let frameAnchor = body.textures[body.currentFrame].defaultAnchor || {x: 0.5, y: 0.5}
+    let rotationAnchor = { x: 0.5, y: 0.5 }
+    let frameAnchor = body.textures[body.currentFrame].defaultAnchor || { x: 0.5, y: 0.5 }
     body.anchor = shadow.anchor = rotationAnchor
 
-    body.y = shadow.y = figure.isDead ? 0 : -body.height* (frameAnchor.y - rotationAnchor.y)
-    shadow.x = body.x+body.width*0.5*body.scale.x
-    
+    body.y = shadow.y = -body.height * (frameAnchor.y - rotationAnchor.y) * (isDeathDetected ? 0.5 : 1)
+    shadow.x = body.x + body.width * 0.5 * body.scale.x
+
 
     if (!(figure.speed === 0 || !windowHasFocus || restartStage) && !body.playing) {
         body.play()
@@ -935,9 +1190,9 @@ const animateFigure = (figure, spritesheet) => {
         body.animationSpeed = animationSpeedFactor * figure.speed
         shadow.animationSpeed = animationSpeedFactor * figure.speed
     }
-   
-    body.zIndex = figure.y + (1-body.anchor.y)*body.height
-    marker.zIndex = figure.yd
+
+    body.zIndex = figure.y
+    marker.zIndex = figure.y
 }
 
 const figureMarker = new PIXI.GraphicsContext().circle(0, 0, 5).fill()
@@ -947,14 +1202,14 @@ const animateFigureMarker = (attackArc, figure) => {
     attackArc.visible = isDebugMode && figure.isAttacking
 }
 
-createFigureMarker = figure => {
+const createFigureMarker = figure => {
     const markerContainer = new PIXI.Container()
     const marker = new PIXI.Graphics(figureMarker)
 
     const markerText = new PIXI.BitmapText({
         style: app.textStyleDefault,
         scale: 0.5,
-        anchor: {x: 0, y: 1},
+        anchor: { x: 0, y: 1 },
     })
 
     markerContainer.addChild(marker, markerText)
@@ -974,10 +1229,10 @@ const animateAttackArc = (attackArc, figure) => {
 
 const createAttackArc = figure => {
     const attackArcContainer = new PIXI.Container()
-    
-    let startAngle = deg2rad(-figure.attackAngle/2)
+
+    let startAngle = deg2rad(-figure.attackAngle / 2)
     let endAngle = startAngle + deg2rad(figure.attackAngle)
-    const attackArc = new PIXI.Graphics().moveTo(0, 0).arc(0, 0, figure.attackDistance, startAngle, endAngle).fill({alpha: 0.2, color: colors.black})
+    const attackArc = new PIXI.Graphics().moveTo(0, 0).arc(0, 0, figure.attackDistance, startAngle, endAngle).fill({ alpha: 0.2, color: colors.black })
     attackArcContainer.addChild(attackArc)
 
     app.ticker.add(() => animateAttackArc(attackArcContainer, figure))
@@ -985,18 +1240,16 @@ const createAttackArc = figure => {
 }
 
 const createFigure = (app, spritesheet, props) => {
-    let figure = new PIXI.Container({sortableChildren: false});
+    let figure = new PIXI.Container({ sortableChildren: false });
     figure = Object.assign(figure, props)
 
     const body = new PIXI.AnimatedSprite(spritesheet.animations.baby_down)
-    //body.anchor.set(0.5)
     body.scale = 0.5
     body.label = 'body'
 
     const shadow = new PIXI.AnimatedSprite(spritesheet.animations.baby_down)
-    //shadow.anchor.set(0.1, 0.5)
     shadow.alpha = shadowDefinition.alpha
-    shadow.scale.set(shadowDefinition.scale.x*body.scale.x, shadowDefinition.scale.y*body.scale.y)
+    shadow.scale.set(shadowDefinition.scale.x * body.scale.x, shadowDefinition.scale.y * body.scale.y)
     shadow.skew.set(shadowDefinition.skew.x, shadowDefinition.skew.y)
     shadow.tint = shadowDefinition.color
     shadow.label = 'shadow'
@@ -1020,27 +1273,29 @@ const createFigure = (app, spritesheet, props) => {
 
 const addCrosshairs = (sniperFigures, ammo) => {
     sniperFigures.forEach(f => {
-        const crosshair = createCrosshair({...f, x: f.x, y: f.y, ammo})
+        const crosshair = createCrosshair({ ...f, x: f.x, y: f.y, ammo })
         figuresPool.add(crosshair)
     })
 }
 
+const defaultFigureProps = () => ({
+    maxBreakDuration: 5000,
+    maxSpeed: defaultMaxSpeed,
+    attackDuration: 500,
+    attackBreakDuration: 2000,
+    points: 0,
+    attackDistance: 80,
+    attackAngle: 90,
+    type: 'fighter',
+})
+
 const addSniperFigures = (app, sniperFigures, ammo) => {
     let spritesheet = PIXI.Assets.get('figureAtlas')
     sniperFigures.forEach(f => {
-        const crosshair = createCrosshair({...f, x: f.x, y: f.y, ammo})
-        
+        const crosshair = createCrosshair({ ...f, x: f.x, y: f.y, ammo })
+
         // NPC replacement in level
-        const figure = createFigure(app, spritesheet, {
-            maxBreakDuration: 5000,
-            maxSpeed: defaultMaxSpeed,
-            attackDuration: 500,
-            attackBreakDuration: 2000,
-            points: 0,
-            attackDistance: 80,
-            attackAngle: 90,
-            type: 'fighter',
-        })
+        const figure = createFigure(app, spritesheet, defaultFigureProps())
         figuresPool.add(crosshair)
         figuresPool.add(figure)
     })
@@ -1048,29 +1303,13 @@ const addSniperFigures = (app, sniperFigures, ammo) => {
 
 const addFiguresInitialPool = (app) => {
     let spritesheet = PIXI.Assets.get('figureAtlas')
-    for (var i = 0; i < maxPlayerFigures; i++) {
-        const figure = createFigure(app, spritesheet, {
-            maxBreakDuration: 5000,
-            maxSpeed: defaultMaxSpeed,
-            attackDuration: 500,
-            attackBreakDuration: 2000,
-            points: 0,
-            attackDistance: 80,
-            attackAngle: 90,
-            type: 'fighter',
-        })
+    for (let i = 0; i < maxPlayerFigures; i++) {
+        const figure = createFigure(app, spritesheet, defaultFigureProps())
+        figure.visible = false
         figuresInitialPool.add(figure)
     }
-    for (var i = 0; i < numberVIPs; i++) {
-        const figure = createFigure(app, spritesheet, {
-            maxBreakDuration: 5000,
-            attackDuration: 500,
-            attackBreakDuration: 2000,
-            points: 0,
-            attackDistance: 80,
-            attackAngle: 90,
-            type: 'fighter',
-        })
+    for (let i = 0; i < numberVIPs; i++) {
+        const figure = createFigure(app, spritesheet, defaultFigureProps())
         switchTeam(figure, 'vip')
 
         app.ticker.add(() => {
@@ -1081,7 +1320,7 @@ const addFiguresInitialPool = (app) => {
 }
 
 const createCrosshair = props => {
-    const {x, y, player, team, ammo} = props
+    const { x, y, player, team, ammo } = props
 
     const sprite = PIXI.Sprite.from('crosshair')
     sprite.anchor.set(0.5)
@@ -1090,7 +1329,7 @@ const createCrosshair = props => {
     const ammoText = new PIXI.BitmapText({
         style: app.textStyleDefault,
         scale: 2,
-        anchor: {x: 1, y: 1}
+        anchor: { x: 1, y: 1 }
     })
 
     const crosshair = new PIXI.Container()
@@ -1105,7 +1344,7 @@ const createCrosshair = props => {
     crosshair.attackRectX = 32
     crosshair.attackRectY = 64
     crosshair.detectRadius = detectRadius
-    crosshair.maxSpeed = 4*defaultMaxSpeed
+    crosshair.maxSpeed = 4 * defaultMaxSpeed
     crosshair.playerId = player.playerId
     crosshair.player = player
     crosshair.recoilDuration = 200
@@ -1121,8 +1360,8 @@ const createCrosshair = props => {
 
     addAnimation(crosshair, () => {
         crosshair.visible = crosshair.ammo > 0
-        ammoText.x = crosshair.width/2
-        ammoText.y = crosshair.height/2
+        ammoText.x = crosshair.width / 2
+        ammoText.y = crosshair.height / 2
         ammoText.visible = crosshair.ammo < Infinity
         ammoText.text = crosshair.ammo
     })
@@ -1131,40 +1370,19 @@ const createCrosshair = props => {
 }
 
 const addOverlay = app => {
-    const circleOfDeathGraphic = createCircleOfDeath(app)
     const countdown = createCountdown(app)
-    const fpsText = createFpsText(app)
-    const pauseOverlay = createPauseOverlay(app)
+    addPauseOverlay(app)
 
-    circleOfDeath = circleOfDeathGraphic
-    levelContainer.addChild(circleOfDeathGraphic, countdown)
-    app.stage.addChild(fpsText, pauseOverlay)
-    overlayLayer.attach(circleOfDeathGraphic, countdown, fpsText, pauseOverlay)
-}
-
-const animateCircleOfDeath = circle => {
-    circle.visible = stage === stages.game && game === games.battleRoyale
-    
-    if (circle.visible) {
-        circle.clear().circle(0, 0, circle.radius)
-        .stroke({alpha: 0.8, color: colors.darkBrown, width: 30})
-    }
-}
-
-const createCircleOfDeath = app => {
-    let circle = new PIXI.Graphics()
-    Object.assign(circle, circleOfDeathDefinition())
-
-    app.ticker.add(() => animateCircleOfDeath(circle))
-    return circle
+    levelContainer.addChild(countdown)
+    overlayLayer.attach(countdown)
 }
 
 const animateCountdown = countdown => {
     countdown.visible = false
     if (stage === stages.game && game.countdown) {
         countdown.visible = true
-        if (!restartStage ) {
-            countdown.text = getCountdownText(dtProcessed, startTime+game.countdown*1000)
+        if (!restartStage) {
+            countdown.text = getCountdownText(dtProcessed, startTime + game.countdown * 1000)
         }
     }
 }
@@ -1174,49 +1392,48 @@ const createCountdown = app => {
         style: {
             fontFamily: 'KnallStroke'
         },
-        anchor: {x: 0.5, y: 0.5},
-        position: {x: level.width/2, y: 0.9*level.height},
-        scale: {x: 2, y: 2},
+        anchor: { x: 0.5, y: 0.5 },
+        position: { x: level.width / 2, y: 0.9 * level.height },
+        scale: { x: 2, y: 2 },
     })
 
     app.ticker.add(() => animateCountdown(countdown))
     return countdown
 }
 
-const animatePauseOverlay = (app, overlay, time) => {
-    const background = overlay.getChildByLabel('background')
-    const text = overlay.getChildByLabel('text')
-    background.height = app.screen.height
-    background.width = app.screen.width
-    background.y = 0
+const animatePauseOverlay = (app, background, text, time) => {
     const numberJoinedPlayer = players.filter(p => p.joinedTime >= 0).length
-    text.text = (numberJoinedPlayer > 0) ? 'Pause' : '   Welcome to\nKnirps und Knall\n \n Press any key'
-    text.x = Math.sin(time.lastTime/1000)*10 + app.screen.width/2
-    text.y = Math.cos(time.lastTime/1000)*10 + app.screen.height/2
-    overlay.visible = !windowHasFocus || numberJoinedPlayer === 0
+    const visible = !windowHasFocus || numberJoinedPlayer === 0
+    background.visible = visible
+    text.visible = visible
+
+    if (visible) {
+        background.height = app.screen.height
+        background.width = app.screen.width
+        background.y = 0
+        text.text = (numberJoinedPlayer > 0) ? 'Pause' : '   Welcome to\nKnirps und Knall\n \n Press any key'
+        text.x = Math.sin(time.lastTime / 1000) * 10 + level.width / 2
+        text.y = Math.cos(time.lastTime / 1000) * 10 + level.height / 2
+    }
 }
 
-const createPauseOverlay = app => {
-    const overlay = new PIXI.Container()
-
+const addPauseOverlay = app => {
     const background = new PIXI.Graphics().rect(0, 0, app.screen.width, app.screen.height)
-    .fill({alpha: 0.3, color: colors.darkBrown})
-    background.label = 'background'
+        .fill({ alpha: 0.3, color: colors.darkBrown })
 
     const text = new PIXI.BitmapText({
         style: {
-            fontFamily: 'KnallTitle'},
-        anchor: {x: 0.5, y: 0.5},
-        label: 'text',
-        scale: {x: 2, y: 2},
-        position: {x: app.screen.width/2, y: app.screen.height/2},
-
+            fontFamily: 'KnallTitle'
+        },
+        anchor: { x: 0.5, y: 0.5 },
+        scale: { x: 2, y: 2 }
     })
 
-    overlay.addChild(background, text)
+    levelContainer.addChild(text)
+    app.stage.addChild(background)
+    overlayLayer.attach(background, text)
 
-    app.ticker.add((time) => animatePauseOverlay(app, overlay, time))
-    return overlay
+    app.ticker.add((time) => animatePauseOverlay(app, background, text, time))
 }
 
 const animateFpsText = (app, fpsText) => {
@@ -1228,9 +1445,9 @@ const animateFpsText = (app, fpsText) => {
 const createFpsText = app => {
     const fpsText = new PIXI.BitmapText({
         style: app.textStyleDefault,
-        anchor: {x: 1, y: 0},
-        position: {x: app.screen.width, y: 0},
-        scale: {x: 0.5, y: 0.5},
+        anchor: { x: 1, y: 0 },
+        position: { x: app.screen.width, y: 0 },
+        scale: { x: 0.5, y: 0.5 },
     })
 
     app.ticker.add(() => animateFpsText(app, fpsText))
@@ -1248,9 +1465,9 @@ const animatePlayersText = playersText => {
 const createPlayersText = app => {
     const playersText = new PIXI.BitmapText({
         style: app.textStyleDefault,
-        anchor: {x: 0, y: 0},   
-        position: {x: 0, y: 0},
-        scale: {x: 0.5, y: 0.5},
+        anchor: { x: 0, y: 0 },
+        position: { x: 0, y: 0 },
+        scale: { x: 0.5, y: 0.5 },
     })
 
     app.ticker.add(() => animatePlayersText(playersText))
@@ -1269,9 +1486,9 @@ const animateFiguresText = (app, figuresText) => {
 const createFiguresText = app => {
     const figuresText = new PIXI.BitmapText({
         style: app.textStyleDefault,
-        anchor: {x: 0, y: 1},   
-        position: {x: 0, y: 0},
-        scale: {x: 0.5, y: 0.5}
+        anchor: { x: 0, y: 1 },
+        position: { x: 0, y: 0 },
+        scale: { x: 0.5, y: 0.5 }
     })
 
     app.ticker.add(() => animateFiguresText(app, figuresText))
@@ -1283,8 +1500,9 @@ const addDebug = app => {
 
     const playersText = createPlayersText(app)
     const figuresText = createFiguresText(app)
+    const fpsText = createFpsText(app)
 
-    debugContainer.addChild(playersText, figuresText)
+    debugContainer.addChild(playersText, figuresText, fpsText)
     app.stage.addChild(debugContainer)
     debugLayer.attach(debugContainer)
 
@@ -1313,7 +1531,7 @@ const addFartCloud = (props) => {
         attackAngle: 360,
         direction: 0,
         isAttacking: false,
-        attackDuration: 10000000,
+        attackDuration: Infinity,
         attackDistance: 64,
         lifetime: 0,
         ...props
@@ -1328,15 +1546,7 @@ const addFartCloud = (props) => {
 }
 
 const addFog = app => {
-    let uViewPointDefinition = ''
-    let uViewPointExecution = ''
-    let uViewPointUniforms = {}
-
-    for (let i = 0; i < maxPlayerFigures; i++) {
-        uViewPointDefinition += `uniform vec2 uViewPoint${i};`
-        uViewPointExecution += `if(${i} < uNumViewPoints) {updateVisibility(pixelPos, uViewPoint${i});}`
-        uViewPointUniforms[`uViewPoint${i}`] = {type: 'vec2<f32>'}
-    }
+    const viewPointsData = new Float32Array(maxPlayerFigures * 2)
 
     const fogFilter = new PIXI.Filter({
         glProgram: new PIXI.GlProgram({
@@ -1346,24 +1556,23 @@ const addFog = app => {
 
             uniform sampler2D uTexture;
             uniform vec2 uResolution;
-            ${uViewPointDefinition}
+            uniform vec2 uViewPoints[${maxPlayerFigures}];
             uniform int uNumViewPoints;
             uniform float uRadius;
 
             const float baseFog = 0.5;
-            float visibility = 0.0;
-
-            void updateVisibility(vec2 pixelPos, vec2 center) {
-                float dist = distance(pixelPos, center);
-                float softness = uRadius * 0.3;
-                float localVis = 1.0-smoothstep(uRadius-softness, uRadius, dist);
-                visibility = max(visibility, localVis);
-            }
 
             void main() {
-                vec2 pixelPos = vec2(vTextureCoord.x, vTextureCoord.y)*uResolution;
+                vec2 pixelPos = vTextureCoord * uResolution;
+                float softness = uRadius * 0.3;
+                float visibility = 0.0;
 
-                ${uViewPointExecution}
+                for (int i = 0; i < ${maxPlayerFigures}; i++) {
+                    if (i >= uNumViewPoints) break;
+                    float dist = distance(pixelPos, uViewPoints[i]);
+                    float localVis = 1.0 - smoothstep(uRadius - softness, uRadius, dist);
+                    visibility = max(visibility, localVis);
+                }
 
                 vec4 fg = texture2D(uTexture, vTextureCoord);
                 fg.a = mix(baseFog, 0.0, visibility);
@@ -1374,10 +1583,10 @@ const addFog = app => {
         }),
         resources: {
             myUniforms: {
-                uResolution: {value: [level.width, level.height], type: 'vec2<f32>'},
-                uRadius: {value: detectRadius, type: 'f32'},
-                uNumViewPoints: {type: 'i32'},
-                ...uViewPointUniforms
+                uResolution: { value: [level.width, level.height], type: 'vec2<f32>' },
+                uRadius: { value: detectRadius, type: 'f32' },
+                uNumViewPoints: { type: 'i32' },
+                uViewPoints: { value: viewPointsData, type: 'vec2<f32>', size: maxPlayerFigures }
             },
         },
     });
@@ -1390,14 +1599,14 @@ const addFog = app => {
     levelContainer.addChild(fog)
     fogLayer.attach(fog)
 
-    app.ticker.add(() =>
-    {
+    app.ticker.add(() => {
         fog.visible = stage === stages.game && (game === games.rampage)
 
         const crosshairs = figures.filter(f => f.playerId && f.type === 'crosshair' && f.ammo > 0)
         fogFilter.resources.myUniforms.uniforms.uNumViewPoints = crosshairs.length
         crosshairs.forEach((f, i) => {
-            fogFilter.resources.myUniforms.uniforms[`uViewPoint${i}`] = [f.x, f.y]
+            viewPointsData[i * 2] = f.x
+            viewPointsData[i * 2 + 1] = f.y
         })
     })
 }
