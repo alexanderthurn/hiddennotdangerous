@@ -1,0 +1,14 @@
+body {
+    background-color: #000;
+    margin: 0px;
+    padding: 0px;
+    cursor: none;
+    touch-action: none;
+}
+
+.lock-screen {
+    height: 100%;
+    overflow: hidden;
+    width: 100%;
+    position: fixed;
+}

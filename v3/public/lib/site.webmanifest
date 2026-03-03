@@ -1,0 +1,21 @@
+{
+  "name": "F-Mote",
+  "short_name": "F-Mote",
+  "description": "Network gamepad to allow more than 4 gamepads",
+  "display": "standalone", 
+  "orientation": "landscape-primary",
+  "icons": [
+    {
+      "src": "../gfx/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../gfx/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#f4b400",
+  "background_color": "#f4b400"
+}
