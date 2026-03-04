@@ -3,7 +3,7 @@
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
 
-const POLL_MS = Math.round(1000 / 60)
+const POLL_MS = Math.round(1000 / 120)
 const DEV_SERVER_URL = 'http://localhost:5173'
 
 let mainWindow = null
@@ -30,6 +30,13 @@ function initSteam() {
 // Supports Xbox, PlayStation, Nintendo, and generic controllers.
 // On Windows: uses HIDAPI for Xbox controllers to bypass XInput's 4-device cap.
 // ---------------------------------------------------------------------------
+
+// SDL2 hints must be set via env vars before the native module loads.
+// HIDAPI avoids the DirectInput backend on Windows, which fixes
+// "IDirectInput::CreateDevice() 0x80004005" errors on some controllers
+// (e.g. Logitech F510) while still supporting Xbox, PS4/5, and generics.
+process.env.SDL_JOYSTICK_HIDAPI = '1'
+process.env.SDL_JOYSTICK_DIRECTINPUT = '0'
 
 const sdl = require('@kmamal/sdl')
 const _controllers = new Map()  // device.id → { instance, index }
