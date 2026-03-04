@@ -13,7 +13,8 @@ export default defineConfig({
     },
 
     server: {
-        strictPort: true,
+        // No strictPort — dev server picks a free port automatically.
+        // electron:dev passes --port 5173 --strictPort explicitly.
     },
 
     build: {

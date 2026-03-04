@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "eslint": "eslint ./src",
-    "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:dev": "concurrently \"vite --port 5173 --strictPort\" \"wait-on http://localhost:5173 && electron .\"",
     "electron:build": "vite build && electron-builder",
     "rebuild:sdl": "node scripts/rebuild-sdl-electron.mjs"
   },
