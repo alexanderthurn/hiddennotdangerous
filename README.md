@@ -20,11 +20,28 @@ In this hilarious multiplayer game, you play as a sneaky baby trying to outlast 
 Will you be the last baby standing... or the first one blown away?
 
 
-## Development
+## Development v2
 
 - Install python3
 - Open a terminal and run `python3 -m http.server 3333`
 - Open `http://localhost:3333` in your webbrowser. If it says it is insecure due to http, open it in another browser or in private mode
+## Development v3
+- Install node
+- Open a terminal and run `npm install`
+- Open a terminal and run `npm run dev`
+- Open `http://localhost:5173` in your webbrowser.
+
+### v3 (Electron / Steam)
+
+ Wraps the game in Electron for Steam release (overlay, >4 controllers via SDL2).
+
+```bash
+cd v3
+npm install
+npm run rebuild:sdl       # rebuild SDL2 native module for Electron (run once after npm install)
+npm run electron:dev      # dev mode: Vite + Electron
+npm run electron:build    # production build (DMG on Mac, NSIS installer on Windows)
+```
 
 To generate characters:
 - Go to https://vitruvianstudio.github.io/

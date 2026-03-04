@@ -12,15 +12,18 @@ export default defineConfig({
         'import.meta.env.VITE_APP_NAME': JSON.stringify(pkg.productName || pkg.name),
     },
 
+    server: {
+        // No strictPort — dev server picks a free port automatically.
+        // electron:dev passes --port 5173 --strictPort explicitly.
+    },
+
     build: {
         // Sorgt dafür, dass der Build-Ordner leer ist, bevor Vite neu baut
         emptyOutDir: true,
         // Verhindert Unschärfe bei manchen Assets durch Inlining-Limit
         assetsInlineLimit: 0,
         chunkSizeWarningLimit: 1000,
-    },
-
-    server: {
-        port: 3333,
+        // No source maps in production — avoids exposing source in Steam install
+        sourcemap: false,
     }
 })

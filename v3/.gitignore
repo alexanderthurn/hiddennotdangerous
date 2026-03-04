@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Native binaries (platform-specific, rebuilt via npm run rebuild:sdl)
+*.node
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
