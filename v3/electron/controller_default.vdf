@@ -1,0 +1,91 @@
+"In Game Actions"
+{
+    "title"     "Stealthy Stinkers"
+
+    "actions"
+    {
+        "InGame"
+        {
+            "title" "In Game"
+
+            "StickPadGyro"
+            {
+                "move"
+                {
+                    "title"         "Move"
+                    "input_mode"    "joystick_move"
+                }
+            }
+
+            "AnalogTrigger"
+            {
+                "left_trigger"  { "title" "Left Trigger"  }
+                "right_trigger" { "title" "Right Trigger" }
+            }
+
+            "Button"
+            {
+                "attack"        { "title" "Attack"          }
+                "speed"         { "title" "Speed Boost"     }
+                "walk"          { "title" "Walk"            }
+                "marker"        { "title" "Marker"          }
+                "left_bumper"   { "title" "Left Bumper"     }
+                "right_bumper"  { "title" "Right Bumper"    }
+                "select"        { "title" "Select"          }
+                "start"         { "title" "Start"           }
+                "left_thumb"    { "title" "Left Stick"      }
+                "right_thumb"   { "title" "Right Stick"     }
+                "dpad_up"       { "title" "D-Pad Up"        }
+                "dpad_down"     { "title" "D-Pad Down"      }
+                "dpad_left"     { "title" "D-Pad Left"      }
+                "dpad_right"    { "title" "D-Pad Right"     }
+            }
+        }
+    }
+
+    "localization"
+    {
+        "english"
+        {
+            "InGame"        "In Game"
+            "move"          "Move"
+            "attack"        "Attack (Fart)"
+            "speed"         "Speed Boost"
+            "walk"          "Walk"
+            "marker"        "Marker"
+            "left_bumper"   "Left Bumper"
+            "right_bumper"  "Right Bumper"
+            "left_trigger"  "Left Trigger"
+            "right_trigger" "Right Trigger"
+            "select"        "Select"
+            "start"         "Start"
+            "left_thumb"    "Left Stick Click"
+            "right_thumb"   "Right Stick Click"
+            "dpad_up"       "D-Pad Up"
+            "dpad_down"     "D-Pad Down"
+            "dpad_left"     "D-Pad Left"
+            "dpad_right"    "D-Pad Right"
+        }
+        "german"
+        {
+            "InGame"        "Im Spiel"
+            "move"          "Bewegen"
+            "attack"        "Angriff (Furz)"
+            "speed"         "Turbo"
+            "walk"          "Gehen"
+            "marker"        "Markierung"
+            "left_bumper"   "Linke Schultertaste"
+            "right_bumper"  "Rechte Schultertaste"
+            "left_trigger"  "Linker Trigger"
+            "right_trigger" "Rechter Trigger"
+            "select"        "Select"
+            "start"         "Start"
+            "left_thumb"    "Linker Stick"
+            "right_thumb"   "Rechter Stick"
+            "dpad_up"       "Steuerkreuz Oben"
+            "dpad_down"     "Steuerkreuz Unten"
+            "dpad_left"     "Steuerkreuz Links"
+            "dpad_right"    "Steuerkreuz Rechts"
+        }
+    }
+}

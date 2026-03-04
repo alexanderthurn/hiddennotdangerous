@@ -3,21 +3,69 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "eslint": "eslint ./src"
+    "eslint": "eslint ./src",
+    "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "vite build && electron-builder",
+    "rebuild:sdl": "node scripts/rebuild-sdl-electron.mjs"
   },
   "devDependencies": {
+    "@electron/rebuild": "^3.7.2",
     "@eslint/js": "^9.39.3",
+    "concurrently": "^9.0.0",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0",
     "eslint": "^9.39.3",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "wait-on": "^8.0.0"
   },
   "dependencies": {
+    "@kmamal/sdl": "^0.11.13",
     "@pixi/sound": "^6.0.1",
+    "node-addon-api": "^8.6.0",
     "peerjs": "^1.5.5",
     "pixi.js": "^8.16.0",
-    "qrious": "^4.0.2"
+    "qrious": "^4.0.2",
+    "steamworks.js": "^0.3.0"
+  },
+  "build": {
+    "appId": "com.feuerware.stealthystinkers",
+    "productName": "Stealthy Stinkers",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "asarUnpack": [
+      "**/node_modules/@kmamal/**",
+      "**/node_modules/steamworks.js/**"
+    ],
+    "extraResources": [
+      {
+        "from": "steam_appid.txt",
+        "to": "steam_appid.txt"
+      },
+      {
+        "from": "electron/controller_default.vdf",
+        "to": "controller_default.vdf"
+      }
+    ],
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.games"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    }
   }
 }
