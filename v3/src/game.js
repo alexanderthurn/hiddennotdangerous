@@ -245,7 +245,7 @@ const gameVoteButtonDefinition = () => ({
     innerRadius: level.width * 0.0,
     outerRadius: level.width * 0.15,
     defaultLoadingSpeed: 1 / 3000,
-    getExecute: button => () => button.playersNear.forEach(figure => {
+    execute: button => button.playersNear.forEach(figure => {
         if (figure.player.vote != button.gameId) {
             figure.player.vote = button.gameId
             const playerVotedCount = players.filter(player => player.vote).length
@@ -276,21 +276,34 @@ const gameStartButtonDefinition = () => ({
 })
 
 const rectangleButtonsDefinition = () => ({
-    mute: {
+    musicVolume: {
         x: level.width * (1.0 - 0.05 - 0.15),
         y: level.height * 0.12,
         width: level.width * 0.15,
         height: level.height * 0.1,
-        defaultLoadingSpeed: 1 / 2500,
-        execute: toggleMusic
+        execute: toggleMusicVolume
     },
-    rounds: {
+    sfxVolume: {
         x: level.width * (1.0 - 0.05 - 0.15),
         y: level.height * 0.12 + level.height * 0.1 + 20,
         width: level.width * 0.15,
         height: level.height * 0.1,
+        execute: toggleSfxVolume
+    },
+    rounds: {
+        x: level.width * (1.0 - 0.05 - 0.15),
+        y: level.height * 0.12 + 2 * (level.height * 0.1 + 20),
+        width: level.width * 0.15,
+        height: level.height * 0.1,
         defaultLoadingSpeed: 1 / 2000,
         execute: toggleRounds
+    },
+    volume: {
+        x: level.width * (1.0 - 0.05 - 0.15),
+        y: level.height * 0.12 + 3 * (level.height * 0.1 + 20),
+        width: level.width * 0.15,
+        height: level.height * 0.1,
+        execute: toggleMasterVolume
     }
 })
 
@@ -585,12 +598,10 @@ function initStage(nextStage) {
 
     figures.filter(figure => figure.type === 'cloud').forEach(cloud => destroyContainer(app, cloud))
 
-    if (!isMusicMuted()) {
-        if (stage === stages.startLobby) {
-            stopMusicPlaylist();
-        } else if (stage === stages.game) {
-            playMusicPlaylist(musicGame, true);
-        }
+    if (stage === stages.startLobby) {
+        stopMusicPlaylist();
+    } else if (stage === stages.game) {
+        playMusicPlaylist(musicGame, true);
     }
 
     Object.values(buttons).forEach(button => button.loadingPercentage = 0);
@@ -1153,9 +1164,7 @@ function handleInput(players, figures, dtProcessed) {
                 playAudio(soundJoin);
 
                 if (joinedFighters.length === 0) {
-                    if (!isMusicMuted()) {
-                        playMusicPlaylist(musicLobby);
-                    }
+                    playMusicPlaylist(musicLobby)
                 }
             }
         })
