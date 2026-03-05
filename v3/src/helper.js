@@ -159,19 +159,19 @@ const distanceAnglesDeg = distanceAngles(360);
 
 const getNextDiscreteAngle = (angle, numberDiscreteAngles) => deg2rad(Math.round(rad2deg(angle) * numberDiscreteAngles / 360) * 360 / numberDiscreteAngles);
 
-const getAudio = (config, { preload = true } = {}) => {
+const getAudio = (config, { preload = true, singleInstance = true } = {}) => {
     const alias = 'snd_' + (_soundCounter++)
     if (preload) {
         loadPromises.push(new Promise((resolve) => {
             sound.add(alias, {
                 url: config.title,
                 preload: true,
-                singleInstance: true,
+                singleInstance,
                 loaded: () => resolve(),
             })
         }))
     } else {
-        sound.add(alias, { url: config.title, singleInstance: true })
+        sound.add(alias, { url: config.title, singleInstance })
     }
     _registeredAliases.add(alias)
     const s = sound.find(alias)
@@ -191,26 +191,7 @@ const isAudioPlaying = (audio) => {
     return sound.find(audio.alias)?.isPlaying ?? false
 }
 
-// pixi/sound handles concurrent playback natively — no manual pool needed
-const loadAudioPool = (config, _length) => {
-    const alias = 'snd_' + (_soundCounter++)
-    loadPromises.push(new Promise((resolve) => {
-        sound.add(alias, {
-            url: config.title,
-            preload: true,
-            singleInstance: false,
-            loaded: () => resolve(),
-        })
-    }))
-    _registeredAliases.add(alias)
-    const s = sound.find(alias)
-    if (s) s.volume = sfxVolume
-    return { alias, end: config.end, start: config.start ?? 0, volume: config.volume ?? 1 }
-}
-
-const playAudioPool = audioPool => {
-    sound.play(audioPool.alias, { end: audioPool.end, start: audioPool.start, volume: audioPool.volume })
-}
+const loadAudioPool = (config) => getAudio(config, { singleInstance: false })
 
 let musicVolume = parseFloat(window.localStorage.getItem('musicVolume'))
 if (isNaN(musicVolume)) musicVolume = 1
@@ -825,7 +806,7 @@ Object.assign(window, {
     shuffle, distance, squaredDistance, angle, move,
     deg2rad, deg2limitedrad, rad2deg, rad2limiteddeg,
     distanceAngles, distanceAnglesRad, distanceAnglesDeg, getNextDiscreteAngle,
-    getAudio, playAudio, stopAudio, isAudioPlaying, playAudioPool, loadAudioPool,
+    getAudio, playAudio, stopAudio, isAudioPlaying, loadAudioPool,
     getMusicVolume, setMusicVolume, getSfxVolume, setSfxVolume,
     playPlaylist, stopPlaylist, stopMusicPlaylist, playMusicPlaylist,
     playKillingSounds, getRoundCount, setRoundCount, toggleRounds, toggleMusicVolume, toggleSfxVolume,

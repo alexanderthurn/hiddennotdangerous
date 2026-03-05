@@ -219,12 +219,12 @@ const audio = {
     ]
 }
 
-const soundFartPool = loadAudioPool(audio.fart, 10);
-const soundBeanFartPool = loadAudioPool(audio.beanFart, 10);
-const soundShootHitPool = loadAudioPool(audio.shootHit, 10);
-const soundShootMissPool = loadAudioPool(audio.shootMiss, 10);
-const soundDeathPool = loadAudioPool(audio.death, 10);
-const soundEatPool = audio.eat.map(audio => loadAudioPool(audio, 4));
+const soundFartPool = loadAudioPool(audio.fart);
+const soundBeanFartPool = loadAudioPool(audio.beanFart);
+const soundShootHitPool = loadAudioPool(audio.shootHit);
+const soundShootMissPool = loadAudioPool(audio.shootMiss);
+const soundDeathPool = loadAudioPool(audio.death);
+const soundEatPool = audio.eat.map(audio => loadAudioPool(audio));
 
 const musicGame = audio.musicGame.map(audio => getAudio(audio, { preload: false }));
 const musicLobby = audio.musicLobby.map(audio => getAudio(audio, { preload: false }));
@@ -983,7 +983,7 @@ function updateGame(figures, dt, dtProcessed) {
             playerFigures.forEach(fig => {
                 if (squaredDistance(b.x, b.y, fig.x, fig.y) < b.attackDistance * b.attackDistance) {
                     if (!fig.beans.has(b.id)) {
-                        playAudioPool(soundEatPool[fig.beans.size]);
+                        playAudio(soundEatPool[fig.beans.size]);
                         fig.beans.add(b.id);
                         b.lastAttackTime = dtProcessed
                     }
@@ -1093,21 +1093,21 @@ function updateGame(figures, dt, dtProcessed) {
     figures.filter(f => f.type === 'fighter').forEach(f => {
         if (f.attacked) {
             if (f.beansFarted.size === 0) {
-                playAudioPool(soundFartPool)
+                playAudio(soundFartPool)
             } else {
-                playAudioPool(soundBeanFartPool)
+                playAudio(soundBeanFartPool)
             }
         }
         if (f.died) {
-            playAudioPool(soundDeathPool)
+            playAudio(soundDeathPool)
         }
     })
     figures.filter(f => f.type === 'crosshair').forEach(f => {
         if (f.attacked) {
             if (f.hasHit) {
-                playAudioPool(soundShootHitPool)
+                playAudio(soundShootHitPool)
             } else {
-                playAudioPool(soundShootMissPool)
+                playAudio(soundShootMissPool)
             }
         }
     })
