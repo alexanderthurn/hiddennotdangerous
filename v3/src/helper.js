@@ -39,6 +39,7 @@ const getCrosshairColor = () => {
 
 let _soundCounter = 0
 let _activePlaylistId = null
+const _registeredAliases = new Set()
 
 function setDeadzone(m, deadzone = 0.2) {
     if (m < deadzone)
@@ -172,11 +173,14 @@ const getAudio = (config, { preload = true } = {}) => {
     } else {
         sound.add(alias, { url: config.title, singleInstance: true })
     }
+    _registeredAliases.add(alias)
+    const s = sound.find(alias)
+    if (s) s.volume = masterVolume * sfxVolume
     return { alias, end: config.end, start: config.start ?? 0, volume: config.volume ?? 1 }
 }
 
 const playAudio = (audio) => {
-    sound.play(audio.alias, { end: audio.end, start: audio.start, volume: audio.volume * masterVolume * sfxVolume })
+    sound.play(audio.alias, { end: audio.end, start: audio.start, volume: audio.volume })
 }
 
 const stopAudio = (audio) => {
@@ -198,11 +202,14 @@ const loadAudioPool = (config, _length) => {
             loaded: () => resolve(),
         })
     }))
+    _registeredAliases.add(alias)
+    const s = sound.find(alias)
+    if (s) s.volume = masterVolume * sfxVolume
     return { alias, end: config.end, start: config.start ?? 0, volume: config.volume ?? 1 }
 }
 
-const playAudioPool = (audioPool, volume) => {
-    sound.play(audioPool.alias, { end: audioPool.end, start: audioPool.start, volume: (volume ?? audioPool.volume) * masterVolume * sfxVolume })
+const playAudioPool = audioPool => {
+    sound.play(audioPool.alias, { end: audioPool.end, start: audioPool.start, volume: audioPool.volume })
 }
 
 let masterVolume = parseFloat(window.localStorage.getItem('masterVolume'))
@@ -214,35 +221,38 @@ if (isNaN(musicVolume)) musicVolume = 1
 let sfxVolume = parseFloat(window.localStorage.getItem('sfxVolume'))
 if (isNaN(sfxVolume)) sfxVolume = 1
 
-const updatePlayingMusicVolume = () => {
+const updateAllSoundVolumes = () => {
+    const musicAliases = new Set()
     if (actualMusicPlaylist) {
-        actualMusicPlaylist.forEach(track => {
-            const s = sound.find(track.alias)
-            if (s?.isPlaying) {
-                s.instances.forEach(inst => inst.volume = track.volume * masterVolume * musicVolume)
-            }
-        })
+        actualMusicPlaylist.forEach(track => musicAliases.add(track.alias))
     }
+    _registeredAliases.forEach(alias => {
+        const s = sound.find(alias)
+        if (s) {
+            s.volume = musicAliases.has(alias) ? masterVolume * musicVolume : masterVolume * sfxVolume
+        }
+    })
 }
 
 const getMasterVolume = () => masterVolume
 const setMasterVolume = (v) => {
     masterVolume = Math.max(0, Math.min(1, v))
     window.localStorage.setItem('masterVolume', masterVolume)
-    updatePlayingMusicVolume()
+    updateAllSoundVolumes()
 }
 
 const getMusicVolume = () => musicVolume
 const setMusicVolume = (v) => {
     musicVolume = Math.max(0, Math.min(1, v))
     window.localStorage.setItem('musicVolume', musicVolume)
-    updatePlayingMusicVolume()
+    updateAllSoundVolumes()
 }
 
 const getSfxVolume = () => sfxVolume
 const setSfxVolume = (v) => {
     sfxVolume = Math.max(0, Math.min(1, v))
     window.localStorage.setItem('sfxVolume', sfxVolume)
+    updateAllSoundVolumes()
 }
 
 const playPlaylist = (playlist, isShuffled) => {
@@ -253,8 +263,10 @@ const playPlaylist = (playlist, isShuffled) => {
     const playNext = async (index) => {
         if (_activePlaylistId !== playlistId) return
         const track = ordered[index]
+        const s = sound.find(track.alias)
+        if (s) s.volume = masterVolume * musicVolume
         const soundPlaying = await sound.play(track.alias, {
-            volume: track.volume * masterVolume * musicVolume,
+            volume: track.volume,
             start: track.start,
         })
         soundPlaying.on('end', () => playNext((index + 1) % ordered.length))
