@@ -250,14 +250,14 @@ const playPlaylist = (playlist, isShuffled) => {
     const playlistId = Symbol()
     _activePlaylistId = playlistId
     const ordered = isShuffled ? shuffle([...playlist]) : playlist
-    const playNext = (index) => {
+    const playNext = async (index) => {
         if (_activePlaylistId !== playlistId) return
         const track = ordered[index]
-        sound.play(track.alias, {
+        const soundPlaying = await sound.play(track.alias, {
             volume: track.volume * masterVolume * musicVolume,
             start: track.start,
-            complete: () => playNext((index + 1) % ordered.length),
         })
+        soundPlaying.on('end', () => playNext((index + 1) % ordered.length))
     }
     playNext(0)
 }
