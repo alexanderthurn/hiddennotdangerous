@@ -215,6 +215,17 @@ const isMusicMuted = () => {
     return window.localStorage.getItem('mute') === 'true'
 }
 
+let masterVolume = parseFloat(window.localStorage.getItem('masterVolume'))
+if (isNaN(masterVolume)) masterVolume = 0.5
+sound.volumeAll = masterVolume
+
+const getMasterVolume = () => masterVolume
+const setMasterVolume = (v) => {
+    masterVolume = Math.max(0, Math.min(1, v))
+    window.localStorage.setItem('masterVolume', masterVolume)
+    sound.volumeAll = masterVolume
+}
+
 const playPlaylist = (playlist, isShuffled) => {
     if (!playlist || playlist.length === 0) return
     const playlistId = Symbol()
@@ -301,6 +312,13 @@ const toggleMusic = () => {
         muteAudio()
         stopMusicPlaylist()
     }
+}
+
+const toggleMasterVolume = (btn) => {
+    const btnRect = new PIXI.Rectangle(btn.x, btn.y, btn.width, btn.height)
+    const avgX = btn.playersNear.reduce((sum, f) => sum + f.x, 0) / btn.playersNear.length
+    const relativeX = Math.max(0, Math.min(1, (avgX - btnRect.x) / btnRect.width))
+    setMasterVolume(relativeX)
 }
 
 const voteGame = () => {
@@ -787,9 +805,9 @@ Object.assign(window, {
     deg2rad, deg2limitedrad, rad2deg, rad2limiteddeg,
     distanceAngles, distanceAnglesRad, distanceAnglesDeg, getNextDiscreteAngle,
     getAudio, playAudio, stopAudio, isAudioPlaying, playAudioPool, loadAudioPool,
-    muteAudio, unmuteAudio, isMusicMuted,
+    muteAudio, unmuteAudio, isMusicMuted, getMasterVolume, setMasterVolume,
     playPlaylist, stopPlaylist, stopMusicPlaylist, playMusicPlaylist,
-    playKillingSounds, getRoundCount, setRoundCount, toggleRounds, toggleMusic,
+    playKillingSounds, getRoundCount, setRoundCount, toggleRounds, toggleMusic, toggleMasterVolume,
     voteGame, loadButton, addAnimation, destroyContainer, createLevelContainer,
     createLevel, getRandomXY, getRandomXYInRectangle, getRandomXYInCircle,
     getCloseRandomXY, cropXY, reduceBounds,

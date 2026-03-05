@@ -289,12 +289,12 @@ const animateRingSegmentButton = button => {
 }
 
 const createRingSegmentButton = (props, lobbyContainer) => {
-    const { x, y, startAngle, endAngle, innerRadius, outerRadius, gameId, getExecute } = props
+    const { x, y, startAngle, endAngle, innerRadius, outerRadius, gameId, execute } = props
     const width = distanceAnglesRad(startAngle, endAngle)
     const centerAngle = startAngle + width / 2
 
     let button = new PIXI.Container()
-    button = Object.assign(button, { x, y, startAngle, endAngle, innerRadius, outerRadius, gameId, execute: getExecute(button) })
+    button = Object.assign(button, { x, y, startAngle, endAngle, innerRadius, outerRadius, gameId, execute })
     const outerCircle = new PIXI.Circle(x, y, outerRadius)
     const innerCircle = new PIXI.Circle(x, y, innerRadius)
     button.isInArea = f => stage === stages.startLobby && outerCircle.contains(f.x, f.y) && !innerCircle.contains(f.x, f.y) && (distanceAnglesRad(angle(x, y, f.x, f.y), centerAngle) < width / 2)
@@ -512,11 +512,19 @@ const animateRoundsButton = button => {
     button.getChildAt(2).text = 'Rounds: ' + getRoundCount()
 }
 
+const animateVolumeButton = button => {
+    const vol = getMasterVolume()
+    const loadingBar = button.getChildAt(1)
+    loadingBar.width = button.width * vol
+    button.getChildAt(2).text = 'Vol: ' + Math.round(vol * 100) + '%'
+}
+
 const addButtons = (app, lobbyContainer) => {
     Object.entries(rectangleButtonsDefinition()).forEach(([id, button]) => { buttons[id] = createRectangleButton(button, lobbyContainer) })
 
     app.ticker.add(() => animateMuteButton(buttons.mute))
     app.ticker.add(() => animateRoundsButton(buttons.rounds))
+    app.ticker.add(() => animateVolumeButton(buttons.volume))
 }
 
 const animateShootingRange = button => {

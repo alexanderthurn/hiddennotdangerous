@@ -245,7 +245,7 @@ const gameVoteButtonDefinition = () => ({
     innerRadius: level.width * 0.0,
     outerRadius: level.width * 0.15,
     defaultLoadingSpeed: 1 / 3000,
-    getExecute: button => () => button.playersNear.forEach(figure => {
+    execute: button => button.playersNear.forEach(figure => {
         if (figure.player.vote != button.gameId) {
             figure.player.vote = button.gameId
             const playerVotedCount = players.filter(player => player.vote).length
@@ -291,6 +291,13 @@ const rectangleButtonsDefinition = () => ({
         height: level.height * 0.1,
         defaultLoadingSpeed: 1 / 2000,
         execute: toggleRounds
+    },
+    volume: {
+        x: level.width * (1.0 - 0.05 - 0.15),
+        y: level.height * 0.12 + 2 * (level.height * 0.1 + 20),
+        width: level.width * 0.15,
+        height: level.height * 0.1,
+        execute: toggleMasterVolume
     }
 })
 
