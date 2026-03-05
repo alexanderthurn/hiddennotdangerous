@@ -508,13 +508,6 @@ const animateRoundsButton = button => {
     button.getChildAt(2).text = 'Rounds: ' + getRoundCount()
 }
 
-const animateVolumeButton = button => {
-    const vol = getMasterVolume()
-    const loadingBar = button.getChildAt(1)
-    loadingBar.width = button.width * vol
-    button.getChildAt(2).text = 'Vol: ' + Math.round(vol * 100) + '%'
-}
-
 const animateMusicVolumeButton = button => {
     const vol = getMusicVolume()
     const loadingBar = button.getChildAt(1)
@@ -532,10 +525,9 @@ const animateSfxVolumeButton = button => {
 const addButtons = (app, lobbyContainer) => {
     Object.entries(rectangleButtonsDefinition()).forEach(([id, button]) => { buttons[id] = createRectangleButton(button, lobbyContainer) })
 
-    app.ticker.add(() => animateRoundsButton(buttons.rounds))
-    app.ticker.add(() => animateVolumeButton(buttons.volume))
     app.ticker.add(() => animateMusicVolumeButton(buttons.musicVolume))
     app.ticker.add(() => animateSfxVolumeButton(buttons.sfxVolume))
+    app.ticker.add(() => animateRoundsButton(buttons.rounds))
 }
 
 const animateShootingRange = button => {

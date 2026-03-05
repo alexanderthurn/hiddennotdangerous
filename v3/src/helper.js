@@ -175,7 +175,7 @@ const getAudio = (config, { preload = true } = {}) => {
     }
     _registeredAliases.add(alias)
     const s = sound.find(alias)
-    if (s) s.volume = masterVolume * sfxVolume
+    if (s) s.volume = sfxVolume
     return { alias, end: config.end, start: config.start ?? 0, volume: config.volume ?? 1 }
 }
 
@@ -204,16 +204,13 @@ const loadAudioPool = (config, _length) => {
     }))
     _registeredAliases.add(alias)
     const s = sound.find(alias)
-    if (s) s.volume = masterVolume * sfxVolume
+    if (s) s.volume = sfxVolume
     return { alias, end: config.end, start: config.start ?? 0, volume: config.volume ?? 1 }
 }
 
 const playAudioPool = audioPool => {
     sound.play(audioPool.alias, { end: audioPool.end, start: audioPool.start, volume: audioPool.volume })
 }
-
-let masterVolume = parseFloat(window.localStorage.getItem('masterVolume'))
-if (isNaN(masterVolume)) masterVolume = 0.5
 
 let musicVolume = parseFloat(window.localStorage.getItem('musicVolume'))
 if (isNaN(musicVolume)) musicVolume = 1
@@ -229,16 +226,9 @@ const updateAllSoundVolumes = () => {
     _registeredAliases.forEach(alias => {
         const s = sound.find(alias)
         if (s) {
-            s.volume = musicAliases.has(alias) ? masterVolume * musicVolume : masterVolume * sfxVolume
+            s.volume = musicAliases.has(alias) ? musicVolume : sfxVolume
         }
     })
-}
-
-const getMasterVolume = () => masterVolume
-const setMasterVolume = (v) => {
-    masterVolume = Math.max(0, Math.min(1, v))
-    window.localStorage.setItem('masterVolume', masterVolume)
-    updateAllSoundVolumes()
 }
 
 const getMusicVolume = () => musicVolume
@@ -264,7 +254,7 @@ const playPlaylist = (playlist, isShuffled) => {
         if (_activePlaylistId !== playlistId) return
         const track = ordered[index]
         const s = sound.find(track.alias)
-        if (s) s.volume = masterVolume * musicVolume
+        if (s) s.volume = musicVolume
         const soundPlaying = await sound.play(track.alias, {
             volume: track.volume,
             start: track.start,
@@ -332,15 +322,6 @@ const toggleRounds = () => {
     }
     setRoundCount(count)
     return count
-}
-
-const toggleMasterVolume = (btn) => {
-    const btnRect = new PIXI.Rectangle(btn.x, btn.y, btn.width, btn.height)
-    const attackingFigures = btn.playersNear.filter(f => f.isAttacking)
-    if (attackingFigures.length === 0) return
-    const avgX = attackingFigures.reduce((sum, f) => sum + f.x, 0) / attackingFigures.length
-    const relativeX = Math.max(0, Math.min(1, (avgX - btnRect.x) / btnRect.width))
-    setMasterVolume(relativeX)
 }
 
 const toggleMusicVolume = (btn) => {
@@ -845,9 +826,9 @@ Object.assign(window, {
     deg2rad, deg2limitedrad, rad2deg, rad2limiteddeg,
     distanceAngles, distanceAnglesRad, distanceAnglesDeg, getNextDiscreteAngle,
     getAudio, playAudio, stopAudio, isAudioPlaying, playAudioPool, loadAudioPool,
-    getMasterVolume, setMasterVolume, getMusicVolume, setMusicVolume, getSfxVolume, setSfxVolume,
+    getMusicVolume, setMusicVolume, getSfxVolume, setSfxVolume,
     playPlaylist, stopPlaylist, stopMusicPlaylist, playMusicPlaylist,
-    playKillingSounds, getRoundCount, setRoundCount, toggleRounds, toggleMasterVolume, toggleMusicVolume, toggleSfxVolume,
+    playKillingSounds, getRoundCount, setRoundCount, toggleRounds, toggleMusicVolume, toggleSfxVolume,
     voteGame, loadButton, addAnimation, destroyContainer, createLevelContainer,
     createLevel, getRandomXY, getRandomXYInRectangle, getRandomXYInCircle,
     getCloseRandomXY, cropXY, reduceBounds,
