@@ -316,7 +316,9 @@ const toggleMusic = () => {
 
 const toggleMasterVolume = (btn) => {
     const btnRect = new PIXI.Rectangle(btn.x, btn.y, btn.width, btn.height)
-    const avgX = btn.playersNear.reduce((sum, f) => sum + f.x, 0) / btn.playersNear.length
+    const attackingFigures = btn.playersNear.filter(f => f.isAttacking)
+    if (attackingFigures.length === 0) return
+    const avgX = attackingFigures.reduce((sum, f) => sum + f.x, 0) / attackingFigures.length
     const relativeX = Math.max(0, Math.min(1, (avgX - btnRect.x) / btnRect.width))
     setMasterVolume(relativeX)
 }
