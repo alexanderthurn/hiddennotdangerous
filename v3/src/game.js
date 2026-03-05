@@ -184,12 +184,12 @@ const audio = {
     roundEnd: { title: './sfx/surprise+4.5db.ogg' },
     win: { title: './sfx/audience-clapping-03-99963.ogg' },
     musicGame: [
-        { title: './sfx/music1.ogg', start: 20, volume: 0.5 },
-        { title: './sfx/music2.ogg', volume: 0.5 },
-        { title: './sfx/music3.ogg', volume: 0.5 }
+        { title: './sfx/music1.ogg', start: 20, volume: 0.5, music: true },
+        { title: './sfx/music2.ogg', volume: 0.5, music: true },
+        { title: './sfx/music3.ogg', volume: 0.5, music: true }
     ],
     musicLobby: [
-        { title: './sfx/lobby.ogg', volume: 0.2 }
+        { title: './sfx/lobby.ogg', volume: 0.2, music: true }
     ],
     multiKill: [
         { title: './sfx/double-kill.ogg', volume: 0.3 },

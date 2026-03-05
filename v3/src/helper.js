@@ -39,7 +39,8 @@ const getCrosshairColor = () => {
 
 let _soundCounter = 0
 let _activePlaylistId = null
-const _registeredAliases = new Set()
+const _musicAliases = new Set()
+const _sfxAliases = new Set()
 
 function setDeadzone(m, deadzone = 0.2) {
     if (m < deadzone)
@@ -173,9 +174,10 @@ const getAudio = (config, { preload = true, singleInstance = true } = {}) => {
     } else {
         sound.add(alias, { url: config.title, singleInstance })
     }
-    _registeredAliases.add(alias)
+    const aliasSet = config.music ? _musicAliases : _sfxAliases
+    aliasSet.add(alias)
     const s = sound.find(alias)
-    if (s) s.volume = sfxVolume
+    if (s) s.volume = config.music ? musicVolume : sfxVolume
     return { alias, end: config.end, start: config.start ?? 0, volume: config.volume ?? 1 }
 }
 
@@ -200,15 +202,13 @@ let sfxVolume = parseFloat(window.localStorage.getItem('sfxVolume'))
 if (isNaN(sfxVolume)) sfxVolume = 1
 
 const updateAllSoundVolumes = () => {
-    const musicAliases = new Set()
-    if (actualMusicPlaylist) {
-        actualMusicPlaylist.forEach(track => musicAliases.add(track.alias))
-    }
-    _registeredAliases.forEach(alias => {
+    _musicAliases.forEach(alias => {
         const s = sound.find(alias)
-        if (s) {
-            s.volume = musicAliases.has(alias) ? musicVolume : sfxVolume
-        }
+        if (s) s.volume = musicVolume
+    })
+    _sfxAliases.forEach(alias => {
+        const s = sound.find(alias)
+        if (s) s.volume = sfxVolume
     })
 }
 
@@ -234,8 +234,6 @@ const playPlaylist = (playlist, isShuffled) => {
     const playNext = async (index) => {
         if (_activePlaylistId !== playlistId) return
         const track = ordered[index]
-        const s = sound.find(track.alias)
-        if (s) s.volume = musicVolume
         const soundPlaying = await sound.play(track.alias, {
             volume: track.volume,
             start: track.start,
