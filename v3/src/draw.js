@@ -505,7 +505,10 @@ const createRectangleButton = (props, lobbyContainer) => {
 }
 
 const animateRoundsButton = button => {
-    button.getChildAt(2).text = 'Rounds: ' + getRoundCount()
+    const count = getRoundCount()
+    const loadingBar = button.getChildAt(1)
+    loadingBar.width = button.width * ((count - 1) / 9) // 1-10 mapped to 0-1
+    button.getChildAt(2).text = 'Rounds: ' + count
 }
 
 const animateMusicVolumeButton = button => {

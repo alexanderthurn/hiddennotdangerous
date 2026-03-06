@@ -293,14 +293,14 @@ const setRoundCount = (rounds) => {
     window.localStorage.setItem('rounds', rounds)
 }
 
-const toggleRounds = () => {
-    let count = getRoundCount()
-    count++
-    if (count > 10) {
-        count = 1
-    }
+const toggleRounds = (btn) => {
+    const btnRect = new PIXI.Rectangle(btn.x, btn.y, btn.width, btn.height)
+    const attackingFigures = btn.playersNear.filter(f => f.isAttacking)
+    if (attackingFigures.length === 0) return
+    const avgX = attackingFigures.reduce((sum, f) => sum + f.x, 0) / attackingFigures.length
+    const relativeX = Math.max(0, Math.min(1, (avgX - btnRect.x) / btnRect.width))
+    const count = Math.round(relativeX * 9) + 1 // 1-10
     setRoundCount(count)
-    return count
 }
 
 const toggleMusicVolume = (btn) => {

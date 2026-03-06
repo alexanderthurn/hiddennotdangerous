@@ -295,7 +295,6 @@ const rectangleButtonsDefinition = () => ({
         y: level.height * 0.12 + 2 * (level.height * 0.1 + 20),
         width: level.width * 0.15,
         height: level.height * 0.1,
-        defaultLoadingSpeed: 1 / 2000,
         execute: toggleRounds
     }
 })
