@@ -121,6 +121,7 @@ const initFigure = (figure, x, y, direction) => {
         isDeathDetected: false,
         killTime: 0,
         isAttacking: false,
+        isAiming: false,
         lastAttackTime: undefined,
         beans: new Set(),
         beansFarted: new Set()
@@ -616,6 +617,7 @@ const killFigure = (figure) => {
         figure.died = true
         figure.killTime = dtProcessed
         if (game === games.rampage && figure.team !== 'killer') {
+            rampageHalfKills++
             figures.filter(f => f.team === 'killer' && f.type === 'fighter').forEach(f => {
                 f.player.score.points++
                 f.player.score.shownPoints = f.player.score.points

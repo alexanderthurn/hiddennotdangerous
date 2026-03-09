@@ -767,7 +767,8 @@ const animatePlayerScore = figure => {
         return
     }
     if (figure.team !== figure.oldTeam) {
-        player.score.getChildAt(0).tint = teams[figure.team]?.color || colors.black
+        const colorTeam = (game === games.rampage && figure.rampageOriginalTeam) ? figure.rampageOriginalTeam : figure.team
+        player.score.getChildAt(0).tint = teams[colorTeam]?.color || colors.black
         figure.oldTeam = figure.team
     }
 
@@ -871,15 +872,18 @@ const animateWinningCeremony = winnerText => {
                 f.player.score.shownPoints = 0
             }
 
-            f.player.score.getChildAt(0).tint = teams[f.team] ? teams[f.team].color : colors.black
+            const colorTeam = (game === games.rampage && f.rampageOriginalTeam) ? f.rampageOriginalTeam : f.team
+            f.player.score.getChildAt(0).tint = teams[colorTeam] ? teams[colorTeam].color : colors.black
         }
     })
 
     if (gameOver && dt3 >= 0 && dt3 < showFinalWinnerDuration) {
         winnerText.visible = true
-        if (game === games.rampage) {
-            const points = playerFigures[0].player.score.shownPoints
-            winnerText.text = `${points} innocents were killed`
+        if (game === games.rampage && finalWinnerTeam) {
+            const killerKills = rampageTotalKills.killer
+            const sniperKills = rampageTotalKills.sniper
+            winnerText.tint = teams[finalWinnerTeam].color
+            winnerText.text = `Team Red: ${killerKills} kills\nTeam Blue: ${sniperKills} kills\n${finalWinnerTeam === 'killer' ? 'Team Red' : 'Team Blue'} wins!`
         } else if (finalWinnerTeam) {
             winnerText.tint = teams[finalWinnerTeam].color
             winnerText.text = `${teams[finalWinnerTeam].label} win`

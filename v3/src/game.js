@@ -44,6 +44,7 @@ window.dtToProcess = 0; window.dtProcessed = 0
 window.isRestartButtonPressed = undefined; window.restartStage = false; window.roundCounter = 0
 window.gameOver = undefined; window.ceremonyOver = undefined
 window.lastRoundEndThen = undefined; window.lastWinnerPlayerIds = undefined; window.lastFinalWinnerPlayerIds = undefined; window.finalWinnerTeam = undefined
+window.rampageHalfKills = undefined; window.rampageTotalKills = undefined
 const moveNewPlayerDuration = 1000
 const moveScoreToPlayerDuration = 1000
 const showFinalWinnerDuration = 5000
@@ -586,6 +587,33 @@ function initStage(nextStage) {
         if (roundCounter === 1) {
             players.forEach(player => initPlayerScore(player.score))
         }
+
+        // Rampage: team swap and half tracking
+        if (game === games.rampage) {
+            rampageHalfKills = 0
+
+            if (roundCounter === 1) {
+                rampageTotalKills = { killer: 0, sniper: 0 }
+                // Store original team for each player
+                Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter').forEach(f => {
+                    f.rampageOriginalTeam = f.team
+                })
+            } else {
+                // Destroy old crosshairs from pool before swap
+                Array.from(figuresPool).forEach(f => {
+                    if (f.type === 'crosshair') {
+                        destroyContainer(app, f)
+                        figuresPool.delete(f)
+                    }
+                })
+                // Swap teams
+                const poolFighters = Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter')
+                poolFighters.forEach(f => {
+                    if (f.team === 'killer') switchTeam(f, 'sniper')
+                    else if (f.team === 'sniper') switchTeam(f, 'killer')
+                })
+            }
+        }
     }
 
     figures.filter(figure => figure.type === 'cloud').forEach(cloud => destroyContainer(app, cloud))
@@ -602,14 +630,24 @@ function initStage(nextStage) {
 
     let figuresPoolArray = Array.from(figuresPool)
 
-    if (roundCounter === 1 && stage === stages.game) {
-        if (game === games.race) {
+    if (stage === stages.game) {
+        if (roundCounter === 1 && game === games.race) {
             addCrosshairs(figuresPoolArray.filter(figure => figure.playerId && !figureIsBot(figure)), 1)
-        } else if (game === games.rampage) {
+        }
+        if (game === games.rampage) {
+            // Setup snipers every half (not just roundCounter === 1)
             const killerFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'killer')
             const sniperFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'sniper')
             const ammo = Math.ceil(baseAmmoFactor * killerFigures.length / sniperFigures.length + bonusAmmoFactor * Math.sqrt(maxPlayerFigures / killerFigures.length))
-            addSniperFigures(app, sniperFigures, ammo)
+            if (roundCounter === 1) {
+                addSniperFigures(app, sniperFigures, ammo)
+            } else {
+                // Only create crosshairs, replacement NPCs already exist
+                sniperFigures.forEach(f => {
+                    const crosshair = createCrosshair({ ...f, x: f.x, y: f.y, ammo })
+                    figuresPool.add(crosshair)
+                })
+            }
         }
     }
 
@@ -670,9 +708,8 @@ function initStage(nextStage) {
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => initCrosshair(figure))
         if (stage !== stages.gameLobby) {
             figures.filter(figure => figure.team !== 'sniper').forEach(figure => initRandomPositionFigure(figure))
-            if (roundCounter === 1) {
-                initSniperPositions(figures.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
-            }
+            // Position snipers outside every half, not just roundCounter === 1
+            initSniperPositions(figures.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
         }
     } else if (stage !== stages.gameLobby) {
         figures.forEach(figure => initRandomPositionFigure(figure))
@@ -792,6 +829,16 @@ const handleSoloModeWinning = (figuresPlayer, extraChecks) => {
     }
 }
 
+const rampageFinishHalf = () => {
+    // Accumulate kills for the current killer team's original team
+    const currentKillers = figures.filter(f => f.playerId && f.type === 'fighter' && f.team === 'killer')
+    if (currentKillers.length > 0) {
+        const originalTeam = currentKillers[0].rampageOriginalTeam
+        rampageTotalKills[originalTeam] += rampageHalfKills
+    }
+    finishRound()
+}
+
 const handleWinning = () => {
     const figuresPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
 
@@ -844,7 +891,7 @@ const handleWinning = () => {
         const killers = figuresPlayer.filter(f => f.team === 'killer')
         const snipers = figuresPlayer.filter(f => f.team === 'sniper')
         if (killers.length === 0 || snipers.length === 0) {
-            finishRound()
+            rampageFinishHalf()
             gameOver = true
         }
 
@@ -853,26 +900,30 @@ const handleWinning = () => {
             const noTeamSurvivors = figures.filter(f => !f.team).filter(f => !f.isDead)
             const killerSurvivors = killers.filter(f => !f.isDead)
             if (killerSurvivors.length === 0 || noTeamSurvivors.length === 0) {
-                finishRound()
+                rampageFinishHalf()
             }
 
             // ammo out
             const crosshairs = figures.filter(f => f.type === 'crosshair')
             const sumAmmo = crosshairs.reduce((sum, f) => sum + f.ammo, 0)
             if (!restartStage && sumAmmo === 0) {
+                rampageHalfKills += noTeamSurvivors.length
                 killers.forEach(f => {
                     f.player.score.points += noTeamSurvivors.length
+                    f.player.score.shownPoints = f.player.score.points
                 })
-                finishRound()
+                rampageFinishHalf()
             }
 
             //countdown
             if (!restartStage && game.countdown && dtProcessed >= startTime + game.countdown * 1000) {
-                finishRound()
+                rampageFinishHalf()
             }
 
-            // round limit hit
-            if (restartStage && roundCounter >= getRoundCount()) {
+            // round limit hit (2 halves per full round)
+            if (restartStage && roundCounter >= getRoundCount() * 2 && roundCounter % 2 === 0 && rampageTotalKills.killer !== rampageTotalKills.sniper) {
+                // Determine final winner by total kills
+                finalWinnerTeam = rampageTotalKills.killer > rampageTotalKills.sniper ? 'killer' : 'sniper'
                 gameOver = true
             }
         }
