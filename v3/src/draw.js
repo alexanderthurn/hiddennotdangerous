@@ -471,6 +471,8 @@ const animateRectangleButton = button => {
 const createRectangleButton = (props, lobbyContainer) => {
     const { x, y, width, height, loadingPercentage, defaultLoadingSpeed, execute } = props
 
+    const borderLeft = 7
+
     let button = new PIXI.Container()
     button = Object.assign(button, { x, y, loadingPercentage, defaultLoadingSpeed, execute })
     const buttonRect = new PIXI.Rectangle(x, y, width, height)
@@ -479,6 +481,7 @@ const createRectangleButton = (props, lobbyContainer) => {
     const loadingBar = new PIXI.Graphics()
         .rect(0, 0, 0.1, height)
         .fill({ alpha: 0.5, color: colors.darkBrown })
+    loadingBar.x = -borderLeft
 
     const buttonText = new PIXI.BitmapText({
         style: app.textStyleDefault,
@@ -497,9 +500,6 @@ const createRectangleButton = (props, lobbyContainer) => {
     button.addChild(buttonSprite, loadingBar, buttonText)
     lobbyContainer.addChild(button)
 
-
-
-
     addAnimation(button, () => animateRectangleButton(button))
     return button
 }
@@ -507,7 +507,7 @@ const createRectangleButton = (props, lobbyContainer) => {
 const animateRoundsButton = button => {
     const count = getRoundCount()
     const loadingBar = button.getChildAt(1)
-    loadingBar.width = button.width * ((count - 1) / 9) // 1-10 mapped to 0-1
+    loadingBar.width = button.width * ((count - 1) / 9)
     button.getChildAt(2).text = 'Rounds: ' + count
 }
 
