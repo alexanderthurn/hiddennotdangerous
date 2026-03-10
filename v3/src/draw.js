@@ -1388,9 +1388,87 @@ const createCrosshair = props => {
 const addOverlay = app => {
     const countdown = createCountdown(app)
     addPauseOverlay(app)
+    const roundDisplay = createRoundDisplay(app)
 
-    levelContainer.addChild(countdown)
-    overlayLayer.attach(countdown)
+    levelContainer.addChild(countdown, roundDisplay.counter, roundDisplay.announcement)
+    overlayLayer.attach(countdown, roundDisplay.counter, roundDisplay.announcement)
+}
+
+const getRoundDisplayNumber = () => {
+    if (game === games.rampage) {
+        return Math.ceil(roundCounter / 2)
+    }
+    return roundCounter
+}
+
+const isNewRoundStart = () => {
+    if (game === games.rampage) {
+        return roundCounter % 2 === 1
+    }
+    return true
+}
+
+const roundAnnounceDuration = 1000
+const roundFlyDuration = 500
+
+const animateRoundDisplay = (counter, announcement) => {
+    const roundNum = getRoundDisplayNumber()
+    const totalRounds = getRoundCount()
+
+    // Counter visibility: during game stage
+    counter.visible = stage === stages.game && roundCounter > 0
+    counter.text = `${roundNum}/${totalRounds}`
+
+    // Announcement animation
+    if (stage === stages.game && !restartStage && isNewRoundStart()) {
+        const elapsed = dtProcessed - startTime
+
+        if (elapsed < roundAnnounceDuration + roundFlyDuration) {
+            announcement.visible = true
+            announcement.text = `Round ${roundNum}`
+
+            if (elapsed < roundAnnounceDuration) {
+                // Phase 1: Hover centered
+                announcement.position.set(level.width / 2, level.height / 2)
+                announcement.scale.set(1)
+                announcement.alpha = 1
+            } else {
+                // Phase 2: Fly to counter position
+                const flyProgress = easeInOutCubic((elapsed - roundAnnounceDuration) / roundFlyDuration)
+                const startPos = { x: level.width / 2, y: level.height / 2 }
+                const endPos = { x: counter.x, y: counter.y }
+                announcement.x = startPos.x + (endPos.x - startPos.x) * flyProgress
+                announcement.y = startPos.y + (endPos.y - startPos.y) * flyProgress
+                announcement.scale.set(1 - flyProgress * 0.7)
+                announcement.alpha = 1 - flyProgress * 0.5
+            }
+        } else {
+            announcement.visible = false
+        }
+    } else {
+        announcement.visible = false
+    }
+}
+
+const createRoundDisplay = app => {
+    const counter = new PIXI.BitmapText({
+        text: '0/3',
+        style: { fontFamily: 'KnallStroke' },
+        anchor: { x: 1, y: 0 },
+        position: { x: level.width - 10, y: level.height + 5 },
+        scale: { x: 1, y: 1 },
+    })
+
+    const announcement = new PIXI.BitmapText({
+        text: 'Round 1',
+        style: { fontFamily: 'KnallTitle' },
+        anchor: { x: 0.5, y: 0.5 },
+        position: { x: level.width / 2, y: level.height / 2 },
+    })
+    announcement.visible = false
+
+    app.ticker.add(() => animateRoundDisplay(counter, announcement))
+    return { counter, announcement }
 }
 
 const animateCountdown = countdown => {
@@ -1646,6 +1724,7 @@ Object.assign(window, {
     animateAttackArc, createAttackArc, createFigure,
     addCrosshairs, defaultFigureProps, addSniperFigures, addFiguresInitialPool,
     createCrosshair, addOverlay, animateCountdown, createCountdown,
+    animateRoundDisplay, createRoundDisplay, getRoundDisplayNumber, isNewRoundStart,
     animatePauseOverlay, addPauseOverlay,
     animateFpsText, createFpsText, animatePlayersText, createPlayersText,
     animateFiguresText, createFiguresText, addDebug,
