@@ -578,6 +578,7 @@ function initStage(nextStage) {
             }
             figure.isAiming = false
             figure.isInRace = false
+            figure.rampageOriginalTeam = undefined
             figure.playerId = null
             figure.player = null
         })

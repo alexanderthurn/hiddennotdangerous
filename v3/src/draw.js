@@ -880,10 +880,8 @@ const animateWinningCeremony = winnerText => {
     if (gameOver && dt3 >= 0 && dt3 < showFinalWinnerDuration) {
         winnerText.visible = true
         if (game === games.rampage && finalWinnerTeam) {
-            const killerKills = rampageTotalKills.killer
-            const sniperKills = rampageTotalKills.sniper
             winnerText.tint = teams[finalWinnerTeam].color
-            winnerText.text = `Team Red: ${killerKills} kills\nTeam Blue: ${sniperKills} kills\n${finalWinnerTeam === 'killer' ? 'Team Red' : 'Team Blue'} wins!`
+            winnerText.text = `${finalWinnerTeam === 'killer' ? 'Team Red' : 'Team Blue'} wins!`
         } else if (finalWinnerTeam) {
             winnerText.tint = teams[finalWinnerTeam].color
             winnerText.text = `${teams[finalWinnerTeam].label} win`
