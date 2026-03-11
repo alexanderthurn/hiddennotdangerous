@@ -1415,15 +1415,19 @@ const animateRoundDisplay = (counter, announcement) => {
     const roundNum = getRoundDisplayNumber()
     const totalRounds = getRoundCount()
 
-    // Counter visibility: during game stage
-    counter.visible = stage === stages.game && roundCounter > 0
-    counter.text = `Round ${roundNum}/${totalRounds}`
+    // Announcement animation
+    const announcementActive = stage === stages.game && !restartStage && isNewRoundStart()
+    const elapsed = announcementActive ? dtProcessed - startTime : Infinity
+    const announcementArrived = elapsed >= roundAnnounceDuration + roundFlyDuration
+
+    // Counter: show previous round number until announcement arrives
+    const counterNum = announcementActive && !announcementArrived ? roundNum - 1 : roundNum
+    counter.visible = stage === stages.game && roundCounter > 0 && counterNum > 0
+    counter.text = `Round ${counterNum}/${totalRounds}`
 
     // Announcement animation
-    if (stage === stages.game && !restartStage && isNewRoundStart()) {
-        const elapsed = dtProcessed - startTime
-
-        if (elapsed < roundAnnounceDuration + roundFlyDuration) {
+    if (announcementActive) {
+        if (!announcementArrived) {
             announcement.visible = true
             announcement.text = `Round ${roundNum}/${totalRounds}`
 
