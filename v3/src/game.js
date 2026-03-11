@@ -540,6 +540,7 @@ function initStage(nextStage) {
     restartStage = false
     stage = nextStage
     lastRoundEndThen = undefined
+    lastWinnerPlayerIds = undefined
     lastFinalWinnerPlayerIds = undefined
     finalWinnerTeam = undefined
     fpsTime = then
