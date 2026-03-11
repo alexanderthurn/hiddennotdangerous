@@ -885,7 +885,7 @@ const animateWinningCeremony = winnerText => {
         } else if (finalWinnerTeam) {
             winnerText.tint = teams[finalWinnerTeam].color
             winnerText.text = `${teams[finalWinnerTeam].label} win`
-        } else {
+        } else if (lastFinalWinnerPlayerIds?.length === 1) {
             const lastFinalWinnerFigure = playerFigures.find(f => lastFinalWinnerPlayerIds?.has(f.playerId))
             const lastFinalWinnerIndex = playersSortedByJoinTime.indexOf(lastFinalWinnerFigure?.player)
             const lastFinalWinnerNumber = lastFinalWinnerIndex + 1

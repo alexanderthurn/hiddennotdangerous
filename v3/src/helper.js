@@ -617,11 +617,12 @@ const killFigure = (figure) => {
         figure.died = true
         figure.killTime = dtProcessed
         if (game === games.rampage && figure.team !== 'killer') {
-            rampageHalfKills++
-            figures.filter(f => f.team === 'killer' && f.type === 'fighter').forEach(f => {
+            const currentKillers = figures.filter(f => f.team === 'killer' && f.type === 'fighter')
+            currentKillers.forEach(f => {
                 f.player.score.points++
                 f.player.score.shownPoints = f.player.score.points
             })
+            teams[currentKillers[0].rampageOriginalTeam].points++
         }
     }
 }

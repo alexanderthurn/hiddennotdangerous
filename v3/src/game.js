@@ -44,7 +44,6 @@ window.dtToProcess = 0; window.dtProcessed = 0
 window.isRestartButtonPressed = undefined; window.restartStage = false; window.roundCounter = 0
 window.gameOver = undefined; window.ceremonyOver = undefined
 window.lastRoundEndThen = undefined; window.lastWinnerPlayerIds = undefined; window.lastFinalWinnerPlayerIds = undefined; window.finalWinnerTeam = undefined
-window.rampageHalfKills = undefined; window.rampageTotalKills = undefined
 const moveNewPlayerDuration = 1000
 const moveScoreToPlayerDuration = 1000
 const showFinalWinnerDuration = 5000
@@ -591,10 +590,7 @@ function initStage(nextStage) {
 
         // Rampage: team swap and half tracking
         if (game === games.rampage) {
-            rampageHalfKills = 0
-
             if (roundCounter === 1) {
-                rampageTotalKills = { killer: 0, sniper: 0 }
                 // Store original team for each player
                 Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter').forEach(f => {
                     f.rampageOriginalTeam = f.team
@@ -830,16 +826,6 @@ const handleSoloModeWinning = (figuresPlayer, extraChecks) => {
     }
 }
 
-const rampageFinishHalf = () => {
-    // Accumulate kills for the current killer team's original team
-    const currentKillers = figures.filter(f => f.playerId && f.type === 'fighter' && f.team === 'killer')
-    if (currentKillers.length > 0) {
-        const originalTeam = currentKillers[0].rampageOriginalTeam
-        rampageTotalKills[originalTeam] += rampageHalfKills
-    }
-    finishRound()
-}
-
 const handleWinning = () => {
     const figuresPlayer = figures.filter(f => f.playerId && f.type === 'fighter')
 
@@ -892,8 +878,10 @@ const handleWinning = () => {
         const killers = figuresPlayer.filter(f => f.team === 'killer')
         const snipers = figuresPlayer.filter(f => f.team === 'sniper')
         if (killers.length === 0 || snipers.length === 0) {
-            rampageFinishHalf()
+            finalWinnerTeam = killers.length === 0 ? snipers.get(0).rampageOriginalTeam : killers.get(0).rampageOriginalTeam
+            lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.rampageOriginalTeam === finalWinnerTeam).map(f => f.playerId))
             gameOver = true
+            winRoundTeam(finalWinnerTeam)
         }
 
         if (!gameOver) {
@@ -901,30 +889,32 @@ const handleWinning = () => {
             const noTeamSurvivors = figures.filter(f => !f.team).filter(f => !f.isDead)
             const killerSurvivors = killers.filter(f => !f.isDead)
             if (killerSurvivors.length === 0 || noTeamSurvivors.length === 0) {
-                rampageFinishHalf()
+                finishRound()
             }
 
             // ammo out
             const crosshairs = figures.filter(f => f.type === 'crosshair')
             const sumAmmo = crosshairs.reduce((sum, f) => sum + f.ammo, 0)
             if (!restartStage && sumAmmo === 0) {
-                rampageHalfKills += noTeamSurvivors.length
-                killers.forEach(f => {
+                const currentKillers = figures.filter(f => f.playerId && f.type === 'fighter' && f.team === 'killer')
+                currentKillers.forEach(f => {
                     f.player.score.points += noTeamSurvivors.length
                     f.player.score.shownPoints = f.player.score.points
                 })
-                rampageFinishHalf()
+                teams[currentKillers[0].rampageOriginalTeam].points += noTeamSurvivors.length
+                finishRound()
             }
 
             //countdown
             if (!restartStage && game.countdown && dtProcessed >= startTime + game.countdown * 1000) {
-                rampageFinishHalf()
+                finishRound()
             }
 
             // round limit hit (2 halves per full round)
-            if (restartStage && roundCounter >= getRoundCount() * 2 && roundCounter % 2 === 0 && rampageTotalKills.killer !== rampageTotalKills.sniper) {
-                // Determine final winner by total kills
-                finalWinnerTeam = rampageTotalKills.killer > rampageTotalKills.sniper ? 'killer' : 'sniper'
+            const teamsWithMaxPoints = getTeamsWithMaxScore()
+            if (restartStage && roundCounter >= getRoundCount() * 2 && roundCounter % 2 === 0 && teamsWithMaxPoints.length === 1) {
+                finalWinnerTeam = teamsWithMaxPoints[0]
+                lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.rampageOriginalTeam === finalWinnerTeam).map(f => f.playerId))
                 gameOver = true
             }
         }
