@@ -1423,13 +1423,19 @@ const animateRoundDisplay = (counter, announcement) => {
     // Counter: show previous round number until announcement arrives
     const counterNum = announcementActive && !announcementArrived ? roundNum - 1 : roundNum
     counter.visible = stage === stages.game && roundCounter > 0 && counterNum > 0
-    counter.text = `Round ${counterNum}/${totalRounds}`
+
+    // Color coding & text: gold for last round, red for overtime
+    const roundTint = num => num > totalRounds ? colors.red : num === totalRounds ? colors.gold : colors.white
+    const roundLabel = num => num > totalRounds ? `Really Final Round ${num - totalRounds}` : num === totalRounds ? 'Final Round' : `Round ${num}/${totalRounds}`
+    counter.text = roundLabel(counterNum)
+    counter.tint = roundTint(counterNum)
 
     // Announcement animation
     if (announcementActive) {
         if (!announcementArrived) {
             announcement.visible = true
-            announcement.text = `Round ${roundNum}/${totalRounds}`
+            announcement.text = roundLabel(roundNum)
+            announcement.tint = roundTint(roundNum)
 
             if (elapsed < roundAnnounceDuration) {
                 // Phase 1: Hover centered
