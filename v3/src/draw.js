@@ -42,7 +42,6 @@ const createLevelContainer = (app, level) => {
         levelContainer.x = (app.screen.width - scale * level.width) / 2
         levelContainer.y = (app.screen.height - scale * level.height) / 2
 
-        // Apply screen shake
         if (game === games.food) {
             let magnitude = 0
             figures.filter(f => f.type === 'cloud').forEach(f => {
@@ -50,11 +49,12 @@ const createLevelContainer = (app, level) => {
                 const duration = 100 * (2 + getCloudMultiplier(f.size))
                 if (elapsed > 0 && elapsed < duration) {
                     const decay = 1 - elapsed / duration
-                    magnitude += 4 * getCloudMultiplier(f.size) * decay
+                    magnitude += Math.pow(4 * getCloudMultiplier(f.size) * decay, 2)
                 }
             })
-            levelContainer.x += (Math.random() - 0.5) * 2 * magnitude
-            levelContainer.y += (Math.random() - 0.5) * 2 * magnitude
+            const totalMagnitude = Math.sqrt(magnitude)
+            levelContainer.x += (Math.random() - 0.5) * 2 * totalMagnitude
+            levelContainer.y += (Math.random() - 0.5) * 2 * totalMagnitude
         }
     })
 
