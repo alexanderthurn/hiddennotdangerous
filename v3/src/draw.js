@@ -42,7 +42,7 @@ const createLevelContainer = (app, level) => {
         levelContainer.x = (app.screen.width - scale * level.width) / 2
         levelContainer.y = (app.screen.height - scale * level.height) / 2
 
-        if (game === games.food) {
+        if (!restartStage && game === games.food) {
             let magnitude = 0
             figures.filter(f => f.type === 'cloud').forEach(f => {
                 const elapsed = f.lifetime - fartGrowDuration
