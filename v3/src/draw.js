@@ -752,7 +752,7 @@ const addLobbyItems = (app) => {
     addNetworkQrCode(app, lobbyContainer)
     addGameDescription(app, lobbyContainer)
 
-    const touchControlDefault = createTouchControlHint(app, lobbyContainer, { position: 'left', text: 'Controls', buttonHints: new Map([[0, { text: 'FART', scale: 4 }], [3, { text: 'SHOW', scale: 4 }]]), axisHints: new Map([[0, { text: 'WALK', scale: 2 }]]) })
+    const touchControlDefault = createTouchControlHint(app, lobbyContainer, { position: 'left', text: 'Controls', buttonHints: new Map([[0, { text: 'FART', scale: 4 }], [1, { text: 'RUN', scale: 4 }], [3, { text: 'SHOW', scale: 4 }]]), axisHints: new Map([[0, { text: 'WALK', scale: 2 }]]) })
     const touchControlSniper = createTouchControlHint(app, lobbyContainer, { position: 'right', color: new PIXI.Color(colors.neonBlue), text: 'Sniper', buttonHints: new Map([[0, { text: 'SHOOT', scale: 3 }]]), axisHints: new Map([[0, { text: 'AIM', scale: 2 }]]) })
     const touchControlRace = createTouchControlHint(app, lobbyContainer, { position: 'right', color: new PIXI.Color(colors.electricIndigo), text: 'Race', buttonHints: new Map([[0, { text: 'SHOOT', scale: 3 }], [1, { text: 'RUN', scale: 4 }], [2, { text: 'WALK', scale: 4 }], [3, { text: 'SHOW', scale: 4 }]]), axisHints: new Map([[0, { text: 'AIM', scale: 2 }]]) })
 

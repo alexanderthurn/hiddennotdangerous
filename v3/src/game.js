@@ -1223,7 +1223,7 @@ function handleInput(players, figures, dtProcessed) {
                 f.speed = f.maxSpeed
                 if (f.type === 'crosshair') {
                     f.speed *= Math.min(p.speed, 1)
-                } else if (f.player.isSpeedButtonPressed && isDebugMode) {
+                } else if (f.player.isSpeedButtonPressed && (stage !== stages.game || isDebugMode)) {
                     f.speed *= raceSpeedMultiplier
                 }
             }
