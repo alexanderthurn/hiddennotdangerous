@@ -404,8 +404,10 @@ function getCloseRandomXY(figure) {
 
 const getWalkRectLength = (game, figure) => game?.walkRectLength ? game.walkRectLength * figure.maxSpeed / defaultMaxSpeed : level.rectangle.width
 
+// t: 0-1, start: start value, end: end value
 const getIntervalPoint = (t, start, end) => start + t * (end - start)
 
+// t: 0-1, start: start point, end: end point
 const getLinePoint = (t, start, end) => ({ x: getIntervalPoint(t, start.x, end.x), y: getIntervalPoint(t, start.y, end.y) })
 
 const getRandomOutsideLevelXY = () => {

@@ -279,12 +279,12 @@ const animateRingSegmentButton = button => {
                 const endOffsetY = Math.sin(centerAngle) * midRadius
 
                 // Interpolate from boomerang end position to final position
-                button.pivot.x = boomerangEndX + (endOffsetX - boomerangEndX) * easedProgress
-                button.pivot.y = boomerangEndY + (endOffsetY - boomerangEndY) * easedProgress
+                button.pivot.x = getIntervalPoint(easedProgress, boomerangEndX, endOffsetX)
+                button.pivot.y = getIntervalPoint(easedProgress, boomerangEndY, endOffsetY)
 
                 // Scale from boomerang end scale to final scale
                 const endScale = 0.95 * level.height / button.outerRadius
-                button.scale.set(boomerangEndScale + (endScale - boomerangEndScale) * easedProgress)
+                button.scale.set(getIntervalPoint(easedProgress, boomerangEndScale, endScale))
 
                 // Determine text orientation - text is flipped when angle is in bottom half
                 let targetRotation = -Math.PI / 2 - centerAngle
@@ -801,7 +801,7 @@ const animatePlayerScore = figure => {
     }
 
     if (!restartStage) {
-        const lp = Math.min((dtProcessed - player.joinedTime) / moveNewPlayerDuration, 1)
+        const lp = easeInOutCubic(Math.min((dtProcessed - player.joinedTime) / moveNewPlayerDuration, 1))
 
         player.score = Object.assign(player.score, getLinePoint(lp, { x: level.width * 0.5, y: level.height * 0.5 }, { x: getScoreDefaultX(player), y: player.score.yDefault }))
         player.score.scale = getIntervalPoint(lp, 12, 1)
@@ -868,7 +868,7 @@ const animateWinningCeremony = winnerText => {
         const dt2 = dtProcessed - (lastRoundEndThen + i * moveScoreToPlayerDuration);
 
         if (dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
-            const lp = dt2 / moveScoreToPlayerDuration
+            const lp = easeInOutCubic(dt2 / moveScoreToPlayerDuration)
 
             f.player.score = Object.assign(f.player.score, getLinePoint(lp, { x: getScoreDefaultX(f.player), y: f.player.score.yDefault }, f))
 
@@ -891,7 +891,7 @@ const animateWinningCeremony = winnerText => {
             }
             f.player.score.shownPoints = f.player.score.points
         } else if (dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
-            const lp = dt4 / moveScoreToPlayerDuration
+            const lp = easeInOutCubic(dt4 / moveScoreToPlayerDuration)
 
             f.player.score = Object.assign(f.player.score, getLinePoint(lp, f, { x: getScoreDefaultX(f.player), y: f.player.score.yDefault }))
 
@@ -1476,11 +1476,11 @@ const animateRoundDisplay = (counter, announcement) => {
                 const flyProgress = easeInOutCubic((elapsed - roundAnnounceDuration) / roundFlyDuration)
                 const startPos = { x: level.width / 2, y: level.height / 2 }
                 const endPos = { x: counter.x, y: counter.y }
-                announcement.x = startPos.x + (endPos.x - startPos.x) * flyProgress
-                announcement.y = startPos.y + (endPos.y - startPos.y) * flyProgress
-                announcement.anchor.set(0.5 + flyProgress * 0.5, 0.5 - flyProgress * 0.5)
-                announcement.scale.set(10 - flyProgress * 9)
-                announcement.alpha = 1 - flyProgress * 0.5
+                announcement.x = getIntervalPoint(flyProgress, startPos.x, endPos.x)
+                announcement.y = getIntervalPoint(flyProgress, startPos.y, endPos.y)
+                announcement.anchor.set(getIntervalPoint(flyProgress, 0.5, 1), getIntervalPoint(flyProgress, 0.5, 0))
+                announcement.scale.set(getIntervalPoint(flyProgress, 10, 1))
+                announcement.alpha = getIntervalPoint(flyProgress, 1, 0.5)
             }
         } else {
             announcement.visible = false
