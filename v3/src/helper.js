@@ -363,19 +363,6 @@ const destroyContainer = (app, container) => {
     }
 }
 
-const createLevelContainer = (app, level) => {
-    const levelContainer = new PIXI.Container()
-
-    app.ticker.add(() => {
-        const scale = Math.min(app.screen.width / level.width, app.screen.height / level.height) * level.scale
-        levelContainer.scale.x = levelContainer.scale.y = scale
-        levelContainer.x = (app.screen.width - scale * level.width) / 2
-        levelContainer.y = (app.screen.height - scale * level.height) / 2
-    })
-
-    return levelContainer
-}
-
 function createLevel() {
     const level = { width: 1920, height: 1080, padding: [30, 40, 30, 10], scale: 0.9 }
     level.rectangle = new PIXI.Rectangle(level.padding[0], level.padding[1], level.width - level.padding[0] - level.padding[2], level.height - level.padding[1] - level.padding[3])
