@@ -33,6 +33,34 @@ const shadowDefinition = {
     color: 0x000000
 }
 
+const createLevelContainer = (app, level) => {
+    const levelContainer = new PIXI.Container()
+
+    app.ticker.add(() => {
+        const scale = Math.min(app.screen.width / level.width, app.screen.height / level.height) * level.scale
+        levelContainer.scale.x = levelContainer.scale.y = scale
+        levelContainer.x = (app.screen.width - scale * level.width) / 2
+        levelContainer.y = (app.screen.height - scale * level.height) / 2
+
+        // Apply screen shake
+        if (game === games.food) {
+            let magnitude = 0
+            figures.filter(f => f.type === 'cloud').forEach(f => {
+                const elapsed = f.lifetime - fartGrowDuration
+                const duration = 100 * (2 + getCloudMultiplier(f.size))
+                if (elapsed > 0 && elapsed < duration) {
+                    const decay = 1 - elapsed / duration
+                    magnitude += 4 * getCloudMultiplier(f.size) * decay
+                }
+            })
+            levelContainer.x += (Math.random() - 0.5) * 2 * magnitude
+            levelContainer.y += (Math.random() - 0.5) * 2 * magnitude
+        }
+    })
+
+    return levelContainer
+}
+
 const createLoadingText = app => {
     const text = new PIXI.BitmapText({
         text: 'Loading...',
@@ -1723,7 +1751,7 @@ const addFog = app => {
 
 Object.assign(window, {
     defaultFilterVert, shadowDefinition,
-    createLoadingText, addHeadline,
+    createLevelContainer, createLoadingText, addHeadline,
     animateCircleButton, animateLobbyStartButton, animateGameStartButton,
     createCircleButton, animateRingSegmentButton, createRingSegmentButton,
     addGameRing, addGameSelection, addGameStartButton, addNetworkQrCode, addGameDescription,
