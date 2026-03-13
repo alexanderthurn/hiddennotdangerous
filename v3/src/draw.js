@@ -1493,7 +1493,7 @@ const animateRoundDisplay = (counter, announcement) => {
 const addRoundDisplay = app => {
     const counter = new PIXI.BitmapText({
         text: '',
-        style: { fontFamily: 'KnallStroke' },
+        style: { fontFamily: 'KnallTitle' },
         anchor: { x: 1, y: 0 },
         position: { x: level.width - 10, y: level.height + 5 },
         scale: { x: 1, y: 1 },
