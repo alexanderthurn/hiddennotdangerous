@@ -62,10 +62,12 @@ To generate characters:
 ## Resources
 
 - character: https://opengameart.org/content/simple-character-base-16x16
+- fart: https://pixabay.com/sound-effects/epic-cinematic-explosion-454857/
 - Grass Tiles: https://www.vecteezy.com/vector-art/13998017-textures-of-green-grass-with-flowers-and-mushrooms
 - music1: https://incompetech.com/music/royalty-free/mp3-royaltyfree/Ranz%20des%20Vaches.mp3
 - music2: https://suno.com/song/90760bdb-d4c5-42d3-8066-7f4597b8e1d4
 - music3: https://pixabay.com/de/music/schlaflieder-brahms-lullaby-wiegenlied-op49-no4-music-box-version-2-229418/
+- music4: https://suno.com/song/dbdc7696-e34f-4d77-917c-a99a6c2f3c83
 - slingshotHit: https://pixabay.com/sound-effects/slingshot-2-40485/
 - slingshotMiss: https://pixabay.com/sound-effects/slingshot-1-40486/
 - spinningWheelClick: https://pixabay.com/sound-effects/film-special-effects-wheel-spin-click-slow-down-101152/
