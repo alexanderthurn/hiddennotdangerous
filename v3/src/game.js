@@ -172,6 +172,7 @@ const teams = {
 }
 
 const audio = {
+    explosion: { title: './sfx/explosion.ogg' },
     fart: { title: './sfx/sound2.ogg', start: 0.15 },
     beanFart: { title: './sfx/sound1.ogg', start: 0.15 },
     shootHit: { title: './sfx/slingshotHit.ogg', start: 1.5 },
@@ -186,7 +187,8 @@ const audio = {
     musicGame: [
         { title: './sfx/music1.ogg', start: 20, volume: 0.5, music: true },
         { title: './sfx/music2.ogg', volume: 0.5, music: true },
-        { title: './sfx/music3.ogg', volume: 0.5, music: true }
+        { title: './sfx/music3.ogg', volume: 0.5, music: true },
+        { title: './sfx/music4.ogg', volume: 0.5, music: true }
     ],
     musicLobby: [
         { title: './sfx/lobby.ogg', volume: 0.2, music: true }
@@ -219,6 +221,7 @@ const audio = {
     ]
 }
 
+const soundExplosion = loadAudioPool(audio.explosion);
 const soundFartPool = loadAudioPool(audio.fart);
 const soundBeanFartPool = loadAudioPool(audio.beanFart);
 const soundShootHitPool = loadAudioPool(audio.shootHit);
@@ -1324,6 +1327,7 @@ function handleNPCs(figures, time, oldNumberJoinedKeyboardPlayers, dt) {
             if (!f.isAttacking) {
                 f.isAttacking = true
                 f.attackDistanceMultiplier = getCloudMultiplier(f.size)
+                playAudio(soundExplosion, { volume: f.size })
             }
             f.attackDistanceMultiplier *= Math.pow(cloudDecayRate, dt)
             if (f.attackDistanceMultiplier < cloudMinSize) {

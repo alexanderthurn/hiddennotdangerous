@@ -182,8 +182,8 @@ const getAudio = (config, { preload = true, singleInstance = true } = {}) => {
     return { alias, end: config.end, start: config.start ?? 0, volume: config.volume ?? 1 }
 }
 
-const playAudio = (audio) => {
-    sound.play(audio.alias, { end: audio.end, start: audio.start, volume: audio.volume })
+const playAudio = (audio, props = {}) => {
+    sound.play(audio.alias, { end: audio.end, start: audio.start, volume: audio.volume * (props.volume ?? 1) })
 }
 
 const stopAudio = (audio) => {
