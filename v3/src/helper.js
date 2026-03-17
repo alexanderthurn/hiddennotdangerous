@@ -94,6 +94,7 @@ const initRandomOutsidePositionFigure = figure => {
 
     initFigure(figure, x, y)
     figure.isAiming = true
+    figure.y += 0.25 * figure.height
 }
 
 const initStartPositionFigure = (figure, i) => {

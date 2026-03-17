@@ -1077,7 +1077,7 @@ const addLevelBoundary = () => {
     const fenceUpper = createSpriteWithShadowContainer({ texture: spritesheet.textures['fence_horizontal'], scaleFactor: { x: 1, y: 1.3 }, skewFactor: { x: 1, y: 1 }, position: { x: level.width * 0.0, y: level.height * 0.03 }, anchor: { x: 0.0, y: 0.9 }, options: { tilingSprite: { tileScale: { x: 0.28, y: 0.28 }, tilePosition: { x: 0, y: 0 } } } });
     fenceUpper.shadow.width = fenceUpper.sprite.width = level.width
     fenceUpper.shadow.height = fenceUpper.sprite.height = level.height * 0.04
-    fenceUpper.sprite.zIndex = -level.height
+    fenceUpper.sprite.zIndex = 30
 
     const fenceLeft = createSpriteWithShadowContainer({ texture: spritesheet.textures['fence_horizontal'], scaleFactor: { x: 1.5 / shadowDefinition.scale.x, y: 1 / shadowDefinition.scale.y }, skewFactor: { x: 0, y: 0 }, position: { x: -level.width * 0.001, y: level.height * 0.00 }, anchor: { x: 0.0, y: 0.0 }, options: { tilingSprite: { tileScale: { x: 0.4, y: 0.4 }, tilePosition: { x: 0, y: 0 } } } });
     fenceLeft.shadow.width = fenceLeft.sprite.width = level.width * 0.006
