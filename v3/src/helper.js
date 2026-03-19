@@ -606,7 +606,7 @@ const killFigure = (figure) => {
         figure.isDead = true
         figure.died = true
         figure.killTime = dtProcessed
-        if (game === games.rampage && figure.team !== 'killer') {
+        if (stage === stages.game && game === games.rampage && figure.team !== 'killer') {
             const currentKillers = figures.filter(f => f.team === 'killer' && f.type === 'fighter')
             currentKillers.forEach(f => {
                 f.player.score.points++
