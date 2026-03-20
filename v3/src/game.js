@@ -882,7 +882,7 @@ const handleWinning = () => {
         const killers = figuresPlayer.filter(f => f.team === 'killer')
         const snipers = figuresPlayer.filter(f => f.team === 'sniper')
         if (killers.length === 0 || snipers.length === 0) {
-            finalWinnerTeam = killers.length === 0 ? snipers.get(0).rampageOriginalTeam : killers.get(0).rampageOriginalTeam
+            finalWinnerTeam = killers.length === 0 ? snipers[0].rampageOriginalTeam : killers[0].rampageOriginalTeam
             lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.rampageOriginalTeam === finalWinnerTeam).map(f => f.playerId))
             gameOver = true
             winRoundTeam(finalWinnerTeam)

@@ -451,6 +451,7 @@ const addGameDescription = (app, lobbyContainer) => {
                     + '\nTimer is ticking'
                 break
             default:
+                gameDescriptionLeft.text = ''
                 break
         }
 
@@ -484,6 +485,7 @@ const addGameDescription = (app, lobbyContainer) => {
                     + '\nGirls can stun you'
                 break
             default:
+                gameDescriptionRight.text = ''
                 break
         }
     })
@@ -913,7 +915,7 @@ const animateWinningCeremony = winnerText => {
         } else if (finalWinnerTeam) {
             winnerText.tint = teams[finalWinnerTeam].color
             winnerText.text = `${teams[finalWinnerTeam].label} win`
-        } else if (lastFinalWinnerPlayerIds?.length === 1) {
+        } else if (lastFinalWinnerPlayerIds?.size === 1) {
             const lastFinalWinnerFigure = playerFigures.find(f => lastFinalWinnerPlayerIds?.has(f.playerId))
             const lastFinalWinnerIndex = playersSortedByJoinTime.indexOf(lastFinalWinnerFigure?.player)
             const lastFinalWinnerNumber = lastFinalWinnerIndex + 1
