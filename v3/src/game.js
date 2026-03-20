@@ -780,8 +780,9 @@ function gameLoop() {
         if (restartStage && (!lastRoundEndThen || ceremonyOver)) {
             if (gameOver) {
                 initStage(stages.startLobby)
+            } else {
+                initStage(stage)
             }
-            initStage(stage)
         }
 
         if (isRestartButtonPressed) {

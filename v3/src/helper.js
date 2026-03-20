@@ -28,13 +28,18 @@ const colors = {
 }
 const crosshairColors = new Set([colors.blue, colors.black, colors.cyan, colors.darkOrange, colors.deepPink, colors.dodgerBlue, colors.electricIndigo, colors.magenta, colors.red, colors.yellow, colors.white])
 
-let crosshairColorsInUse = new Set()
-
 const getCrosshairColor = () => {
-    const freeColors = Array.from(crosshairColors.difference(crosshairColorsInUse))
-    const color = freeColors[getRandomInt(freeColors.length)]
-    crosshairColorsInUse.add(color)
-    return color
+    const crosshairColorsUsage = new Map();
+    crosshairColors.forEach(color => crosshairColorsUsage.set(color, 0))
+    players.forEach(p => {
+        if (p.crosshairColor) {
+            crosshairColorsUsage.set(p.crosshairColor, crosshairColorsUsage.get(p.crosshairColor) + 1)
+        }
+    })
+
+    const minUsage = Math.min(...crosshairColorsUsage.values())
+    const leastUsedColors = [...crosshairColorsUsage.entries()].filter(([, count]) => count === minUsage).map(([color]) => color)
+    return leastUsedColors[getRandomInt(leastUsedColors.length)]
 }
 
 let _soundCounter = 0
@@ -786,7 +791,7 @@ const quadraticBezier = (t, p0, p1, p2) => ({
 })
 
 Object.assign(window, {
-    colors, crosshairColors, crosshairColorsInUse, getCrosshairColor,
+    colors, crosshairColors, getCrosshairColor,
     setDeadzone, pad, getCountdownText, getQueryParam,
     mod, getRandomInt, getRandomIndex,
     initRandomPositionFigure, initRandomOutsidePositionFigure, initStartPositionFigure,
