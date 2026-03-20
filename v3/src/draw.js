@@ -860,7 +860,13 @@ const animateWinningCeremony = winnerText => {
         playerFigures = playerFigures.filter(f => f.team === 'killer')
     }
 
-    const playerFiguresSortedByNewPoints = playerFigures.toSorted((f1, f2) => (f1.player.score.points - f1.player.score.oldPoints) - (f2.player.score.points - f2.player.score.oldPoints))
+    // first sort by final winner, then by new points
+    const playerFiguresSortedByNewPoints = playerFigures.toSorted((f1, f2) => {
+        const f1IsFinalWinner = lastFinalWinnerPlayerIds?.has(f1.playerId) ? 1 : 0
+        const f2IsFinalWinner = lastFinalWinnerPlayerIds?.has(f2.playerId) ? 1 : 0
+        if (f1IsFinalWinner !== f2IsFinalWinner) return f1IsFinalWinner - f2IsFinalWinner
+        return (f1.player.score.points - f1.player.score.oldPoints) - (f2.player.score.points - f2.player.score.oldPoints)
+    })
 
     const dt3 = dtProcessed - (lastRoundEndThen + playerFigures.length * moveScoreToPlayerDuration);
     const dt4 = dtProcessed - (lastRoundEndThen + playerFigures.length * moveScoreToPlayerDuration + showFinalWinnerDuration);
@@ -880,7 +886,9 @@ const animateWinningCeremony = winnerText => {
                 f.player.score.scale = getIntervalPoint(lp, 1, 2)
             }
 
-            if (lastWinnerPlayerIds?.has(f.playerId)) {
+            if (gameOver && lastFinalWinnerPlayerIds?.has(f.playerId)) {
+                f.player.score.getChildAt(0).tint = colors.gold
+            } else if (!gameOver && lastWinnerPlayerIds?.has(f.playerId)) {
                 f.player.score.getChildAt(0).tint = colors.gold
             }
         } else if (dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
