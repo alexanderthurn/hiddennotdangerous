@@ -1065,19 +1065,7 @@ function updateGame(figures, dt, dtProcessed) {
     }
 
     // attack/detect figures
-    let numberKilledFigures = 0;
-    let killTime;
-
-    if (stage === stages.startLobby || game === games.battleRoyale || game === games.food) {
-        figuresAlive.filter(f => f.isAttacking).forEach(f => {
-            figuresAlive.filter(fig => fig.playerId !== f.playerId && fig.type === 'fighter').forEach(fig => {
-                if (attackFigure(f, fig)) {
-                    numberKilledFigures++
-                    killTime = dtProcessed
-                }
-            });
-        })
-    } else if (game === games.race) {
+    if (stage === stages.startLobby || game === games.battleRoyale || game === games.food || game === games.race) {
         figuresAlive.filter(f => f.isAttacking).forEach(f => {
             figuresAlive.filter(fig => (fig.playerId !== f.playerId || fig.isInRace) && fig.type === 'fighter').forEach(fig => {
                 attackFigure(f, fig)
@@ -1136,6 +1124,8 @@ function updateGame(figures, dt, dtProcessed) {
         })
     }
 
+    let numberKilledFigures = 0
+    let killTime
     figures.filter(f => f.type === 'fighter').forEach(f => {
         if (f.attacked) {
             if (f.beansFarted.size === 0) {
@@ -1146,6 +1136,10 @@ function updateGame(figures, dt, dtProcessed) {
         }
         if (f.died) {
             playAudio(soundDeathPool)
+            if (stage === stages.startLobby || game === games.battleRoyale || game === games.food) {
+                numberKilledFigures++
+                killTime = dtProcessed
+            }
         }
     })
     figures.filter(f => f.type === 'crosshair').forEach(f => {

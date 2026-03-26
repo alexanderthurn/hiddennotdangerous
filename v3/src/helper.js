@@ -595,19 +595,15 @@ const attackFigure = (figureAttacker, figureAttacked) => {
         if (2 * distanceAnglesDeg(rad2deg(figureAttacker.direction), rad2deg(angle(figureAttacker.x, figureAttacker.y, figureAttacked.x, figureAttacked.y)) + 180) <= figureAttacker.attackAngle) {
             killFigure(figureAttacked)
             figureAttacker.hasHit = true
-            return true
         }
-    }
-    else if (reduceBounds(figureAttacked.getBounds(), { left: 0.15, right: 0.45, top: 0.15, bottom: 0.15 }).contains(figureAttacker.worldTransform.tx, figureAttacker.worldTransform.ty)) {
+    } else if (reduceBounds(figureAttacked.getBounds(), { left: 0.15, right: 0.45, top: 0.15, bottom: 0.15 }).contains(figureAttacker.worldTransform.tx, figureAttacker.worldTransform.ty)) {
         killFigure(figureAttacked)
         figureAttacker.hasHit = true
-        return true
     }
-    return false
 }
 
 const killFigure = (figure) => {
-    if (!figure.isDead) {
+    if (!figure.isDead && !(buttons.selectGame?.isInArea(figure) || buttons.startGame?.isInArea(figure))) {
         figure.isDead = true
         figure.died = true
         figure.killTime = dtProcessed
