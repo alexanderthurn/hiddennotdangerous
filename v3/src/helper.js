@@ -26,19 +26,19 @@ const colors = {
     white: 0xFFFFFF,
     yellow: 0xFFFF00
 }
-const crosshairColors = new Set([colors.blue, colors.black, colors.cyan, colors.darkOrange, colors.deepPink, colors.dodgerBlue, colors.electricIndigo, colors.magenta, colors.red, colors.yellow, colors.white])
+const playerColors = new Set([colors.blue, colors.black, colors.cyan, colors.darkOrange, colors.deepPink, colors.dodgerBlue, colors.electricIndigo, colors.magenta, colors.red, colors.yellow, colors.white])
 
-const getCrosshairColor = () => {
-    const crosshairColorsUsage = new Map();
-    crosshairColors.forEach(color => crosshairColorsUsage.set(color, 0))
+const getPlayerColor = () => {
+    const playerColorsUsage = new Map();
+    playerColors.forEach(color => playerColorsUsage.set(color, 0))
     players.forEach(p => {
-        if (p.crosshairColor) {
-            crosshairColorsUsage.set(p.crosshairColor, crosshairColorsUsage.get(p.crosshairColor) + 1)
+        if (p.color) {
+            playerColorsUsage.set(p.color, playerColorsUsage.get(p.color) + 1)
         }
     })
 
-    const minUsage = Math.min(...crosshairColorsUsage.values())
-    const leastUsedColors = [...crosshairColorsUsage.entries()].filter(([, count]) => count === minUsage).map(([color]) => color)
+    const minUsage = Math.min(...playerColorsUsage.values())
+    const leastUsedColors = [...playerColorsUsage.entries()].filter(([, count]) => count === minUsage).map(([color]) => color)
     return leastUsedColors[getRandomInt(leastUsedColors.length)]
 }
 
@@ -787,7 +787,7 @@ const quadraticBezier = (t, p0, p1, p2) => ({
 })
 
 Object.assign(window, {
-    colors, crosshairColors, getCrosshairColor,
+    colors, playerColors, getPlayerColor,
     setDeadzone, pad, getCountdownText, getQueryParam,
     mod, getRandomInt, getRandomIndex,
     initRandomPositionFigure, initRandomOutsidePositionFigure, initStartPositionFigure,

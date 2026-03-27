@@ -1168,7 +1168,7 @@ function handleInput(players, figures, dtProcessed) {
                         return
                     }
                 } else {
-                    p.crosshairColor = getCrosshairColor()
+                    p.color = getPlayerColor()
                 }
                 figure = figures.find(f => !f.playerId && f.type === 'fighter')
                 if (!figure) {

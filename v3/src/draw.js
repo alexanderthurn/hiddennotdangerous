@@ -798,7 +798,7 @@ const animatePlayerScore = figure => {
     }
     if (figure.team !== figure.oldTeam) {
         const colorTeam = (game === games.rampage && figure.rampageOriginalTeam) ? figure.rampageOriginalTeam : figure.team
-        player.score.getChildAt(0).tint = teams[colorTeam]?.color || colors.black
+        player.score.getChildAt(0).tint = teams[colorTeam]?.color || player.color || colors.black
         figure.oldTeam = figure.team
     }
 
@@ -832,7 +832,7 @@ const addPlayerScore = figure => {
     } else {
         circle = new PIXI.Graphics(playerCircleContext)
     }
-    circle.tint = colors.black
+    circle.tint = figure.player.color || colors.black
 
     const text = new PIXI.BitmapText({
         text: 0,
@@ -911,7 +911,7 @@ const animateWinningCeremony = winnerText => {
             }
 
             const colorTeam = (game === games.rampage && f.rampageOriginalTeam) ? f.rampageOriginalTeam : f.team
-            f.player.score.getChildAt(0).tint = teams[colorTeam] ? teams[colorTeam].color : colors.black
+            f.player.score.getChildAt(0).tint = teams[colorTeam] ? teams[colorTeam].color : (f.player.color || colors.black)
         }
     })
 
@@ -1406,7 +1406,7 @@ const createCrosshair = props => {
     crosshair.recoilOffset = 5
     crosshair.team = team
     crosshair.type = 'crosshair'
-    crosshair.tint = player.crosshairColor
+    crosshair.tint = player.color
 
     crosshair.addChild(sprite, ammoText)
     levelContainer.addChild(crosshair)
