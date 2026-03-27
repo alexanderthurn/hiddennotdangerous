@@ -1206,7 +1206,7 @@ const animateFigure = (figure, spritesheet) => {
     }
 
     if (figure.player?.isMarkerButtonPressed && !restartStage) {
-        body.tint = colors.purple
+        body.tint = figure.player.color ?? colors.purple
     } else {
         body.tint = undefined
     }
