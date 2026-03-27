@@ -556,13 +556,6 @@ function initStage(nextStage) {
     if (stage === stages.startLobby) {
         game = undefined
         roundCounter = 0
-        players.forEach(player => {
-            destroyContainer(app, player.score)
-        })
-        botPlayers = []
-        gamepadPlayers = []
-        keyboardPlayers = []
-        players = []
 
         figuresPool.difference(figuresInitialPool).forEach(figure => {
             destroyContainer(app, figure)
@@ -573,6 +566,7 @@ function initStage(nextStage) {
         figures.filter(figure => figure.type === 'fighter' && figure.team !== 'vip').forEach(figure => {
             figure.visible = false
         })
+
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => destroyContainer(app, figure))
         figures.filter(figure => figure.type === 'fighter').forEach(figure => {
             if (figure.team !== 'vip') {
@@ -582,8 +576,6 @@ function initStage(nextStage) {
             figure.isAiming = false
             figure.isInRace = false
             figure.rampageOriginalTeam = undefined
-            figure.playerId = null
-            figure.player = null
         })
         Object.values(teams).forEach(team => team.points = 0)
     } else if (stage === stages.game) {
@@ -658,7 +650,7 @@ function initStage(nextStage) {
 
     // Figuren aus Pool laden
     if (stage === stages.startLobby) {
-        figures.push(figuresPoolArray.find(figure => figure.type === 'fighter' && figure.team !== 'vip'))
+        figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.playerId && figure.team !== 'vip'))
     } else if (game === games.vip) {
         figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'fighter'))
     } else {
