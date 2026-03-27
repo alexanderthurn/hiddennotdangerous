@@ -927,6 +927,9 @@ const animateWinningCeremony = winnerText => {
             const lastFinalWinnerFigure = playerFigures.find(f => lastFinalWinnerPlayerIds?.has(f.playerId))
             const lastFinalWinnerIndex = playersSortedByJoinTime.indexOf(lastFinalWinnerFigure?.player)
             const lastFinalWinnerNumber = lastFinalWinnerIndex + 1
+            if (lastFinalWinnerFigure?.player?.color) {
+                winnerText.tint = lastFinalWinnerFigure.player.color
+            }
             if (figureIsBot(lastFinalWinnerFigure)) {
                 winnerText.text = `Player ${lastFinalWinnerNumber} (Bot) wins`
             } else {

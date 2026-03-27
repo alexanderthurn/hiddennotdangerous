@@ -504,7 +504,7 @@ Object.assign(window, {
                 fontSize: level.width * 0.1,
                 fill: {
                     alpha: 0.8,
-                    color: colors.lightBrown,
+                    color: colors.white,
                 },
                 stroke: {
                     color: colors.white,
