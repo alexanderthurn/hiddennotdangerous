@@ -515,6 +515,10 @@ Object.assign(window, {
                 chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
                 fontFamily: fontFamilyName,
                 fontSize: level.width * 0.1,
+                fill: {
+                    alpha: 0,
+                    color: colors.black,
+                },
                 stroke: {
                     color: colors.white,
                     width: 6,

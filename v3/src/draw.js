@@ -959,6 +959,7 @@ const addWinningCeremony = app => {
         style: { fontFamily: 'KnallWinningFill', fontSize: 256 },
         ...textProps,
     })
+    fillText.alpha = 0.8
 
     const strokeText = new PIXI.BitmapText({
         style: { fontFamily: 'KnallWinningStroke', fontSize: 256 },
