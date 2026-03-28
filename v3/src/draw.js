@@ -922,22 +922,22 @@ const animateWinningCeremony = winnerText => {
     if (gameOver && dt3 >= 0 && dt3 < showFinalWinnerDuration) {
         winnerText.visible = true
         if (game === games.rampage && finalWinnerTeam) {
-            winnerText.tint = teams[finalWinnerTeam].color
-            winnerText.text = `${finalWinnerTeam === 'killer' ? 'Team Red' : 'Team Blue'} wins!`
+            winnerText.fillText.tint = teams[finalWinnerTeam].color
+            winnerText.fillText.text = winnerText.strokeText.text = `${finalWinnerTeam === 'killer' ? 'Team Red' : 'Team Blue'} wins!`
         } else if (finalWinnerTeam) {
-            winnerText.tint = teams[finalWinnerTeam].color
-            winnerText.text = `${teams[finalWinnerTeam].label} win`
+            winnerText.fillText.tint = teams[finalWinnerTeam].color
+            winnerText.fillText.text = winnerText.strokeText.text = `${teams[finalWinnerTeam].label} win`
         } else if (lastFinalWinnerPlayerIds?.size === 1) {
             const lastFinalWinnerFigure = playerFigures.find(f => lastFinalWinnerPlayerIds?.has(f.playerId))
             const lastFinalWinnerIndex = playersSortedByJoinTime.indexOf(lastFinalWinnerFigure?.player)
             const lastFinalWinnerNumber = lastFinalWinnerIndex + 1
             if (lastFinalWinnerFigure?.player?.color) {
-                winnerText.tint = lastFinalWinnerFigure.player.color
+                winnerText.fillText.tint = lastFinalWinnerFigure.player.color
             }
             if (figureIsBot(lastFinalWinnerFigure)) {
-                winnerText.text = `Player ${lastFinalWinnerNumber} (Bot) wins`
+                winnerText.fillText.text = winnerText.strokeText.text = `Player ${lastFinalWinnerNumber} (Bot) wins`
             } else {
-                winnerText.text = `Player ${lastFinalWinnerNumber} wins`
+                winnerText.fillText.text = winnerText.strokeText.text = `Player ${lastFinalWinnerNumber} wins`
             }
         }
     } else {
@@ -950,14 +950,25 @@ const animateWinningCeremony = winnerText => {
 }
 
 const addWinningCeremony = app => {
-    let winnerText = new PIXI.BitmapText({
-        style: {
-            fontFamily: 'KnallWinning',
-            fontSize: 256
-        },
+    const textProps = {
         anchor: { x: 0.5, y: 0.5 },
         position: { x: level.width / 2, y: level.height / 2 },
+    }
+
+    const fillText = new PIXI.BitmapText({
+        style: { fontFamily: 'KnallWinningFill', fontSize: 256 },
+        ...textProps,
     })
+
+    const strokeText = new PIXI.BitmapText({
+        style: { fontFamily: 'KnallWinningStroke', fontSize: 256 },
+        ...textProps,
+    })
+
+    const winnerText = new PIXI.Container()
+    winnerText.fillText = fillText
+    winnerText.strokeText = strokeText
+    winnerText.addChild(strokeText, fillText)
 
     levelContainer.addChild(winnerText)
     overlayLayer.attach(winnerText)

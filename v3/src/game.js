@@ -497,13 +497,26 @@ Object.assign(window, {
         })
 
         PIXI.BitmapFontManager.install({
-            name: 'KnallWinning',
+            name: 'KnallWinningFill',
             style: {
                 chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
                 fontFamily: fontFamilyName,
                 fontSize: level.width * 0.1,
                 fill: {
                     alpha: 0.8,
+                    color: colors.white,
+                },
+            }
+        })
+
+        PIXI.BitmapFontManager.install({
+            name: 'KnallWinningStroke',
+            style: {
+                chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?',
+                fontFamily: fontFamilyName,
+                fontSize: level.width * 0.1,
+                fill: {
+                    alpha: 0,
                     color: colors.white,
                 },
                 stroke: {
