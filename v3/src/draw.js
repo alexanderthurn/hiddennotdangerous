@@ -798,7 +798,7 @@ const animatePlayerScore = figure => {
     }
     if (figure.team !== figure.oldTeam) {
         const colorTeam = (game === games.rampage && figure.rampageOriginalTeam) ? figure.rampageOriginalTeam : figure.team
-        player.score.getChildAt(0).tint = teams[colorTeam]?.color || player.color || colors.black
+        player.score.getChildAt(1).tint = teams[colorTeam]?.color || player.color || colors.black
         figure.oldTeam = figure.team
     }
 
@@ -809,7 +809,7 @@ const animatePlayerScore = figure => {
         player.score.scale = getIntervalPoint(lp, 12, 1)
     }
 
-    player.score.getChildAt(1).text = player.score.shownPoints
+    player.score.getChildAt(2).text = player.score.shownPoints
 
     if (player.isMarkerButtonPressed) {
         const shakeMargin = 10
@@ -819,7 +819,9 @@ const animatePlayerScore = figure => {
 }
 
 const botCircleContext = new PIXI.GraphicsContext().rect(-24, -24, 48, 48).fill({ alpha: 0.5, color: colors.white }).stroke({ alpha: 0.5, color: colors.black, width: 1 })
+const botGlowContext = new PIXI.GraphicsContext().rect(-30, -30, 60, 60).fill({ color: colors.gold }).rect(-24, -24, 48, 48).cut()
 const playerCircleContext = new PIXI.GraphicsContext().circle(0, 0, 24).fill({ alpha: 0.5, color: colors.white }).stroke({ alpha: 0.5, color: colors.black, width: 1 })
+const playerGlowContext = new PIXI.GraphicsContext().circle(0, 0, 30).fill({ color: colors.gold }).circle(0, 0, 24).cut()
 
 const addPlayerScore = figure => {
     let playerScore = new PIXI.Container()
@@ -827,12 +829,17 @@ const addPlayerScore = figure => {
     initPlayerScore(playerScore)
 
     let circle
+    let glow
     if (figure.player.type === 'bot') {
         circle = new PIXI.Graphics(botCircleContext)
+        glow = new PIXI.Graphics(botGlowContext)
     } else {
         circle = new PIXI.Graphics(playerCircleContext)
+        glow = new PIXI.Graphics(playerGlowContext)
     }
     circle.tint = figure.player.color || colors.black
+    glow.filters = [new PIXI.BlurFilter({ strength: 8, quality: 3 })]
+    glow.visible = false
 
     const text = new PIXI.BitmapText({
         text: 0,
@@ -842,7 +849,7 @@ const addPlayerScore = figure => {
     });
 
     figure.player.score = playerScore
-    playerScore.addChild(circle, text)
+    playerScore.addChild(glow, circle, text)
     levelContainer.addChild(playerScore)
     scoreLayer.attach(playerScore)
 
@@ -873,7 +880,9 @@ const animateWinningCeremony = winnerText => {
 
     playerFiguresSortedByNewPoints.forEach((f, i) => {
         f.player.score.zIndex = i
-        const dt2 = dtProcessed - (lastRoundEndThen + i * moveScoreToPlayerDuration);
+        const dt2 = dtProcessed - (lastRoundEndThen + i * moveScoreToPlayerDuration)
+        const isWinner = (gameOver && lastFinalWinnerPlayerIds?.has(f.playerId)) || (!gameOver && lastWinnerPlayerIds?.has(f.playerId))
+        const glow = f.player.score.getChildAt(0)
 
         if (dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
             const lp = easeInOutCubic(dt2 / moveScoreToPlayerDuration)
@@ -886,11 +895,7 @@ const animateWinningCeremony = winnerText => {
                 f.player.score.scale = getIntervalPoint(lp, 1, 2)
             }
 
-            if (gameOver && lastFinalWinnerPlayerIds?.has(f.playerId)) {
-                f.player.score.getChildAt(0).tint = colors.gold
-            } else if (!gameOver && lastWinnerPlayerIds?.has(f.playerId)) {
-                f.player.score.getChildAt(0).tint = colors.gold
-            }
+            glow.visible = isWinner
         } else if (dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
             f.player.score.x = f.x
             f.player.score.y = f.y
@@ -910,8 +915,7 @@ const animateWinningCeremony = winnerText => {
                 f.player.score.shownPoints = 0
             }
 
-            const colorTeam = (game === games.rampage && f.rampageOriginalTeam) ? f.rampageOriginalTeam : f.team
-            f.player.score.getChildAt(0).tint = teams[colorTeam] ? teams[colorTeam].color : (f.player.color || colors.black)
+            glow.visible = false
         }
     })
 
