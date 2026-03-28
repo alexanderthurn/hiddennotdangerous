@@ -506,6 +506,11 @@ Object.assign(window, {
                     alpha: 0.8,
                     color: colors.white,
                 },
+                stroke: {
+                    alpha: 0,
+                    color: colors.white,
+                    width: 6,
+                }
             }
         })
 
