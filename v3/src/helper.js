@@ -615,7 +615,7 @@ const killFigure = (figure) => {
                 f.player.score.points++
                 f.player.score.shownPoints = f.player.score.points
             })
-            factions[currentKillers[0].rampageOriginalFaction].points++
+            factions[currentKillers[0].team].points++
         }
     }
 }
@@ -625,9 +625,9 @@ const finishRound = () => {
     restartStage = true
 }
 
-const winRoundFaction = faction => {
-    factions[faction].points++
-    winRoundFigures(figures.filter(f => f.playerId && f.faction === faction && f.type === 'fighter'))
+const winRoundTeam = team => {
+    teams[team].points++
+    winRoundFigures(figures.filter(f => f.playerId && f.team === team && f.type === 'fighter'))
 }
 
 const winRoundFigures = winnerFigures => {
@@ -644,28 +644,31 @@ const getPlayersWithMaxScore = () => {
     return players.filter(p => p.score?.points === maxPoints)
 }
 
-const getFactionsWithMaxScore = () => {
-    const maxPoints = Math.max(...Object.values(factions).map(faction => faction.points))
-    return Object.keys(factions).filter(faction => factions[faction].points === maxPoints)
+const getTeamsWithMaxScore = () => {
+    const maxPoints = Math.max(...Object.values(teams).map(team => team.points))
+    return Object.keys(teams).filter(team => teams[team].points === maxPoints)
 }
 
-const switchFaction = (figure, faction) => {
+const switchFaction = (figure, faction, switchTeam = true) => {
     if (figure.faction) {
         factions[figure.faction].size--
     }
-    if (figure.team) {
-        teams[figure.team].size--
-    }
     figure.faction = faction
-    figure.team = factions[faction]?.team
-    // TODO: using team size instead of faction size, where are multiple sprites in faction still used? Simplify to 1 sprite per faction if not needed.
-    figure.currentSprite = factions[faction]?.sprites?.[factions[faction]?.size % factions[faction]?.sprites.length] || figure.defaultSprite
-    figure.maxSpeed = factions[faction]?.maxSpeed || defaultMaxSpeed
     if (figure.faction) {
         factions[figure.faction].size++
     }
-    if (figure.team) {
-        teams[figure.team].size++
+    // TODO: using team size instead of faction size, where are multiple sprites in faction still used? Simplify to 1 sprite per faction if not needed.
+    figure.currentSprite = factions[faction]?.sprites?.[factions[faction]?.size % factions[faction]?.sprites.length] || figure.defaultSprite
+    figure.maxSpeed = factions[faction]?.maxSpeed || defaultMaxSpeed
+
+    if (switchTeam) {
+        if (figure.team) {
+            teams[figure.team].size--
+        }
+        figure.team = factions[faction]?.team
+        if (figure.team) {
+            teams[figure.team].size++
+        }
     }
 }
 
@@ -817,7 +820,7 @@ Object.assign(window, {
     figureIsBot, initSniperPositions, resetFiguresToBabys,
     initRandomSpriteFigures, initVIPGamePositions,
     detectFigure, attackFigure, killFigure, finishRound,
-    winRoundFaction, winRoundFigures, getPlayersWithMaxScore, getFactionsWithMaxScore,
+    winRoundTeam, winRoundFigures, getPlayersWithMaxScore, getTeamsWithMaxScore,
     switchFaction, initNetwork,
     spinningWheel, initSpinningWheel, stopSpinningWheel, processSpinningWheel, stepSpinningWheel,
     easeInOutCubic, quadraticBezier

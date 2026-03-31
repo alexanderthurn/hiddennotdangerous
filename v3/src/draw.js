@@ -921,12 +921,9 @@ const animateWinningCeremony = winnerText => {
 
     if (gameOver && dt3 >= 0 && dt3 < showFinalWinnerDuration) {
         winnerText.visible = true
-        if (game === games.rampage && finalWinnerFaction) {
-            winnerText.fillText.tint = factions[finalWinnerFaction].color
-            winnerText.fillText.text = winnerText.strokeText.text = `${finalWinnerFaction === 'killer' ? 'Faction Red' : 'Faction Blue'} wins!`
-        } else if (finalWinnerFaction) {
-            winnerText.fillText.tint = factions[finalWinnerFaction].color
-            winnerText.fillText.text = winnerText.strokeText.text = `${factions[finalWinnerFaction].label} win`
+        if (finalWinnerTeam) {
+            winnerText.fillText.tint = teams[finalWinnerTeam].color
+            winnerText.fillText.text = winnerText.strokeText.text = `Team ${teams[finalWinnerTeam].label} wins`
         } else if (lastFinalWinnerPlayerIds?.size === 1) {
             const lastFinalWinnerFigure = playerFigures.find(f => lastFinalWinnerPlayerIds?.has(f.playerId))
             const lastFinalWinnerIndex = playersSortedByJoinTime.indexOf(lastFinalWinnerFigure?.player)

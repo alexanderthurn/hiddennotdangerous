@@ -43,7 +43,7 @@ window.dtToProcess = 0; window.dtProcessed = 0
 // --- Round / Win State ---
 window.isRestartButtonPressed = undefined; window.restartStage = false; window.roundCounter = 0
 window.gameOver = undefined; window.ceremonyOver = undefined
-window.lastRoundEndThen = undefined; window.lastWinnerPlayerIds = undefined; window.lastFinalWinnerPlayerIds = undefined; window.finalWinnerFaction = undefined
+window.lastRoundEndThen = undefined; window.lastWinnerPlayerIds = undefined; window.lastFinalWinnerPlayerIds = undefined; window.finalWinnerTeam = undefined
 const moveNewPlayerDuration = 1000
 const moveScoreToPlayerDuration = 1000
 const showFinalWinnerDuration = 5000
@@ -570,7 +570,7 @@ function initStage(nextStage) {
     lastRoundEndThen = undefined
     lastWinnerPlayerIds = undefined
     lastFinalWinnerPlayerIds = undefined
-    finalWinnerFaction = undefined
+    finalWinnerTeam = undefined
     fpsTime = then
     lastKillTime = undefined;
     multikillCounter = 0;
@@ -601,7 +601,6 @@ function initStage(nextStage) {
             }
             figure.isAiming = false
             figure.isInRace = false
-            figure.rampageOriginalFaction = undefined
             figure.team = undefined
         })
         Object.values(factions).forEach(faction => faction.points = 0)
@@ -614,10 +613,10 @@ function initStage(nextStage) {
         // Rampage: faction swap and half tracking
         if (game === games.rampage) {
             if (roundCounter === 1) {
-                // Store original faction for each player
-                Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter').forEach(f => {
+                // TODO: delete: Store original faction for each player
+                /*Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter').forEach(f => {
                     f.rampageOriginalFaction = f.faction
-                })
+                })*/
             } else {
                 // Destroy old crosshairs from pool before swap
                 Array.from(figuresPool).forEach(f => {
@@ -629,8 +628,8 @@ function initStage(nextStage) {
                 // Swap factions
                 const poolFighters = Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter')
                 poolFighters.forEach(f => {
-                    if (f.faction === 'killer') switchFaction(f, 'sniper')
-                    else if (f.faction === 'sniper') switchFaction(f, 'killer')
+                    if (f.faction === 'killer') switchFaction(f, 'sniper', false)
+                    else if (f.faction === 'sniper') switchFaction(f, 'killer', false)
                 })
             }
         }
@@ -860,10 +859,10 @@ const handleWinning = () => {
         const assassins = figuresPlayer.filter(f => f.faction === 'assassin')
         const guards = figuresPlayer.filter(f => f.faction === 'guard')
         if (assassins.length === 0 || guards.length === 0) {
-            finalWinnerFaction = guards.length === 0 ? 'assassin' : 'guard'
-            lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.faction === finalWinnerFaction).map(f => f.playerId))
+            finalWinnerTeam = guards.length === 0 ? factions.assassin.team : factions.guard.team
+            lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.faction === finalWinnerTeam).map(f => f.playerId))
             gameOver = true
-            winRoundFaction(finalWinnerFaction)
+            winRoundTeam(finalWinnerTeam)
         }
 
         if (!gameOver) {
@@ -872,19 +871,19 @@ const handleWinning = () => {
             const assassinSurvivors = assassins.filter(f => !f.isDead)
             const vipSurvivors = vips.filter(f => !f.isDead)
             if (assassinSurvivors.length === 0 || vipSurvivors.length === 0) {
-                winRoundFaction(vipSurvivors.length === 0 ? 'assassin' : 'guard')
+                winRoundTeam(vipSurvivors.length === 0 ? factions.assassin.team : factions.guard.team)
             }
 
             //countdown
             if (!restartStage && game.countdown && dtProcessed >= startTime + game.countdown * 1000) {
-                winRoundFaction('guard')
+                winRoundTeam(factions.guard.team)
             }
 
             // round limit hit
-            const factionsWithMaxPoints = getFactionsWithMaxScore()
-            if (restartStage && roundCounter >= getRoundCount() && factionsWithMaxPoints.length === 1) {
-                finalWinnerFaction = factionsWithMaxPoints[0]
-                lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.faction === finalWinnerFaction).map(f => f.playerId))
+            const teamsWithMaxPoints = getTeamsWithMaxScore()
+            if (restartStage && roundCounter >= getRoundCount() && teamsWithMaxPoints.length === 1) {
+                finalWinnerTeam = teamsWithMaxPoints[0]
+                lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.team === finalWinnerTeam).map(f => f.playerId))
                 gameOver = true
             }
         }
@@ -902,10 +901,10 @@ const handleWinning = () => {
         const killers = figuresPlayer.filter(f => f.faction === 'killer')
         const snipers = figuresPlayer.filter(f => f.faction === 'sniper')
         if (killers.length === 0 || snipers.length === 0) {
-            finalWinnerFaction = killers.length === 0 ? snipers[0].rampageOriginalFaction : killers[0].rampageOriginalFaction
-            lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.rampageOriginalFaction === finalWinnerFaction).map(f => f.playerId))
+            finalWinnerTeam = killers.length === 0 ? snipers[0].team : killers[0].team
+            lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.team === finalWinnerTeam).map(f => f.playerId))
             gameOver = true
-            winRoundFaction(finalWinnerFaction)
+            winRoundTeam(finalWinnerTeam)
         }
 
         if (!gameOver) {
@@ -925,7 +924,7 @@ const handleWinning = () => {
                     f.player.score.points += noFactionSurvivors.length
                     f.player.score.shownPoints = f.player.score.points
                 })
-                factions[currentKillers[0].rampageOriginalFaction].points += noFactionSurvivors.length
+                factions[currentKillers[0].team].points += noFactionSurvivors.length
                 finishRound()
             }
 
@@ -935,10 +934,10 @@ const handleWinning = () => {
             }
 
             // round limit hit (2 halves per full round)
-            const factionsWithMaxPoints = getFactionsWithMaxScore()
-            if (restartStage && roundCounter >= getRoundCount() * 2 && roundCounter % 2 === 0 && factionsWithMaxPoints.length === 1) {
-                finalWinnerFaction = factionsWithMaxPoints[0]
-                lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.rampageOriginalFaction === finalWinnerFaction).map(f => f.playerId))
+            const teamsWithMaxPoints = getTeamsWithMaxScore()
+            if (restartStage && roundCounter >= getRoundCount() * 2 && roundCounter % 2 === 0 && teamsWithMaxPoints.length === 1) {
+                finalWinnerTeam = teamsWithMaxPoints[0]
+                lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.team === finalWinnerTeam).map(f => f.playerId))
                 gameOver = true
             }
         }
