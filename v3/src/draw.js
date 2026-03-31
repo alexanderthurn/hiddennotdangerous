@@ -797,7 +797,6 @@ const animatePlayerScore = figure => {
         return
     }
     if (figure.team !== figure.oldTeam) {
-        //TODO: delete: const colorFaction = (game === games.rampage && figure.rampageOriginalFaction) ? figure.rampageOriginalFaction : figure.faction
         player.score.getChildAt(1).tint = teams[figure.team]?.color || player.color || colors.black
         figure.oldTeam = figure.team
     }

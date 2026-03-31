@@ -563,9 +563,6 @@ const initVIPGamePositions = figures => {
     }
     vips.forEach((f, i) => {
         initFigure(f, vipPositions[i].x, vipPositions[i].y, deg2rad(90))
-
-        // TODO: Remove if not needed. VIP Sprited already should be set by switchFaction.
-        f.currentSprite = factions.vip.sprites[i]
     })
 }
 

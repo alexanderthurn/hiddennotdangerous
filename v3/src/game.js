@@ -616,12 +616,7 @@ function initStage(nextStage) {
 
         // Rampage: faction swap and half tracking
         if (game === games.rampage) {
-            if (roundCounter === 1) {
-                // TODO: delete: Store original faction for each player
-                /*Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter').forEach(f => {
-                    f.rampageOriginalFaction = f.faction
-                })*/
-            } else {
+            {
                 // Destroy old crosshairs from pool before swap
                 Array.from(figuresPool).forEach(f => {
                     if (f.type === 'crosshair') {
