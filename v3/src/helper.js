@@ -615,7 +615,7 @@ const killFigure = (figure) => {
                 f.player.score.points++
                 f.player.score.shownPoints = f.player.score.points
             })
-            factions[currentKillers[0].team].points++
+            teams[currentKillers[0].team].points++
         }
     }
 }

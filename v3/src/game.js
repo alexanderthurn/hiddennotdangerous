@@ -607,7 +607,7 @@ function initStage(nextStage) {
             figure.isAiming = false
             figure.isInRace = false
         })
-        Object.values(factions).forEach(faction => faction.points = 0)
+        Object.values(teams).forEach(team => team.points = 0)
     } else if (stage === stages.game) {
         roundCounter++
         if (roundCounter === 1) {
@@ -928,7 +928,7 @@ const handleWinning = () => {
                     f.player.score.points += noFactionSurvivors.length
                     f.player.score.shownPoints = f.player.score.points
                 })
-                factions[currentKillers[0].team].points += noFactionSurvivors.length
+                teams[currentKillers[0].team].points += noFactionSurvivors.length
                 finishRound()
             }
 

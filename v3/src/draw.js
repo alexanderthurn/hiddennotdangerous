@@ -1389,7 +1389,7 @@ const addFiguresInitialPool = (app) => {
 }
 
 const createCrosshair = props => {
-    const { x, y, player, faction, ammo } = props
+    const { x, y, player, faction, team, ammo } = props
 
     const sprite = PIXI.Sprite.from('crosshair')
     sprite.anchor.set(0.5)
@@ -1420,6 +1420,7 @@ const createCrosshair = props => {
     crosshair.recoilForce = 15
     crosshair.recoilOffset = 5
     crosshair.faction = faction
+    crosshair.team = team
     crosshair.type = 'crosshair'
     crosshair.tint = player.color
 
