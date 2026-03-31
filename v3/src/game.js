@@ -133,6 +133,7 @@ const factions = {
         maxSpeed: defaultMaxSpeed,
         playerFaction: true,
         sprites: ['girl'],
+        size: 0,
         team: 'red'
     },
     guard: {
@@ -141,12 +142,14 @@ const factions = {
         maxSpeed: guardSpeedFactor * defaultMaxSpeed,
         playerFaction: true,
         sprites: ['boy'],
+        size: 0,
         team: 'blue'
     },
     killer: {
         games: new Set([games.rampage]),
         label: 'Killers',
         playerFaction: true,
+        size: 0,
         team: 'red'
     },
     sniper: {
@@ -154,6 +157,7 @@ const factions = {
         label: 'Snipers',
         playerFaction: true,
         sprites: ['sniper'],
+        size: 0,
         team: 'blue'
     },
     vip: {
@@ -161,7 +165,8 @@ const factions = {
         label: 'VIPs',
         maxSpeed: vipSpeedFactor * defaultMaxSpeed,
         playerFaction: false,
-        sprites: ['mother', 'father', 'grandpa']
+        sprites: ['mother', 'father', 'grandpa'],
+        size: 0
     }
 }
 
@@ -595,13 +600,12 @@ function initStage(nextStage) {
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => destroyContainer(app, figure))
         figures.filter(figure => figure.type === 'fighter').forEach(figure => {
             if (figure.faction !== 'vip') {
-                figure.currentSprite = 'baby'
                 figure.defaultSprite = 'baby'
-                figure.faction = undefined
+                // TODO: durch initFigure ersetzen mit neuen figures ersetzen?
+                switchFaction(figure, undefined)
             }
             figure.isAiming = false
             figure.isInRace = false
-            figure.team = undefined
         })
         Object.values(factions).forEach(faction => faction.points = 0)
     } else if (stage === stages.game) {

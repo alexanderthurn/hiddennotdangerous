@@ -654,12 +654,11 @@ const switchFaction = (figure, faction, switchTeam = true) => {
         factions[figure.faction].size--
     }
     figure.faction = faction
+    figure.currentSprite = factions[faction]?.sprites?.[factions[faction]?.size % factions[faction]?.sprites.length] || figure.defaultSprite
+    figure.maxSpeed = factions[faction]?.maxSpeed || defaultMaxSpeed
     if (figure.faction) {
         factions[figure.faction].size++
     }
-    // TODO: using team size instead of faction size, where are multiple sprites in faction still used? Simplify to 1 sprite per faction if not needed.
-    figure.currentSprite = factions[faction]?.sprites?.[factions[faction]?.size % factions[faction]?.sprites.length] || figure.defaultSprite
-    figure.maxSpeed = factions[faction]?.maxSpeed || defaultMaxSpeed
 
     if (switchTeam) {
         if (figure.team) {
