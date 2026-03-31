@@ -616,7 +616,7 @@ function initStage(nextStage) {
 
         // Rampage: faction swap and half tracking
         if (game === games.rampage) {
-            {
+            if (roundCounter > 1) {
                 // Destroy old crosshairs from pool before swap
                 Array.from(figuresPool).forEach(f => {
                     if (f.type === 'crosshair') {
