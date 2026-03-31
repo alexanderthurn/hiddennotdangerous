@@ -133,7 +133,7 @@ const initFigure = (figure, x, y, direction) => {
         beansFarted: new Set()
     })
     if (stage === stages.startLobby) {
-        switchTeam(figure, undefined)
+        switchFaction(figure, undefined)
     }
 }
 
@@ -497,24 +497,24 @@ const initRandomSpriteFigures = figures => {
 
 const initVIPGamePositions = figures => {
 
-    const neutralPlayerFigures = shuffle(figures.filter(figure => figure.playerId && !figure.team))
+    const neutralPlayerFigures = shuffle(figures.filter(figure => figure.playerId && !figure.faction))
     if (neutralPlayerFigures.length > 0) {
         // distribute neutral players evenly
-        const numberPlayerAssassins = figures.filter(figure => figure.playerId && figure.team === 'assassin').length
-        const numberPlayerGuards = figures.filter(figure => figure.playerId && figure.team === 'guard').length
-        const smallerTeam = numberPlayerAssassins > numberPlayerGuards ? 'guard' : 'assassin'
-        const shuffledTeams = shuffle(['assassin', 'guard'])
+        const numberPlayerAssassins = figures.filter(figure => figure.playerId && figure.faction === 'assassin').length
+        const numberPlayerGuards = figures.filter(figure => figure.playerId && figure.faction === 'guard').length
+        const smallerFaction = numberPlayerAssassins > numberPlayerGuards ? 'guard' : 'assassin'
+        const shuffledFactions = shuffle(['assassin', 'guard'])
 
-        neutralPlayerFigures.forEach((f, i) => switchTeam(f, i < Math.abs(numberPlayerAssassins - numberPlayerGuards) ? smallerTeam : shuffledTeams[i % 2]))
+        neutralPlayerFigures.forEach((f, i) => switchFaction(f, i < Math.abs(numberPlayerAssassins - numberPlayerGuards) ? smallerFaction : shuffledFactions[i % 2]))
     }
 
-    // put NPC neutrals in teams
-    const numberMissingGuards = numberGuards - figures.filter(figure => figure.team === 'guard').length
-    const neutralFigures = shuffle(figures.filter(figure => !figure.team))
-    neutralFigures.forEach((f, i) => switchTeam(f, i < numberMissingGuards ? 'guard' : 'assassin'))
+    // put NPC neutrals in factions
+    const numberMissingGuards = numberGuards - figures.filter(figure => figure.faction === 'guard').length
+    const neutralFigures = shuffle(figures.filter(figure => !figure.faction))
+    neutralFigures.forEach((f, i) => switchFaction(f, i < numberMissingGuards ? 'guard' : 'assassin'))
 
     // assassin positions
-    const assassins = shuffle(figures.filter(figure => figure.team === 'assassin'))
+    const assassins = shuffle(figures.filter(figure => figure.faction === 'assassin'))
     const assassinPositions = []
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 5; j++) {
@@ -526,7 +526,7 @@ const initVIPGamePositions = figures => {
     })
 
     // guard positions, minimum guards in center columns
-    const guards = figures.filter(figure => figure.team === 'guard')
+    const guards = figures.filter(figure => figure.faction === 'guard')
 
     const minCenterPlayerGuards = 2
     let centerGuards = guards.filter(figure => figure.playerId).slice(0, minCenterPlayerGuards)
@@ -556,14 +556,16 @@ const initVIPGamePositions = figures => {
     })
 
     // vip positions
-    const vips = figures.filter(figure => figure.team === 'vip')
+    const vips = figures.filter(figure => figure.faction === 'vip')
     const vipPositions = []
     for (let i = 0; i < 3; i++) {
         vipPositions.push({ x: (5 + (i - 1) / 3) / 10 * level.width, y: (1 / 8) / 2 * level.height })
     }
     vips.forEach((f, i) => {
         initFigure(f, vipPositions[i].x, vipPositions[i].y, deg2rad(90))
-        f.currentSprite = teams.vip.sprites[i]
+
+        // TODO: Remove if not needed. VIP Sprited already should be set by switchFaction.
+        f.currentSprite = factions.vip.sprites[i]
     })
 }
 
@@ -607,13 +609,13 @@ const killFigure = (figure) => {
         figure.isDead = true
         figure.died = true
         figure.killTime = dtProcessed
-        if (stage === stages.game && game === games.rampage && figure.team !== 'killer') {
-            const currentKillers = figures.filter(f => f.team === 'killer' && f.type === 'fighter')
+        if (stage === stages.game && game === games.rampage && figure.faction !== 'killer') {
+            const currentKillers = figures.filter(f => f.faction === 'killer' && f.type === 'fighter')
             currentKillers.forEach(f => {
                 f.player.score.points++
                 f.player.score.shownPoints = f.player.score.points
             })
-            teams[currentKillers[0].rampageOriginalTeam].points++
+            factions[currentKillers[0].rampageOriginalFaction].points++
         }
     }
 }
@@ -623,9 +625,9 @@ const finishRound = () => {
     restartStage = true
 }
 
-const winRoundTeam = team => {
-    teams[team].points++
-    winRoundFigures(figures.filter(f => f.playerId && f.team === team && f.type === 'fighter'))
+const winRoundFaction = faction => {
+    factions[faction].points++
+    winRoundFigures(figures.filter(f => f.playerId && f.faction === faction && f.type === 'fighter'))
 }
 
 const winRoundFigures = winnerFigures => {
@@ -642,18 +644,26 @@ const getPlayersWithMaxScore = () => {
     return players.filter(p => p.score?.points === maxPoints)
 }
 
-const getTeamsWithMaxScore = () => {
-    const maxPoints = Math.max(...Object.values(teams).map(team => team.points))
-    return Object.keys(teams).filter(team => teams[team].points === maxPoints)
+const getFactionsWithMaxScore = () => {
+    const maxPoints = Math.max(...Object.values(factions).map(faction => faction.points))
+    return Object.keys(factions).filter(faction => factions[faction].points === maxPoints)
 }
 
-const switchTeam = (figure, team) => {
+const switchFaction = (figure, faction) => {
+    if (figure.faction) {
+        factions[figure.faction].size--
+    }
     if (figure.team) {
         teams[figure.team].size--
     }
-    figure.team = team
-    figure.currentSprite = teams[team]?.sprites?.[teams[team]?.size % teams[team]?.sprites.length] || figure.defaultSprite
-    figure.maxSpeed = teams[team]?.maxSpeed || defaultMaxSpeed
+    figure.faction = faction
+    figure.team = factions[faction]?.team
+    // TODO: using team size instead of faction size, where are multiple sprites in faction still used? Simplify to 1 sprite per faction if not needed.
+    figure.currentSprite = factions[faction]?.sprites?.[factions[faction]?.size % factions[faction]?.sprites.length] || figure.defaultSprite
+    figure.maxSpeed = factions[faction]?.maxSpeed || defaultMaxSpeed
+    if (figure.faction) {
+        factions[figure.faction].size++
+    }
     if (figure.team) {
         teams[figure.team].size++
     }
@@ -807,8 +817,8 @@ Object.assign(window, {
     figureIsBot, initSniperPositions, resetFiguresToBabys,
     initRandomSpriteFigures, initVIPGamePositions,
     detectFigure, attackFigure, killFigure, finishRound,
-    winRoundTeam, winRoundFigures, getPlayersWithMaxScore, getTeamsWithMaxScore,
-    switchTeam, initNetwork,
+    winRoundFaction, winRoundFigures, getPlayersWithMaxScore, getFactionsWithMaxScore,
+    switchFaction, initNetwork,
     spinningWheel, initSpinningWheel, stopSpinningWheel, processSpinningWheel, stepSpinningWheel,
     easeInOutCubic, quadraticBezier
 })

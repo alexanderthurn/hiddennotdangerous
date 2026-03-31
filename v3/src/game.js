@@ -43,7 +43,7 @@ window.dtToProcess = 0; window.dtProcessed = 0
 // --- Round / Win State ---
 window.isRestartButtonPressed = undefined; window.restartStage = false; window.roundCounter = 0
 window.gameOver = undefined; window.ceremonyOver = undefined
-window.lastRoundEndThen = undefined; window.lastWinnerPlayerIds = undefined; window.lastFinalWinnerPlayerIds = undefined; window.finalWinnerTeam = undefined
+window.lastRoundEndThen = undefined; window.lastWinnerPlayerIds = undefined; window.lastFinalWinnerPlayerIds = undefined; window.finalWinnerFaction = undefined
 const moveNewPlayerDuration = 1000
 const moveScoreToPlayerDuration = 1000
 const showFinalWinnerDuration = 5000
@@ -113,7 +113,7 @@ const games = {
         color: colors.chocolate,
         text: 'RAMPAGE',
         countdown: 180,
-        initialTeam: 'killer',
+        initialFaction: 'killer',
         sprites: mostFigures
     },
     vip: {
@@ -126,47 +126,54 @@ const games = {
 
 window.game = undefined
 
-const teams = {
+const factions = {
     assassin: {
-        color: colors.red,
         games: new Set([games.vip]),
         label: 'Girls',
         maxSpeed: defaultMaxSpeed,
-        playerTeam: true,
+        playerFaction: true,
         sprites: ['girl'],
-        size: 0
+        team: 'red'
     },
     guard: {
-        color: colors.blue,
         games: new Set([games.vip]),
         label: 'Boys',
         maxSpeed: guardSpeedFactor * defaultMaxSpeed,
-        playerTeam: true,
+        playerFaction: true,
         sprites: ['boy'],
-        size: 0
+        team: 'blue'
     },
     killer: {
-        color: colors.red,
         games: new Set([games.rampage]),
         label: 'Killers',
-        playerTeam: true,
-        size: 0
+        playerFaction: true,
+        team: 'red'
     },
     sniper: {
-        color: colors.blue,
         games: new Set([games.rampage]),
         label: 'Snipers',
-        playerTeam: true,
+        playerFaction: true,
         sprites: ['sniper'],
-        size: 0
+        team: 'blue'
     },
     vip: {
-        color: colors.green,
         games: new Set([games.vip]),
         label: 'VIPs',
         maxSpeed: vipSpeedFactor * defaultMaxSpeed,
-        playerTeam: false,
-        sprites: ['mother', 'father', 'grandpa'],
+        playerFaction: false,
+        sprites: ['mother', 'father', 'grandpa']
+    }
+}
+
+const teams = {
+    red: {
+        color: colors.red,
+        label: 'Red',
+        size: 0
+    },
+    blue: {
+        color: colors.blue,
+        label: 'Blue',
         size: 0
     }
 }
@@ -307,7 +314,7 @@ const shootingRangeDefinition = () => ({
     y: level.height * 0.9,
     width: 512,
     height: 128,
-    team: 'sniper'
+    faction: 'sniper'
 })
 
 const raceTrackDefinition = () => ({
@@ -325,26 +332,26 @@ const practiceTrackDefinition = () => ({
 })
 
 
-const teamSwitchersDefinition = () => ({
+const factionSwitchersDefinition = () => ({
     assassin: {
         x: level.width * 0.4,
         y: level.height * 0.75,
-        team: 'assassin'
+        faction: 'assassin'
     },
     guard: {
         x: level.width * 0.6,
         y: level.height * 0.75,
-        team: 'guard'
+        faction: 'guard'
     },
     killer: {
         x: level.width * 0.4,
         y: level.height * 0.75,
-        team: 'killer'
+        faction: 'killer'
     },
     sniper: {
         x: level.width * 0.6,
         y: level.height * 0.75,
-        team: 'sniper'
+        faction: 'sniper'
     }
 })
 
@@ -419,14 +426,14 @@ Object.assign(window, {
     baseAmmoFactor, bonusAmmoFactor, detectRadius, raceSpeedMultiplier,
     guardSpeedFactor, vipSpeedFactor, cloudDecayRate, cloudMinSize, cloudOffset,
     npcArrivalThreshold, npcInitialWalkDelay, lobbyStartDelay, multikillTimeWindow,
-    stages, mostFigures, games, teams, audio,
+    stages, mostFigures, games, factions, teams, audio,
     soundFartPool, soundBeanFartPool, soundShootHitPool, soundShootMissPool,
     soundDeathPool, soundEatPool, musicGame, musicLobby,
     soundJoin, soundSpinningWheel, soundBoomerang, soundFirstBlood,
     soundMultiKill, soundTotalKill, soundRoundEnd, soundWin,
     gameVoteButtonDefinition, lobbyStartButtonDefinition, gameStartButtonDefinition,
     rectangleButtonsDefinition, shootingRangeDefinition, raceTrackDefinition,
-    practiceTrackDefinition, teamSwitchersDefinition, buttons, circleOfDeathDefinition,
+    practiceTrackDefinition, factionSwitchersDefinition, buttons, circleOfDeathDefinition,
     getFoodDefinition, app,
     figureShadowLayer, figureLayer, cloudLayer, fogLayer, crosshairLayer,
     scoreLayer, overlayLayer, debugLayer,
@@ -563,7 +570,7 @@ function initStage(nextStage) {
     lastRoundEndThen = undefined
     lastWinnerPlayerIds = undefined
     lastFinalWinnerPlayerIds = undefined
-    finalWinnerTeam = undefined
+    finalWinnerFaction = undefined
     fpsTime = then
     lastKillTime = undefined;
     multikillCounter = 0;
@@ -581,33 +588,35 @@ function initStage(nextStage) {
 
         figuresPool = new Set(figuresInitialPool)
 
-        figures.filter(figure => figure.type === 'fighter' && figure.team !== 'vip').forEach(figure => {
+        figures.filter(figure => figure.type === 'fighter' && figure.faction !== 'vip').forEach(figure => {
             figure.visible = false
         })
 
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => destroyContainer(app, figure))
         figures.filter(figure => figure.type === 'fighter').forEach(figure => {
-            if (figure.team !== 'vip') {
+            if (figure.faction !== 'vip') {
                 figure.currentSprite = 'baby'
                 figure.defaultSprite = 'baby'
+                figure.faction = undefined
             }
             figure.isAiming = false
             figure.isInRace = false
-            figure.rampageOriginalTeam = undefined
+            figure.rampageOriginalFaction = undefined
+            figure.team = undefined
         })
-        Object.values(teams).forEach(team => team.points = 0)
+        Object.values(factions).forEach(faction => faction.points = 0)
     } else if (stage === stages.game) {
         roundCounter++
         if (roundCounter === 1) {
             players.forEach(player => initPlayerScore(player.score))
         }
 
-        // Rampage: team swap and half tracking
+        // Rampage: faction swap and half tracking
         if (game === games.rampage) {
             if (roundCounter === 1) {
-                // Store original team for each player
+                // Store original faction for each player
                 Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter').forEach(f => {
-                    f.rampageOriginalTeam = f.team
+                    f.rampageOriginalFaction = f.faction
                 })
             } else {
                 // Destroy old crosshairs from pool before swap
@@ -617,11 +626,11 @@ function initStage(nextStage) {
                         figuresPool.delete(f)
                     }
                 })
-                // Swap teams
+                // Swap factions
                 const poolFighters = Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter')
                 poolFighters.forEach(f => {
-                    if (f.team === 'killer') switchTeam(f, 'sniper')
-                    else if (f.team === 'sniper') switchTeam(f, 'killer')
+                    if (f.faction === 'killer') switchFaction(f, 'sniper')
+                    else if (f.faction === 'sniper') switchFaction(f, 'killer')
                 })
             }
         }
@@ -647,8 +656,8 @@ function initStage(nextStage) {
         }
         if (game === games.rampage) {
             // Setup snipers every half (not just roundCounter === 1)
-            const killerFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'killer')
-            const sniperFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team === 'sniper')
+            const killerFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.faction === 'killer')
+            const sniperFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.faction === 'sniper')
             const ammo = Math.ceil(baseAmmoFactor * killerFigures.length / sniperFigures.length + bonusAmmoFactor * Math.sqrt(maxPlayerFigures / killerFigures.length))
             if (roundCounter === 1) {
                 addSniperFigures(app, sniperFigures, ammo)
@@ -668,11 +677,11 @@ function initStage(nextStage) {
 
     // Figuren aus Pool laden
     if (stage === stages.startLobby) {
-        figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.playerId && figure.team !== 'vip'))
+        figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.playerId && figure.faction !== 'vip'))
     } else if (game === games.vip) {
         figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'fighter'))
     } else {
-        figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.team !== 'vip'))
+        figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.faction !== 'vip'))
     }
     if (game === games.race || game === games.rampage) {
         figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'crosshair'))
@@ -684,7 +693,7 @@ function initStage(nextStage) {
     // Figuren initialisieren
 
     if (stage === stages.startLobby || stage === stages.gameLobby) {
-        figures.filter(figure => figure.type === 'fighter' && figure.team !== 'vip').forEach(figure => {
+        figures.filter(figure => figure.type === 'fighter' && figure.faction !== 'vip').forEach(figure => {
             figure.visible = true
         })
     }
@@ -692,15 +701,15 @@ function initStage(nextStage) {
     if (stage === stages.gameLobby) {
         figures.filter(figure => !figure.playerId).forEach(figure => initRandomPositionFigure(figure))
         //resetFiguresToBabys(figures.filter(figure => figure.playerId && figure.type === 'fighter'))
-        if (game.initialTeam) {
+        if (game.initialFaction) {
             figures.filter(figure => figure.playerId).forEach(figure => {
-                switchTeam(figure, game.initialTeam)
+                switchFaction(figure, game.initialFaction)
             })
         }
     }
     if (game === games.vip) {
         if (stage === stages.gameLobby) {
-            figures.filter(figure => figure.team === 'vip').forEach(figure => {
+            figures.filter(figure => figure.faction === 'vip').forEach(figure => {
                 initRandomPositionFigure(figure)
             })
         } else {
@@ -714,13 +723,13 @@ function initStage(nextStage) {
             shuffle(figures.filter(figure => figure.type !== 'crosshair')).forEach((figure, i) => initStartPositionFigure(figure, i))
         }
     } else if (game === games.rampage) {
-        initRandomSpriteFigures(figures.filter(figure => figure.team !== 'sniper'))
+        initRandomSpriteFigures(figures.filter(figure => figure.faction !== 'sniper'))
 
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => initCrosshair(figure))
         if (stage !== stages.gameLobby) {
-            figures.filter(figure => figure.team !== 'sniper').forEach(figure => initRandomPositionFigure(figure))
+            figures.filter(figure => figure.faction !== 'sniper').forEach(figure => initRandomPositionFigure(figure))
             // Position snipers outside every half, not just roundCounter === 1
-            initSniperPositions(figures.filter(figure => figure.type === 'fighter' && figure.team === 'sniper'))
+            initSniperPositions(figures.filter(figure => figure.type === 'fighter' && figure.faction === 'sniper'))
         }
     } else if (stage !== stages.gameLobby) {
         figures.forEach(figure => initRandomPositionFigure(figure))
@@ -848,34 +857,34 @@ const handleWinning = () => {
         handleSoloModeWinning(figuresPlayer)
     } else if (game === games.vip) {
         // players left, quit game
-        const assassins = figuresPlayer.filter(f => f.team === 'assassin')
-        const guards = figuresPlayer.filter(f => f.team === 'guard')
+        const assassins = figuresPlayer.filter(f => f.faction === 'assassin')
+        const guards = figuresPlayer.filter(f => f.faction === 'guard')
         if (assassins.length === 0 || guards.length === 0) {
-            finalWinnerTeam = guards.length === 0 ? 'assassin' : 'guard'
-            lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.team === finalWinnerTeam).map(f => f.playerId))
+            finalWinnerFaction = guards.length === 0 ? 'assassin' : 'guard'
+            lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.faction === finalWinnerFaction).map(f => f.playerId))
             gameOver = true
-            winRoundTeam(finalWinnerTeam)
+            winRoundFaction(finalWinnerFaction)
         }
 
         if (!gameOver) {
-            // team dead
-            const vips = figures.filter(f => f.team === 'vip')
+            // faction dead
+            const vips = figures.filter(f => f.faction === 'vip')
             const assassinSurvivors = assassins.filter(f => !f.isDead)
             const vipSurvivors = vips.filter(f => !f.isDead)
             if (assassinSurvivors.length === 0 || vipSurvivors.length === 0) {
-                winRoundTeam(vipSurvivors.length === 0 ? 'assassin' : 'guard')
+                winRoundFaction(vipSurvivors.length === 0 ? 'assassin' : 'guard')
             }
 
             //countdown
             if (!restartStage && game.countdown && dtProcessed >= startTime + game.countdown * 1000) {
-                winRoundTeam('guard')
+                winRoundFaction('guard')
             }
 
             // round limit hit
-            const teamsWithMaxPoints = getTeamsWithMaxScore()
-            if (restartStage && roundCounter >= getRoundCount() && teamsWithMaxPoints.length === 1) {
-                finalWinnerTeam = teamsWithMaxPoints[0]
-                lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.team === finalWinnerTeam).map(f => f.playerId))
+            const factionsWithMaxPoints = getFactionsWithMaxScore()
+            if (restartStage && roundCounter >= getRoundCount() && factionsWithMaxPoints.length === 1) {
+                finalWinnerFaction = factionsWithMaxPoints[0]
+                lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.faction === finalWinnerFaction).map(f => f.playerId))
                 gameOver = true
             }
         }
@@ -890,20 +899,20 @@ const handleWinning = () => {
         })
     } else if (game === games.rampage) {
         // players left, quit game
-        const killers = figuresPlayer.filter(f => f.team === 'killer')
-        const snipers = figuresPlayer.filter(f => f.team === 'sniper')
+        const killers = figuresPlayer.filter(f => f.faction === 'killer')
+        const snipers = figuresPlayer.filter(f => f.faction === 'sniper')
         if (killers.length === 0 || snipers.length === 0) {
-            finalWinnerTeam = killers.length === 0 ? snipers[0].rampageOriginalTeam : killers[0].rampageOriginalTeam
-            lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.rampageOriginalTeam === finalWinnerTeam).map(f => f.playerId))
+            finalWinnerFaction = killers.length === 0 ? snipers[0].rampageOriginalFaction : killers[0].rampageOriginalFaction
+            lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.rampageOriginalFaction === finalWinnerFaction).map(f => f.playerId))
             gameOver = true
-            winRoundTeam(finalWinnerTeam)
+            winRoundFaction(finalWinnerFaction)
         }
 
         if (!gameOver) {
-            // team dead
-            const noTeamSurvivors = figures.filter(f => !f.team).filter(f => !f.isDead)
+            // faction dead
+            const noFactionSurvivors = figures.filter(f => !f.faction).filter(f => !f.isDead)
             const killerSurvivors = killers.filter(f => !f.isDead)
-            if (killerSurvivors.length === 0 || noTeamSurvivors.length === 0) {
+            if (killerSurvivors.length === 0 || noFactionSurvivors.length === 0) {
                 finishRound()
             }
 
@@ -911,12 +920,12 @@ const handleWinning = () => {
             const crosshairs = figures.filter(f => f.type === 'crosshair')
             const sumAmmo = crosshairs.reduce((sum, f) => sum + f.ammo, 0)
             if (!restartStage && sumAmmo === 0) {
-                const currentKillers = figures.filter(f => f.playerId && f.type === 'fighter' && f.team === 'killer')
+                const currentKillers = figures.filter(f => f.playerId && f.type === 'fighter' && f.faction === 'killer')
                 currentKillers.forEach(f => {
-                    f.player.score.points += noTeamSurvivors.length
+                    f.player.score.points += noFactionSurvivors.length
                     f.player.score.shownPoints = f.player.score.points
                 })
-                teams[currentKillers[0].rampageOriginalTeam].points += noTeamSurvivors.length
+                factions[currentKillers[0].rampageOriginalFaction].points += noFactionSurvivors.length
                 finishRound()
             }
 
@@ -926,10 +935,10 @@ const handleWinning = () => {
             }
 
             // round limit hit (2 halves per full round)
-            const teamsWithMaxPoints = getTeamsWithMaxScore()
-            if (restartStage && roundCounter >= getRoundCount() * 2 && roundCounter % 2 === 0 && teamsWithMaxPoints.length === 1) {
-                finalWinnerTeam = teamsWithMaxPoints[0]
-                lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.rampageOriginalTeam === finalWinnerTeam).map(f => f.playerId))
+            const factionsWithMaxPoints = getFactionsWithMaxScore()
+            if (restartStage && roundCounter >= getRoundCount() * 2 && roundCounter % 2 === 0 && factionsWithMaxPoints.length === 1) {
+                finalWinnerFaction = factionsWithMaxPoints[0]
+                lastFinalWinnerPlayerIds = new Set(figuresPlayer.filter(f => f.rampageOriginalFaction === finalWinnerFaction).map(f => f.playerId))
                 gameOver = true
             }
         }
@@ -957,7 +966,7 @@ function updateGame(figures, dt, dtProcessed) {
                 figuresRevived = figuresDead.filter(f => !f.playerId)
                 break;
             case games.vip:
-                figuresRevived = figuresDead.filter(f => !f.playerId && f.team !== 'vip' || f.playerId && f.team === 'guard')
+                figuresRevived = figuresDead.filter(f => !f.playerId && f.faction !== 'vip' || f.playerId && f.faction === 'guard')
                 break;
             default:
                 break;
@@ -976,7 +985,7 @@ function updateGame(figures, dt, dtProcessed) {
         const playersMinimum = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
         const playersPossible = figures.filter(f => f.playerId && f.playerId[0] !== 'b' && f.type === 'fighter')
         const allPlayers = figures.filter(f => f.playerId && f.type === 'fighter')
-        allPlayersSameTeam = Object.values(teams).filter(team => team.playerTeam && team.games.has(game)).some(team => team.size == allPlayers.length)
+        allPlayersSameTeam = Object.values(teams).some(team => team.size == allPlayers.length)
 
         Object.values(buttons).forEach(btn => {
             if (!btn.visible) return
@@ -1082,27 +1091,27 @@ function updateGame(figures, dt, dtProcessed) {
             })
         })
     } else if (game === games.rampage) {
-        const killers = figures.filter(f => f.team === 'killer')
-        const snipers = figures.filter(f => f.team === 'sniper')
-        const noTeam = figures.filter(f => !f.team)
-        const killersAlive = figuresAlive.filter(f => f.team === 'killer')
-        const snipersAlive = figuresAlive.filter(f => f.team === 'sniper')
-        const noTeamAlive = figuresAlive.filter(f => !f.team)
+        const killers = figures.filter(f => f.faction === 'killer')
+        const snipers = figures.filter(f => f.faction === 'sniper')
+        const noFaction = figures.filter(f => !f.faction)
+        const killersAlive = figuresAlive.filter(f => f.faction === 'killer')
+        const snipersAlive = figuresAlive.filter(f => f.faction === 'sniper')
+        const noFactionAlive = figuresAlive.filter(f => !f.faction)
 
         snipersAlive.filter(f => f.isAttacking).forEach(f => {
-            [...killersAlive, ...noTeamAlive].forEach(fig => {
+            [...killersAlive, ...noFactionAlive].forEach(fig => {
                 attackFigure(f, fig)
             })
         })
 
         killersAlive.filter(f => f.isAttacking).forEach(f => {
-            [...noTeamAlive].forEach(fig => {
+            [...noFactionAlive].forEach(fig => {
                 attackFigure(f, fig)
             })
         })
 
         if (stage === stages.game) {
-            ([...killers, ...noTeam]).forEach(fig => {
+            ([...killers, ...noFaction]).forEach(fig => {
                 fig.isDetected = false
                 snipers.forEach(f => {
                     detectFigure(f, fig)
@@ -1110,24 +1119,24 @@ function updateGame(figures, dt, dtProcessed) {
             })
         }
     } else if (game === games.vip) {
-        const assassinsAlive = figuresAlive.filter(f => f.team === 'assassin')
-        const guardsAlive = figuresAlive.filter(f => f.team === 'guard')
-        const vipsAlive = figuresAlive.filter(f => f.team === 'vip')
-        const noTeamAlive = figuresAlive.filter(f => !f.team)
+        const assassinsAlive = figuresAlive.filter(f => f.faction === 'assassin')
+        const guardsAlive = figuresAlive.filter(f => f.faction === 'guard')
+        const vipsAlive = figuresAlive.filter(f => f.faction === 'vip')
+        const noFactionAlive = figuresAlive.filter(f => !f.faction)
 
         guardsAlive.filter(f => f.isAttacking).forEach(f => {
-            [...assassinsAlive, ...noTeamAlive].forEach(fig => {
+            [...assassinsAlive, ...noFactionAlive].forEach(fig => {
                 attackFigure(f, fig)
             })
         })
 
         assassinsAlive.filter(f => f.isAttacking).forEach(f => {
-            [...guardsAlive, ...vipsAlive, ...noTeamAlive].forEach(fig => {
+            [...guardsAlive, ...vipsAlive, ...noFactionAlive].forEach(fig => {
                 attackFigure(f, fig)
             })
         })
 
-        noTeamAlive.filter(f => f.isAttacking).forEach(f => {
+        noFactionAlive.filter(f => f.isAttacking).forEach(f => {
             figuresAlive.filter(fig => fig.playerId !== f.playerId && fig.type === 'fighter').forEach(fig => {
                 attackFigure(f, fig)
             })
@@ -1201,7 +1210,7 @@ function handleInput(players, figures, dtProcessed) {
                 figure.isDeathDetected = false
                 figure.playerId = p.playerId
                 figure.player = p
-                switchTeam(figure, game?.initialTeam)
+                switchFaction(figure, game?.initialFaction)
 
                 addPlayerScore(figure)
                 playAudio(soundJoin);

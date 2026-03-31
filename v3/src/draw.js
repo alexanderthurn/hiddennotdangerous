@@ -584,7 +584,7 @@ const addRaceTrack = (app) => {
 }
 
 const addShootingRange = (app, props, lobbyContainer) => {
-    const { x, y, width, height, team } = props
+    const { x, y, width, height, faction } = props
     const newX = x - width / 2
     const newY = y - height / 2
 
@@ -608,7 +608,7 @@ const addShootingRange = (app, props, lobbyContainer) => {
 
     const buttonInside = new PIXI.Container()
     buttonInside.execute = () => buttonInside.playersNear.forEach(f => {
-        if (f.team === team && !f.isAiming && !f.justShot) {
+        if (f.faction === faction && !f.isAiming && !f.justShot) {
             f.isAiming = true
             f.justShot = true
             const crosshair = createCrosshair({ ...f, x: f.x, y: f.y })
@@ -704,24 +704,24 @@ const addPracticeTrack = (app, props, lobbyContainer) => {
     })
 }
 
-const createTeamSwitcher = (app, props, lobbyContainer) => {
-    const { x, y, team } = props
+const createFactionSwitcher = (app, props, lobbyContainer) => {
+    const { x, y, faction } = props
     const width = 128
     const height = 128
     const newX = x - width / 2
     const newY = y - height / 2
-    const games = teams[team].games
+    const games = factions[faction].games
 
-    const area = new PIXI.NineSliceSprite(PIXI.Assets.get('house_' + team))
+    const area = new PIXI.NineSliceSprite(PIXI.Assets.get('house_' + faction))
     area.x = newX
     area.y = newY
     area.width = width
     area.height = height
 
     const button = new PIXI.Container()
-    button.execute = () => button.playersNear.forEach(f => switchTeam(f, team))
-    const teamRect = new PIXI.Rectangle(newX, newY, width, height)
-    button.isInArea = f => stage === stages.gameLobby && games.has(game) && teamRect.contains(f.x, f.y)
+    button.execute = () => button.playersNear.forEach(f => switchFaction(f, faction))
+    const factionRect = new PIXI.Rectangle(newX, newY, width, height)
+    button.isInArea = f => stage === stages.gameLobby && games.has(game) && factionRect.contains(f.x, f.y)
     button.addChild(area)
     lobbyContainer.addChild(button)
 
@@ -732,8 +732,8 @@ const createTeamSwitcher = (app, props, lobbyContainer) => {
     return button
 }
 
-const addTeamSwitchers = (app, lobbyContainer) => {
-    Object.entries(teamSwitchersDefinition()).forEach(([id, button]) => { buttons[id] = createTeamSwitcher(app, button, lobbyContainer) })
+const addFactionSwitchers = (app, lobbyContainer) => {
+    Object.entries(factionSwitchersDefinition()).forEach(([id, button]) => { buttons[id] = createFactionSwitcher(app, button, lobbyContainer) })
 }
 
 const animateLobbyItems = (lobbyContainer, touchControlDefault, touchControlSniper, touchControlRace) => {
@@ -750,7 +750,7 @@ const addLobbyItems = (app) => {
     addButtons(app, lobbyContainer)
     addShootingRange(app, shootingRangeDefinition(), lobbyContainer)
     addPracticeTrack(app, practiceTrackDefinition(), lobbyContainer)
-    addTeamSwitchers(app, lobbyContainer)
+    addFactionSwitchers(app, lobbyContainer)
     addNetworkQrCode(app, lobbyContainer)
     addGameDescription(app, lobbyContainer)
 
@@ -797,8 +797,8 @@ const animatePlayerScore = figure => {
         return
     }
     if (figure.team !== figure.oldTeam) {
-        const colorTeam = (game === games.rampage && figure.rampageOriginalTeam) ? figure.rampageOriginalTeam : figure.team
-        player.score.getChildAt(1).tint = teams[colorTeam]?.color || player.color || colors.black
+        //TODO: delete: const colorFaction = (game === games.rampage && figure.rampageOriginalFaction) ? figure.rampageOriginalFaction : figure.faction
+        player.score.getChildAt(1).tint = teams[figure.team]?.color || player.color || colors.black
         figure.oldTeam = figure.team
     }
 
@@ -864,7 +864,7 @@ const animateWinningCeremony = winnerText => {
     let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter')
 
     if (game === games.rampage) {
-        playerFigures = playerFigures.filter(f => f.team === 'killer')
+        playerFigures = playerFigures.filter(f => f.faction === 'killer')
     }
 
     // first sort by final winner, then by new points
@@ -921,12 +921,12 @@ const animateWinningCeremony = winnerText => {
 
     if (gameOver && dt3 >= 0 && dt3 < showFinalWinnerDuration) {
         winnerText.visible = true
-        if (game === games.rampage && finalWinnerTeam) {
-            winnerText.fillText.tint = teams[finalWinnerTeam].color
-            winnerText.fillText.text = winnerText.strokeText.text = `${finalWinnerTeam === 'killer' ? 'Team Red' : 'Team Blue'} wins!`
-        } else if (finalWinnerTeam) {
-            winnerText.fillText.tint = teams[finalWinnerTeam].color
-            winnerText.fillText.text = winnerText.strokeText.text = `${teams[finalWinnerTeam].label} win`
+        if (game === games.rampage && finalWinnerFaction) {
+            winnerText.fillText.tint = factions[finalWinnerFaction].color
+            winnerText.fillText.text = winnerText.strokeText.text = `${finalWinnerFaction === 'killer' ? 'Faction Red' : 'Faction Blue'} wins!`
+        } else if (finalWinnerFaction) {
+            winnerText.fillText.tint = factions[finalWinnerFaction].color
+            winnerText.fillText.text = winnerText.strokeText.text = `${factions[finalWinnerFaction].label} win`
         } else if (lastFinalWinnerPlayerIds?.size === 1) {
             const lastFinalWinnerFigure = playerFigures.find(f => lastFinalWinnerPlayerIds?.has(f.playerId))
             const lastFinalWinnerIndex = playersSortedByJoinTime.indexOf(lastFinalWinnerFigure?.player)
@@ -1382,7 +1382,7 @@ const addFiguresInitialPool = (app) => {
     }
     for (let i = 0; i < numberVIPs; i++) {
         const figure = createFigure(app, spritesheet, defaultFigureProps())
-        switchTeam(figure, 'vip')
+        switchFaction(figure, 'vip')
 
         app.ticker.add(() => {
             figure.visible = game === games.vip
@@ -1392,7 +1392,7 @@ const addFiguresInitialPool = (app) => {
 }
 
 const createCrosshair = props => {
-    const { x, y, player, team, ammo } = props
+    const { x, y, player, faction, ammo } = props
 
     const sprite = PIXI.Sprite.from('crosshair')
     sprite.anchor.set(0.5)
@@ -1422,7 +1422,7 @@ const createCrosshair = props => {
     crosshair.recoilDuration = 200
     crosshair.recoilForce = 15
     crosshair.recoilOffset = 5
-    crosshair.team = team
+    crosshair.faction = faction
     crosshair.type = 'crosshair'
     crosshair.tint = player.color
 
@@ -1643,7 +1643,7 @@ const createPlayersText = app => {
 const animateFiguresText = (app, figuresText) => {
     const text = ['Figures with player']
     figures.filter(f => f.playerId).forEach(f => {
-        text.push('playerId: ' + f.playerId + ' x: ' + Math.floor(f.x) + ' y: ' + Math.floor(f.y) + ' Beans: ' + f.beans?.size + ' Team: ' + f.team)
+        text.push('playerId: ' + f.playerId + ' x: ' + Math.floor(f.x) + ' y: ' + Math.floor(f.y) + ' Beans: ' + f.beans?.size + ' Faction: ' + f.faction + ' Team: ' + f.team)
     })
     figuresText.text = text.join('\n')
     figuresText.y = app.screen.height
@@ -1785,7 +1785,7 @@ Object.assign(window, {
     addGameRing, addGameSelection, addGameStartButton, addNetworkQrCode, addGameDescription,
     animateRectangleButton, createRectangleButton, animateRoundsButton,
     addButtons, animateShootingRange, addRaceTrack, addShootingRange, addPracticeTrack,
-    createTeamSwitcher, addTeamSwitchers, animateLobbyItems, addLobbyItems,
+    createFactionSwitcher, addFactionSwitchers, animateLobbyItems, addLobbyItems,
     createTouchControlHint, getScoreDefaultX, animatePlayerScore,
     botCircleContext, playerCircleContext, addPlayerScore,
     animateWinningCeremony, addWinningCeremony,
