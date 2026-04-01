@@ -128,6 +128,7 @@ const initFigure = (figure, x, y, direction) => {
         killTime: 0,
         isAttacking: false,
         isAiming: false,
+        isInRace: false,
         lastAttackTime: undefined,
         beans: new Set(),
         beansFarted: new Set()

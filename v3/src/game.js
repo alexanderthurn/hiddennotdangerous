@@ -601,11 +601,7 @@ function initStage(nextStage) {
         figures.filter(figure => figure.type === 'fighter').forEach(figure => {
             if (figure.faction !== 'vip') {
                 figure.defaultSprite = 'baby'
-                // TODO: durch initFigure ersetzen mit neuen figures ersetzen?
-                switchFaction(figure, undefined)
             }
-            figure.isAiming = false
-            figure.isInRace = false
         })
         players.forEach(player => initPlayerScore(player.score))
         Object.values(teams).forEach(team => team.points = 0)
@@ -696,6 +692,7 @@ function initStage(nextStage) {
 
     if (stage === stages.gameLobby) {
         figures.filter(figure => !figure.playerId).forEach(figure => initRandomPositionFigure(figure))
+        // TODO: delete
         //resetFiguresToBabys(figures.filter(figure => figure.playerId && figure.type === 'fighter'))
         if (game.initialFaction) {
             figures.filter(figure => figure.playerId).forEach(figure => {
