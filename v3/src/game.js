@@ -607,12 +607,10 @@ function initStage(nextStage) {
             figure.isAiming = false
             figure.isInRace = false
         })
+        players.forEach(player => initPlayerScore(player.score))
         Object.values(teams).forEach(team => team.points = 0)
     } else if (stage === stages.game) {
         roundCounter++
-        if (roundCounter === 1) {
-            players.forEach(player => initPlayerScore(player.score))
-        }
 
         // Rampage: faction swap and half tracking
         if (game === games.rampage) {
