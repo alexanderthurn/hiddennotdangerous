@@ -692,8 +692,6 @@ function initStage(nextStage) {
 
     if (stage === stages.gameLobby) {
         figures.filter(figure => !figure.playerId).forEach(figure => initRandomPositionFigure(figure))
-        // TODO: delete
-        //resetFiguresToBabys(figures.filter(figure => figure.playerId && figure.type === 'fighter'))
         if (game.initialFaction) {
             figures.filter(figure => figure.playerId).forEach(figure => {
                 switchFaction(figure, game.initialFaction)

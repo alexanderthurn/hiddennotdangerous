@@ -480,11 +480,6 @@ const initSniperPositions = figures => {
     figures.forEach(figure => initRandomOutsidePositionFigure(figure))
 }
 
-const resetFiguresToBabys = figures => {
-    figures.forEach(figure => {
-        figure.currentSprite = 'baby'
-    })
-}
 const initRandomSpriteFigures = figures => {
     const shuffledFigures = shuffle(figures)
     const shuffledSprites = shuffle(game.sprites)
@@ -814,7 +809,7 @@ Object.assign(window, {
     getCloseRandomXY, cropXY, reduceBounds,
     getWalkRectLength, getIntervalPoint, getLinePoint,
     getRandomOutsideLevelXY, distanceToBorder, getCloudMultiplier,
-    figureIsBot, initSniperPositions, resetFiguresToBabys,
+    figureIsBot, initSniperPositions,
     initRandomSpriteFigures, initVIPGamePositions,
     detectFigure, attackFigure, killFigure, finishRound,
     winRoundTeam, winRoundFigures, getPlayersWithMaxScore, getTeamsWithMaxScore,
