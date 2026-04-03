@@ -174,12 +174,12 @@ const teams = {
     red: {
         color: colors.red,
         label: 'Red',
-        size: 0
+        players: []
     },
     blue: {
         color: colors.blue,
         label: 'Blue',
-        size: 0
+        players: []
     }
 }
 
@@ -976,7 +976,7 @@ function updateGame(figures, dt, dtProcessed) {
         const playersMinimum = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
         const playersPossible = figures.filter(f => f.playerId && f.playerId[0] !== 'b' && f.type === 'fighter')
         const allPlayers = figures.filter(f => f.playerId && f.type === 'fighter')
-        allPlayersSameTeam = Object.values(teams).some(team => team.size == allPlayers.length)
+        allPlayersSameTeam = Object.values(teams).some(team => team.players.length === allPlayers.length)
 
         Object.values(buttons).forEach(btn => {
             if (!btn.visible) return

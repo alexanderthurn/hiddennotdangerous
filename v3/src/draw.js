@@ -785,10 +785,13 @@ const createTouchControlHint = (app, container, props) => {
     return touchControl
 }
 
-const getScoreDefaultX = player => {
+const getScoreDefaultX = figure => {
+    const { player } = figure
+    const team = figure.team && teams[figure.team] || undefined
+    const sortedPlayers = team?.players ?? playersSortedByJoinTime
+    const playerIndex = sortedPlayers.indexOf(player)
     const offx = 48 * 1.2
-    const playerIndex = playersSortedByJoinTime.indexOf(player)
-    return 32 + playerIndex * offx
+    return (team?.score.x ?? 32) + playerIndex * offx
 }
 
 const animatePlayerScore = figure => {
@@ -804,7 +807,7 @@ const animatePlayerScore = figure => {
     if (!restartStage) {
         const lp = easeInOutCubic(Math.min((dtProcessed - player.joinedTime) / moveNewPlayerDuration, 1))
 
-        player.score = Object.assign(player.score, getLinePoint(lp, { x: level.width * 0.5, y: level.height * 0.5 }, { x: getScoreDefaultX(player), y: player.score.yDefault }))
+        player.score = Object.assign(player.score, getLinePoint(lp, { x: level.width * 0.5, y: level.height * 0.5 }, { x: getScoreDefaultX(figure), y: player.score.yDefault }))
         player.score.scale = getIntervalPoint(lp, 12, 1)
     }
 
@@ -855,6 +858,57 @@ const addPlayerScore = figure => {
     addAnimation(playerScore, () => animatePlayerScore(figure))
 }
 
+const animateTeamScore = teamScore => {
+    teamScore.getChildAt(1).text = teamScore.points
+}
+
+const updateTeamScore = () => {
+    let x = 32
+    Object.values(teams).forEach(team => {
+        const teamScore = team.score
+        teamScore.x = x
+        teamScore.getChildAt(0).clear()
+        teamScore.visible = false
+
+        if (team.players.length > 0) {
+            const offx = 48 * 1.2
+            const width = team.players.length * offx
+            teamScore.getChildAt(0).roundRect(-offx * 0.5, -offx * 0.5, width, offx, width * 0.1).fill({ alpha: 1.0, color: 0xFFFFFF }).stroke({ alpha: 1, color: 0x000000, width: teamScore.wantedHeight * 0.01 })
+            x += 32 + width
+            teamScore.visible = true
+        }
+    })
+}
+
+const addTeamScore = team => {
+    const teamScore = new PIXI.Container()
+    teamScore.points = 0
+    teamScore.y = level.height + 32
+    teamScore.tint = team.color
+    teamScore.visible = false
+
+    const background = new PIXI.Graphics()
+
+    const text = new PIXI.BitmapText({
+        text: 0,
+        style: app.textStyleDefault,
+        anchor: { x: 0.5, y: 0.5 },
+        scale: { x: 1.1, y: 1.1 },
+    })
+
+    team.score = teamScore
+    teamScore.addChild(background, text)
+    levelContainer.addChild(teamScore)
+    scoreLayer.attach(teamScore)
+
+    addAnimation(teamScore, () => animateTeamScore(teamScore))
+}
+
+const addTeamScoreOverlay = () => {
+    addTeamScore(teams.red)
+    addTeamScore(teams.blue)
+}
+
 const animateWinningCeremony = winnerText => {
     if (!lastRoundEndThen) {
         return
@@ -886,7 +940,7 @@ const animateWinningCeremony = winnerText => {
         if (dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
             const lp = easeInOutCubic(dt2 / moveScoreToPlayerDuration)
 
-            f.player.score = Object.assign(f.player.score, getLinePoint(lp, { x: getScoreDefaultX(f.player), y: f.player.score.yDefault }, f))
+            f.player.score = Object.assign(f.player.score, getLinePoint(lp, { x: getScoreDefaultX(f), y: f.player.score.yDefault }, f))
 
             if (lastFinalWinnerPlayerIds?.has(f.playerId)) {
                 f.player.score.scale = getIntervalPoint(lp, 1, 2) * getIntervalPoint(lp, 1, 2)
@@ -907,7 +961,7 @@ const animateWinningCeremony = winnerText => {
         } else if (dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
             const lp = easeInOutCubic(dt4 / moveScoreToPlayerDuration)
 
-            f.player.score = Object.assign(f.player.score, getLinePoint(lp, f, { x: getScoreDefaultX(f.player), y: f.player.score.yDefault }))
+            f.player.score = Object.assign(f.player.score, getLinePoint(lp, f, { x: getScoreDefaultX(f), y: f.player.score.yDefault }))
 
             f.player.score.scale = f.player.score.scale = getIntervalPoint(lp, 2, 1)
             if (lastFinalWinnerPlayerIds) {
@@ -1378,7 +1432,7 @@ const addFiguresInitialPool = (app) => {
     }
     for (let i = 0; i < numberVIPs; i++) {
         const figure = createFigure(app, spritesheet, defaultFigureProps())
-        switchFaction(figure, 'vip')
+        //switchFaction(figure, 'vip')
 
         app.ticker.add(() => {
             figure.visible = game === games.vip
@@ -1442,6 +1496,7 @@ const addOverlay = app => {
     const countdown = createCountdown(app)
     addPauseOverlay(app)
     addRoundDisplay(app)
+    addTeamScoreOverlay()
 
     levelContainer.addChild(countdown)
     overlayLayer.attach(countdown)
@@ -1785,6 +1840,7 @@ Object.assign(window, {
     createFactionSwitcher, addFactionSwitchers, animateLobbyItems, addLobbyItems,
     createTouchControlHint, getScoreDefaultX, animatePlayerScore,
     botCircleContext, playerCircleContext, addPlayerScore,
+    animateTeamScore, updateTeamScore, addTeamScore, addTeamScoreOverlay,
     animateWinningCeremony, addWinningCeremony,
     animateFood, addFood, addFoods,
     animateGrass, createBackgroundSprite, addGrass, addLevelBoundary, addLevelDecoration,

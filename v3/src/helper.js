@@ -655,11 +655,12 @@ const switchFaction = (figure, faction, switchTeam = true) => {
 
     if (switchTeam) {
         if (figure.team) {
-            teams[figure.team].size--
+            teams[figure.team].players = teams[figure.team].players.filter(p => p !== figure.player)
         }
         figure.team = factions[faction]?.team
         if (figure.team) {
-            teams[figure.team].size++
+            teams[figure.team].players.push(figure.player)
+            updateTeamScore()
         }
     }
 }
