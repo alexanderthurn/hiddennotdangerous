@@ -609,7 +609,7 @@ const killFigure = (figure) => {
                 f.player.score.points++
                 f.player.score.shownPoints = f.player.score.points
             })
-            teams[currentKillers[0].team].points++
+            teams[currentKillers[0].team].score.points++
         }
     }
 }
@@ -620,7 +620,7 @@ const finishRound = () => {
 }
 
 const winRoundTeam = team => {
-    teams[team].points++
+    teams[team].score.points++
     winRoundFigures(figures.filter(f => f.playerId && f.team === team && f.type === 'fighter'))
 }
 
@@ -639,8 +639,8 @@ const getPlayersWithMaxScore = () => {
 }
 
 const getTeamsWithMaxScore = () => {
-    const maxPoints = Math.max(...Object.values(teams).map(team => team.points))
-    return Object.keys(teams).filter(team => teams[team].points === maxPoints)
+    const maxPoints = Math.max(...Object.values(teams).map(team => team.score.points))
+    return Object.keys(teams).filter(team => teams[team].score.points === maxPoints)
 }
 
 const switchFaction = (figure, faction, switchTeam = true) => {

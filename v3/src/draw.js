@@ -789,9 +789,9 @@ const getScoreDefaultX = figure => {
     const { player } = figure
     const team = figure.team && teams[figure.team] || undefined
     const sortedPlayers = team?.players ?? playersSortedByJoinTime
-    const playerIndex = sortedPlayers.indexOf(player)
+    const shift = sortedPlayers.indexOf(player) + (team ? 1 : 0)
     const offx = 48 * 1.2
-    return (team?.score.x ?? 32) + playerIndex * offx
+    return (team?.score.x ?? 32) + shift * offx
 }
 
 const animatePlayerScore = figure => {
@@ -811,7 +811,7 @@ const animatePlayerScore = figure => {
         player.score.scale = getIntervalPoint(lp, 12, 1)
     }
 
-    player.score.getChildAt(2).text = player.score.shownPoints
+    player.score.getChildAt(2).text = !figure.team ? player.score.shownPoints : ''
 
     if (player.isMarkerButtonPressed) {
         const shakeMargin = 10
@@ -873,13 +873,13 @@ const updateTeamScore = () => {
 
         if (team.players.length > 0) {
             const offx = 48 * 1.2
-            const width = team.players.length * offx
+            const width = (team.players.length + 1) * offx
             background.roundRect(-offx * 0.5, -offx * 0.5, width, offx, 10).fill({ alpha: 0.5, color: colors.white })
             team.players.forEach((player, index) => {
                 if (playerIsBot(player)) {
-                    background.rect(-24 + index * offx, -24, 48, 48).cut()
+                    background.rect(-24 + (index + 1) * offx, -24, 48, 48).cut()
                 } else {
-                    background.circle(index * offx, 0, 24).cut()
+                    background.circle((index + 1) * offx, 0, 24).cut()
                 }
             })
             x += 32 + width
@@ -892,10 +892,10 @@ const addTeamScore = team => {
     const teamScore = new PIXI.Container()
     teamScore.points = 0
     teamScore.y = level.height + 32
-    teamScore.tint = team.color
     teamScore.visible = false
 
     const background = new PIXI.Graphics()
+    background.tint = team.color
 
     const text = new PIXI.BitmapText({
         text: 0,
