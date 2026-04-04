@@ -655,12 +655,18 @@ const switchFaction = (figure, faction, switchTeam = true) => {
     }
 
     if (switchTeam) {
+        // remove player from old team
         if (figure.team) {
             teams[figure.team].players = teams[figure.team].players.filter(p => p !== figure.player)
         }
+        // set new team
         figure.team = factions[faction]?.team
+        // add player to new team
         if (figure.team) {
             teams[figure.team].players.push(figure.player)
+        }
+        // update team score
+        if (figure.playerId) {
             updateTeamScore()
         }
     }

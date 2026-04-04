@@ -1440,7 +1440,7 @@ const addFiguresInitialPool = (app) => {
     }
     for (let i = 0; i < numberVIPs; i++) {
         const figure = createFigure(app, spritesheet, defaultFigureProps())
-        //switchFaction(figure, 'vip')
+        switchFaction(figure, 'vip')
 
         app.ticker.add(() => {
             figure.visible = game === games.vip
