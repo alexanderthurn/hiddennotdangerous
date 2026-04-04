@@ -864,16 +864,28 @@ const animateTeamScore = teamScore => {
 
 const updateTeamScore = () => {
     let x = 32
+    console.log('*updateTeamScore', teams)
     Object.values(teams).forEach(team => {
         const teamScore = team.score
         teamScore.x = x
-        teamScore.getChildAt(0).clear()
+        const background = teamScore.getChildAt(0)
+        background.clear()
         teamScore.visible = false
 
         if (team.players.length > 0) {
             const offx = 48 * 1.2
             const width = team.players.length * offx
-            teamScore.getChildAt(0).roundRect(-offx * 0.5, -offx * 0.5, width, offx, width * 0.1).fill({ alpha: 1.0, color: 0xFFFFFF }).stroke({ alpha: 1, color: 0x000000, width: teamScore.wantedHeight * 0.01 })
+            background.roundRect(-offx * 0.5, -offx * 0.5, width, offx, 10).fill({ alpha: 1, color: colors.white }).stroke({ alpha: 1, color: colors.black, width: 1 })
+            team.players.forEach((player, index) => {
+                console.log('player', player, index, index * offx)
+                if (playerIsBot(player)) {
+                    console.log('cut bot', -24 + index * offx)
+                    background.rect(-24 + index * offx, -24, 48, 48).cut()
+                } else {
+                    console.log('cut player', index * offx)
+                    background.circle(index * offx, 0, 24).cut()
+                }
+            })
             x += 32 + width
             teamScore.visible = true
         }

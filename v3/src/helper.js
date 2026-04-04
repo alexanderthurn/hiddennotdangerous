@@ -475,6 +475,7 @@ const getCloudMultiplier = size => {
 }
 
 const figureIsBot = figure => figure.playerId?.includes('b')
+const playerIsBot = player => player.type === 'bot'
 
 const initSniperPositions = figures => {
     figures.forEach(figure => initRandomOutsidePositionFigure(figure))
@@ -810,7 +811,7 @@ Object.assign(window, {
     getCloseRandomXY, cropXY, reduceBounds,
     getWalkRectLength, getIntervalPoint, getLinePoint,
     getRandomOutsideLevelXY, distanceToBorder, getCloudMultiplier,
-    figureIsBot, initSniperPositions,
+    figureIsBot, playerIsBot, initSniperPositions,
     initRandomSpriteFigures, initVIPGamePositions,
     detectFigure, attackFigure, killFigure, finishRound,
     winRoundTeam, winRoundFigures, getPlayersWithMaxScore, getTeamsWithMaxScore,
