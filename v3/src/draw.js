@@ -800,7 +800,7 @@ const animatePlayerScore = figure => {
         return
     }
     if (figure.team !== figure.oldTeam) {
-        player.score.getChildAt(1).tint = teams[figure.team]?.color || player.color || colors.black
+        player.score.getChildAt(1).tint = player.color || colors.black
         figure.oldTeam = figure.team
     }
 
@@ -864,7 +864,6 @@ const animateTeamScore = teamScore => {
 
 const updateTeamScore = () => {
     let x = 32
-    console.log('*updateTeamScore', teams)
     Object.values(teams).forEach(team => {
         const teamScore = team.score
         teamScore.x = x
@@ -875,14 +874,11 @@ const updateTeamScore = () => {
         if (team.players.length > 0) {
             const offx = 48 * 1.2
             const width = team.players.length * offx
-            background.roundRect(-offx * 0.5, -offx * 0.5, width, offx, 10).fill({ alpha: 1, color: colors.white }).stroke({ alpha: 1, color: colors.black, width: 1 })
+            background.roundRect(-offx * 0.5, -offx * 0.5, width, offx, 10).fill({ alpha: 0.5, color: colors.white })
             team.players.forEach((player, index) => {
-                console.log('player', player, index, index * offx)
                 if (playerIsBot(player)) {
-                    console.log('cut bot', -24 + index * offx)
                     background.rect(-24 + index * offx, -24, 48, 48).cut()
                 } else {
-                    console.log('cut player', index * offx)
                     background.circle(index * offx, 0, 24).cut()
                 }
             })
