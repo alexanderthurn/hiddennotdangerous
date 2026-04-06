@@ -3,7 +3,6 @@ window.gamepadPlayers = []
 window.keyboardPlayers = []
 window.botPlayers = []
 window.players = []
-window.playersSortedByJoinTime = []
 const keyboards = [{
     keys: {
         'KeyA': { playerId: 'k0', action: 'left' },
@@ -171,6 +170,9 @@ const factions = {
 }
 
 const teams = {
+    none: {
+        players: []
+    },
     red: {
         color: colors.red,
         label: 'Red',
@@ -604,7 +606,7 @@ function initStage(nextStage) {
             }
         })
         players.forEach(player => initPlayerScore(player.score))
-        Object.values(teams).forEach(team => team.score.points = 0)
+        Object.values(teams).forEach(team => { if (team.score) team.score.points = 0 })
     } else if (stage === stages.game) {
         roundCounter++
 
@@ -750,7 +752,6 @@ function gameLoop() {
         }
 
         players = collectInputs()
-        playersSortedByJoinTime = players.filter(player => player.joinedTime).sort((player1, player2) => player1.joinedTime - player2.joinedTime || player1.playerId - player2.playerId)
 
         const oldNumberJoinedKeyboardPlayers = keyboardPlayers.filter(k => k.joinedTime >= 0).length
 
@@ -1201,6 +1202,7 @@ function handleInput(players, figures, dtProcessed) {
                 figure.isDeathDetected = false
                 figure.playerId = p.playerId
                 figure.player = p
+                teams.none.players.push(p)
                 switchFaction(figure, game?.initialFaction)
 
                 addPlayerScore(figure)

@@ -787,11 +787,10 @@ const createTouchControlHint = (app, container, props) => {
 
 const getScoreDefaultX = figure => {
     const { player } = figure
-    const team = figure.team && teams[figure.team] || undefined
-    const sortedPlayers = team?.players ?? playersSortedByJoinTime
-    const shift = sortedPlayers.indexOf(player) + (team ? 1 : 0)
+    const team = teams[figure.team ?? 'none']
+    const shift = team.players.indexOf(player) + (team.score?.x ? 1 : 0)
     const offx = 48 * 1.2
-    return (team?.score.x ?? 32) + shift * offx
+    return (team.score?.x ?? 32) + shift * offx
 }
 
 const animatePlayerScore = figure => {
@@ -863,16 +862,19 @@ const animateTeamScore = teamScore => {
 }
 
 const updateTeamScore = () => {
-    let x = 32
+    const offx = 48 * 1.2
+    let x = 32 + teams.none.players.length * offx
     Object.values(teams).forEach(team => {
         const teamScore = team.score
+        if (!teamScore) {
+            return
+        }
         teamScore.x = x
         const background = teamScore.getChildAt(0)
         background.clear()
         teamScore.visible = false
 
         if (team.players.length > 0) {
-            const offx = 48 * 1.2
             const width = (team.players.length + 1) * offx
             background.roundRect(-offx * 0.5, -offx * 0.5, width, offx, 10).fill({ alpha: 0.5, color: colors.white })
             team.players.forEach((player, index) => {
@@ -987,7 +989,7 @@ const animateWinningCeremony = winnerText => {
             winnerText.fillText.text = winnerText.strokeText.text = `Team ${teams[finalWinnerTeam].label} wins`
         } else if (lastFinalWinnerPlayerIds?.size === 1) {
             const lastFinalWinnerFigure = playerFigures.find(f => lastFinalWinnerPlayerIds?.has(f.playerId))
-            const lastFinalWinnerIndex = playersSortedByJoinTime.indexOf(lastFinalWinnerFigure?.player)
+            const lastFinalWinnerIndex = teams.none.players.indexOf(lastFinalWinnerFigure?.player)
             const lastFinalWinnerNumber = lastFinalWinnerIndex + 1
             if (lastFinalWinnerFigure?.player?.color) {
                 winnerText.fillText.tint = lastFinalWinnerFigure.player.color

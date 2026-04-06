@@ -639,11 +639,15 @@ const getPlayersWithMaxScore = () => {
 }
 
 const getTeamsWithMaxScore = () => {
-    const maxPoints = Math.max(...Object.values(teams).map(team => team.score.points))
-    return Object.keys(teams).filter(team => teams[team].score.points === maxPoints)
+    const maxPoints = Math.max(...Object.values(teams).map(team => team.score?.points || 0))
+    return Object.keys(teams).filter(team => teams[team].score?.points === maxPoints)
 }
 
 const switchFaction = (figure, faction, switchTeam = true) => {
+    if (figure.faction === faction) {
+        return
+    }
+
     if (figure.faction) {
         factions[figure.faction].size--
     }
@@ -654,17 +658,21 @@ const switchFaction = (figure, faction, switchTeam = true) => {
         factions[figure.faction].size++
     }
 
-    if (switchTeam) {
+    if (figure.player && switchTeam) {
         // remove player from old team
-        if (figure.team) {
-            teams[figure.team].players = teams[figure.team].players.filter(p => p !== figure.player)
-        }
+        teams[figure.team ?? 'none'].players = teams[figure.team ?? 'none'].players.filter(p => p !== figure.player)
+
         // set new team
         figure.team = factions[faction]?.team
+
         // add player to new team
-        if (figure.team) {
-            teams[figure.team].players.push(figure.player)
+        teams[figure.team ?? 'none'].players.push(figure.player)
+
+        // sort no team players by join time
+        if (!figure.team) {
+            teams.none.players.sort((a, b) => a.joinedTime - b.joinedTime || a.playerId - b.playerId)
         }
+
         // update team score
         if (figure.playerId) {
             updateTeamScore()
