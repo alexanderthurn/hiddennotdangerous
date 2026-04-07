@@ -621,11 +621,8 @@ function initStage(nextStage) {
                     }
                 })
                 // Swap factions
-                const poolFighters = Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter')
-                poolFighters.forEach(f => {
-                    if (f.faction === 'killer') switchFaction(f, 'sniper', false)
-                    else if (f.faction === 'sniper') switchFaction(f, 'killer', false)
-                })
+                switchFaction(Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter' && f.faction === 'killer'), 'sniper', false)
+                switchFaction(Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter' && f.faction === 'sniper'), 'killer', false)
             }
         }
     }
@@ -695,9 +692,7 @@ function initStage(nextStage) {
     if (stage === stages.gameLobby) {
         figures.filter(figure => !figure.playerId).forEach(figure => initRandomPositionFigure(figure))
         if (game.initialFaction) {
-            figures.filter(figure => figure.playerId).forEach(figure => {
-                switchFaction(figure, game.initialFaction)
-            })
+            switchFaction(figures.filter(figure => figure.playerId), game.initialFaction)
         }
     }
     if (game === games.vip) {
@@ -1203,7 +1198,7 @@ function handleInput(players, figures, dtProcessed) {
                 figure.playerId = p.playerId
                 figure.player = p
                 teams.none.players.push(p)
-                switchFaction(figure, game?.initialFaction)
+                switchFaction([figure], game?.initialFaction)
 
                 addPlayerScore(figure)
                 playAudio(soundJoin);

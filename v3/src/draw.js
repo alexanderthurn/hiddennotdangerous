@@ -719,7 +719,7 @@ const createFactionSwitcher = (app, props, lobbyContainer) => {
     area.height = height
 
     const button = new PIXI.Container()
-    button.execute = () => button.playersNear.forEach(f => switchFaction(f, faction))
+    button.execute = () => switchFaction(button.playersNear, faction)
     const factionRect = new PIXI.Rectangle(newX, newY, width, height)
     button.isInArea = f => stage === stages.gameLobby && games.has(game) && factionRect.contains(f.x, f.y)
     button.addChild(area)
@@ -1442,7 +1442,7 @@ const addFiguresInitialPool = (app) => {
     }
     for (let i = 0; i < numberVIPs; i++) {
         const figure = createFigure(app, spritesheet, defaultFigureProps())
-        switchFaction(figure, 'vip')
+        switchFaction([figure], 'vip')
 
         app.ticker.add(() => {
             figure.visible = game === games.vip

@@ -134,7 +134,7 @@ const initFigure = (figure, x, y, direction) => {
         beansFarted: new Set()
     })
     if (stage === stages.startLobby) {
-        switchFaction(figure, undefined)
+        switchFaction([figure], undefined)
     }
 }
 
@@ -502,13 +502,13 @@ const initVIPGamePositions = figures => {
         const smallerFaction = numberPlayerAssassins > numberPlayerGuards ? 'guard' : 'assassin'
         const shuffledFactions = shuffle(['assassin', 'guard'])
 
-        neutralPlayerFigures.forEach((f, i) => switchFaction(f, i < Math.abs(numberPlayerAssassins - numberPlayerGuards) ? smallerFaction : shuffledFactions[i % 2]))
+        neutralPlayerFigures.forEach((f, i) => switchFaction([f], i < Math.abs(numberPlayerAssassins - numberPlayerGuards) ? smallerFaction : shuffledFactions[i % 2]))
     }
 
     // put NPC neutrals in factions
     const numberMissingGuards = numberGuards - figures.filter(figure => figure.faction === 'guard').length
     const neutralFigures = shuffle(figures.filter(figure => !figure.faction))
-    neutralFigures.forEach((f, i) => switchFaction(f, i < numberMissingGuards ? 'guard' : 'assassin'))
+    neutralFigures.forEach((f, i) => switchFaction([f], i < numberMissingGuards ? 'guard' : 'assassin'))
 
     // assassin positions
     const assassins = shuffle(figures.filter(figure => figure.faction === 'assassin'))
@@ -643,40 +643,48 @@ const getTeamsWithMaxScore = () => {
     return Object.keys(teams).filter(team => teams[team].score?.points === maxPoints)
 }
 
-const switchFaction = (figure, faction, switchTeam = true) => {
-    if (figure.faction === faction) {
-        return
-    }
+const switchFaction = (figures, faction, switchTeam = true) => {
+    let sortNoTeamPlayers = false
 
-    if (figure.faction) {
-        factions[figure.faction].size--
-    }
-    figure.faction = faction
-    figure.currentSprite = factions[faction]?.sprites?.[factions[faction]?.size % factions[faction]?.sprites.length] || figure.defaultSprite
-    figure.maxSpeed = factions[faction]?.maxSpeed || defaultMaxSpeed
-    if (figure.faction) {
-        factions[figure.faction].size++
-    }
-
-    if (figure.player && switchTeam) {
-        // remove player from old team
-        teams[figure.team ?? 'none'].players = teams[figure.team ?? 'none'].players.filter(p => p !== figure.player)
-
-        // set new team
-        figure.team = factions[faction]?.team
-
-        // add player to new team
-        teams[figure.team ?? 'none'].players.push(figure.player)
-
-        // sort no team players by join time
-        if (!figure.team) {
-            teams.none.players.sort((a, b) => a.joinedTime - b.joinedTime || a.playerId - b.playerId)
+    figures.forEach(figure => {
+        if (figure.faction === faction) {
+            return
         }
 
-        // update team score
-        if (figure.playerId) {
-            updateTeamScore()
+        if (figure.faction) {
+            factions[figure.faction].size--
         }
+        figure.faction = faction
+        figure.currentSprite = factions[faction]?.sprites?.[factions[faction]?.size % factions[faction]?.sprites.length] || figure.defaultSprite
+        figure.maxSpeed = factions[faction]?.maxSpeed || defaultMaxSpeed
+        if (figure.faction) {
+            factions[figure.faction].size++
+        }
+
+        if (figure.player && switchTeam) {
+            // remove player from old team
+            teams[figure.team ?? 'none'].players = teams[figure.team ?? 'none'].players.filter(p => p !== figure.player)
+
+            // set new team
+            figure.team = factions[faction]?.team
+
+            // add player to new team
+            teams[figure.team ?? 'none'].players.push(figure.player)
+
+            // sort no team players by join time
+            if (!figure.team) {
+                sortNoTeamPlayers = true
+            }
+
+            // update team score
+            if (figure.playerId) {
+                updateTeamScore()
+            }
+        }
+    })
+
+    if (sortNoTeamPlayers) {
+        teams.none.players.sort((a, b) => a.joinedTime - b.joinedTime || a.playerId - b.playerId)
     }
 }
 
