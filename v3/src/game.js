@@ -130,7 +130,6 @@ const factions = {
         games: new Set([games.vip]),
         label: 'Girls',
         maxSpeed: defaultMaxSpeed,
-        playerFaction: true,
         sprites: ['girl'],
         size: 0,
         team: 'red'
@@ -139,7 +138,6 @@ const factions = {
         games: new Set([games.vip]),
         label: 'Boys',
         maxSpeed: guardSpeedFactor * defaultMaxSpeed,
-        playerFaction: true,
         sprites: ['boy'],
         size: 0,
         team: 'blue'
@@ -147,14 +145,12 @@ const factions = {
     killer: {
         games: new Set([games.rampage]),
         label: 'Killers',
-        playerFaction: true,
         size: 0,
         team: 'red'
     },
     sniper: {
         games: new Set([games.rampage]),
         label: 'Snipers',
-        playerFaction: true,
         sprites: ['sniper'],
         size: 0,
         team: 'blue'
@@ -163,7 +159,6 @@ const factions = {
         games: new Set([games.vip]),
         label: 'VIPs',
         maxSpeed: vipSpeedFactor * defaultMaxSpeed,
-        playerFaction: false,
         sprites: ['mother', 'father', 'grandpa'],
         size: 0
     }
@@ -589,13 +584,11 @@ function initStage(nextStage) {
         game = undefined
         roundCounter = 0
 
-        figuresPool.difference(figuresInitialPool).forEach(figure => {
+        new Set(figures).difference(figuresInitialPool).forEach(figure => {
             destroyContainer(app, figure)
         })
 
         figuresPool = new Set(figuresInitialPool)
-
-        figures.filter(figure => figure.type === 'crosshair').forEach(figure => destroyContainer(app, figure))
 
         players.forEach(player => initPlayerScore(player.score))
         Object.values(teams).forEach(team => { if (team.score) team.score.points = 0 })
@@ -612,11 +605,6 @@ function initStage(nextStage) {
                         figuresPool.delete(f)
                     }
                 })
-                // Swap factions
-                const killers = Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter' && f.faction === 'killer')
-                const snipers = Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter' && f.faction === 'sniper')
-                switchFaction(killers, 'sniper', false)
-                switchFaction(snipers, 'killer', false)
             }
         }
     }
@@ -638,6 +626,7 @@ function initStage(nextStage) {
     if (stage === stages.startLobby) {
         const notVips = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.faction !== 'vip')
         notVips.forEach(figure => {
+            figure.currentSprite = 'baby'
             figure.defaultSprite = 'baby'
             figure.visible = false
         })
@@ -647,15 +636,17 @@ function initStage(nextStage) {
             addCrosshairs(figuresPoolArray.filter(figure => figure.playerId && !figureIsBot(figure)), 1)
         }
         if (game === games.rampage) {
-            // Setup snipers every half (not just roundCounter === 1)
-            const killerFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.faction === 'killer')
-            const sniperFigures = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.faction === 'sniper')
-            const ammo = Math.ceil(baseAmmoFactor * killerFigures.length / sniperFigures.length + bonusAmmoFactor * Math.sqrt(maxPlayerFigures / killerFigures.length))
+            // Swap factions
+            const newSniperFigures = figuresPoolArray.filter(figure => figure.faction === 'killer')
+            const newKillerFigures = figuresPoolArray.filter(figure => figure.faction === 'sniper')
+            switchFaction(newSniperFigures, 'sniper', false)
+            switchFaction(newKillerFigures, 'killer', false)
+            const ammo = Math.ceil(baseAmmoFactor * newKillerFigures.length / newSniperFigures.length + bonusAmmoFactor * Math.sqrt(maxPlayerFigures / newKillerFigures.length))
             if (roundCounter === 1) {
-                addSniperFigures(app, sniperFigures, ammo)
+                addSniperFigures(app, newSniperFigures, ammo)
             } else {
                 // Only create crosshairs, replacement NPCs already exist
-                sniperFigures.forEach(f => {
+                newSniperFigures.forEach(f => {
                     const crosshair = createCrosshair({ ...f, x: f.x, y: f.y, ammo })
                     figuresPool.add(crosshair)
                 })
