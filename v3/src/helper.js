@@ -133,9 +133,6 @@ const initFigure = (figure, x, y, direction) => {
         beans: new Set(),
         beansFarted: new Set()
     })
-    if (stage === stages.startLobby) {
-        switchFaction([figure], undefined)
-    }
 }
 
 const initPlayerScore = score => {

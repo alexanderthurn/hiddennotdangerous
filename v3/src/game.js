@@ -595,16 +595,8 @@ function initStage(nextStage) {
 
         figuresPool = new Set(figuresInitialPool)
 
-        figures.filter(figure => figure.type === 'fighter' && figure.faction !== 'vip').forEach(figure => {
-            figure.visible = false
-        })
-
         figures.filter(figure => figure.type === 'crosshair').forEach(figure => destroyContainer(app, figure))
-        figures.filter(figure => figure.type === 'fighter').forEach(figure => {
-            if (figure.faction !== 'vip') {
-                figure.defaultSprite = 'baby'
-            }
-        })
+
         players.forEach(player => initPlayerScore(player.score))
         Object.values(teams).forEach(team => { if (team.score) team.score.points = 0 })
     } else if (stage === stages.game) {
@@ -621,8 +613,10 @@ function initStage(nextStage) {
                     }
                 })
                 // Swap factions
-                switchFaction(Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter' && f.faction === 'killer'), 'sniper', false)
-                switchFaction(Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter' && f.faction === 'sniper'), 'killer', false)
+                const killers = Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter' && f.faction === 'killer')
+                const snipers = Array.from(figuresPool).filter(f => f.playerId && f.type === 'fighter' && f.faction === 'sniper')
+                switchFaction(killers, 'sniper', false)
+                switchFaction(snipers, 'killer', false)
             }
         }
     }
@@ -641,7 +635,14 @@ function initStage(nextStage) {
 
     let figuresPoolArray = Array.from(figuresPool)
 
-    if (stage === stages.game) {
+    if (stage === stages.startLobby) {
+        const notVips = figuresPoolArray.filter(figure => figure.type === 'fighter' && figure.faction !== 'vip')
+        notVips.forEach(figure => {
+            figure.defaultSprite = 'baby'
+            figure.visible = false
+        })
+        switchFaction(notVips, undefined)
+    } else if (stage === stages.game) {
         if (roundCounter === 1 && game === games.race) {
             addCrosshairs(figuresPoolArray.filter(figure => figure.playerId && !figureIsBot(figure)), 1)
         }
