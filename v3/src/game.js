@@ -589,7 +589,7 @@ function initStage(nextStage) {
             destroyContainer(app, figure)
         })
 
-        //figuresPoolSet = new Set(figuresInitialPoolSet)
+        figuresPoolSet.clear()
 
         players.forEach(player => initPlayerScore(player.score))
         Object.values(teams).forEach(team => { if (team.score) team.score.points = 0 })
