@@ -584,11 +584,10 @@ function initStage(nextStage) {
         game = undefined
         roundCounter = 0
 
-        figuresSet = new Set(figures)
-        figuresSet.union(figuresPoolSet).difference(figuresInitialPoolSet).forEach(figure => {
+        // Destroy pool figures not in initial pool
+        figuresPoolSet.difference(figuresInitialPoolSet).forEach(figure => {
             destroyContainer(app, figure)
         })
-
         figuresPoolSet.clear()
 
         players.forEach(player => initPlayerScore(player.score))
@@ -599,13 +598,6 @@ function initStage(nextStage) {
         // Rampage: faction swap and half tracking
         if (game === games.rampage) {
             if (roundCounter > 1) {
-                // Destroy old crosshairs from pool before swap
-                /*Array.from(figuresPoolSet).forEach(f => {
-                    if (f.type === 'crosshair') {
-                        destroyContainer(app, f)
-                        figuresPoolSet.delete(f)
-                    }
-                })*/
                 const allFigures = [...Array.from(figuresInitialPoolSet), ...Array.from(figuresPoolSet)]
                 const newSniperFigures = allFigures.filter(figure => figure.faction === 'killer')
                 const newKillerFigures = allFigures.filter(figure => figure.faction === 'sniper')
@@ -615,7 +607,13 @@ function initStage(nextStage) {
         }
     }
 
-    figures.filter(figure => figure.type === 'cloud').forEach(cloud => destroyContainer(app, cloud))
+    // Destroy figures not in pool
+    figuresSet = new Set(figures)
+    figuresSet.difference(figuresPoolSet).difference(figuresInitialPoolSet).forEach(figure => {
+        destroyContainer(app, figure)
+    })
+    figuresSet.clear()
+    figures = []
 
     if (stage === stages.startLobby) {
         stopMusicPlaylist();
@@ -671,8 +669,6 @@ function initStage(nextStage) {
 
     figuresInitialPool = Array.from(figuresInitialPoolSet)
     let figuresPool = Array.from(figuresPoolSet)
-
-    figures = []
 
     // Figuren aus Pool laden
     if (stage === stages.startLobby) {
@@ -777,7 +773,7 @@ function gameLoop() {
         })
 
         // delete dead crosshair and cloud figures
-        // TODO. refactor
+        // TODO refactor
         figures.filter(f => (f.type === 'cloud' || f.type === 'crosshair') && f.isDead).forEach(f => {
             destroyContainer(app, f)
             figuresSet.delete(f)
