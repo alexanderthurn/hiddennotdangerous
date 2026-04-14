@@ -1430,6 +1430,8 @@ const addSniperFigures = (app, sniperFigures, ammo) => {
         const figure = createFigure(app, spritesheet, defaultFigureProps())
         figuresPool.add(crosshair)
         figuresPool.add(figure)
+        //figures.push(crosshair)
+        //figures.push(figure)
     })
 }
 

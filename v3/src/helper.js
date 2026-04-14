@@ -653,7 +653,9 @@ const switchFaction = (figures, faction, switchTeam = true) => {
         }
         figure.faction = faction
         figure.currentSprite = factions[faction]?.sprites?.[factions[faction]?.size % factions[faction]?.sprites.length] || figure.defaultSprite
-        figure.maxSpeed = factions[faction]?.maxSpeed || defaultMaxSpeed
+        if (figure.type !== 'crosshair') {
+            figure.maxSpeed = factions[faction]?.maxSpeed || defaultMaxSpeed
+        }
         if (figure.faction) {
             factions[figure.faction].size++
         }
