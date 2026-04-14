@@ -463,11 +463,15 @@ const distanceToBorder = (x, y, angleX, angleY) => {
     return Math.min(!isNaN(tX) ? tX : Infinity, !isNaN(tY) ? tY : Infinity)
 }
 
-function cropXY(x, y, level) {
-    if (x > level.width - level.padding[2]) x = level.width - level.padding[2]
-    if (y > level.height - level.padding[3]) y = level.height - level.padding[3]
-    if (x < level.padding[0]) x = level.padding[0]
-    if (y < level.padding[1]) y = level.padding[1]
+function cropXY(x, y, level, type) {
+    x = Math.min(level.width - level.padding[2], x)
+    y = Math.min(level.height - level.padding[3], y)
+    x = Math.max(level.padding[0], x)
+    if (type === 'crosshair') {
+        y = Math.max(0, y)
+    } else {
+        y = Math.max(level.padding[1], y)
+    }
     return [x, y]
 }
 

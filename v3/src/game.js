@@ -1005,7 +1005,7 @@ function updateGame(figures, dt, dtProcessed) {
         }
 
         if (xyNew) {
-            [f.x, f.y] = cropXY(xyNew.x, xyNew.y, level)
+            [f.x, f.y] = cropXY(xyNew.x, xyNew.y, level, f.type)
         }
     })
 
