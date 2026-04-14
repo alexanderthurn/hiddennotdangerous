@@ -356,6 +356,12 @@ const addFigure = figure => {
     figuresSet.add(figure)
 }
 
+const removeFigure = figure => {
+    figures.splice(figures.indexOf(figure), 1)
+    figuresSet.delete(figure)
+    destroyContainer(app, figure)
+}
+
 const addAnimation = (container, callback) => {
     container.tickerCallback = callback
     app.ticker.add(callback)
