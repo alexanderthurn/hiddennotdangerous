@@ -950,10 +950,10 @@ function updateGame(figures, dt, dtProcessed) {
     })
 
     if (stage === stages.startLobby || stage === stages.gameLobby) {
-        const playersMinimum = figures.filter(f => f.playerId?.[0] === 'b' && f.type === 'fighter').length > 0 ? 1 : 2
-        const playersPossible = figures.filter(f => f.playerId && f.playerId[0] !== 'b' && f.type === 'fighter')
+        const playersMinimum = figures.filter(f => figureIsBot(f) && f.type === 'fighter').length > 0 ? 1 : 2
+        const playersPossible = figures.filter(f => f.playerId && !figureIsBot(f) && f.type === 'fighter')
         const allPlayers = figures.filter(f => f.playerId && f.type === 'fighter')
-        allPlayersSameTeam = Object.values(teams).some(team => team.players.length === allPlayers.length)
+        allPlayersSameTeam = Object.entries(teams).some(([teamId, team]) => teamId !== 'none' && team.players.length === allPlayers.length)
 
         Object.values(buttons).forEach(btn => {
             if (!btn.visible) return

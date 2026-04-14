@@ -26,7 +26,7 @@ const colors = {
     white: 0xFFFFFF,
     yellow: 0xFFFF00
 }
-const playerColors = new Set([colors.blue, colors.black, colors.cyan, colors.darkOrange, colors.deepPink, colors.dodgerBlue, colors.electricIndigo, colors.magenta, colors.red, colors.yellow])
+const playerColors = new Set([colors.blue, colors.cyan, colors.darkOrange, colors.deepPink, colors.dodgerBlue, colors.electricIndigo, colors.magenta, colors.red, colors.yellow])
 
 const getPlayerColor = () => {
     const playerColorsUsage = new Map();
