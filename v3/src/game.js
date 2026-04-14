@@ -48,8 +48,8 @@ const moveScoreToPlayerDuration = 1000
 const showFinalWinnerDuration = 5000
 
 // --- Figure Pools ---
-window.figuresInitialPool = new Set(); window.figuresPool = new Set()
-window.figures = []
+window.figuresInitialPoolSet = new Set(); window.figuresPoolSet = new Set(); window.figuresSet = new Set()
+window.figuresInitialPool = []; window.figuresPool = []; window.figures = []
 
 // --- Game Constants ---
 const maxPlayerFigures = 32
@@ -584,11 +584,12 @@ function initStage(nextStage) {
         game = undefined
         roundCounter = 0
 
-        new Set(figures).union(figuresPool).difference(figuresInitialPool).forEach(figure => {
+        figuresSet = new Set(figures)
+        figuresSet.union(figuresPoolSet).difference(figuresInitialPoolSet).forEach(figure => {
             destroyContainer(app, figure)
         })
 
-        //figuresPool = new Set(figuresInitialPool)
+        //figuresPoolSet = new Set(figuresInitialPoolSet)
 
         players.forEach(player => initPlayerScore(player.score))
         Object.values(teams).forEach(team => { if (team.score) team.score.points = 0 })
@@ -599,13 +600,13 @@ function initStage(nextStage) {
         if (game === games.rampage) {
             if (roundCounter > 1) {
                 // Destroy old crosshairs from pool before swap
-                /*Array.from(figuresPool).forEach(f => {
+                /*Array.from(figuresPoolSet).forEach(f => {
                     if (f.type === 'crosshair') {
                         destroyContainer(app, f)
-                        figuresPool.delete(f)
+                        figuresPoolSet.delete(f)
                     }
                 })*/
-                const allFigures = [...Array.from(figuresInitialPool), ...Array.from(figuresPool)]
+                const allFigures = [...Array.from(figuresInitialPoolSet), ...Array.from(figuresPoolSet)]
                 const newSniperFigures = allFigures.filter(figure => figure.faction === 'killer')
                 const newKillerFigures = allFigures.filter(figure => figure.faction === 'sniper')
                 switchFaction(newSniperFigures, 'sniper', false)
@@ -626,11 +627,11 @@ function initStage(nextStage) {
 
     // Figuren in Pool laden
 
-    let figuresInitialPoolArray = Array.from(figuresInitialPool)
-    //let figuresPoolArray = Array.from(figuresPool)
+    let figuresInitialPool = Array.from(figuresInitialPoolSet)
+    //let figuresPool = Array.from(figuresPoolSet)
 
     if (stage === stages.startLobby) {
-        const notVips = figuresInitialPoolArray.filter(figure => figure.type === 'fighter' && figure.faction !== 'vip')
+        const notVips = figuresInitialPool.filter(figure => figure.type === 'fighter' && figure.faction !== 'vip')
         notVips.forEach(figure => {
             figure.currentSprite = 'baby'
             figure.defaultSprite = 'baby'
@@ -640,18 +641,18 @@ function initStage(nextStage) {
     } else if (stage === stages.game) {
         if (roundCounter === 1) {
             if (game === games.race) {
-                addCrosshairs(figuresInitialPoolArray.filter(figure => figure.playerId && !figureIsBot(figure)), 1)
+                addCrosshairs(figuresInitialPool.filter(figure => figure.playerId && !figureIsBot(figure)), 1)
             } else if (game === games.rampage) {
-                const killerFigures = figuresInitialPoolArray.filter(figure => figure.faction === 'killer')
-                const sniperFigures = figuresInitialPoolArray.filter(figure => figure.faction === 'sniper')
+                const killerFigures = figuresInitialPool.filter(figure => figure.faction === 'killer')
+                const sniperFigures = figuresInitialPool.filter(figure => figure.faction === 'sniper')
                 addSniperFigures(app, sniperFigures, Math.ceil(baseAmmoFactor * killerFigures.length / sniperFigures.length + bonusAmmoFactor * Math.sqrt(maxPlayerFigures / killerFigures.length)))
                 addSniperFigures(app, killerFigures, Math.ceil(baseAmmoFactor * sniperFigures.length / killerFigures.length + bonusAmmoFactor * Math.sqrt(maxPlayerFigures / sniperFigures.length)))
             }
         }
 
         if (game === games.rampage) {
-            /*const killerFigures = figuresPoolArray.filter(figure => figure.faction === 'killer')
-            const sniperFigures = figuresPoolArray.filter(figure => figure.faction === 'sniper')
+            /*const killerFigures = figuresPool.filter(figure => figure.faction === 'killer')
+            const sniperFigures = figuresPool.filter(figure => figure.faction === 'sniper')
 
             const ammo = Math.ceil(baseAmmoFactor * killerFigures.length / sniperFigures.length + bonusAmmoFactor * Math.sqrt(maxPlayerFigures / killerFigures.length))
             if (roundCounter === 1) {
@@ -660,7 +661,7 @@ function initStage(nextStage) {
                 // Only create crosshairs, replacement NPCs already exist
                 sniperFigures.forEach(f => {
                     const crosshair = createCrosshair({ ...f, x: f.x, y: f.y, ammo })
-                    figuresPool.add(crosshair)
+                    figuresPoolSet.add(crosshair)
                 })
             }*/
 
@@ -668,47 +669,36 @@ function initStage(nextStage) {
         }
     }
 
-    figuresInitialPoolArray = Array.from(figuresInitialPool)
-    let figuresPoolArray = Array.from(figuresPool)
+    figuresInitialPool = Array.from(figuresInitialPoolSet)
+    let figuresPool = Array.from(figuresPoolSet)
 
     figures = []
 
     // Figuren aus Pool laden
     if (stage === stages.startLobby) {
-        figures = figures.concat(figuresInitialPoolArray.filter(figure => figure.type === 'fighter' && figure.playerId && figure.faction !== 'vip'))
+        figures = figures.concat(figuresInitialPool.filter(figure => figure.type === 'fighter' && figure.playerId && figure.faction !== 'vip'))
     } else if (game === games.vip) {
-        figures = figures.concat(figuresInitialPoolArray.filter(figure => figure.type === 'fighter'))
+        figures = figures.concat(figuresInitialPool.filter(figure => figure.type === 'fighter'))
     } else {
-        figures = figures.concat(figuresInitialPoolArray.filter(figure => figure.type === 'fighter' && figure.faction !== 'vip'))
+        figures = figures.concat(figuresInitialPool.filter(figure => figure.type === 'fighter' && figure.faction !== 'vip'))
     }
     if (game === games.race) {
-        figures = figures.concat(figuresPoolArray.filter(figure => figure.type === 'crosshair'))
+        figures = figures.concat(figuresPool.filter(figure => figure.type === 'crosshair'))
     }
     if (game === games.rampage) {
-        const sniperTeam = figuresInitialPoolArray.find(figure => figure.faction === 'sniper')?.team
-        const figuresToUse = figuresPoolArray.filter(figure => figure.type === 'crosshair' && figure.team === sniperTeam)
-            .concat(figuresPoolArray.filter(figure => figure.type === 'fighter' && !figure.playerId).slice(0, teams[sniperTeam]?.players?.length ?? 0))
+        const sniperTeam = figuresInitialPool.find(figure => figure.faction === 'sniper')?.team
+        const figuresToUse = figuresPool.filter(figure => figure.type === 'crosshair' && figure.team === sniperTeam)
+            .concat(figuresPool.filter(figure => figure.type === 'fighter' && !figure.playerId).slice(0, teams[sniperTeam]?.players?.length ?? 0))
         console.log('figuresToUse', figuresToUse)
-        figuresPoolArray.forEach(figure => {
-            if (new Set(figuresToUse).has(figure)) {
-                figure.visible = true
-            } else {
-                figure.visible = false
-            }
-        });
         figures = figures.concat(figuresToUse)
     }
     if (game === games.food) {
-        figures = figures.concat(figuresInitialPoolArray.filter(figure => figure.type === 'bean'))
+        figures = figures.concat(figuresInitialPool.filter(figure => figure.type === 'bean'))
     }
+
+    figuresSet = new Set(figures)
 
     // Figuren initialisieren
-
-    if (stage === stages.startLobby || stage === stages.gameLobby) {
-        figures.filter(figure => figure.type === 'fighter' && figure.faction !== 'vip').forEach(figure => {
-            figure.visible = true
-        })
-    }
 
     if (stage === stages.gameLobby) {
         figures.filter(figure => !figure.playerId).forEach(figure => initRandomPositionFigure(figure))
@@ -787,8 +777,10 @@ function gameLoop() {
         })
 
         // delete dead crosshair and cloud figures
+        // TODO. refactor
         figures.filter(f => (f.type === 'cloud' || f.type === 'crosshair') && f.isDead).forEach(f => {
             destroyContainer(app, f)
+            figuresSet.delete(f)
         })
         figures = figures.filter(f => !((f.type === 'cloud' || f.type === 'crosshair') && f.isDead))
 
@@ -1211,8 +1203,8 @@ function handleInput(players, figures, dtProcessed) {
                 figure = figures.find(f => !f.playerId && f.type === 'fighter')
                 if (!figure) {
                     // load from pool
-                    figure = Array.from(figuresInitialPool).find(f => !f.playerId && f.type === 'fighter')
-                    figures.push(figure)
+                    figure = Array.from(figuresInitialPoolSet).find(f => !f.playerId && f.type === 'fighter')
+                    addFigure(figure)
                     initRandomPositionFigure(figure)
                     figure.visible = true
                 }

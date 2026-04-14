@@ -612,7 +612,7 @@ const addShootingRange = (app, props, lobbyContainer) => {
             f.isAiming = true
             f.justShot = true
             const crosshair = createCrosshair({ ...f, x: f.x, y: f.y })
-            figures.push(crosshair)
+            addFigure(crosshair)
         }
     })
     const insideRect = new PIXI.Rectangle(newXInside, newYInside, widthInside, heightInside)
@@ -668,7 +668,7 @@ const addPracticeTrack = (app, props, lobbyContainer) => {
         if (!f.isInRace) {
             f.isInRace = true
             const crosshair = createCrosshair({ ...f, x: f.x, y: f.y })
-            figures.push(crosshair)
+            addFigure(crosshair)
         }
     })
     const startRect = new PIXI.Rectangle(trackX, trackY, startZoneWidth, height)
@@ -1069,7 +1069,7 @@ const addFood = (app, texture, props) => {
     marker.label = 'marker'
 
     food.addChild(plate, meal, marker)
-    figuresInitialPool.add(food)
+    figuresInitialPoolSet.add(food)
     levelContainer.addChild(food)
     debugLayer.attach(marker)
 
@@ -1242,6 +1242,11 @@ const createShadow = (spriteOriginal, scaleFactor, skewFactor, zIndex) => {
 }
 
 const animateFigure = (figure, spritesheet) => {
+    if (!figuresSet.has(figure)) {
+        figure.visible = false
+        return
+    }
+    figure.visible = true
     const deg = rad2limiteddeg(figure.direction)
     const body = figure.getChildByLabel('body')
     const marker = figure.getChildByLabel('marker')
@@ -1406,7 +1411,7 @@ const createFigure = (app, spritesheet, props) => {
 const addCrosshairs = (sniperFigures, ammo) => {
     sniperFigures.forEach(f => {
         const crosshair = createCrosshair({ ...f, x: f.x, y: f.y, ammo })
-        figuresPool.add(crosshair)
+        figuresPoolSet.add(crosshair)
     })
 }
 
@@ -1428,10 +1433,8 @@ const addSniperFigures = (app, sniperFigures, ammo) => {
 
         // NPC replacement in level
         const figure = createFigure(app, spritesheet, defaultFigureProps())
-        figuresPool.add(crosshair)
-        figuresPool.add(figure)
-        //figures.push(crosshair)
-        //figures.push(figure)
+        figuresPoolSet.add(crosshair)
+        figuresPoolSet.add(figure)
     })
 }
 
@@ -1440,7 +1443,7 @@ const addFiguresInitialPool = (app) => {
     for (let i = 0; i < maxPlayerFigures; i++) {
         const figure = createFigure(app, spritesheet, defaultFigureProps())
         figure.visible = false
-        figuresInitialPool.add(figure)
+        figuresInitialPoolSet.add(figure)
     }
     for (let i = 0; i < numberVIPs; i++) {
         const figure = createFigure(app, spritesheet, defaultFigureProps())
@@ -1449,7 +1452,7 @@ const addFiguresInitialPool = (app) => {
         app.ticker.add(() => {
             figure.visible = game === games.vip
         })
-        figuresInitialPool.add(figure)
+        figuresInitialPoolSet.add(figure)
     }
 }
 
@@ -1494,7 +1497,7 @@ const createCrosshair = props => {
     crosshairLayer.attach(crosshair)
 
     addAnimation(crosshair, () => {
-        crosshair.visible = crosshair.ammo > 0
+        crosshair.visible = figuresSet.has(crosshair) && crosshair.ammo > 0
         ammoText.x = crosshair.width / 2
         ammoText.y = crosshair.height / 2
         ammoText.visible = crosshair.ammo < Infinity
@@ -1768,7 +1771,7 @@ const addFartCloud = (props) => {
     })
     cloud.tint = colors.lightBrown
     cloud.animationSpeed = 0.1
-    figures.push(cloud)
+    addFigure(cloud)
     levelContainer.addChild(cloud)
     cloudLayer.attach(cloud)
 

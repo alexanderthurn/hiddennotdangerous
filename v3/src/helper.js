@@ -351,6 +351,11 @@ const loadButton = (btn, aimLoadingPercentage) => {
     }
 }
 
+const addFigure = figure => {
+    figures.push(figure)
+    figuresSet.add(figure)
+}
+
 const addAnimation = (container, callback) => {
     container.tickerCallback = callback
     app.ticker.add(callback)
@@ -827,7 +832,7 @@ Object.assign(window, {
     getMusicVolume, setMusicVolume, getSfxVolume, setSfxVolume,
     playPlaylist, stopPlaylist, stopMusicPlaylist, playMusicPlaylist,
     playKillingSounds, getRoundCount, setRoundCount, toggleRounds, toggleMusicVolume, toggleSfxVolume,
-    voteGame, loadButton, addAnimation, destroyContainer,
+    voteGame, loadButton, addFigure, addAnimation, destroyContainer,
     createLevel, getRandomXY, getRandomXYInRectangle, getRandomXYInCircle,
     getCloseRandomXY, cropXY, reduceBounds,
     getWalkRectLength, getIntervalPoint, getLinePoint,
