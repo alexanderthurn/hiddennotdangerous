@@ -842,7 +842,7 @@ Object.assign(window, {
     getMusicVolume, setMusicVolume, getSfxVolume, setSfxVolume,
     playPlaylist, stopPlaylist, stopMusicPlaylist, playMusicPlaylist,
     playKillingSounds, getRoundCount, setRoundCount, toggleRounds, toggleMusicVolume, toggleSfxVolume,
-    voteGame, loadButton, addFigure, addAnimation, destroyContainer,
+    voteGame, loadButton, addFigure, removeFigure, addAnimation, destroyContainer,
     createLevel, getRandomXY, getRandomXYInRectangle, getRandomXYInCircle,
     getCloseRandomXY, cropXY, reduceBounds,
     getWalkRectLength, getIntervalPoint, getLinePoint,
