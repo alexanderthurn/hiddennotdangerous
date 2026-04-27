@@ -950,7 +950,7 @@ const animateWinningCeremony = winnerText => {
         if (dt2 >= 0 && dt2 < moveScoreToPlayerDuration) {
             const lp = easeInOutCubic(dt2 / moveScoreToPlayerDuration)
 
-            f.player.score = Object.assign(f.player.score, getLinePoint(lp, { x: getScoreDefaultX(f), y: f.player.score.yDefault }, f))
+            f.player.score = Object.assign(f.player.score, getLinePoint(lp, { x: getScoreDefaultX(f), y: f.player.score.yDefault }, { x: f.x, y: getFigureCenterY(f) }))
 
             if (lastFinalWinnerPlayerIds?.has(f.playerId)) {
                 f.player.score.scale = getIntervalPoint(lp, 1, 2) * getIntervalPoint(lp, 1, 2)
@@ -961,7 +961,7 @@ const animateWinningCeremony = winnerText => {
             glow.visible = isWinner
         } else if (dt2 >= moveScoreToPlayerDuration && dt3 < showFinalWinnerDuration) {
             f.player.score.x = f.x
-            f.player.score.y = f.y
+            f.player.score.y = getFigureCenterY(f)
             if (lastFinalWinnerPlayerIds?.has(f.playerId)) {
                 f.player.score.scale = 4
             } else {
@@ -971,7 +971,7 @@ const animateWinningCeremony = winnerText => {
         } else if (dt4 >= 0 && dt4 < moveScoreToPlayerDuration) {
             const lp = easeInOutCubic(dt4 / moveScoreToPlayerDuration)
 
-            f.player.score = Object.assign(f.player.score, getLinePoint(lp, f, { x: getScoreDefaultX(f), y: f.player.score.yDefault }))
+            f.player.score = Object.assign(f.player.score, getLinePoint(lp, { x: f.x, y: getFigureCenterY(f) }, { x: getScoreDefaultX(f), y: f.player.score.yDefault }))
 
             f.player.score.scale = f.player.score.scale = getIntervalPoint(lp, 2, 1)
             if (lastFinalWinnerPlayerIds) {
@@ -1240,6 +1240,8 @@ const createShadow = (spriteOriginal, scaleFactor, skewFactor, zIndex) => {
     figureShadowLayer.attach(shadow)
     return shadow
 }
+
+const getFigureCenterY = figure => figure.y + figure.getChildByLabel('body').y
 
 const animateFigure = (figure, spritesheet) => {
     if (!figuresSet.has(figure)) {
