@@ -586,7 +586,11 @@ function initStage(nextStage) {
 
         // Destroy pool figures not in initial pool
         figuresPoolSet.difference(figuresInitialPoolSet).forEach(figure => {
-            destroyContainer(app, figure)
+            if (figure.type === 'fighter') {
+                recycleFighter(figure)
+            } else {
+                destroyContainer(app, figure)
+            }
         })
         figuresPoolSet.clear()
 
@@ -610,7 +614,11 @@ function initStage(nextStage) {
     // Destroy figures not in pool
     figuresSet = new Set(figures)
     figuresSet.difference(figuresPoolSet).difference(figuresInitialPoolSet).forEach(figure => {
-        destroyContainer(app, figure)
+        if (figure.type === 'fighter') {
+            recycleFighter(figure)
+        } else {
+            destroyContainer(app, figure)
+        }
     })
     figuresSet.clear()
     figures = []

@@ -1376,8 +1376,16 @@ const createAttackArc = figure => {
     return attackArcContainer
 }
 
+const fighterPool = []
+
 const createFigure = (app, spritesheet, props) => {
-    let figure = new PIXI.Container({ sortableChildren: false });
+    let figure = fighterPool.pop()
+    if (figure) {
+        figure = Object.assign(figure, props)
+        return figure
+    }
+
+    figure = new PIXI.Container({ sortableChildren: false });
     figure = Object.assign(figure, props)
 
     const body = new PIXI.AnimatedSprite(spritesheet.animations.baby_down)
@@ -1408,6 +1416,13 @@ const createFigure = (app, spritesheet, props) => {
     return figure
 }
 
+const recycleFighter = (figure) => {
+    figure.visible = false
+    figure.playerId = null
+    figure.player = null
+    fighterPool.push(figure)
+}
+
 const addCrosshairs = (sniperFigures, ammo) => {
     sniperFigures.forEach(f => {
         const crosshair = createCrosshair({ ...f, x: f.x, y: f.y, ammo })
@@ -1420,7 +1435,6 @@ const defaultFigureProps = () => ({
     maxSpeed: defaultMaxSpeed,
     attackDuration: 500,
     attackBreakDuration: 2000,
-    points: 0,
     attackDistance: 80,
     attackAngle: 90,
     type: 'fighter',
@@ -1861,7 +1875,7 @@ Object.assign(window, {
     animateGrass, createBackgroundSprite, addGrass, addLevelBoundary, addLevelDecoration,
     createSpriteWithShadowContainer, createShadow,
     animateFigure, figureMarker, animateFigureMarker, createFigureMarker,
-    animateAttackArc, createAttackArc, createFigure,
+    animateAttackArc, createAttackArc, createFigure, recycleFighter,
     addCrosshairs, defaultFigureProps, addSniperFigures, addFiguresInitialPool,
     createCrosshair, addOverlay, animateCountdown, createCountdown,
     animateRoundDisplay, addRoundDisplay, getRoundDisplayNumber, isNewRoundStart,
