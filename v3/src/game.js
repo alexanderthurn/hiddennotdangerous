@@ -1007,7 +1007,7 @@ function updateGame(figures, dt, dtProcessed) {
     })
 
     // eat beans
-    if (stage !== stages.startLobby && game === games.food) {
+    if (game === games.food) {
         let playerFigures = figures.filter(f => f.playerId && f.type === 'fighter');
         figures.filter(b => b.type === 'bean').forEach(b => {
             playerFigures.forEach(fig => {
@@ -1027,7 +1027,7 @@ function updateGame(figures, dt, dtProcessed) {
         const scale = 1 - (dtProcessed - startTime) / (game.countdown * 1000)
         circleOfDeath.radius = scale * circleOfDeath.startRadius
         figuresAlive.filter(f => f.type === 'fighter').forEach(f => {
-            if (/*level.scale * level.scale **/ squaredDistance(f.x, f.y, level.width / 2, level.height / 2) > circleOfDeath.radius * circleOfDeath.radius) {
+            if (squaredDistance(f.x, f.y, level.width / 2, level.height / 2) > circleOfDeath.radius * circleOfDeath.radius) {
                 killFigure(f)
             }
         })
@@ -1120,7 +1120,7 @@ function updateGame(figures, dt, dtProcessed) {
         }
         if (f.died) {
             playAudio(soundDeathPool)
-            if (stage === stages.startLobby || game === games.battleRoyale || game === games.food) {
+            if (game === games.food) {
                 numberKilledFigures++
                 killTime = dtProcessed
             }
