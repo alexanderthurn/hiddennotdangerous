@@ -60,8 +60,7 @@ const defaultMaxSpeed = 0.12
 const deadDuration = 3000
 const beanAttackDuration = 800
 const fartGrowDuration = 2000
-const baseAmmoFactor = 2
-const bonusAmmoFactor = 0.5
+const baseAmmoFactor = 3
 const detectRadius = 200
 const raceSpeedMultiplier = 2.2
 const guardSpeedFactor = 0.75
@@ -425,7 +424,7 @@ Object.assign(window, {
     keyboards, fpsMinForEffects, dtFix, moveNewPlayerDuration, moveScoreToPlayerDuration,
     showFinalWinnerDuration, maxPlayerFigures, numberGuards, numberVIPs, numberBots,
     defaultMaxSpeed, deadDuration, beanAttackDuration, fartGrowDuration,
-    baseAmmoFactor, bonusAmmoFactor, detectRadius, raceSpeedMultiplier,
+    baseAmmoFactor, detectRadius, raceSpeedMultiplier,
     guardSpeedFactor, vipSpeedFactor, cloudDecayRate, cloudMinSize, cloudOffset,
     npcArrivalThreshold, npcInitialWalkDelay, lobbyStartDelay, multikillTimeWindow,
     stages, mostFigures, games, factions, teams, audio,
@@ -642,8 +641,9 @@ function initStage(nextStage) {
             } else if (game === games.rampage) {
                 const killerFigures = figuresInitialPool.filter(figure => figure.faction === 'killer')
                 const sniperFigures = figuresInitialPool.filter(figure => figure.faction === 'sniper')
-                addSniperFigures(app, sniperFigures, Math.ceil(baseAmmoFactor * killerFigures.length / sniperFigures.length + bonusAmmoFactor * Math.sqrt(maxPlayerFigures / killerFigures.length)))
-                addSniperFigures(app, killerFigures, Math.ceil(baseAmmoFactor * sniperFigures.length / killerFigures.length + bonusAmmoFactor * Math.sqrt(maxPlayerFigures / sniperFigures.length)))
+                const totalAmmo = baseAmmoFactor * Math.max(killerFigures.length, sniperFigures.length)
+                addSniperFigures(app, sniperFigures, Math.ceil(totalAmmo / sniperFigures.length))
+                addSniperFigures(app, killerFigures, Math.ceil(totalAmmo / killerFigures.length))
             }
         }
     }
