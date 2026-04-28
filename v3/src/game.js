@@ -580,6 +580,14 @@ function initStage(nextStage) {
     spinningWheel.finishTime = undefined
 
     if (stage === stages.startLobby) {
+        stopMusicPlaylist()
+    } else if (stage === stages.game) {
+        playMusicPlaylist(musicGame, true)
+    }
+
+    Object.values(buttons).forEach(button => button.loadingPercentage = 0)
+
+    if (stage === stages.startLobby) {
         game = undefined
         roundCounter = 0
 
@@ -591,19 +599,6 @@ function initStage(nextStage) {
 
         players.forEach(player => initPlayerScore(player.score))
         Object.values(teams).forEach(team => { if (team.score) team.score.points = 0 })
-    } else if (stage === stages.game) {
-        roundCounter++
-
-        // Rampage: faction swap and half tracking
-        if (game === games.rampage) {
-            if (roundCounter > 1) {
-                const allFigures = [...Array.from(figuresInitialPoolSet), ...Array.from(figuresPoolSet)]
-                const newSniperFigures = allFigures.filter(figure => figure.faction === 'killer')
-                const newKillerFigures = allFigures.filter(figure => figure.faction === 'sniper')
-                switchFaction(newSniperFigures, 'sniper', false)
-                switchFaction(newKillerFigures, 'killer', false)
-            }
-        }
     }
 
     // Destroy figures not in pool
@@ -613,14 +608,6 @@ function initStage(nextStage) {
     })
     figuresSet.clear()
     figures = []
-
-    if (stage === stages.startLobby) {
-        stopMusicPlaylist();
-    } else if (stage === stages.game) {
-        playMusicPlaylist(musicGame, true);
-    }
-
-    Object.values(buttons).forEach(button => button.loadingPercentage = 0);
 
     // Figuren in Pool laden
 
@@ -635,6 +622,7 @@ function initStage(nextStage) {
         })
         switchFaction(notVips, undefined)
     } else if (stage === stages.game) {
+        roundCounter++
         if (roundCounter === 1) {
             if (game === games.race) {
                 addCrosshairs(figuresInitialPool.filter(figure => figure.playerId && !figureIsBot(figure)), 1)
@@ -644,6 +632,15 @@ function initStage(nextStage) {
                 const totalAmmo = baseAmmoFactor * Math.max(killerFigures.length, sniperFigures.length)
                 addSniperFigures(app, sniperFigures, Math.ceil(totalAmmo / sniperFigures.length))
                 addSniperFigures(app, killerFigures, Math.ceil(totalAmmo / killerFigures.length))
+            }
+        } else {
+            // Rampage: faction swap and half tracking
+            if (game === games.rampage) {
+                const allFigures = [...Array.from(figuresInitialPoolSet), ...Array.from(figuresPoolSet)]
+                const newSniperFigures = allFigures.filter(figure => figure.faction === 'killer')
+                const newKillerFigures = allFigures.filter(figure => figure.faction === 'sniper')
+                switchFaction(newSniperFigures, 'sniper', false)
+                switchFaction(newKillerFigures, 'killer', false)
             }
         }
     }
