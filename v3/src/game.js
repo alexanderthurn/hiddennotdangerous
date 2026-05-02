@@ -581,6 +581,9 @@ function initStage(nextStage) {
 
     if (stage === stages.startLobby) {
         stopMusicPlaylist()
+        if (players.some(p => p.joinedTime >= 0)) {
+            playMusicPlaylist(musicLobby)
+        }
     } else if (stage === stages.game) {
         playMusicPlaylist(musicGame, true)
     }
