@@ -859,6 +859,8 @@ const addPlayerScore = figure => {
 
 const animateTeamScore = teamScore => {
     teamScore.getChildAt(1).text = teamScore.points
+    const glow = teamScore.getChildAt(2)
+    glow.visible = gameOver && finalWinnerTeam === teamScore.teamId
 }
 
 const updateTeamScore = () => {
@@ -871,12 +873,15 @@ const updateTeamScore = () => {
         }
         teamScore.x = x
         const background = teamScore.getChildAt(0)
+        const glow = teamScore.getChildAt(2)
         background.clear()
+        glow.clear()
         teamScore.visible = false
 
         if (team.players.length > 0) {
             const width = (team.players.length + 1) * offx
             background.roundRect(-offx * 0.5, -offx * 0.5, width, offx, 10).fill({ alpha: 0.5, color: colors.white })
+            glow.roundRect(-offx * 0.5 - 6, -offx * 0.5 - 6, width + 12, offx + 12, 14).fill({ color: colors.gold }).roundRect(-offx * 0.5, -offx * 0.5, width, offx, 10).cut()
             team.players.forEach((player, index) => {
                 if (playerIsBot(player)) {
                     background.rect(-24 + (index + 1) * offx, -24, 48, 48).cut()
@@ -890,9 +895,11 @@ const updateTeamScore = () => {
     })
 }
 
-const addTeamScore = team => {
+const addTeamScore = teamId => {
+    const team = teams[teamId]
     const teamScore = new PIXI.Container()
     teamScore.points = 0
+    teamScore.teamId = teamId
     teamScore.y = level.height + 32
     teamScore.visible = false
 
@@ -906,8 +913,12 @@ const addTeamScore = team => {
         scale: { x: 1.1, y: 1.1 },
     })
 
+    const glow = new PIXI.Graphics()
+    glow.filters = [new PIXI.BlurFilter({ strength: 8, quality: 3 })]
+    glow.visible = false
+
     team.score = teamScore
-    teamScore.addChild(background, text)
+    teamScore.addChild(background, text, glow)
     levelContainer.addChild(teamScore)
     scoreLayer.attach(teamScore)
 
@@ -915,8 +926,8 @@ const addTeamScore = team => {
 }
 
 const addTeamScoreOverlay = () => {
-    addTeamScore(teams.red)
-    addTeamScore(teams.blue)
+    addTeamScore('red')
+    addTeamScore('blue')
 }
 
 const animateWinningCeremony = winnerText => {
