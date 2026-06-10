@@ -55,6 +55,7 @@ window.figuresInitialPool = []; window.figuresPool = []; window.figures = []
 const maxPlayerFigures = 32
 const numberGuards = 17
 const numberVIPs = 3
+const numberFartGirls = 10
 const numberBots = getQueryParam('bots') && Number.parseInt(getQueryParam('bots')) || 0
 const defaultMaxSpeed = 0.12
 const deadDuration = 3000
@@ -119,6 +120,12 @@ const games = {
         text: 'VIP',
         countdown: 180,
         walkRectLength: 300
+    },
+    fartBoys: {
+        color: colors.deepPink,
+        text: 'FART BOYS',
+        countdown: 90,
+        sprites: ['boy']
     }
 }
 
@@ -160,7 +167,7 @@ const factions = {
         maxSpeed: vipSpeedFactor * defaultMaxSpeed,
         sprites: ['mother', 'father', 'grandpa'],
         size: 0
-    }
+    },
 }
 
 const teams = {
@@ -422,7 +429,7 @@ app.textStyleController = {
 
 Object.assign(window, {
     keyboards, fpsMinForEffects, dtFix, moveNewPlayerDuration, moveScoreToPlayerDuration,
-    showFinalWinnerDuration, maxPlayerFigures, numberGuards, numberVIPs, numberBots,
+    showFinalWinnerDuration, maxPlayerFigures, numberGuards, numberVIPs, numberFartGirls, numberBots,
     defaultMaxSpeed, deadDuration, beanAttackDuration, fartGrowDuration,
     baseAmmoFactor, detectRadius, raceSpeedMultiplier,
     guardSpeedFactor, vipSpeedFactor, cloudDecayRate, cloudMinSize, cloudOffset,
@@ -624,6 +631,8 @@ function initStage(nextStage) {
             figure.visible = false
         })
         switchFaction(notVips, undefined)
+    } else if (stage === stages.gameLobby && game === games.fartBoys) {
+        addFartBoysNPCBoys(app)
     } else if (stage === stages.game) {
         roundCounter++
         if (roundCounter === 1) {
@@ -655,7 +664,12 @@ function initStage(nextStage) {
     if (stage === stages.startLobby) {
         figures = figures.concat(figuresInitialPool.filter(figure => figure.type === 'fighter' && figure.playerId && figure.faction !== 'vip'))
     } else if (game === games.vip) {
-        figures = figures.concat(figuresInitialPool.filter(figure => figure.type === 'fighter'))
+        figures = figures.concat(figuresInitialPool.filter(figure => figure.type === 'fighter' && figure.defaultSprite !== 'girl'))
+    } else if (game === games.fartBoys) {
+        figures = figures.concat(figuresInitialPool.filter(figure => figure.type === 'fighter' && figure.playerId))
+        const npcBoysToLoad = Math.max(0, maxPlayerFigures - figures.filter(f => f.playerId).length - numberFartGirls)
+        figures = figures.concat(figuresInitialPool.filter(figure => figure.faction === 'vip' && figure.defaultSprite === 'girl'))
+        figures = figures.concat(figuresPool.filter(figure => figure.type === 'fighter' && !figure.playerId && !figure.faction).slice(0, npcBoysToLoad))
     } else {
         figures = figures.concat(figuresInitialPool.filter(figure => figure.type === 'fighter' && figure.faction !== 'vip'))
     }
@@ -700,6 +714,22 @@ function initStage(nextStage) {
         if (stage === stages.game) {
             figures.filter(figure => figure.faction !== 'sniper').forEach(figure => initRandomPositionFigure(figure))
             initSniperPositions(figures.filter(figure => figure.type === 'fighter' && figure.faction === 'sniper'))
+        }
+    } else if (game === games.fartBoys) {
+        initRandomSpriteFigures(figures.filter(figure => figure.playerId))
+        if (stage === stages.game) {
+            const npcFigures = figures.filter(f => !f.playerId)
+            const playerFigures = shuffle(figures.filter(f => f.playerId))
+            npcFigures.forEach(f => {
+                const [x, y] = getRandomXYInRectangle(level.width * 0.25, level.height * 0.25, level.width * 0.5, level.height * 0.5)
+                initFigure(f, x, y, Math.random() * 2 * Math.PI)
+            })
+            playerFigures.forEach((f, i) => {
+                const a = 2 * Math.PI * i / playerFigures.length
+                const x = level.width * 0.5 + level.width * 0.42 * Math.cos(a)
+                const y = level.height * 0.5 + level.height * 0.42 * Math.sin(a)
+                initFigure(f, x, y, angle(x, y, level.width * 0.5, level.height * 0.5))
+            })
         }
     } else if (stage !== stages.gameLobby) {
         figures.forEach(figure => initRandomPositionFigure(figure))
@@ -823,6 +853,12 @@ const handleWinning = () => {
 
     if (game === games.battleRoyale || game === games.food) {
         handleSoloModeWinning(figuresPlayer)
+    } else if (game === games.fartBoys) {
+        handleSoloModeWinning(figuresPlayer, () => {
+            if (figures.filter(f => f.faction === 'vip' && !f.isDead).length === 0) {
+                winRoundFigures([])
+            }
+        })
     } else if (game === games.vip) {
         // players left, quit game
         const assassins = figuresPlayer.filter(f => f.faction === 'assassin')
@@ -935,6 +971,8 @@ function updateGame(figures, dt, dtProcessed) {
                 break;
             case games.vip:
                 figuresRevived = figuresDead.filter(f => !f.playerId && f.faction !== 'vip' || f.playerId && f.faction === 'guard')
+                break;
+            case games.fartBoys:
                 break;
             default:
                 break;
@@ -1107,6 +1145,16 @@ function updateGame(figures, dt, dtProcessed) {
         noFactionAlive.filter(f => f.isAttacking).forEach(f => {
             figuresAlive.filter(fig => fig.playerId !== f.playerId && fig.type === 'fighter').forEach(fig => {
                 attackFigure(f, fig)
+            })
+        })
+    } else if (game === games.fartBoys) {
+        figuresAlive.filter(f => f.playerId && f.isAttacking).forEach(attacker => {
+            figuresAlive.filter(f => f !== attacker && f.type === 'fighter').forEach(target => {
+                if (attackFigure(attacker, target)) {
+                    const delta = target.faction === 'vip' ? 1 : -1
+                    attacker.player.score.points += delta
+                    attacker.player.score.shownPoints = attacker.player.score.points
+                }
             })
         })
     }

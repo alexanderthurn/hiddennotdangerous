@@ -484,6 +484,12 @@ const addGameDescription = (app, lobbyContainer) => {
                     + '\nNeutralize the girls'
                     + '\nGirls can stun you'
                 break
+            case games.fartBoys:
+                gameDescriptionRight.text = 'FART BOYS:'
+                    + '\nFart at GIRLS: +1 point'
+                    + '\nFart at BOYS: -1 point'
+                    + '\nMost points after countdown wins'
+                break
             default:
                 gameDescriptionRight.text = ''
                 break
@@ -1467,6 +1473,24 @@ const addFiguresInitialPool = (app) => {
         })
         figuresInitialPoolSet.add(figure)
     }
+    for (let i = 0; i < numberFartGirls; i++) {
+        const figure = createFigure(app, spritesheet, defaultFigureProps())
+        switchFaction([figure], 'vip')
+        figure.currentSprite = 'girl'
+        figure.defaultSprite = 'girl'
+        app.ticker.add(() => { figure.visible = game === games.fartBoys })
+        figuresInitialPoolSet.add(figure)
+    }
+}
+
+const addFartBoysNPCBoys = (app) => {
+    const spritesheet = PIXI.Assets.get('figureAtlas')
+    for (let i = 0; i < maxPlayerFigures - numberFartGirls; i++) {
+        const figure = createFigure(app, spritesheet, defaultFigureProps())
+        figure.currentSprite = 'boy'
+        figure.defaultSprite = 'boy'
+        figuresPoolSet.add(figure)
+    }
 }
 
 const createCrosshair = props => {
@@ -1875,7 +1899,7 @@ Object.assign(window, {
     createSpriteWithShadowContainer, createShadow,
     animateFigure, figureMarker, animateFigureMarker, createFigureMarker,
     animateAttackArc, createAttackArc, createFigure,
-    addCrosshairs, defaultFigureProps, addSniperFigures, addFiguresInitialPool,
+    addCrosshairs, defaultFigureProps, addSniperFigures, addFiguresInitialPool, addFartBoysNPCBoys,
     createCrosshair, addOverlay, animateCountdown, createCountdown,
     animateRoundDisplay, addRoundDisplay, getRoundDisplayNumber, isNewRoundStart,
     animatePauseOverlay, addPauseOverlay,

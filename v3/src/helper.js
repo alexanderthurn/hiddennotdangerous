@@ -414,6 +414,9 @@ function getCloseRandomXY(figure) {
         // shrink by 0.8 so that figures don't run so much into the edges of the circle
         return getRandomXYInCircle(circleOfDeath.x, circleOfDeath.y, circleOfDeath.radius * 0.8)
     }
+    if (stage === stages.game && game === games.fartBoys) {
+        return getRandomXYInRectangle(level.width * 0.25, level.height * 0.25, level.width * 0.5, level.height * 0.5)
+    }
     return getRandomXY()
 }
 
@@ -603,10 +606,12 @@ const attackFigure = (figureAttacker, figureAttacked) => {
         if (2 * distanceAnglesDeg(rad2deg(figureAttacker.direction), rad2deg(angle(figureAttacker.x, figureAttacker.y, figureAttacked.x, figureAttacked.y)) + 180) <= figureAttacker.attackAngle) {
             killFigure(figureAttacked)
             figureAttacker.hasHit = true
+            return true
         }
     } else if (reduceBounds(figureAttacked.getBounds(), { left: 0.15, right: 0.45, top: 0.15, bottom: 0.15 }).contains(figureAttacker.worldTransform.tx, figureAttacker.worldTransform.ty)) {
         killFigure(figureAttacked)
         figureAttacker.hasHit = true
+        return true
     }
 }
 
